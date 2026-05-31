@@ -1,0 +1,17 @@
+Title: Simple action
+Describe: None
+------------------------------------------------------------
+[Example]
+Simple action
+
+[Description]
+None
+
+[UML]
+@startuml
+:Hello world;
+:This is defined on
+several **lines**;
+@enduml
+
+------------------------------------------------------------

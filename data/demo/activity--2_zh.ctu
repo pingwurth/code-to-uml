@@ -1,0 +1,17 @@
+Title: Simple action list separated by -
+Describe: None
+------------------------------------------------------------
+[Example]
+Simple action list separated by -
+
+[Description]
+None
+
+[UML]
+@startuml
+- Action 1
+- Action 2
+- Action 3
+@enduml
+
+------------------------------------------------------------

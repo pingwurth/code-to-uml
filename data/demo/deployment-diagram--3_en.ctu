@@ -1,0 +1,18 @@
+Title: Actor
+Describe: None
+------------------------------------------------------------
+[Example]
+Actor
+
+[Description]
+None
+
+[UML]
+@startuml
+
+actor actor1
+:actor2:
+
+@enduml
+
+------------------------------------------------------------

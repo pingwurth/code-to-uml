@@ -1,0 +1,29 @@
+Title: 示例 3
+Describe: None
+------------------------------------------------------------
+[Example]
+示例 3
+
+[Description]
+None
+
+[UML]
+@startmindmap
++ OS
+++ Ubuntu
++++ Linux Mint
++++ Kubuntu
++++ Lubuntu
++++ KDE Neon
+++ LMDE
+++ SolydXK
+++ SteamOS
+++ Raspbian
+-- Windows 95
+-- Windows 98
+-- Windows NT
+--- Windows 8
+--- Windows 10
+@endmindmap
+
+------------------------------------------------------------

@@ -1,0 +1,16 @@
+Title: Shorthand Character Classes
+Describe: None
+------------------------------------------------------------
+[Example]
+Shorthand Character Classes
+
+[Description]
+None
+
+[UML]
+@startregex
+title shorthandCharacterClasses
+\d\w\s
+@endregex
+
+------------------------------------------------------------

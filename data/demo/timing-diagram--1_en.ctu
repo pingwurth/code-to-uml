@@ -1,0 +1,30 @@
+Title: Declaring element or participant
+Describe: None
+------------------------------------------------------------
+[Example]
+Declaring element or participant
+
+[Description]
+None
+
+[UML]
+@startuml
+robust &#34;Web Browser&#34; as WB
+concise &#34;Web User&#34; as WU
+rectangle &#34;Rect. Web User&#34; as RWU
+
+@0
+WU is Idle
+RWU is Idle
+WB is Idle
+
+@100
+WU is Waiting
+RWU is Waiting
+WB is Processing
+
+@300
+WB is Waiting
+@enduml
+
+------------------------------------------------------------

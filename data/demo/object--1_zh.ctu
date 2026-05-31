@@ -1,0 +1,16 @@
+Title: 示例 1
+Describe: None
+------------------------------------------------------------
+[Example]
+示例 1
+
+[Description]
+None
+
+[UML]
+@startuml
+object firstObject
+object "My Second Object" as o2
+@enduml
+
+------------------------------------------------------------

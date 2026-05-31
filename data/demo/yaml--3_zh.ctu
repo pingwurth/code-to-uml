@@ -1,0 +1,19 @@
+Title: 示例 3
+Describe: None
+------------------------------------------------------------
+[Example]
+示例 3
+
+[Description]
+None
+
+[UML]
+@startyaml
+@fruit: Apple
+$size: Large
+&color: Red
+❤: Heart
+‰: Per mille
+@endyaml
+
+------------------------------------------------------------

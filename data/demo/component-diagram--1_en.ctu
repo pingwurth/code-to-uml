@@ -1,0 +1,20 @@
+Title: Components
+Describe: None
+------------------------------------------------------------
+[Example]
+Components
+
+[Description]
+None
+
+[UML]
+@startuml
+
+[First component]
+[Another component] as Comp2
+component Comp3
+component [Last\ncomponent] as Comp4
+
+@enduml
+
+------------------------------------------------------------

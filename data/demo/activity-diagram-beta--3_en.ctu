@@ -1,0 +1,17 @@
+Title: With one level
+Describe: None
+------------------------------------------------------------
+[Example]
+With one level
+
+[Description]
+None
+
+[UML]
+@startuml
+* Action 1
+* Action 2
+* Action 3
+@enduml
+
+------------------------------------------------------------

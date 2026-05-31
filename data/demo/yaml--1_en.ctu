@@ -1,0 +1,19 @@
+Title: None
+Describe: None
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+None
+
+[UML]
+@startyaml
+fruit: Apple
+size: Large
+color: 
+  - Red
+  - Green
+@endyaml
+
+------------------------------------------------------------

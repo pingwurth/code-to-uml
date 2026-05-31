@@ -1,0 +1,17 @@
+Title: Define a network
+Describe: None
+------------------------------------------------------------
+[Example]
+Define a network
+
+[Description]
+None
+
+[UML]
+@startnwdiag
+network dmz {
+  address = &#34;210.x.x.x/24&#34;
+}
+@endnwdiag
+
+------------------------------------------------------------

@@ -7,8 +7,17 @@
 	<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
 	<link rel="stylesheet" href="main.css">
 </head>
-<body>
-	<div class="page-shell demo-shell">
+<body class="demo-page">
+		<header class="demo-topbar">
+			<a class="demo-topbar-logo" href="demo.html" aria-label="Code-To-UML Home">
+				<img src="favicon.svg" alt="" />
+				<span>Code-To-UML</span>
+			</a>
+				<a class="demo-topbar-link" id="official-demo-link" href="plantuml-official-demo/zh/sequence-diagram_zh.html" target="_blank" rel="noopener noreferrer">
+					PlantUML Official Demo
+				</a>
+		</header>
+		<div class="page-shell demo-shell">
 		<main class="content">
 			<section class="intro">
 				<h1>Code-To-UML Template</h1>
@@ -46,15 +55,39 @@
 		<aside data-demo-toc></aside>
 	</div>
 
-	<script src="viz-global.js"></script>
-	<script src="plantuml.js"></script>
-	<script src="docs-page-core.js"></script>
+	<script src="js/viz-global.js"></script>
+	<script src="js/plantuml.js"></script>
+	<script src="component/docs-page-core.js"></script>
+	<script src="component/render-failure-common.js"></script>
 	<script src="i18n/zh.js"></script>
 	<script src="i18n/en.js"></script>
 	<script src="i18n-config.js"></script>
-	<script src="toc-component.js"></script>
-	<script src="markdown-it.js"></script>
-	<script src="demo-example-component.js"></script>
-	<script src="demo.js"></script>
+	<script src="component/toc-component.js"></script>
+	<script src="js/markdown-it.js"></script>
+		<script src="component/demo-example-component.js"></script>
+		<script src="demo.js"></script>
+			<script>
+				(function initOfficialDemoLink() {
+					const link = document.getElementById("official-demo-link");
+					if (!link) return;
+
+					function resolveLang() {
+						const mode = window.DocsI18n && typeof window.DocsI18n.getMode === "function"
+							? String(window.DocsI18n.getMode() || "")
+							: "";
+						const htmlLang = String(document.documentElement.lang || "").toLowerCase();
+						return (mode === "en" || htmlLang.startsWith("en")) ? "en" : "zh";
+					}
+
+					function apply() {
+						const lang = resolveLang();
+						link.href = `plantuml-official-demo/${lang}/sequence-diagram_${lang}.html`;
+						link.textContent = lang === "en" ? "PlantUML Official Tutorial" : "PlantUML 官方教程";
+					}
+
+					apply();
+					document.addEventListener("docs:langchange", apply);
+				})();
+			</script>
 </body>
 </html>

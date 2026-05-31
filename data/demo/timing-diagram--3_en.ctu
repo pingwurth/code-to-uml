@@ -1,0 +1,25 @@
+Title: Binary and Clock
+Describe: None
+------------------------------------------------------------
+[Example]
+Binary and Clock
+
+[Description]
+None
+
+[UML]
+@startuml
+clock clk with period 1
+binary &#34;Enable&#34; as EN
+
+@0
+EN is low
+
+@5
+EN is high
+
+@10
+EN is low
+@enduml
+
+------------------------------------------------------------

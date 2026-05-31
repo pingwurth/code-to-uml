@@ -1,0 +1,34 @@
+Title: Internal sub-state
+Describe: None
+------------------------------------------------------------
+[Example]
+Internal sub-state
+
+[Description]
+None
+
+[UML]
+@startuml
+scale 350 width
+[*] --&gt; NotShooting
+
+state NotShooting {
+  [*] --&gt; Idle
+  Idle --&gt; Configuring : EvConfig
+  Configuring --&gt; Idle : EvConfig
+}
+
+state Configuring {
+  [*] --&gt; NewValueSelection
+  NewValueSelection --&gt; NewValuePreview : EvNewValue
+  NewValuePreview --&gt; NewValueSelection : EvNewValueRejected
+  NewValuePreview --&gt; NewValueSelection : EvNewValueSaved
+
+  state NewValuePreview {
+     State1 -&gt; State2
+  }
+
+}
+@enduml
+
+------------------------------------------------------------

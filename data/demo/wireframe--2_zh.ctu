@@ -1,0 +1,20 @@
+Title: 示例 2
+Describe: None
+------------------------------------------------------------
+[Example]
+示例 2
+
+[Description]
+None
+
+[UML]
+@startsalt
+{+
+   This is a long
+   text in a textarea
+   .
+   "                         "
+}
+@endsalt
+
+------------------------------------------------------------

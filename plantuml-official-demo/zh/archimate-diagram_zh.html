@@ -883,8 +883,6 @@ rectangle WAIT #orange
 </textarea>
                 <div id="outb28515ee185e8f7f1166cc050e663fb4">
                     <div class="mycell">
-                        <img loading="lazy" width="190" height="174" class="scale"
-                            src="/imgw/img-b28515ee185e8f7f1166cc050e663fb4.png" />
                     </div>
                 </div>
             </div>
@@ -916,8 +914,6 @@ WAIT -down-&gt; JunctionAnd
 </textarea>
                 <div id="out75089af1ae4b47d6febc90b648f4a1c3">
                     <div class="mycell">
-                        <img loading="lazy" loading="lazy" width="252" height="300" class="scale"
-                            src="/imgw/img-75089af1ae4b47d6febc90b648f4a1c3.png" />
                     </div>
                 </div>
             </div>
@@ -994,8 +990,6 @@ endlegend
 </textarea>
                 <div id="out777ae1f4a7de17438365949e93df452a">
                     <div class="mycell">
-                        <img loading="lazy" loading="lazy" width="745" height="641" class="scale"
-                            src="/imgw/img-777ae1f4a7de17438365949e93df452a.png" />
                     </div>
                 </div>
             </div>
@@ -1016,8 +1010,6 @@ rectangle &#34;Capture Information&#34;  as CI &lt;&lt;$archimate/business-proce
 </textarea>
                 <div id="out0577bf6d86f52e6e8cda061330df71ff">
                     <div class="mycell">
-                        <img loading="lazy" loading="lazy" width="162" height="75" class="scale"
-                            src="/imgw/img-0577bf6d86f52e6e8cda061330df71ff.png" />
                     </div>
                 </div>
             </div>
@@ -1034,8 +1026,6 @@ listsprite
 </textarea>
                 <div id="out363b69b649c942ea76b78c18202ab2e4">
                     <div class="mycell">
-                        <img loading="lazy" loading="lazy" width="840" height="645" class="scale"
-                            src="/imgw/img-363b69b649c942ea76b78c18202ab2e4.png" />
                     </div>
                 </div>
             </div>
@@ -1070,8 +1060,6 @@ Motivation_Stakeholder(StakeholderElement, &#34;Stakeholder Description&#34;)
 </textarea>
                 <div id="out87de93154302a51fc8418833e4227276">
                     <div class="mycell">
-                        <img loading="lazy" loading="lazy" width="183" height="72" class="scale"
-                            src="/imgw/img-87de93154302a51fc8418833e4227276.png" />
                     </div>
                 </div>
             </div>
@@ -1089,8 +1077,6 @@ Business_Service(BService, &#34;Business Service&#34;)
 </textarea>
                 <div id="outcd9568d5688d5c48be17ef65b056fed0">
                     <div class="mycell">
-                        <img loading="lazy" loading="lazy" width="159" height="72" class="scale"
-                            src="/imgw/img-cd9568d5688d5c48be17ef65b056fed0.png" />
                     </div>
                 </div>
             </div>
@@ -1141,8 +1127,6 @@ Rel_Composition(StakeholderElement, BService, &#34;Description for the relations
 </textarea>
                 <div id="oute15b39cb50e677e9bfdc584426405591">
                     <div class="mycell">
-                        <img loading="lazy" loading="lazy" width="290" height="202" class="scale"
-                            src="/imgw/img-e15b39cb50e677e9bfdc584426405591.png" />
                     </div>
                 </div>
             </div>
@@ -1161,8 +1145,6 @@ Rel_Composition_Down(StakeholderElement, BService, &#34;Description for the rela
 </textarea>
                 <div id="out191bfd5133610648f5fbcc718bcbbbc7">
                     <div class="mycell">
-                        <img loading="lazy" loading="lazy" width="290" height="202" class="scale"
-                            src="/imgw/img-191bfd5133610648f5fbcc718bcbbbc7.png" />
                     </div>
                 </div>
             </div>
@@ -1192,8 +1174,6 @@ Rel_Access(i1, j1, Access)
 </textarea>
                 <div id="out8d74236c7e0a3303870a5b485dd21a8e">
                     <div class="mycell">
-                        <img loading="lazy" loading="lazy" width="327" height="878" class="scale"
-                            src="/imgw/img-8d74236c7e0a3303870a5b485dd21a8e.png" />
                     </div>
                 </div>
             </div>
@@ -1267,8 +1247,6 @@ Rel_Access(i4, j4, Access)
 </textarea>
                 <div id="outfa2dc77749a4327bf9852e595acd0994">
                     <div class="mycell">
-                        <img loading="lazy" loading="lazy" width="477" height="942" class="scale"
-                            src="/imgw/img-fa2dc77749a4327bf9852e595acd0994.png" />
                     </div>
                 </div>
             </div>
@@ -1301,98 +1279,70 @@ Rel_Access(i4, j4, Access)
         </aside>
 
     </div>
-    <script src="../../viz-global.js"></script>
-    <script src="../../plantuml.js"></script>
+    <script src="../../js/viz-global.js"></script>
+    <script src="../../component/docs-page-core.js"></script>
+    <script src="../../component/render-failure-common.js"></script>
+    <script src="../../js/plantuml.js"></script>
     <script>
         (function () {
             const render = window.plantumlRender;
-            if (typeof render !== "function") {
-                console.error("PlantUML renderer is unavailable.");
+            const core = window.PlantUmlDocsCore;
+            const common = window.PlantUmlRenderFailureCommon;
+            if (typeof render !== "function" || !common || typeof common.renderWithFailureHandling !== "function") {
+                console.error("PlantUML shared renderer is unavailable.");
                 return;
             }
 
-            const renderOptions = {};
-            let counter = 0;
+            const renderFailureBuffer = core && typeof core.createRuntimeErrorBuffer === "function"
+                ? core.createRuntimeErrorBuffer({ windowRef: window, windowMs: 3000, patchConsole: false })
+                : null;
 
+            let counter = 0;
             function nextId() {
                 counter += 1;
                 return "mycell-render-" + counter;
             }
 
-            function hasRenderableContent(mycell) {
-                return !!mycell.querySelector("svg") || !!mycell.querySelector(".mycell-render-host > *") || mycell.textContent.trim().length > 0;
-            }
+            async function renderOne(mycell, textarea) {
+                if (!mycell.id) {
+                    mycell.id = nextId();
+                }
+                mycell.dataset.renderStatus = "rendering";
+                mycell.innerHTML = '<pre style="white-space:pre-wrap;color:#666;">Rendering...</pre>';
 
-            function renderOne(mycell, textarea) {
-                return new Promise((resolve) => {
-                    if (!mycell.id) {
-                        mycell.id = nextId();
-                    }
-                    mycell.dataset.renderStatus = "rendering";
-
-                    const loading = document.createElement("span");
-                    loading.className = "mycell-render-loading";
-                    loading.textContent = "Rendering...";
-
-                    const target = document.createElement("div");
-                    target.className = "mycell-render-host";
-                    target.id = mycell.id + "-host";
-
-                    mycell.innerHTML = "";
-                    mycell.appendChild(loading);
-                    mycell.appendChild(target);
-
-                    const timeoutMs = 20000;
-                    const start = Date.now();
-
-                    const observer = new MutationObserver(() => {
-                        if (target.querySelector("svg") || target.children.length > 0 || target.textContent.trim().length > 0) {
-                            mycell.dataset.renderStatus = "ok";
-                            const loadingEl = mycell.querySelector(".mycell-render-loading");
-                            if (loadingEl) loadingEl.remove();
-                            observer.disconnect();
-                            resolve(true);
-                        }
+                try {
+                    await common.renderWithFailureHandling({
+                        preview: mycell,
+                        source: textarea.value,
+                        render,
+                        previewId: mycell.id,
+                        errorBuffer: renderFailureBuffer,
+                        renderWaitMs: 60000,
+                        unknownRecheckDelayMs: 800,
+                        fallbackEndpoint: "/api/plantuml-svg"
                     });
-                    observer.observe(target, { childList: true, subtree: true, characterData: true });
-
-                    try {
-                        render(textarea.value.split(/\r\n|\r|\n/), target.id, renderOptions);
-                    } catch (err) {
-                        mycell.dataset.renderStatus = "error";
-                        mycell.innerHTML = '<pre style="white-space:pre-wrap;color:#b00020;">PlantUML render error</pre>';
-                        observer.disconnect();
-                        console.error("PlantUML render failed:", err);
-                        resolve(false);
+                    mycell.dataset.renderStatus = "ok";
+                } catch (err) {
+                    if (mycell.querySelector("svg")) {
+                        mycell.dataset.renderStatus = "ok";
                         return;
                     }
-
-                    function checkDone() {
-                        if (target.querySelector("svg") || target.children.length > 0 || target.textContent.trim().length > 0) {
+                    mycell.dataset.renderStatus = "error";
+                    mycell.innerHTML = '<pre style="white-space:pre-wrap;color:#b00020;">' +
+                        'Render failed: ' + String(err && err.message ? err.message : err) +
+                        '</pre>';
+                    window.setTimeout(() => {
+                        if (mycell.querySelector("svg")) {
                             mycell.dataset.renderStatus = "ok";
-                            const loadingEl = mycell.querySelector(".mycell-render-loading");
-                            if (loadingEl) loadingEl.remove();
-                            observer.disconnect();
-                            resolve(true);
-                            return;
                         }
-                        if (Date.now() - start >= timeoutMs) {
-                            mycell.dataset.renderStatus = "timeout";
-                            mycell.innerHTML = '<pre style="white-space:pre-wrap;color:#b00020;">PlantUML render timeout</pre>';
-                            observer.disconnect();
-                            resolve(false);
-                            return;
-                        }
-                        window.setTimeout(checkDone, 100);
-                    }
-
-                    window.setTimeout(checkDone, 100);
-                });
+                    }, 2000);
+                    console.error("PlantUML official demo render failed:", err);
+                }
             }
 
-            async function renderQueue(items) {
-                for (const item of items) {
-                    await renderOne(item.mycell, item.textarea);
+            async function renderQueue(jobs) {
+                for (const job of jobs) {
+                    await renderOne(job.mycell, job.textarea);
                 }
             }
 
@@ -1418,6 +1368,12 @@ Rel_Access(i4, j4, Access)
                     }, 120);
                 });
             });
+
+            window.addEventListener("beforeunload", () => {
+                if (renderFailureBuffer && typeof renderFailureBuffer.dispose === "function") {
+                    renderFailureBuffer.dispose();
+                }
+            }, { once: true });
         })();
     </script>
 </body>

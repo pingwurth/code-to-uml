@@ -1,0 +1,19 @@
+Title: 示例 2
+Describe: None
+------------------------------------------------------------
+[Example]
+示例 2
+
+[Description]
+None
+
+[UML]
+@startmindmap
+* root node
+	* some first level node
+		* second level node
+		* another second level node
+	* another first level node
+@endmindmap
+
+------------------------------------------------------------

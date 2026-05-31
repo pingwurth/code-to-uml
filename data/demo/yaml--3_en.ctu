@@ -1,0 +1,19 @@
+Title: Specific key (with symbols or unicode)
+Describe: None
+------------------------------------------------------------
+[Example]
+Specific key (with symbols or unicode)
+
+[Description]
+None
+
+[UML]
+@startyaml
+@fruit: Apple
+$size: Large
+&amp;color: Red
+❤: Heart
+‰: Per mille
+@endyaml
+
+------------------------------------------------------------

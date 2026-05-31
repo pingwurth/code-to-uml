@@ -1,0 +1,16 @@
+Title: Literal Character Sequences
+Describe: None
+------------------------------------------------------------
+[Example]
+Literal Character Sequences
+
+[Description]
+None
+
+[UML]
+@startregex
+title litteralCharacterSequence
+\Qfoo\E
+@endregex
+
+------------------------------------------------------------

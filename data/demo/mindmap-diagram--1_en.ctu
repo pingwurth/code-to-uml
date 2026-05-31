@@ -1,0 +1,26 @@
+Title: OrgMode syntax
+Describe: None
+------------------------------------------------------------
+[Example]
+OrgMode syntax
+
+[Description]
+None
+
+[UML]
+@startmindmap
+* Debian
+** Ubuntu
+*** Linux Mint
+*** Kubuntu
+*** Lubuntu
+*** KDE Neon
+** LMDE
+** SolydXK
+** SteamOS
+** Raspbian with a very long name
+*** &lt;s&gt;Raspmbc&lt;/s&gt; =&gt; OSMC
+*** &lt;s&gt;Raspyfi&lt;/s&gt; =&gt; Volumio
+@endmindmap
+
+------------------------------------------------------------

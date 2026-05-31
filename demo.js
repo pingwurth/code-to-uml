@@ -6,6 +6,7 @@
 	const render = window.plantumlRender;
 	const toc = window.PlantUmlToc;
 	const demoExample = window.PlantUmlDemoExample;
+	const renderCommon = window.PlantUmlRenderFailureCommon;
 	const title = document.getElementById("demo-title");
 	const tabs = Array.from(document.querySelectorAll(".demo-tab"));
 	const tabsNav = document.querySelector(".demo-tabs");
@@ -357,36 +358,20 @@
 		try {
 			setLargeDiagramLayout(example, false);
 			preview.textContent = tr("rendering");
-			const renderStartedAt = Date.now();
 			const previewId = core.ensurePreviewId(example, 0);
-			render(core.splitPlantUmlLines(source), previewId, { dark: false });
-			await waitForSvg(preview, {
-				timeoutMs: RENDER_WAIT_MS,
-				getAbortError: () => {
-					const runtimeHit = renderFailureBuffer && typeof renderFailureBuffer.hasSince === "function"
-						? renderFailureBuffer.hasSince(renderStartedAt)
-						: null;
-					if (!runtimeHit) return "";
-					return `PlantUML runtime failure detected: ${runtimeHit.message || "unknown error"}`;
-				}
+			if (!renderCommon || typeof renderCommon.renderWithFailureHandling !== "function") {
+				throw new Error("PlantUmlRenderFailureCommon.renderWithFailureHandling is unavailable.");
+			}
+			await renderCommon.renderWithFailureHandling({
+				preview,
+				source,
+				render,
+				previewId,
+				errorBuffer: renderFailureBuffer,
+				renderWaitMs: RENDER_WAIT_MS,
+				unknownRecheckDelayMs: UNKNOWN_RECHECK_DELAY_MS
 			});
 			if (generation !== renderGeneration || !example.isConnected) return;
-			let outcome = evaluateRenderOutcomeWithSignals(preview, renderStartedAt);
-			if (outcome.status === "unknown") {
-				await wait(UNKNOWN_RECHECK_DELAY_MS);
-				if (generation !== renderGeneration || !example.isConnected) return;
-				outcome = evaluateRenderOutcomeWithSignals(preview, renderStartedAt);
-			}
-			if (outcome.status !== "success") {
-				console.warn("[uml-detector] browser render outcome indicates failure", {
-					exampleId,
-					generation,
-					currentGeneration: renderGeneration,
-					signalType: outcome.signalType,
-					reason: outcome.reason
-				});
-				throw new Error(`Browser renderer produced an error outcome: ${describeRenderOutcome(outcome)}`);
-			}
 			core.clearExampleMessage(example);
 		} catch (err) {
 			const message = err && err.message ? err.message : String(err || "");
@@ -400,7 +385,10 @@
 					const scaledSource = core.addBrowserSafeScale(source, 4000);
 					const previewId = core.ensurePreviewId(example, 0);
 					render(core.splitPlantUmlLines(scaledSource), previewId, { dark: false });
-					await waitForSvg(preview);
+					if (!renderCommon || typeof renderCommon.waitForSvg !== "function") {
+						throw new Error("PlantUmlRenderFailureCommon.waitForSvg is unavailable.");
+					}
+					await renderCommon.waitForSvg(preview);
 					if (generation !== renderGeneration || !example.isConnected) return;
 					setLargeDiagramLayout(example, true);
 					core.setExampleMessage(example, tr("largeScaled"), "success");
@@ -412,21 +400,6 @@
 			if (generation !== renderGeneration || !example.isConnected) {
 				console.error("Render failed for stale/disconnected example:", err, errorMeta);
 				return;
-			}
-
-			console.error("Render failed, trying plantuml.jar fallback:", err, errorMeta);
-			try {
-				const fallbackSvg = await requestJarFallbackSvg(source);
-				if (generation !== renderGeneration || !example.isConnected) return;
-				const applied = applyFallbackSvg(preview, fallbackSvg);
-				if (!applied) {
-					throw new Error("Fallback SVG could not be inserted into preview.");
-				}
-				setLargeDiagramLayout(example, false);
-				core.clearExampleMessage(example);
-				return;
-			} catch (jarErr) {
-				console.error("PlantUML jar fallback failed:", jarErr, errorMeta);
 			}
 
 			console.error("Render failed after fallback:", err, errorMeta);
@@ -441,124 +414,7 @@
 		grid.classList.toggle("example-large-diagram", Boolean(enabled));
 	}
 
-	function evaluateRenderOutcomeWithSignals(preview, sinceTimestamp) {
-		if (core && typeof core.evaluateRenderOutcome === "function") {
-			return core.evaluateRenderOutcome(preview, {
-				sinceTimestamp,
-				errorBuffer: renderFailureBuffer
-			});
-		}
-		const fallbackReason = core && typeof core.detectPreviewError === "function"
-			? core.detectPreviewError(preview)
-			: "";
-		if (fallbackReason) {
-			return { status: "failure", signalType: "svg-error", reason: fallbackReason };
-		}
-		return preview && preview.querySelector("svg")
-			? { status: "success", signalType: "ok", reason: "" }
-			: { status: "unknown", signalType: "no-svg", reason: "No SVG rendered yet." };
-	}
-
-	function describeRenderOutcome(outcome) {
-		if (!outcome) return "unknown";
-		const signal = String(outcome.signalType || "unknown");
-		const reason = String(outcome.reason || "").trim();
-		return reason ? `${signal}: ${reason}` : signal;
-	}
-
-	function wait(ms) {
-		const delay = Number.isFinite(ms) ? Math.max(0, Math.floor(ms)) : 0;
-		return new Promise(resolve => window.setTimeout(resolve, delay));
-	}
-
-	async function requestJarFallbackSvg(source) {
-		if (core && typeof core.renderWithPlantUmlJar === "function") {
-			return core.renderWithPlantUmlJar(source);
-		}
-		if (window.location && window.location.protocol === "file:") {
-			throw new Error("Cannot call /api/plantuml-svg from file:// pages. Start local server via ./serve.sh and open http://localhost:5401.");
-		}
-		console.warn("PlantUmlDocsCore.renderWithPlantUmlJar is unavailable; using inline fallback request.");
-		console.info("PlantUML jar fallback request: /api/plantuml-svg");
-		const response = await fetch("/api/plantuml-svg", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ source: String(source || "") })
-		});
-		const raw = await response.text();
-		let payload = null;
-		try {
-			payload = raw ? JSON.parse(raw) : null;
-		} catch {
-			payload = null;
-		}
-		if (!response.ok) {
-			const reason = payload && typeof payload.error === "string" ? payload.error : (raw || `HTTP ${response.status}`);
-			throw new Error(`Jar fallback request failed: ${reason}`);
-		}
-		const svg = payload && typeof payload.svg === "string" ? payload.svg : "";
-		if (!svg.trim() || !/<svg[\s>]/i.test(svg)) {
-			throw new Error("Jar fallback returned invalid SVG.");
-		}
-		return svg;
-	}
-
-	function applyFallbackSvg(preview, svgMarkup) {
-		if (core && typeof core.setPreviewSvg === "function") {
-			return core.setPreviewSvg(preview, svgMarkup);
-		}
-		console.warn("PlantUmlDocsCore.setPreviewSvg is unavailable; using inline SVG injection.");
-		if (!preview) return false;
-		preview.innerHTML = String(svgMarkup || "").trim();
-		return Boolean(preview.querySelector("svg"));
-	}
-
-	function waitForSvg(preview, options = {}) {
-		const timeoutMs = Number.isFinite(options.timeoutMs) ? Math.max(1, Math.floor(options.timeoutMs)) : 15000;
-		const pollMs = Number.isFinite(options.pollMs) ? Math.max(50, Math.floor(options.pollMs)) : 120;
-		const getAbortError = typeof options.getAbortError === "function" ? options.getAbortError : null;
-		return new Promise((resolve, reject) => {
-			let pollTimer = null;
-			const timeout = window.setTimeout(() => {
-				cleanup();
-				reject(new Error("Timed out waiting for preview"));
-			}, timeoutMs);
-
-			function cleanup() {
-				window.clearTimeout(timeout);
-				if (pollTimer) {
-					window.clearInterval(pollTimer);
-					pollTimer = null;
-				}
-				observer.disconnect();
-			}
-
-			function check() {
-				if (preview.querySelector("svg")) {
-					cleanup();
-					resolve();
-					return;
-				}
-				if (getAbortError) {
-					const abortMessage = getAbortError();
-					if (abortMessage) {
-						cleanup();
-						reject(new Error(String(abortMessage)));
-					}
-				}
-			}
-
-			const observer = new MutationObserver(() => {
-				check();
-			});
-			observer.observe(preview, { childList: true, subtree: true });
-
-			if (getAbortError) {
-				pollTimer = window.setInterval(check, pollMs);
-			}
-			check();
-		});
-	}
+	
 
 	async function handleAction(example, button) {
 		const action = button.dataset.action;

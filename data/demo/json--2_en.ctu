@@ -1,0 +1,38 @@
+Title: Complex example
+Describe: None
+------------------------------------------------------------
+[Example]
+Complex example
+
+[Description]
+None
+
+[UML]
+@startjson
+{
+  &#34;firstName&#34;: &#34;John&#34;,
+  &#34;lastName&#34;: &#34;Smith&#34;,
+  &#34;isAlive&#34;: true,
+  &#34;age&#34;: 27,
+  &#34;address&#34;: {
+    &#34;streetAddress&#34;: &#34;21 2nd Street&#34;,
+    &#34;city&#34;: &#34;New York&#34;,
+    &#34;state&#34;: &#34;NY&#34;,
+    &#34;postalCode&#34;: &#34;10021-3100&#34;
+  },
+  &#34;phoneNumbers&#34;: [
+    {
+      &#34;type&#34;: &#34;home&#34;,
+      &#34;number&#34;: &#34;212 555-1234&#34;
+    },
+    {
+      &#34;type&#34;: &#34;office&#34;,
+      &#34;number&#34;: &#34;646 555-4567&#34;
+    }
+  ],
+  &#34;children&#34;: [],
+  &#34;spouse&#34;: null
+}
+@endjson
+
+------------------------------------------------------------

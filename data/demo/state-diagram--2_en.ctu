@@ -1,0 +1,22 @@
+Title: Change state rendering
+Describe: None
+------------------------------------------------------------
+[Example]
+Change state rendering
+
+[Description]
+None
+
+[UML]
+@startuml
+hide empty description
+[*] --&gt; State1
+State1 --&gt; [*]
+State1 : this is a string
+State1 : this is another string
+
+State1 -&gt; State2
+State2 --&gt; [*]
+@enduml
+
+------------------------------------------------------------

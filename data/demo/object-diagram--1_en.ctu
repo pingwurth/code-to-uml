@@ -1,0 +1,16 @@
+Title: Definition of objects
+Describe: None
+------------------------------------------------------------
+[Example]
+Definition of objects
+
+[Description]
+None
+
+[UML]
+@startuml
+object firstObject
+object &#34;My Second Object&#34; as o2
+@enduml
+
+------------------------------------------------------------

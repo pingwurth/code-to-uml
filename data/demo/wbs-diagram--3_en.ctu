@@ -1,0 +1,30 @@
+Title: Arithmetic notation
+Describe: None
+------------------------------------------------------------
+[Example]
+Arithmetic notation
+
+[Description]
+None
+
+[UML]
+@startwbs
++ New Job
+++ Decide on Job Requirements
++++ Identity gaps
++++ Review JDs
+++++ Sign-Up for courses
+++++ Volunteer
+++++ Reading
+++- Checklist
++++- Responsibilities
++++- Location
+++ CV Upload Done
++++ CV Updated
+++++ Spelling &amp; Grammar
+++++ Check dates
+---- Skills
++++ Recruitment sites chosen
+@endwbs
+
+------------------------------------------------------------

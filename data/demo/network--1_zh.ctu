@@ -1,0 +1,19 @@
+Title: 定义一个网络
+Describe: None
+------------------------------------------------------------
+[Example]
+定义一个网络
+
+[Description]
+None
+
+[UML]
+@startnwdiag
+nwdiag {
+  network dmz {
+      address = "210.x.x.x/24"
+  }
+}
+@endnwdiag
+
+------------------------------------------------------------

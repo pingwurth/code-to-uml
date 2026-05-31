@@ -1,0 +1,39 @@
+Title: Declaring element or participant
+Describe: None
+------------------------------------------------------------
+[Example]
+Declaring element or participant
+
+[Description]
+None
+
+[UML]
+@startuml
+clock   &#34;Clock_0&#34;   as C0 with period 50
+clock   &#34;Clock_1&#34;   as C1 with period 50 pulse 15 offset 10
+binary  &#34;Binary&#34;  as B
+concise &#34;Concise&#34; as C
+rectangle &#34;Rectangle&#34; as Re
+robust  &#34;Robust&#34;  as R
+analog  &#34;Analog&#34;  as A
+
+
+@0
+C is Idle
+R is Idle
+Re is Idle
+A is 0
+
+@100
+B is high
+C is Waiting
+Re is Waiting
+R is Processing
+A is 3
+
+@300
+R is Waiting
+A is 1
+@enduml
+
+------------------------------------------------------------

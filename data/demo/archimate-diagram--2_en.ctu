@@ -1,0 +1,29 @@
+Title: Defining Junctions
+Describe: None
+------------------------------------------------------------
+[Example]
+Defining Junctions
+
+[Description]
+None
+
+[UML]
+@startuml
+!define Junction_Or circle #black
+!define Junction_And circle #whitesmoke
+
+Junction_And JunctionAnd
+Junction_Or JunctionOr
+
+archimate #Technology &#34;VPN Server&#34; as vpnServerA &lt;&lt;technology-device&gt;&gt;
+
+rectangle GO #lightgreen
+rectangle STOP #red
+rectangle WAIT #orange
+GO -up-&gt; JunctionOr
+STOP -up-&gt; JunctionOr
+STOP -down-&gt; JunctionAnd
+WAIT -down-&gt; JunctionAnd
+@enduml
+
+------------------------------------------------------------

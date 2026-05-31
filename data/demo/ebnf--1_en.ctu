@@ -1,0 +1,15 @@
+Title: Minimal binary diagram
+Describe: None
+------------------------------------------------------------
+[Example]
+Minimal binary diagram
+
+[Description]
+None
+
+[UML]
+@startebnf
+binaryDigit = &#34;0&#34; | &#34;1&#34;;
+@endebnf
+
+------------------------------------------------------------

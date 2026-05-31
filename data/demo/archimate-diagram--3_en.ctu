@@ -1,0 +1,76 @@
+Title: Example 1
+Describe: None
+------------------------------------------------------------
+[Example]
+Example 1
+
+[Description]
+None
+
+[UML]
+@startuml
+skinparam rectangle&lt;&lt;behavior&gt;&gt; {
+	roundCorner 25
+}
+sprite $bProcess jar:archimate/business-process
+sprite $aService jar:archimate/application-service
+sprite $aComponent jar:archimate/application-component
+
+rectangle &#34;Handle claim&#34;  as HC &lt;&lt;$bProcess&gt;&gt;&lt;&lt;behavior&gt;&gt; #Business
+rectangle &#34;Capture Information&#34;  as CI &lt;&lt;$bProcess&gt;&gt;&lt;&lt;behavior&gt;&gt; #Business
+rectangle &#34;Notify\nAdditional Stakeholders&#34; as NAS &lt;&lt;$bProcess&gt;&gt;&lt;&lt;behavior&gt;&gt; #Business
+rectangle &#34;Validate&#34; as V &lt;&lt;$bProcess&gt;&gt;&lt;&lt;behavior&gt;&gt; #Business
+rectangle &#34;Investigate&#34; as I &lt;&lt;$bProcess&gt;&gt;&lt;&lt;behavior&gt;&gt; #Business
+rectangle &#34;Pay&#34; as P &lt;&lt;$bProcess&gt;&gt;&lt;&lt;behavior&gt;&gt; #Business
+
+HC *-down- CI
+HC *-down- NAS
+HC *-down- V
+HC *-down- I
+HC *-down- P
+
+CI -right-&gt;&gt; NAS
+NAS -right-&gt;&gt; V
+V -right-&gt;&gt; I
+I -right-&gt;&gt; P
+
+rectangle &#34;Scanning&#34; as scanning &lt;&lt;$aService&gt;&gt;&lt;&lt;behavior&gt;&gt; #Application
+rectangle &#34;Customer administration&#34; as customerAdministration &lt;&lt;$aService&gt;&gt;&lt;&lt;behavior&gt;&gt; #Application
+rectangle &#34;Claims administration&#34; as claimsAdministration &lt;&lt;$aService&gt;&gt;&lt;&lt;behavior&gt;&gt; #Application
+rectangle Printing &lt;&lt;$aService&gt;&gt;&lt;&lt;behavior&gt;&gt; #Application
+rectangle Payment &lt;&lt;$aService&gt;&gt;&lt;&lt;behavior&gt;&gt; #Application
+
+scanning -up-&gt; CI
+customerAdministration  -up-&gt; CI
+claimsAdministration -up-&gt; NAS
+claimsAdministration -up-&gt; V
+claimsAdministration -up-&gt; I
+Payment -up-&gt; P
+
+Printing -up-&gt; V
+Printing -up-&gt; P
+
+rectangle &#34;Document\nManagement\nSystem&#34; as DMS &lt;&lt;$aComponent&gt;&gt; #Application
+rectangle &#34;General\nCRM\nSystem&#34; as CRM &lt;&lt;$aComponent&gt;&gt;  #Application
+rectangle &#34;Home &amp; Away\nPolicy\nAdministration&#34; as HAPA &lt;&lt;$aComponent&gt;&gt; #Application
+rectangle &#34;Home &amp; Away\nFinancial\nAdministration&#34; as HFPA &lt;&lt;$aComponent&gt;&gt;  #Application
+
+DMS .up.|&gt; scanning
+DMS .up.|&gt; Printing
+CRM .up.|&gt; customerAdministration
+HAPA .up.|&gt; claimsAdministration
+HFPA .up.|&gt; Payment
+
+legend left
+Example from the &#34;Archisurance case study&#34; (OpenGroup).
+See
+====
+&lt;$bProcess&gt; :business process
+====
+&lt;$aService&gt; : application service
+====
+&lt;$aComponent&gt; : application component
+endlegend
+@enduml
+
+------------------------------------------------------------

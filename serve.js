@@ -269,11 +269,21 @@ async function loadDemoExamplesFromData(lang) {
 	return out;
 }
 
-	function resolveStaticPath(urlPath) {
-		let pathname = decodeURIComponent(urlPath);
-		if (pathname === "/") {
-			pathname = "/demo.html";
-		}
+function resolveStaticPath(urlPath) {
+	let pathname = decodeURIComponent(urlPath);
+	const movedToJs = new Set([
+		"/plantuml.js",
+		"/viz-global.js",
+		"/markdown-it.js",
+		"/openiconic.js",
+		"/emoji.js"
+	]);
+	if (movedToJs.has(pathname)) {
+		pathname = `/js${pathname}`;
+	}
+	if (pathname === "/") {
+		pathname = "/demo.html";
+	}
 	const absPath = path.resolve(ROOT_DIR, `.${pathname}`);
 	if (!isPathInside(ROOT_DIR, absPath)) {
 		return null;

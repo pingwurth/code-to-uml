@@ -1,0 +1,20 @@
+Title: Text area
+Describe: None
+------------------------------------------------------------
+[Example]
+Text area
+
+[Description]
+None
+
+[UML]
+@startsalt
+{SI
+   This is a long
+   text in a textarea
+   .
+   &#34;                         &#34;
+}
+@endsalt
+
+------------------------------------------------------------

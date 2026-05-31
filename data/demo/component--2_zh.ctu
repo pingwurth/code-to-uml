@@ -1,0 +1,20 @@
+Title: 命名例外
+Describe: None
+------------------------------------------------------------
+[Example]
+命名例外
+
+[Description]
+None
+
+[UML]
+@startuml
+component [$C1]
+component [$C2] $C2
+component [$C2] as dollarC2
+remove $C1
+remove $C2
+remove dollarC2
+@enduml
+
+------------------------------------------------------------

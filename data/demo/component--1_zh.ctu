@@ -1,0 +1,20 @@
+Title: 示例 1
+Describe: None
+------------------------------------------------------------
+[Example]
+示例 1
+
+[Description]
+None
+
+[UML]
+@startuml
+
+[First component]
+[Another component] as Comp2
+component Comp3
+component [Last\ncomponent] as Comp4
+
+@enduml
+
+------------------------------------------------------------

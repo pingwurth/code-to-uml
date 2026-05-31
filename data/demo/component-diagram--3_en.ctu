@@ -1,0 +1,22 @@
+Title: Interfaces
+Describe: None
+------------------------------------------------------------
+[Example]
+Interfaces
+
+[Description]
+None
+
+[UML]
+@startuml
+
+() &#34;First Interface&#34;
+() &#34;Another interface&#34; as Interf2
+interface Interf3
+interface &#34;Last\ninterface&#34; as Interf4
+
+[component]
+footer //Adding &#34;component&#34; to force diagram to be a **component diagram**//
+@enduml
+
+------------------------------------------------------------

@@ -1,0 +1,16 @@
+Title: An Invaluable Tool for Learning and Collaboration
+Describe: None
+------------------------------------------------------------
+[Example]
+An Invaluable Tool for Learning and Collaboration
+
+[Description]
+None
+
+[UML]
+@startregex
+title litteralText
+abc
+@endregex
+
+------------------------------------------------------------

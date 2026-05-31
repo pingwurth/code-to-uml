@@ -1,0 +1,24 @@
+Title: Change direction
+Describe: None
+------------------------------------------------------------
+[Example]
+Change direction
+
+[Description]
+None
+
+[UML]
+@startwbs
+* Business Process Modelling WBS
+** Launch the project
+*** Complete Stakeholder Research
+*** Initial Implementation Plan
+** Design phase
+*** Model of AsIs Processes Completed
+****&lt; Model of AsIs Processes Completed1
+****&gt; Model of AsIs Processes Completed2
+***&lt; Measure AsIs performance metrics
+***&lt; Identify Quick Wins
+@endwbs
+
+------------------------------------------------------------
