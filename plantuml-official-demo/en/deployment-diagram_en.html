@@ -1,0 +1,3365 @@
+<html lang="en">
+
+<head>
+
+
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Organization",
+  "url": "https://plantuml.com",
+  "name": "PlantUML",
+  "sameAs" : ["https://twitter.com/plantuml","https://en.wikipedia.org/wiki/PlantUML","https://www.wikidata.org/wiki/Q18346546"],
+  "logo": "https://cdn-0.plantuml.com/logo3.png",
+  "contactPoint": [{
+    "@type": "ContactPoint",
+    "email": "plantuml@gmail.com",
+    "url": "https://plantuml.com",
+    "contactType": "customer service"
+  }]
+}
+</script>
+  <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+    "@type": "ListItem",
+    "position": 1,
+    "item": {
+      "@id": "https://plantuml.com",
+      "name": "Home"
+    }
+  },{
+    "@type": "ListItem",
+    "position": 2,
+    "item": {
+      "@id": "https://plantuml.com/sitemap-language-specification",
+      "name": "Language specification"
+    }
+  },{
+    "@type": "ListItem",
+    "position": 3,
+    "item": {
+      "@id": "https://plantuml.com/deployment-diagram",
+      "name": "Deployment Diagram"
+  }
+  }]
+}
+</script>
+  <link rel="canonical" href="https://plantuml.com/deployment-diagram" />
+  <link rel="alternate" hreflang="x-default" href="https://plantuml.com/deployment-diagram" />
+  <link rel="alternate" hreflang="de" href="https://plantuml.com/de/deployment-diagram" />
+  <link rel="alternate" hreflang="en" href="https://plantuml.com/deployment-diagram" />
+  <link rel="alternate" hreflang="es" href="https://plantuml.com/es/deployment-diagram" />
+  <link rel="alternate" hreflang="fr" href="https://plantuml.com/fr/deployment-diagram" />
+  <link rel="alternate" hreflang="ja" href="https://plantuml.com/ja/deployment-diagram" />
+  <link rel="alternate" hreflang="ko" href="https://plantuml.com/ko/deployment-diagram" />
+  <link rel="alternate" hreflang="zh" href="https://plantuml.com/zh/deployment-diagram" />
+
+  <link rel="shortcut icon" href="/favicon.ico" />
+
+
+  <!-- link rel="preload" as="image" href="https://img.shields.io/liberapay/patrons/plantuml.svg?logo=liberapay" -->
+
+
+  <title>Deployment Diagram syntax and features</title>
+  <meta name="description"
+    content="PlantUML deployment diagram syntax: Deployment diagrams are not fully supported within PlantUML. This is a draft version of the language can be subject to changes." />
+
+  <meta property="og:type" content="article" />
+  <!-- volt:dokuwiki titleog: -->
+  <!-- volt:dokuwiki descriptionog: -->
+
+  <meta property="og:url" content="https://plantuml.com/deployment-diagram" />
+  <meta property="og:site_name" content="PlantUML.com" />
+
+  <!-- meta property="og:image" content="https://plantuml.com/og-deployment-diagram" -->
+  <meta name="twitter:image" content="https://plantuml.com/og-deployment-diagram" />
+  <meta property="og:locale" content="en" />
+
+  <meta name="twitter:card" content="summary" />
+  <!-- volt:dokuwiki titletwitter: -->
+  <!-- volt:dokuwiki descriptiontwitter: -->
+  <meta name="twitter:site" content="@PlantUML" />
+  <meta name="twitter:creator" content="@PlantUML" />
+
+  <script>
+    if (window.location.href.indexOf("/en/") == -1) {
+      var lg = navigator.language.substring(0, 2);
+      if (lg == "de") window.location.href = "/de/deployment-diagram";
+      if (lg == "es") window.location.href = "/es/deployment-diagram";
+      if (lg == "fr") window.location.href = "/fr/deployment-diagram";
+      if (lg == "ja") window.location.href = "/ja/deployment-diagram";
+      if (lg == "ko") window.location.href = "/ko/deployment-diagram";
+      if (lg == "ru") window.location.href = "/ru/deployment-diagram";
+      if (lg == "zh") window.location.href = "/zh/deployment-diagram";
+    }
+  </script>
+
+
+  <!-- https://www.w3schools.com/colors/colors_picker.asp -->
+  <!-- filter css https://codepen.io/sosuke/pen/Pjoqqp -->
+
+
+  <style>
+    .scale {}
+
+    li {
+      margin: 2px;
+    }
+
+    #external li {
+      margin: 13px;
+    }
+
+    @media screen and (max-width: 1190px) {
+    }
+
+
+    .coptable {
+      max-width: 90%;
+    }
+
+    .mytab {
+      display: inline-block;
+      border-radius: 3px;
+      border: 1px solid #e1e4e8;
+    }
+
+    .mytab:hover {
+      border: 1px dashed #0366d6;
+      cursor: pointer;
+      color: #0366d6;
+      background: #f6f8fa;
+    }
+
+    .cop {
+      margin: 25px 10px 0 10px;
+    }
+
+    .cop:hover {
+      cursor: pointer;
+      filter: invert(30%) sepia(75%) saturate(4001%) hue-rotate(201deg) brightness(88%) contrast(98%);
+    }
+
+    .cop2 {
+      margin: 25px 10px 0 10px;
+    }
+
+    .cop2:hover {
+      cursor: pointer;
+    }
+
+    .msg {
+      position: absolute;
+      color: #339966;
+      background-color: #FFF;
+      margin-top: 55px;
+      display: none;
+      border-radius: 3px;
+      border: 1px solid #4dff00;
+    }
+
+    .mycell0 {
+      float: left;
+      vertical-align: top;
+      padding: 10px;
+    }
+
+    .mycell0 code:hover {
+      cursor: default;
+      color: #000;
+    }
+
+    .mycell {
+      float: right;
+      vertical-align: top;
+      padding: 10px;
+      max-width: 55vw;
+      overflow-x: auto;
+    }
+
+    .mycell0 pre {
+      max-width: 55vw;
+      overflow-x: auto;
+    }
+
+    .cod {
+      background: #edeff3;
+      padding: 2px 5px;
+      border-radius: 3px;
+    }
+
+    .colo {
+      display: inline-block;
+      background: #edeff3;
+      padding: 7px 12px;
+      border-radius: 3px;
+    }
+
+    .tag,
+    .tagg,
+    .tago,
+    .tagr {
+      text-rendering: optimizeLegibility;
+      display: inline-block;
+      padding: 3px 5px 2px 4px;
+      text-decoration: none;
+      white-space: nowrap;
+      border: 1px solid #999;
+      text-transform: uppercase;
+      text-align: center;
+      border-radius: 3px;
+      font-size: 11px;
+      font-weight: bold;
+      line-height: 90%;
+    }
+
+    .tag {
+      background-color: #EEEEEE;
+    }
+
+    .tagg {
+      background-color: #98FB98;
+    }
+
+    .tago {
+      background-color: #fafa00;
+    }
+
+    .tagr {
+      background-color: #FF4500;
+    }
+
+
+    a {
+      text-decoration: none;
+      color: #0366d6;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .menu1 {
+      display: flex;
+      flex-direction: row;
+      border: 0;
+      font-size: 14px;
+      padding: 0;
+      margin: 0;
+      white-space: nowrap;
+    }
+
+    .menu1 a {
+      white-space: nowrap;
+      padding: 0 8px;
+      text-decoration: none;
+      color: #5e6d7d;
+      line-height: 30px;
+      height: 30px;
+    }
+
+    .menu1 a:hover {
+      background: #fefefe;
+      color: #0366d6;
+    }
+
+    .menuside2 {
+      display: flex;
+      flex-direction: column;
+      border: 0;
+      font-size: 14px;
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+      justify-content: center;
+    }
+
+    .menuside2 img {
+      vertical-align: top;
+      padding: 0 8px;
+      filter: brightness(0) saturate(100%) invert(42%) sepia(22%) saturate(385%) hue-rotate(170deg) brightness(92%) contrast(84%);
+    }
+
+    .menuside2 a {
+      padding: 6px 0;
+      text-decoration: none;
+      color: #5e6d7d;
+    }
+
+    .menuside2 a:hover {
+      color: #0366d6;
+      background: #fefefe;
+    }
+
+    .menuside2 a:hover img {
+      filter: brightness(0) saturate(100%) invert(23%) sepia(44%) saturate(7029%) hue-rotate(203deg) brightness(94%) contrast(98%);
+    }
+
+    .breadcrumb {
+      z-index: 1;
+      font-size: 14px;
+      text-align: center;
+      display: inline-block;
+      overflow: hidden;
+      border-radius: 5px;
+    }
+
+
+    .breadcrumb a {
+      text-decoration: none;
+      outline: none;
+      display: block;
+      float: left;
+      font-size: 12px;
+      line-height: 24px;
+      color: #373f49;
+      padding: 0 10px 0 35px;
+      background: #f0f1f1;
+      background: linear-gradient(#f0f1f1, #c6d2d2);
+      position: relative;
+    }
+
+    .breadcrumb a:first-child {
+      padding-left: 21px;
+      border-radius: 5px 0 0 5px;
+      /*to match with the parent's radius*/
+    }
+
+    .breadcrumb a:first-child:before {
+      left: 14px;
+    }
+
+    .breadcrumb a:last-child {
+      visibility: hidden;
+    }
+
+    .breadcrumb a.active,
+    .breadcrumb a:hover {
+      color: #0366d6;
+      background: #c6d2d2;
+      background: linear-gradient(#e3e4e4, #b8c7c7);
+    }
+
+    .breadcrumb a.active:after,
+    .breadcrumb a:hover:after {
+      background: #c6d2d2;
+      background: linear-gradient(135deg, #e3e4e4, #b8c7c7);
+    }
+
+    .breadcrumb a:after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: -12px;
+      /*half of square's length*/
+      /*same dimension as the line-height of .breadcrumb a */
+      width: 24px;
+      height: 24px;
+      transform: scale(0.707) rotate(45deg);
+      /*we need to prevent the arrows from getting buried under the next link*/
+      z-index: 1;
+      /*background same as links but the gradient will be rotated to compensate with the transform applied*/
+      background: #f0f1f1;
+      background: linear-gradient(135deg, #f0f1f1, #c6d2d2);
+      /*stylish arrow design using box shadow*/
+      box-shadow:
+        2px -2px 0 2px rgba(0, 0, 0, 0.1),
+        3px -3px 0 2px rgba(255, 255, 255, 0.1);
+      /*
+		5px - for rounded arrows and 
+		50px - to prevent hover glitches on the border created using shadows*/
+      border-radius: 0 5px 0 50px;
+    }
+
+    /*we dont need an arrow after the last link*/
+    .breadcrumb a:last-child:after {
+      content: none;
+      visibility: hidden;
+    }
+
+
+    .lga,
+    .lga a,
+    .lgi,
+    .lgi a {
+      font-size: 13px;
+      text-align: center;
+      color: #fff;
+      padding: 0 5px;
+      margin: 0;
+    }
+
+    .lga,
+    .lga a {
+      background-color: #008;
+    }
+
+    .lgi,
+    .lgi a {
+      background-color: #888;
+    }
+
+    .lga:hover,
+    .lga:hover a {
+      text-decoration: none;
+      color: #BBB;
+    }
+
+    .lgi:hover,
+    .lgi:hover a {
+      text-decoration: none;
+      color: #CCC;
+    }
+  </style>
+  <style>
+    body {
+      font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+      font-size: 14px;
+      line-height: 1.5;
+      margin: auto;
+      overflow-x: hidden;
+      background: #fefefe;
+    }
+
+    h1.chap {
+      font-size: 1.8em;
+    }
+
+    h2.chap {
+      font-size: 1.35em;
+    }
+
+    h3,
+    h3.chap {
+      font-size: 1.15em;
+    }
+
+    h4 {
+      font-size: 1.05em;
+    }
+
+    table {
+      font-size: inherit;
+    }
+  </style>
+
+
+  <style>
+    .dyn {
+      display: flex;
+      flex-direction: row;
+      gap: 3em;
+      align-items: stretch;
+      flex-wrap: wrap;
+      margin: 10px 0;
+    }
+
+    .dyn textarea {
+      font-family: monospace;
+      font-size: 13px;
+      line-height: 1.4;
+      min-width: 30ch;
+      max-width: 90ch;
+      box-sizing: border-box;
+      resize: both;
+      white-space: pre;
+      overflow: auto;
+      field-sizing: content;
+      align-self: stretch;
+      border: 1px solid #888;
+      border-radius: 3px;
+      margin: 0;
+      padding: 4px 8px;
+      background: #fefefe;
+    }
+
+    .dyn>div {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      display: flex;
+    }
+
+    .dyn>div>div {
+      margin: 0;
+      padding: 0;
+    }
+
+    .dyn img {
+      margin: 0;
+      padding: 0;
+    }
+
+    .scale {
+      max-width: 100%;
+      height: auto;
+      border: 1px solid #dde;
+      border-radius: 4px;
+    }
+  </style>
+
+
+  <script>
+    var llg = "en";
+    var az = 0;
+    var amdark = 0;
+    function ljs(n) {
+      if (az) return false;
+      var sc = document.createElement("script");
+      sc.type = "text/javascript";
+      sc.src = "/btn-" + n + ".js";
+      document.body.innerHTML = "<i style='position:absolute;top:30%;width:100%;'><center>Loading in progress...";
+      document.body.appendChild(sc);
+    }
+    function ctc(id) {
+      document.getElementById('img' + id).classList.remove('cop'); document.getElementById('img' + id).classList.add('cop2');
+      document.getElementById('pre' + id).style.backgroundColor = '#4dff00';
+      document.getElementById('msg' + id).style.display = 'inline';
+
+      setTimeout(function () { document.getElementById('img' + id).classList.remove('cop2'); document.getElementById('img' + id).classList.add('cop'); document.getElementById('pre' + id).style.backgroundColor = ''; document.getElementById('msg' + id).style.display = 'none'; }, 800);
+
+
+      text = document.getElementById('pre' + id).innerText;
+      if (window.clipboardData && window.clipboardData.setData)
+        return window.clipboardData.setData("Text", text);
+      else if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
+        var ta = document.createElement("textarea");
+        ta.textContent = text;
+        ta.style.position = "fixed";
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          return document.execCommand("copy");
+        }
+        catch (ex) {
+          return false;
+        }
+        finally {
+          document.body.removeChild(ta);
+        }
+      }
+    }
+  </script>
+</head>
+
+<body>
+  <style>
+    body,
+    .container,
+    #B3,
+    #C5,
+    #C6,
+    #C7,
+    #D7,
+    #D8 {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      overflow-y: scroll;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      grid-template-rows: auto 1fr auto;
+      min-height: 100vh;
+    }
+
+    #B3 {
+      grid-column: 1 / 5;
+      grid-row: 1;
+      position: sticky;
+      top: 0;
+      height: 30px;
+      padding: 0;
+      z-index: 10;
+      overflow: hidden;
+      background: #edeff3;
+      border-bottom: 1px solid #d4d8de;
+    }
+
+    #D7 {
+      grid-column: 1;
+      grid-row: 2;
+      margin: 0;
+      padding: 0;
+      padding-left: 30px;
+      line-height: 1.6;
+    }
+
+    #D8 {
+      grid-column: 1;
+      grid-row: 3;
+      position: sticky;
+      bottom: 0;
+      z-index: 5;
+      background: #fefefe;
+    }
+
+    #C5 {
+      grid-column: 2;
+      grid-row: 1 / -1;
+      position: sticky;
+      top: 40px;
+      align-self: start;
+      height: calc(98vh - 60px);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #C6 {
+      grid-column: 3;
+      grid-row: 1 / -1;
+      position: sticky;
+      top: 40px;
+      align-self: start;
+      height: calc(98vh - 60px);
+      max-width: 200px;
+      overflow: hidden;
+      margin: 0 10px;
+      padding: 8px 5px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #C7 {
+      grid-column: 4;
+      grid-row: 1 / -1;
+      position: sticky;
+      top: 40px;
+      align-self: start;
+      height: calc(98vh - 60px);
+      margin: 0 20px 0 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #toc {
+      z-index: 15;
+      overflow-x: hidden;
+      overflow-y: auto;
+      background: #f6f8fa;
+      border-width: 2px;
+      border-style: groove;
+      border-radius: 3px;
+      border-color: #e1e4e8;
+      margin: 0 5px;
+      padding: 0;
+      max-height: 100%;
+    }
+
+    #toc ul {
+      margin: 0;
+      list-style-type: none;
+      padding: 0;
+    }
+
+    #toc li {
+      padding: 0 10px;
+      margin: 0;
+    }
+
+    #toc li a {
+      padding: 5px 0;
+      display: inline-block;
+      text-decoration: none;
+      width: 100%;
+      color: #5e6d7d;
+    }
+
+    #toc li a:hover {
+      color: #0366d6;
+    }
+
+    #toc li:hover {
+      background: #fefefe;
+    }
+
+    #magic {
+      position: absolute;
+      top: 0;
+      right: 50px;
+      width: 30px;
+      height: 30px;
+      overflow: hidden;
+      background: #edeff3;
+      z-index: 14;
+    }
+
+    #magic:hover {
+      width: calc(100% - 50px);
+    }
+
+    #magic .menu1 {
+      position: absolute;
+      top: 0;
+      right: 30px;
+      height: 30px;
+      padding-left: 10px;
+      background: #edeff3;
+      border-left: 1px solid #d4d8de;
+      border-bottom: 1px solid #d4d8de;
+    }
+
+    .menu1-tail {
+      flex-grow: 1;
+      flex-shrink: 0;
+      height: 30px;
+      position: relative;
+      z-index: 15;
+      background: #edeff3;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: auto auto auto;
+      grid-auto-rows: auto;
+      gap: 5px;
+      margin: 0;
+      padding: 0;
+    }
+
+    .merged {
+      grid-column: 1 / -1;
+    }
+
+    #C6 {
+      display: none;
+    }
+
+    @media (min-width: 1401px) {
+      #C6:has(#toc li) {
+        display: flex;
+      }
+    }
+
+    @media (max-width: 1100px) {
+      #C5,
+      #C7 {
+        display: none;
+      }
+    }
+
+    @media (max-width: 1200px) {
+      .merged {
+        display: none;
+      }
+    }
+  </style>
+
+  <div class="container">
+
+    <footer id="D8">
+
+      <p>
+      </p>
+      <p>
+
+      </p>
+    </footer>
+
+
+    <header id="B3">
+      <div class="menu1">
+        <a id="titem10" href="sequence-diagram_en.html">Sequence</a>
+        <a id="titem20" href="use-case-diagram_en.html">Use Case</a>
+        <a id="titem30" href="class-diagram_en.html">Class</a>
+        <a id="titem40" href="activity-diagram-beta_en.html">Activity</a>
+        <a id="titem50" href="component-diagram_en.html">Component</a>
+        <a id="titem60" href="state-diagram_en.html">State</a>
+        <a id="titem70" href="object-diagram_en.html">Object</a>
+        <a id="titem80" href="deployment-diagram_en.html">Deployment</a>
+        <a id="titem90" href="timing-diagram_en.html">Timing</a>
+
+        <a id="titem99" href="regex_en.html">Regex</a>
+        <a id="titem100" href="nwdiag_en.html">Network</a>
+        <a id="titem110" href="salt_en.html">Wireframe</a>
+        <a id="titem120" href="archimate-diagram_en.html">Archimate</a>
+        <a id="titem130" href="gantt-diagram_en.html">Gantt</a>
+        <a id="titem140" href="mindmap-diagram_en.html">MindMap</a>
+        <a id="titem150" href="wbs-diagram_en.html">WBS</a>
+        <a id="titem151" href="ebnf_en.html">EBNF</a>
+        <a id="titem160" href="json_en.html">JSON</a>
+        <a id="titem170" href="yaml_en.html">YAML</a>
+
+        <div class="menu1-tail"></div>
+      </div>
+      <div id="magic">
+        <div class="menu1">
+          <a id="titem10" href="sequence-diagram_en.html">Sequence</a>
+          <a id="titem20" href="use-case-diagram_en.html">Use Case</a>
+          <a id="titem30" href="class-diagram_en.html">Class</a>
+          <a id="titem40" href="activity-diagram-beta_en.html">Activity</a>
+          <a id="titem50" href="component-diagram_en.html">Component</a>
+          <a id="titem60" href="state-diagram_en.html">State</a>
+          <a id="titem70" href="object-diagram_en.html">Object</a>
+          <a id="titem80" href="deployment-diagram_en.html">Deployment</a>
+          <a id="titem90" href="timing-diagram_en.html">Timing</a>
+
+          <a id="titem99" href="regex_en.html">Regex</a>
+          <a id="titem100" href="nwdiag_en.html">Network</a>
+          <a id="titem110" href="salt_en.html">Wireframe</a>
+          <a id="titem120" href="archimate-diagram_en.html">Archimate</a>
+          <a id="titem130" href="gantt-diagram_en.html">Gantt</a>
+          <a id="titem140" href="mindmap-diagram_en.html">MindMap</a>
+          <a id="titem150" href="wbs-diagram_en.html">WBS</a>
+          <a id="titem151" href="ebnf_en.html">EBNF</a>
+          <a id="titem160" href="json_en.html">JSON</a>
+          <a id="titem170" href="yaml_en.html">YAML</a>
+
+          <div class="menu1-tail"></div>
+        </div>
+      </div><!-- magic -->
+    </header>
+
+    <main id="D7">
+
+      <style>
+        #donate {
+          padding-top: 10px;
+          min-height: 30px;
+        }
+      </style>
+
+
+      <p style="clear:both;">
+
+
+        <style>
+          #titem80 {
+            color: #0366d6;
+            background-color: #fefefe;
+          }
+
+          #titem80 img {
+            filter: brightness(0) saturate(100%) invert(23%) sepia(44%) saturate(7029%) hue-rotate(203deg) brightness(94%) contrast(98%);
+          }
+
+          .menu1:hover #titem80 {
+            color: #5e6d7d;
+          }
+
+          .menu1:hover #titem80:hover {
+            color: #0366d6;
+          }
+
+          .menu1:hover #titem80 img {
+            filter: brightness(0) saturate(100%) invert(42%) sepia(22%) saturate(385%) hue-rotate(170deg) brightness(92%) contrast(84%);
+          }
+        </style>
+
+        <a style="position:relative;top:-38px;" name="6c38d20e9f7e0390"></a>
+        <!--heading-->
+      </p>
+      <h1 class="chap">Deployment Diagram</h1>
+      <p></p>
+      <p></p>
+      A <strong>Deployment Diagram</strong> is a type of diagram that visualizes the architecture of systems, showcasing
+      how software components are deployed onto hardware. It provides a clear picture of the distribution of components
+      across various nodes, such as servers, workstations, and devices.
+      <p></p>
+      With <a href="https://plantuml.com/en/deployment-diagram">PlantUML</a>, creating deployment diagrams becomes a
+      breeze. The platform offers a simple and intuitive way to design these diagrams using plain text, ensuring rapid
+      iterations and easy version control. Moreover, the <a href="https://forum.plantuml.net/">PlantUML forum</a>
+      provides a vibrant community where users can seek help, share ideas, and collaborate on diagramming challenges.
+      One of the key advantages of PlantUML is its ability to integrate seamlessly with various tools and platforms,
+      making it a preferred choice for professionals and enthusiasts alike.
+      <a style="position:relative;top:-38px;" name="e5cec68ef9127fc4"></a>
+      <!--heading-->
+      <h2 class="chap">Declaring element</h2>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+action action
+actor actor
+actor/ &#34;actor/&#34;
+agent agent
+artifact artifact
+boundary boundary
+card card
+circle circle
+cloud cloud
+collections collections
+component component
+control control
+database database
+entity entity
+file file
+folder folder
+frame frame
+hexagon hexagon
+interface interface
+label label
+node node
+package package
+person person
+process process
+queue queue
+rectangle rectangle
+stack stack
+storage storage
+usecase usecase
+usecase/ &#34;usecase/&#34;
+@enduml
+</textarea>
+        <div id="out1b810a87f9c284662eda057b1920d3f0">
+          <div class="mycell">
+            <img loading="lazy" width="682" height="551" class="scale"
+              src="/imgw/img-1b810a87f9c284662eda057b1920d3f0.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      You can optionaly put text using bracket <code class="cod">[]</code> for a long description.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+folder folder [
+This is a &lt;b&gt;folder
+----
+You can use separator
+====
+of different kind
+....
+and style
+]
+
+node node [
+This is a &lt;b&gt;node
+----
+You can use separator
+====
+of different kind
+....
+and style
+]
+
+database database [
+This is a &lt;b&gt;database
+----
+You can use separator
+====
+of different kind
+....
+and style
+]
+
+usecase usecase [
+This is a &lt;b&gt;usecase
+----
+You can use separator
+====
+of different kind
+....
+and style
+]
+
+card card [
+This is a &lt;b&gt;card
+----
+You can use separator
+====
+of different kind
+....
+and style
+&lt;i&gt;&lt;color:blue&gt;(add from V1.2020.7)&lt;/color&gt;&lt;/i&gt;
+]
+@enduml
+</textarea>
+        <div id="outa87e628d5ff7c29a09d61b2ae1d291ab">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="614" height="330" class="scale"
+              src="/imgw/img-a87e628d5ff7c29a09d61b2ae1d291ab.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="ccbc4c57abc698a9"></a>
+      <!--heading-->
+      <h2 class="chap">Declaring element (using short form)</h2>
+      <p></p>
+      We can declare element using some short forms.
+      <p></p>
+      <table border="1" cellspacing="0" cellpadding="5">
+        <tbody>
+          <tr>
+            <td><b>
+                Long form Keyword
+              </b></td>
+            <td><b>
+                Short form Keyword
+              </b></td>
+            <td><b>
+                Long form example
+              </b></td>
+            <td><b>
+                Short form example
+              </b></td>
+            <td><b>
+                Ref.
+              </b></td>
+          </tr>
+          <tr>
+            <td>
+              <code class="cod">actor</code>
+            </td>
+            <td>
+              <code class="cod">:</code> <em>a</em> <code class="cod">:</code>
+            </td>
+            <td>
+              <code class="cod">actor actor1</code>
+            </td>
+            <td>
+              <code class="cod">:actor2:</code>
+            </td>
+            <td>
+              <a href="https://plantuml.com/use-case-diagram#d9b36998c97be687">Actors</a>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <code class="cod">component</code>
+            </td>
+            <td>
+              <code class="cod">[</code> <em>c</em> <code class="cod">]</code>
+            </td>
+            <td>
+              <code class="cod">component component1</code>
+            </td>
+            <td>
+              <code class="cod">[component2]</code>
+            </td>
+            <td>
+              <a href="https://plantuml.com/component-diagram#05bbb43b3d923283">Components</a>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <code class="cod">interface</code>
+            </td>
+            <td>
+              <code class="cod">()</code> <em>i</em>
+            </td>
+            <td>
+              <code class="cod">interface interface1</code>
+            </td>
+            <td>
+              <code class="cod">() &#34;interface2&#34;</code>
+            </td>
+            <td>
+              <a href="https://plantuml.com/component-diagram#756640f0aea5f5be">Interfaces</a>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <code class="cod">usecase</code>
+            </td>
+            <td>
+              <code class="cod">(</code> <em>u</em> <code class="cod">)</code>
+            </td>
+            <td>
+              <code class="cod">usecase usecase1</code>
+            </td>
+            <td>
+              <code class="cod">(usecase2)</code>
+            </td>
+            <td>
+              <a href="https://plantuml.com/use-case-diagram#5cb617d22da857ea">Usecases</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p></p>
+      <h3>Actor</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+actor actor1
+:actor2:
+
+@enduml
+</textarea>
+        <div id="out6ec57f42a98da91f15b30629ca1a3c4f">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="132" height="95" class="scale"
+              src="/imgw/img-6ec57f42a98da91f15b30629ca1a3c4f.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <strong>NB</strong>: <em>There is an old syntax for actor with guillemet which is now deprecated and will be
+        removed some days. Please do not use in your diagram.</em>
+      <p></p>
+      <h3>Component </h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+component component1
+[component2]
+
+@enduml
+</textarea>
+        <div id="outc4b405a9251f003b1234e2900b2f731a">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="289" height="67" class="scale"
+              src="/imgw/img-c4b405a9251f003b1234e2900b2f731a.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>Interface </h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+interface interface1
+() &#34;interface2&#34;
+
+label &#34;//interface example//&#34;
+@enduml
+</textarea>
+        <div id="out44bb60158246b5f1e3971dc04a4b7e9c">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="217" height="144" class="scale"
+              src="/imgw/img-44bb60158246b5f1e3971dc04a4b7e9c.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>Usecase </h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+usecase usecase1
+(usecase2)
+
+@enduml
+</textarea>
+        <div id="outcdbc3978c34f1ad8120169a786899271">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="235" height="49" class="scale"
+              src="/imgw/img-cdbc3978c34f1ad8120169a786899271.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="bb3fdb917676e9ae"></a>
+      <!--heading-->
+      <h2 class="chap">Linking or arrow</h2>
+      <p></p>
+      You can create simple links between elements with or without labels:
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+node node1
+node node2
+node node3
+node node4
+node node5
+node1 -- node2 : label1
+node1 .. node3 : label2
+node1 ~~ node4 : label3
+node1 == node5
+
+@enduml
+</textarea>
+        <div id="outc9e9782e32671e77202d62d06ae7916d">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="460" height="203" class="scale"
+              src="/imgw/img-c9e9782e32671e77202d62d06ae7916d.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      It is possible to use several types of links:
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+artifact artifact1
+artifact artifact2
+artifact artifact3
+artifact artifact4
+artifact artifact5
+artifact artifact6
+artifact artifact7
+artifact artifact8
+artifact artifact9
+artifact artifact10
+artifact1 --&gt; artifact2
+artifact1 --* artifact3
+artifact1 --o artifact4
+artifact1 --+ artifact5
+artifact1 --# artifact6
+artifact1 --&gt;&gt; artifact7
+artifact1 --0 artifact8
+artifact1 --^ artifact9
+artifact1 --(0 artifact10
+
+@enduml
+</textarea>
+        <div id="out0bf2c2603da517a1cc522e122dc94d68">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="1033" height="161" class="scale"
+              src="/imgw/img-0bf2c2603da517a1cc522e122dc94d68.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      You can also have the following types:
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+cloud cloud1
+cloud cloud2
+cloud cloud3
+cloud cloud4
+cloud cloud5
+cloud1 -0- cloud2
+cloud1 -0)- cloud3
+cloud1 -(0- cloud4
+cloud1 -(0)- cloud5
+
+@enduml
+</textarea>
+        <div id="outfcdf646d76236460d093b93030f96d28">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="421" height="181" class="scale"
+              src="/imgw/img-fcdf646d76236460d093b93030f96d28.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      or another example:
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+actor foo1
+actor foo2
+foo1 &lt;-0-&gt; foo2
+foo1 &lt;-(0)-&gt; foo2
+ 
+(ac1) -le(0)-&gt; left1
+ac1 -ri(0)-&gt; right1
+ac1 .up(0).&gt; up1
+ac1 ~up(0)~&gt; up2
+ac1 -do(0)-&gt; down1
+ac1 -do(0)-&gt; down2
+ 
+actor1 -0)- actor2
+ 
+component comp1
+component comp2
+comp1 *-0)-+ comp2
+[comp3] &lt;--&gt;&gt; [comp4]
+
+boundary b1
+control c1
+b1 -(0)- c1
+
+component comp1
+interface interf1
+comp1 #~~( interf1
+
+:mode1actor: -0)- fooa1
+:mode1actorl: -ri0)- foo1l
+
+[component1] 0)-(0-(0 [componentC]
+() component3 )-0-(0 &#34;foo&#34; [componentC]
+
+[aze1] #--&gt;&gt; [aze2]
+@enduml
+</textarea>
+        <div id="out206c5b1ac395eb9588124ad1ec149f48">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="1390" height="371" class="scale"
+              src="/imgw/img-206c5b1ac395eb9588124ad1ec149f48.png" />
+          </div>
+        </div>
+      </div>
+      <em>[Ref. <a href="https://forum.plantuml.net/547/composite-structure-diagrams?show=554#a554">QA-547</a> and <a
+          href="https://forum.plantuml.net/1736/are-partial-lollipop-for-component-diagrams-supported?show=1737#a1737">QA-1736</a>]</em>
+      <p></p>
+      ⎘ See all type on <strong>Appendix</strong>.
+      <a style="position:relative;top:-38px;" name="b5f6831632fd63c1"></a>
+      <!--heading-->
+      <h2 class="chap">Bracketed arrow style </h2>
+      <p></p>
+      <em>Similar as <a href="class-diagram#chjviqthvhkikfmwbahk">Bracketed <strong>class</strong> relations (linking or
+          arrow) style</a></em>
+      <p></p>
+      <h3>Line style</h3>
+      It&#39;s also possible to have explicitly <code class="cod">bold</code>, <code class="cod">dashed</code>, <code
+        class="cod">dotted</code>, <code class="cod">hidden</code> or <code class="cod">plain</code> arrows:<br />
+      <p></p>
+      <ul>
+        <li>without label</li>
+      </ul>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+node foo
+title Bracketed line style without label
+foo --&gt; bar
+foo -[bold]-&gt; bar1
+foo -[dashed]-&gt; bar2
+foo -[dotted]-&gt; bar3
+foo -[hidden]-&gt; bar4
+foo -[plain]-&gt; bar5
+@enduml
+</textarea>
+        <div id="out63adb1c50b6bf61952c727edb56b5098">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="489" height="229" class="scale"
+              src="/imgw/img-63adb1c50b6bf61952c727edb56b5098.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <ul>
+        <li>with label</li>
+      </ul>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+title Bracketed line style with label
+node foo
+foo --&gt; bar          : ∅
+foo -[bold]-&gt; bar1   : [bold]
+foo -[dashed]-&gt; bar2 : [dashed]
+foo -[dotted]-&gt; bar3 : [dotted]
+foo -[hidden]-&gt; bar4 : [hidden]
+foo -[plain]-&gt; bar5  : [plain]
+@enduml
+</textarea>
+        <div id="out9a99e23b087f76b48a6ef8c3230511d9">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="490" height="247" class="scale"
+              src="/imgw/img-9a99e23b087f76b48a6ef8c3230511d9.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Adapted from <a
+          href="https://forum.plantuml.net/4181/how-change-width-line-in-a-relationship-between-two-classes?show=4232#a4232">QA-4181</a>]</em>
+      <p></p>
+      <h3>Line color</h3>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+title Bracketed line color
+node  foo
+foo --&gt; bar
+foo -[#red]-&gt; bar1     : [#red]
+foo -[#green]-&gt; bar2   : [#green]
+foo -[#blue]-&gt; bar3    : [#blue]
+foo -[#blue;#yellow;#green]-&gt; bar4
+@enduml
+</textarea>
+        <div id="out1a057967f6b352e16114e966a3fb4e6f">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="400" height="247" class="scale"
+              src="/imgw/img-1a057967f6b352e16114e966a3fb4e6f.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>Line thickness</h3>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+title Bracketed line thickness
+node foo
+foo --&gt; bar                 : ∅
+foo -[thickness=1]-&gt; bar1   : [1]
+foo -[thickness=2]-&gt; bar2   : [2]
+foo -[thickness=4]-&gt; bar3   : [4]
+foo -[thickness=8]-&gt; bar4   : [8]
+foo -[thickness=16]-&gt; bar5  : [16]
+@enduml
+</textarea>
+        <div id="outfe2d33efea20f024315038b6a5576ff1">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="489" height="247" class="scale"
+              src="/imgw/img-fe2d33efea20f024315038b6a5576ff1.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Adapted from <a href="https://forum.plantuml.net/4949">QA-4949</a>]</em>
+      <p></p>
+      <h3>Mix</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+title Bracketed line style mix
+node foo
+foo --&gt; bar                             : ∅
+foo -[#red,thickness=1]-&gt; bar1          : [#red,1]
+foo -[#red,dashed,thickness=2]-&gt; bar2   : [#red,dashed,2]
+foo -[#green,dashed,thickness=4]-&gt; bar3 : [#green,dashed,4]
+foo -[#blue,dotted,thickness=8]-&gt; bar4  : [blue,dotted,8]
+foo -[#blue,plain,thickness=16]-&gt; bar5  : [blue,plain,16]
+foo -[#blue;#green,dashed,thickness=4]-&gt; bar6  : [blue;green,dashed,4]
+@enduml
+</textarea>
+        <div id="outb3a9f1828ee4bb2a91e41361d451fed6">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="809" height="247" class="scale"
+              src="/imgw/img-b3a9f1828ee4bb2a91e41361d451fed6.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="39a64d49d97a1ea0"></a>
+      <!--heading-->
+      <h2 class="chap">Change arrow color and style (inline style)</h2>
+      <p></p>
+      You can change the <a href="color">color</a> or style of individual arrows using the inline following notation:
+      <p></p>
+      <ul>
+        <li><code class="cod">#color;line.[bold|dashed|dotted];text:color</code></li>
+      </ul>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+node foo
+foo --&gt; bar : normal
+foo --&gt; bar1 #line:red;line.bold;text:red  : red bold
+foo --&gt; bar2 #green;line.dashed;text:green : green dashed 
+foo --&gt; bar3 #blue;line.dotted;text:blue   : blue dotted
+@enduml
+</textarea>
+        <div id="outa821b94877255b00ddb12a7fb83f4754">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="357" height="209" class="scale"
+              src="/imgw/img-a821b94877255b00ddb12a7fb83f4754.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/3770">QA-3770</a> and <a
+          href="https://forum.plantuml.net/3816">QA-3816</a>]</em>
+      <em>[See similar feature on <a href="class-diagram#b5b0e4228f2e5022">class diagram</a>]</em>
+      <a style="position:relative;top:-38px;" name="ded8ac71cf351121"></a>
+      <!--heading-->
+      <h2 class="chap">Change element color and style (inline style)</h2>
+      <p></p>
+      You can change the <a href="color">color</a> or style of individual element using the following notation:
+      <ul>
+        <li><code class="cod">#[color|back:color];line:color;line.[bold|dashed|dotted];text:color</code></li>
+      </ul>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+agent a
+cloud c #pink;line:red;line.bold;text:red
+file  f #palegreen;line:green;line.dashed;text:green
+node  n #aliceblue;line:blue;line.dotted;text:blue
+@enduml
+</textarea>
+        <div id="out81957562d8853a08cce6187e28d29989">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="139" height="185" class="scale"
+              src="/imgw/img-81957562d8853a08cce6187e28d29989.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+agent a
+cloud c #pink;line:red;line.bold;text:red [
+c
+cloud description
+]
+file  f #palegreen;line:green;line.dashed;text:green {
+[c1]
+[c2]
+}
+frame frame {
+node  n #aliceblue;line:blue;line.dotted;text:blue
+}
+@enduml
+</textarea>
+        <div id="out9053a8bab16a44c806de61c9bfef45ce">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="519" height="121" class="scale"
+              src="/imgw/img-9053a8bab16a44c806de61c9bfef45ce.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/6852">QA-6852</a>]</em>
+      <a style="position:relative;top:-38px;" name="b2ecd56c45d3d896"></a>
+      <!--heading-->
+      <h2 class="chap">Nestable elements</h2>
+      <p></p>
+      Here are the nestable elements:
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+action action {
+}
+artifact artifact {
+}
+card card {
+}
+cloud cloud {
+}
+component component {
+}
+database database {
+}
+file file {
+}
+folder folder {
+}
+frame frame {
+}
+hexagon hexagon {
+}
+node node {
+}
+package package {
+}
+process process {
+}
+queue queue {
+}
+rectangle rectangle {
+}
+stack stack {
+}
+storage storage {
+}
+@enduml
+</textarea>
+        <div id="outd9550f6a05d57913ed8b72f13e3c6b83">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="1842" height="81" class="scale"
+              src="/imgw/img-d9550f6a05d57913ed8b72f13e3c6b83.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="f36f2582540e74f1"></a>
+      <!--heading-->
+      <h2 class="chap">Packages and nested elements</h2>
+      <p></p>
+      <h3>Example with one level</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+artifact    artifactVeryLOOOOOOOOOOOOOOOOOOOg    as &#34;artifact&#34; {
+file f1
+}
+card        cardVeryLOOOOOOOOOOOOOOOOOOOg        as &#34;card&#34; {
+file f2
+}
+cloud       cloudVeryLOOOOOOOOOOOOOOOOOOOg       as &#34;cloud&#34; {
+file f3
+}
+component   componentVeryLOOOOOOOOOOOOOOOOOOOg   as &#34;component&#34; {
+file f4
+}
+database    databaseVeryLOOOOOOOOOOOOOOOOOOOg    as &#34;database&#34; {
+file f5
+}
+file        fileVeryLOOOOOOOOOOOOOOOOOOOg        as &#34;file&#34; {
+file f6
+}
+folder      folderVeryLOOOOOOOOOOOOOOOOOOOg      as &#34;folder&#34; {
+file f7
+}
+frame       frameVeryLOOOOOOOOOOOOOOOOOOOg       as &#34;frame&#34; {
+file f8
+}
+hexagon     hexagonVeryLOOOOOOOOOOOOOOOOOOOg     as &#34;hexagon&#34; {
+file f9
+}
+node        nodeVeryLOOOOOOOOOOOOOOOOOOOg        as &#34;node&#34; {
+file f10
+}
+package     packageVeryLOOOOOOOOOOOOOOOOOOOg     as &#34;package&#34; {
+file f11
+}
+queue       queueVeryLOOOOOOOOOOOOOOOOOOOg       as &#34;queue&#34; {
+file f12
+}
+rectangle   rectangleVeryLOOOOOOOOOOOOOOOOOOOg   as &#34;rectangle&#34; {
+file f13
+}
+stack       stackVeryLOOOOOOOOOOOOOOOOOOOg       as &#34;stack&#34; {
+file f14
+}
+storage     storageVeryLOOOOOOOOOOOOOOOOOOOg     as &#34;storage&#34; {
+file f15
+}
+@enduml
+</textarea>
+        <div id="out8a9fa189c31489dc7e208ffe5e1ec29c">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="1455" height="135" class="scale"
+              src="/imgw/img-8a9fa189c31489dc7e208ffe5e1ec29c.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <h3>Other example</h3>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+artifact Foo1 {
+  folder Foo2
+}
+
+folder Foo3 {
+  artifact Foo4
+}
+
+frame Foo5 {
+  database Foo6
+}
+
+cloud vpc {
+  node ec2 {
+    stack stack
+  }
+}
+
+@enduml
+</textarea>
+        <div id="oute6bf714ad2b2ce883b2f1ba114efd525">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="538" height="193" class="scale"
+              src="/imgw/img-e6bf714ad2b2ce883b2f1ba114efd525.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+node Foo1 {
+ cloud Foo2
+}
+
+cloud Foo3 {
+  frame Foo4
+}
+
+database Foo5  {
+  storage Foo6
+}
+
+storage Foo7 {
+  storage Foo8
+}
+@enduml
+</textarea>
+        <div id="outf29c031dd07b2efa0c1fb2ae9beb4301">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="482" height="140" class="scale"
+              src="/imgw/img-f29c031dd07b2efa0c1fb2ae9beb4301.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>Full nesting</h3>
+      <p></p>
+      Here is all the nested elements:
+      <ul>
+        <li>by alphabetical order:</li>
+      </ul>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+action action {
+artifact artifact {
+card card {
+cloud cloud {
+component component {
+database database {
+file file {
+folder folder {
+frame frame {
+hexagon hexagon {
+node node {
+package package {
+process process {
+queue queue {
+rectangle rectangle {
+stack stack {
+storage storage {
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+@enduml
+</textarea>
+        <div id="outd9d97bfa46615fa78e457a3dc5124ee3">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="860" height="1150" class="scale"
+              src="/imgw/img-d9d97bfa46615fa78e457a3dc5124ee3.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <ul>
+        <li>or reverse alphabetical order</li>
+      </ul>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+storage storage {
+stack stack {
+rectangle rectangle {
+queue queue {
+process process {
+package package {
+node node {
+hexagon hexagon {
+frame frame {
+folder folder {
+file file {
+database database {
+component component {
+cloud cloud {
+card card {
+artifact artifact {
+action action {
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+@enduml
+</textarea>
+        <div id="out4e74aa50ac82a43111c1a71fbc3dca14">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="840" height="1150" class="scale"
+              src="/imgw/img-4e74aa50ac82a43111c1a71fbc3dca14.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="effdb9ce6c5d44df"></a>
+      <!--heading-->
+      <h2 class="chap">Alias </h2>
+      <p></p>
+      <h3>Simple alias with <code class="cod">as</code></h3>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+node Node1 as n1
+node &#34;Node 2&#34; as n2
+file f1 as &#34;File 1&#34;
+cloud c1 as &#34;this
+is
+a
+cloud&#34;
+cloud c2 [this
+is
+another
+cloud]
+
+n1 -&gt; n2
+n1 --&gt; f1
+f1 -&gt; c1
+c1 -&gt; c2
+@enduml
+</textarea>
+        <div id="outfe834748069decfc6eae629b7826ea0a">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="310" height="236" class="scale"
+              src="/imgw/img-fe834748069decfc6eae629b7826ea0a.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>Examples of long alias</h3>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+actor        &#34;actor&#34;       as actorVeryLOOOOOOOOOOOOOOOOOOOg
+agent        &#34;agent&#34;       as agentVeryLOOOOOOOOOOOOOOOOOOOg
+artifact     &#34;artifact&#34;    as artifactVeryLOOOOOOOOOOOOOOOOOOOg
+boundary     &#34;boundary&#34;    as boundaryVeryLOOOOOOOOOOOOOOOOOOOg
+card         &#34;card&#34;        as cardVeryLOOOOOOOOOOOOOOOOOOOg
+cloud        &#34;cloud&#34;       as cloudVeryLOOOOOOOOOOOOOOOOOOOg
+collections  &#34;collections&#34; as collectionsVeryLOOOOOOOOOOOOOOOOOOOg
+component    &#34;component&#34;   as componentVeryLOOOOOOOOOOOOOOOOOOOg
+control      &#34;control&#34;     as controlVeryLOOOOOOOOOOOOOOOOOOOg
+database     &#34;database&#34;    as databaseVeryLOOOOOOOOOOOOOOOOOOOg
+entity       &#34;entity&#34;      as entityVeryLOOOOOOOOOOOOOOOOOOOg
+file         &#34;file&#34;        as fileVeryLOOOOOOOOOOOOOOOOOOOg
+folder       &#34;folder&#34;      as folderVeryLOOOOOOOOOOOOOOOOOOOg
+frame        &#34;frame&#34;       as frameVeryLOOOOOOOOOOOOOOOOOOOg
+hexagon      &#34;hexagon&#34;     as hexagonVeryLOOOOOOOOOOOOOOOOOOOg
+interface    &#34;interface&#34;   as interfaceVeryLOOOOOOOOOOOOOOOOOOOg
+label        &#34;label&#34;       as labelVeryLOOOOOOOOOOOOOOOOOOOg
+node         &#34;node&#34;        as nodeVeryLOOOOOOOOOOOOOOOOOOOg
+package      &#34;package&#34;     as packageVeryLOOOOOOOOOOOOOOOOOOOg
+person       &#34;person&#34;      as personVeryLOOOOOOOOOOOOOOOOOOOg
+queue        &#34;queue&#34;       as queueVeryLOOOOOOOOOOOOOOOOOOOg
+stack        &#34;stack&#34;       as stackVeryLOOOOOOOOOOOOOOOOOOOg
+rectangle    &#34;rectangle&#34;   as rectangleVeryLOOOOOOOOOOOOOOOOOOOg
+storage      &#34;storage&#34;     as storageVeryLOOOOOOOOOOOOOOOOOOOg
+usecase      &#34;usecase&#34;     as usecaseVeryLOOOOOOOOOOOOOOOOOOOg
+@enduml
+</textarea>
+        <div id="outb420659c197d56911c52d07472369098">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="763" height="541" class="scale"
+              src="/imgw/img-b420659c197d56911c52d07472369098.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+actor       actorVeryLOOOOOOOOOOOOOOOOOOOg       as &#34;actor&#34;
+agent       agentVeryLOOOOOOOOOOOOOOOOOOOg       as &#34;agent&#34;
+artifact    artifactVeryLOOOOOOOOOOOOOOOOOOOg    as &#34;artifact&#34;
+boundary    boundaryVeryLOOOOOOOOOOOOOOOOOOOg    as &#34;boundary&#34;
+card        cardVeryLOOOOOOOOOOOOOOOOOOOg        as &#34;card&#34;
+cloud       cloudVeryLOOOOOOOOOOOOOOOOOOOg       as &#34;cloud&#34;
+collections collectionsVeryLOOOOOOOOOOOOOOOOOOOg as &#34;collections&#34;
+component   componentVeryLOOOOOOOOOOOOOOOOOOOg   as &#34;component&#34;
+control     controlVeryLOOOOOOOOOOOOOOOOOOOg     as &#34;control&#34;
+database    databaseVeryLOOOOOOOOOOOOOOOOOOOg    as &#34;database&#34;
+entity      entityVeryLOOOOOOOOOOOOOOOOOOOg      as &#34;entity&#34;
+file        fileVeryLOOOOOOOOOOOOOOOOOOOg        as &#34;file&#34;
+folder      folderVeryLOOOOOOOOOOOOOOOOOOOg      as &#34;folder&#34;
+frame       frameVeryLOOOOOOOOOOOOOOOOOOOg       as &#34;frame&#34;
+hexagon     hexagonVeryLOOOOOOOOOOOOOOOOOOOg     as &#34;hexagon&#34;
+interface   interfaceVeryLOOOOOOOOOOOOOOOOOOOg   as &#34;interface&#34;
+label       labelVeryLOOOOOOOOOOOOOOOOOOOg       as &#34;label&#34;
+node        nodeVeryLOOOOOOOOOOOOOOOOOOOg        as &#34;node&#34;
+package     packageVeryLOOOOOOOOOOOOOOOOOOOg     as &#34;package&#34;
+person      personVeryLOOOOOOOOOOOOOOOOOOOg      as &#34;person&#34;
+queue       queueVeryLOOOOOOOOOOOOOOOOOOOg       as &#34;queue&#34;
+stack       stackVeryLOOOOOOOOOOOOOOOOOOOg       as &#34;stack&#34;
+rectangle   rectangleVeryLOOOOOOOOOOOOOOOOOOOg   as &#34;rectangle&#34;
+storage     storageVeryLOOOOOOOOOOOOOOOOOOOg     as &#34;storage&#34;
+usecase     usecaseVeryLOOOOOOOOOOOOOOOOOOOg     as &#34;usecase&#34;
+@enduml
+</textarea>
+        <div id="out5d63f9331aee6f84348a553ecd803186">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="763" height="541" class="scale"
+              src="/imgw/img-5d63f9331aee6f84348a553ecd803186.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/12082">QA-12082</a>]</em>
+      <a style="position:relative;top:-38px;" name="d6ace33a51767250"></a>
+      <!--heading-->
+      <h2 class="chap">Round corner</h2>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+skinparam rectangle {
+    roundCorner&lt;&lt;Concept&gt;&gt; 25
+}
+
+rectangle &#34;Concept Model&#34; &lt;&lt;Concept&gt;&gt; {
+rectangle &#34;Example 1&#34; &lt;&lt;Concept&gt;&gt; as ex1
+rectangle &#34;Another rectangle&#34;
+}
+@enduml
+</textarea>
+        <div id="outbc6a7a5cb9e9d36644bd01c69aeff00c">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="309" height="145" class="scale"
+              src="/imgw/img-bc6a7a5cb9e9d36644bd01c69aeff00c.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <p></p>
+      <a style="position:relative;top:-38px;" name="75b4984abd04b14f"></a>
+      <!--heading-->
+      <h2 class="chap">Specific SkinParameter</h2>
+      <p></p>
+      <h3>roundCorner </h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+skinparam roundCorner 15
+actor actor
+agent agent
+artifact artifact
+boundary boundary
+card card
+circle circle
+cloud cloud
+collections collections
+component component
+control control
+database database
+entity entity
+file file
+folder folder
+frame frame
+hexagon hexagon
+interface interface
+label label
+node node
+package package
+person person
+queue queue
+rectangle rectangle
+stack stack
+storage storage
+usecase usecase
+@enduml
+</textarea>
+        <div id="outb0161188c48b9d8373ad242c65d91a9f">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="658" height="542" class="scale"
+              src="/imgw/img-b0161188c48b9d8373ad242c65d91a9f.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/5299">QA-5299</a>, <a
+          href="https://forum.plantuml.net/6915">QA-6915</a>, <a
+          href="https://forum.plantuml.net/11943">QA-11943</a>]</em>
+      <a style="position:relative;top:-38px;" name="85f50efefa90c284"></a>
+      <!--heading-->
+      <h2 class="chap">Appendix: All type of arrow line</h2>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+left to right direction
+skinparam nodesep 5
+
+f3  ~~  b3  : &#34;&#34;~~&#34;&#34;\n//dotted//
+f2  ..  b2  : &#34;&#34;..&#34;&#34;\n//dashed//
+f1  ==  b1  : &#34;&#34;==&#34;&#34;\n//bold//
+f0  --  b0  : &#34;&#34;--&#34;&#34;\n//plain//
+@enduml
+</textarea>
+        <div id="out07786f706d5277e49740915ec9c61f43">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="193" height="284" class="scale"
+              src="/imgw/img-07786f706d5277e49740915ec9c61f43.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="e281b137af34842a"></a>
+      <!--heading-->
+      <h2 class="chap">Appendix: All type of arrow head or &#39;0&#39; arrow</h2>
+      <p></p>
+      <h3>Type of arrow head</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+left to right direction
+skinparam nodesep 5
+label &#34; &#34;
+
+f13 --0   b13 : &#34;&#34;--0&#34;&#34;
+f12 --@   b12 : &#34;&#34;--@&#34;&#34;
+f11 --:|&gt; b11 : &#34;&#34;--:|&gt;&#34;&#34;
+f10 --||&gt; b10 : &#34;&#34;--||&gt;&#34;&#34;
+f9  --|&gt;  b9  : &#34;&#34;--|&gt;&#34;&#34;
+f8  --^   b8  : &#34;&#34;--^ &#34;&#34;
+f7  --\\  b7  : &#34;&#34;--\\\\&#34;&#34;
+f6  --#   b6  : &#34;&#34;--# &#34;&#34;
+f5  --+   b5  : &#34;&#34;--+ &#34;&#34;
+f4  --o   b4  : &#34;&#34;--o &#34;&#34;
+f3  --*   b3  : &#34;&#34;--* &#34;&#34;
+f2  --&gt;&gt;  b2  : &#34;&#34;--&gt;&gt;&#34;&#34;
+f1  --&gt;   b1  : &#34;&#34;--&gt; &#34;&#34;
+f0  --    b0  : &#34;&#34;--  &#34;&#34;
+@enduml
+</textarea>
+        <div id="out0f353bba83684aa9ecf961b8dea29223">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="180" height="916" class="scale"
+              src="/imgw/img-0f353bba83684aa9ecf961b8dea29223.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>Type of &#39;0&#39; arrow or circle arrow</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+left to right direction
+skinparam nodesep 5
+label &#34; &#34;
+
+f10 0--0 b10 : &#34;&#34; 0--0 &#34;&#34;
+f9 )--(  b9  : &#34;&#34; )--( &#34;&#34;
+f8 0)--(0 b8 : &#34;&#34; 0)--(0&#34;&#34;
+f7 0)--  b7  : &#34;&#34; 0)-- &#34;&#34;
+f6 -0)-  b6  : &#34;&#34; -0)- &#34;&#34;
+f5 -(0)- b5  : &#34;&#34; -(0)-&#34;&#34;
+f4 -(0-  b4  : &#34;&#34; -(0- &#34;&#34;
+f3 --(0  b3  : &#34;&#34; --(0 &#34;&#34;
+f2 --(   b2  : &#34;&#34; --(  &#34;&#34;
+f1 --0   b1  : &#34;&#34; --0  &#34;&#34;
+@enduml
+</textarea>
+        <div id="out6e9c313baaffb78424a07ce4fc1faa16">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="199" height="656" class="scale"
+              src="/imgw/img-6e9c313baaffb78424a07ce4fc1faa16.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="a1f5e07fd64da2cc"></a>
+      <!--heading-->
+      <h2 class="chap">Appendix: Test of inline style on all element</h2>
+      <p></p>
+      <h3>Simple element</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+action action           #aliceblue;line:blue;line.dotted;text:blue
+actor actor             #aliceblue;line:blue;line.dotted;text:blue
+actor/ &#34;actor/&#34;         #aliceblue;line:blue;line.dotted;text:blue
+agent agent             #aliceblue;line:blue;line.dotted;text:blue
+artifact artifact       #aliceblue;line:blue;line.dotted;text:blue
+boundary boundary       #aliceblue;line:blue;line.dotted;text:blue
+card card               #aliceblue;line:blue;line.dotted;text:blue
+circle circle           #aliceblue;line:blue;line.dotted;text:blue
+cloud cloud             #aliceblue;line:blue;line.dotted;text:blue
+collections collections #aliceblue;line:blue;line.dotted;text:blue
+component component     #aliceblue;line:blue;line.dotted;text:blue
+control control         #aliceblue;line:blue;line.dotted;text:blue
+database database       #aliceblue;line:blue;line.dotted;text:blue
+entity entity           #aliceblue;line:blue;line.dotted;text:blue
+file file               #aliceblue;line:blue;line.dotted;text:blue
+folder folder           #aliceblue;line:blue;line.dotted;text:blue
+frame frame             #aliceblue;line:blue;line.dotted;text:blue
+hexagon hexagon         #aliceblue;line:blue;line.dotted;text:blue
+interface interface     #aliceblue;line:blue;line.dotted;text:blue
+label label             #aliceblue;line:blue;line.dotted;text:blue
+node node               #aliceblue;line:blue;line.dotted;text:blue
+package package         #aliceblue;line:blue;line.dotted;text:blue
+person person           #aliceblue;line:blue;line.dotted;text:blue
+process process         #aliceblue;line:blue;line.dotted;text:blue
+queue queue             #aliceblue;line:blue;line.dotted;text:blue
+rectangle rectangle     #aliceblue;line:blue;line.dotted;text:blue
+stack stack             #aliceblue;line:blue;line.dotted;text:blue
+storage storage         #aliceblue;line:blue;line.dotted;text:blue
+usecase usecase         #aliceblue;line:blue;line.dotted;text:blue
+usecase/ &#34;usecase/&#34;     #aliceblue;line:blue;line.dotted;text:blue
+@enduml
+</textarea>
+        <div id="oute5ea0cac2cdc5d5beb936f68475ed89a">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="682" height="551" class="scale"
+              src="/imgw/img-e5ea0cac2cdc5d5beb936f68475ed89a.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>Nested element</h3>
+      <p></p>
+      <h4>Without sub-element</h4>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+action action #aliceblue;line:blue;line.dotted;text:blue {
+}
+artifact artifact #aliceblue;line:blue;line.dotted;text:blue {
+}
+card card #aliceblue;line:blue;line.dotted;text:blue {
+}
+cloud cloud #aliceblue;line:blue;line.dotted;text:blue {
+}
+component component #aliceblue;line:blue;line.dotted;text:blue {
+}
+database database #aliceblue;line:blue;line.dotted;text:blue {
+}
+file file #aliceblue;line:blue;line.dotted;text:blue {
+}
+folder folder #aliceblue;line:blue;line.dotted;text:blue {
+}
+frame frame #aliceblue;line:blue;line.dotted;text:blue {
+}
+hexagon hexagon #aliceblue;line:blue;line.dotted;text:blue {
+}
+node node #aliceblue;line:blue;line.dotted;text:blue {
+}
+package package #aliceblue;line:blue;line.dotted;text:blue {
+}
+process process #aliceblue;line:blue;line.dotted;text:blue {
+}
+queue queue #aliceblue;line:blue;line.dotted;text:blue {
+}
+rectangle rectangle #aliceblue;line:blue;line.dotted;text:blue {
+}
+stack stack #aliceblue;line:blue;line.dotted;text:blue {
+}
+storage storage #aliceblue;line:blue;line.dotted;text:blue {
+}
+@enduml
+</textarea>
+        <div id="outab5a8eccefcd7f82bd6f23b7d73a0fba">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="1842" height="81" class="scale"
+              src="/imgw/img-ab5a8eccefcd7f82bd6f23b7d73a0fba.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <h4>With sub-element</h4>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+action      actionVeryLOOOOOOOOOOOOOOOOOOOg      as &#34;action&#34; #aliceblue;line:blue;line.dotted;text:blue {
+file f1
+}
+artifact    artifactVeryLOOOOOOOOOOOOOOOOOOOg    as &#34;artifact&#34; #aliceblue;line:blue;line.dotted;text:blue {
+file f1
+}
+card        cardVeryLOOOOOOOOOOOOOOOOOOOg        as &#34;card&#34; #aliceblue;line:blue;line.dotted;text:blue {
+file f2
+}
+cloud       cloudVeryLOOOOOOOOOOOOOOOOOOOg       as &#34;cloud&#34; #aliceblue;line:blue;line.dotted;text:blue {
+file f3
+}
+component   componentVeryLOOOOOOOOOOOOOOOOOOOg   as &#34;component&#34; #aliceblue;line:blue;line.dotted;text:blue {
+file f4
+}
+database    databaseVeryLOOOOOOOOOOOOOOOOOOOg    as &#34;database&#34; #aliceblue;line:blue;line.dotted;text:blue {
+file f5
+}
+file        fileVeryLOOOOOOOOOOOOOOOOOOOg        as &#34;file&#34; #aliceblue;line:blue;line.dotted;text:blue {
+file f6
+}
+folder      folderVeryLOOOOOOOOOOOOOOOOOOOg      as &#34;folder&#34; #aliceblue;line:blue;line.dotted;text:blue {
+file f7
+}
+frame       frameVeryLOOOOOOOOOOOOOOOOOOOg       as &#34;frame&#34; #aliceblue;line:blue;line.dotted;text:blue {
+file f8
+}
+hexagon     hexagonVeryLOOOOOOOOOOOOOOOOOOOg     as &#34;hexagon&#34; #aliceblue;line:blue;line.dotted;text:blue {
+file f9
+}
+node        nodeVeryLOOOOOOOOOOOOOOOOOOOg        as &#34;node&#34; #aliceblue;line:blue;line.dotted;text:blue {
+file f10
+}
+package     packageVeryLOOOOOOOOOOOOOOOOOOOg     as &#34;package&#34; #aliceblue;line:blue;line.dotted;text:blue {
+file f11
+}
+process     processVeryLOOOOOOOOOOOOOOOOOOOg     as &#34;process&#34; #aliceblue;line:blue;line.dotted;text:blue {
+file f11
+}
+queue       queueVeryLOOOOOOOOOOOOOOOOOOOg       as &#34;queue&#34; #aliceblue;line:blue;line.dotted;text:blue {
+file f12
+}
+rectangle   rectangleVeryLOOOOOOOOOOOOOOOOOOOg   as &#34;rectangle&#34; #aliceblue;line:blue;line.dotted;text:blue {
+file f13
+}
+stack       stackVeryLOOOOOOOOOOOOOOOOOOOg       as &#34;stack&#34; #aliceblue;line:blue;line.dotted;text:blue {
+file f14
+}
+storage     storageVeryLOOOOOOOOOOOOOOOOOOOg     as &#34;storage&#34; #aliceblue;line:blue;line.dotted;text:blue {
+file f15
+}
+@enduml
+</textarea>
+        <div id="out5e6b69f675e87ce1535cb9d41c39a556">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="1671" height="135" class="scale"
+              src="/imgw/img-5e6b69f675e87ce1535cb9d41c39a556.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="b3234841348a68e0"></a>
+      <!--heading-->
+      <h2 class="chap">Appendix: Test of style on all element</h2>
+      <p></p>
+      <h3>Simple element</h3>
+      <h4>Global style (on componentDiagram)</h4>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+&lt;style&gt;
+componentDiagram {
+  BackGroundColor palegreen
+  LineThickness 1
+  LineColor red
+}
+document {
+  BackGroundColor white
+}
+&lt;/style&gt;
+actor actor
+actor/ &#34;actor/&#34;
+agent agent
+artifact artifact
+boundary boundary
+card card
+circle circle
+cloud cloud
+collections collections
+component component
+control control
+database database
+entity entity
+file file
+folder folder
+frame frame
+hexagon hexagon
+interface interface
+label label
+node node
+package package
+person person
+queue queue
+rectangle rectangle
+stack stack
+storage storage
+usecase usecase
+usecase/ &#34;usecase/&#34;
+@enduml
+</textarea>
+        <div id="out78c7550383c8b5b8b5734e4c89a72da8">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="651" height="553" class="scale"
+              src="/imgw/img-78c7550383c8b5b8b5734e4c89a72da8.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h4>Style for each element</h4>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+&lt;style&gt;
+actor {
+  BackGroundColor #f80c12
+  LineThickness 1
+  LineColor black
+}
+agent {
+  BackGroundColor #f80c12
+  LineThickness 1
+  LineColor black
+}
+artifact {
+  BackGroundColor #ee1100
+  LineThickness 1
+  LineColor black
+}
+boundary {
+  BackGroundColor #ee1100
+  LineThickness 1
+  LineColor black
+}
+card {
+  BackGroundColor #ff3311
+  LineThickness 1
+  LineColor black
+}
+circle {
+  BackGroundColor #ff3311
+  LineThickness 1
+  LineColor black
+}
+cloud {
+  BackGroundColor #ff4422
+  LineThickness 1
+  LineColor black
+}
+collections {
+  BackGroundColor #ff4422
+  LineThickness 1
+  LineColor black
+}
+component {
+  BackGroundColor #ff6644
+  LineThickness 1
+  LineColor black
+}
+control {
+  BackGroundColor #ff6644
+  LineThickness 1
+  LineColor black
+}
+database {
+  BackGroundColor #ff9933
+  LineThickness 1
+  LineColor black
+}
+entity {
+  BackGroundColor #feae2d
+  LineThickness 1
+  LineColor black
+}
+file {
+  BackGroundColor #feae2d
+  LineThickness 1
+  LineColor black
+}
+folder {
+  BackGroundColor #ccbb33
+  LineThickness 1
+  LineColor black
+}
+frame {
+  BackGroundColor #d0c310
+  LineThickness 1
+  LineColor black
+}
+hexagon {
+  BackGroundColor #aacc22
+  LineThickness 1
+  LineColor black
+}
+interface {
+  BackGroundColor #69d025
+  LineThickness 1
+  LineColor black
+}
+label {
+  BackGroundColor black
+  LineThickness 1
+  LineColor black
+}
+node {
+  BackGroundColor #22ccaa
+  LineThickness 1
+  LineColor black
+}
+package {
+  BackGroundColor #12bdb9
+  LineThickness 1
+  LineColor black
+}
+person {
+  BackGroundColor #11aabb
+  LineThickness 1
+  LineColor black
+}
+queue {
+  BackGroundColor #11aabb
+  LineThickness 1
+  LineColor black
+}
+rectangle {
+  BackGroundColor #4444dd
+  LineThickness 1
+  LineColor black
+}
+stack {
+  BackGroundColor #3311bb
+  LineThickness 1
+  LineColor black
+}
+storage {
+  BackGroundColor #3b0cbd
+  LineThickness 1
+  LineColor black
+}
+usecase {
+  BackGroundColor #442299
+  LineThickness 1
+  LineColor black
+}
+&lt;/style&gt;
+actor actor
+actor/ &#34;actor/&#34;
+agent agent
+artifact artifact
+boundary boundary
+card card
+circle circle
+cloud cloud
+collections collections
+component component
+control control
+database database
+entity entity
+file file
+folder folder
+frame frame
+hexagon hexagon
+interface interface
+label label
+node node
+package package
+person person
+queue queue
+rectangle rectangle
+stack stack
+storage storage
+usecase usecase
+usecase/ &#34;usecase/&#34;
+@enduml
+</textarea>
+        <div id="out559977525858e1c7cb15e8cf066c6a33">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="651" height="553" class="scale"
+              src="/imgw/img-559977525858e1c7cb15e8cf066c6a33.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/13261/">QA-13261</a>]</em>
+      <p></p>
+      <h3>Nested element (without level)</h3>
+      <h4>Global style (on componentDiagram)</h4>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+&lt;style&gt;
+componentDiagram {
+  BackGroundColor palegreen
+  LineThickness 2
+  LineColor red
+}
+&lt;/style&gt;
+artifact artifact {
+}
+card card {
+}
+cloud cloud {
+}
+component component {
+}
+database database {
+}
+file file {
+}
+folder folder {
+}
+frame frame {
+}
+hexagon hexagon {
+}
+node node {
+}
+package package {
+}
+queue queue {
+}
+rectangle rectangle {
+}
+stack stack {
+}
+storage storage {
+}
+@enduml
+</textarea>
+        <div id="out35b0a9bcb461781c9dd5969707ee0fb3">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="1607" height="81" class="scale"
+              src="/imgw/img-35b0a9bcb461781c9dd5969707ee0fb3.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h4>Style for each nested element</h4>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+&lt;style&gt;
+artifact {
+  BackGroundColor #ee1100
+  LineThickness 1
+  LineColor black
+}
+card {
+  BackGroundColor #ff3311
+  LineThickness 1
+  LineColor black
+}
+cloud {
+  BackGroundColor #ff4422
+  LineThickness 1
+  LineColor black
+}
+component {
+  BackGroundColor #ff6644
+  LineThickness 1
+  LineColor black
+}
+database {
+  BackGroundColor #ff9933
+  LineThickness 1
+  LineColor black
+}
+file {
+  BackGroundColor #feae2d
+  LineThickness 1
+  LineColor black
+}
+folder {
+  BackGroundColor #ccbb33
+  LineThickness 1
+  LineColor black
+}
+frame {
+  BackGroundColor #d0c310
+  LineThickness 1
+  LineColor black
+}
+hexagon {
+  BackGroundColor #aacc22
+  LineThickness 1
+  LineColor black
+}
+node {
+  BackGroundColor #22ccaa
+  LineThickness 1
+  LineColor black
+}
+package {
+  BackGroundColor #12bdb9
+  LineThickness 1
+  LineColor black
+}
+queue {
+  BackGroundColor #11aabb
+  LineThickness 1
+  LineColor black
+}
+rectangle {
+  BackGroundColor #4444dd
+  LineThickness 1
+  LineColor black
+}
+stack {
+  BackGroundColor #3311bb
+  LineThickness 1
+  LineColor black
+}
+storage {
+  BackGroundColor #3b0cbd
+  LineThickness 1
+  LineColor black
+}
+
+&lt;/style&gt;
+artifact artifact {
+}
+card card {
+}
+cloud cloud {
+}
+component component {
+}
+database database {
+}
+file file {
+}
+folder folder {
+}
+frame frame {
+}
+hexagon hexagon {
+}
+node node {
+}
+package package {
+}
+queue queue {
+}
+rectangle rectangle {
+}
+stack stack {
+}
+storage storage {
+}
+@enduml
+</textarea>
+        <div id="out6208a7b1f5afa7c869941b368eda856a">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="1607" height="81" class="scale"
+              src="/imgw/img-6208a7b1f5afa7c869941b368eda856a.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>Nested element (with one level)</h3>
+      <h4>Global style (on componentDiagram)</h4>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+&lt;style&gt;
+componentDiagram {
+  BackGroundColor palegreen
+  LineThickness 1
+  LineColor red
+}
+document {
+  BackGroundColor white
+}
+&lt;/style&gt;
+artifact e1 as &#34;artifact&#34; {
+file f1
+}
+card e2 as &#34;card&#34; {
+file f2
+}
+cloud e3 as &#34;cloud&#34; {
+file f3
+}
+component e4 as &#34;component&#34; {
+file f4
+}
+database e5 as &#34;database&#34; {
+file f5
+}
+file e6 as &#34;file&#34; {
+file f6
+}
+folder e7 as &#34;folder&#34; {
+file f7
+}
+frame e8 as &#34;frame&#34; {
+file f8
+}
+hexagon e9 as &#34;hexagon&#34; {
+file f9
+}
+node e10 as &#34;node&#34; {
+file f10
+}
+package e11 as &#34;package&#34; {
+file f11
+}
+queue e12 as &#34;queue&#34; {
+file f12
+}
+rectangle e13 as &#34;rectangle&#34; {
+file f13
+}
+stack e14 as &#34;stack&#34; {
+file f14
+}
+storage e15 as &#34;storage&#34; {
+file f15
+}
+@enduml
+</textarea>
+        <div id="out892c8fb5bfe9b513a1812c08bf7cfe6a">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="1455" height="135" class="scale"
+              src="/imgw/img-892c8fb5bfe9b513a1812c08bf7cfe6a.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h4>Style for each nested element</h4>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+&lt;style&gt;
+artifact {
+  BackGroundColor #ee1100
+  LineThickness 1
+  LineColor black
+}
+card {
+  BackGroundColor #ff3311
+  LineThickness 1
+  LineColor black
+}
+cloud {
+  BackGroundColor #ff4422
+  LineThickness 1
+  LineColor black
+}
+component {
+  BackGroundColor #ff6644
+  LineThickness 1
+  LineColor black
+}
+database {
+  BackGroundColor #ff9933
+  LineThickness 1
+  LineColor black
+}
+file {
+  BackGroundColor #feae2d
+  LineThickness 1
+  LineColor black
+}
+folder {
+  BackGroundColor #ccbb33
+  LineThickness 1
+  LineColor black
+}
+frame {
+  BackGroundColor #d0c310
+  LineThickness 1
+  LineColor black
+}
+hexagon {
+  BackGroundColor #aacc22
+  LineThickness 1
+  LineColor black
+}
+node {
+  BackGroundColor #22ccaa
+  LineThickness 1
+  LineColor black
+}
+package {
+  BackGroundColor #12bdb9
+  LineThickness 1
+  LineColor black
+}
+queue {
+  BackGroundColor #11aabb
+  LineThickness 1
+  LineColor black
+}
+rectangle {
+  BackGroundColor #4444dd
+  LineThickness 1
+  LineColor black
+}
+stack {
+  BackGroundColor #3311bb
+  LineThickness 1
+  LineColor black
+}
+storage {
+  BackGroundColor #3b0cbd
+  LineThickness 1
+  LineColor black
+}
+&lt;/style&gt;
+artifact e1 as &#34;artifact&#34; {
+file f1
+}
+card e2 as &#34;card&#34; {
+file f2
+}
+cloud e3 as &#34;cloud&#34; {
+file f3
+}
+component e4 as &#34;component&#34; {
+file f4
+}
+database e5 as &#34;database&#34; {
+file f5
+}
+file e6 as &#34;file&#34; {
+file f6
+}
+folder e7 as &#34;folder&#34; {
+file f7
+}
+frame e8 as &#34;frame&#34; {
+file f8
+}
+hexagon e9 as &#34;hexagon&#34; {
+file f9
+}
+node e10 as &#34;node&#34; {
+file f10
+}
+package e11 as &#34;package&#34; {
+file f11
+}
+queue e12 as &#34;queue&#34; {
+file f12
+}
+rectangle e13 as &#34;rectangle&#34; {
+file f13
+}
+stack e14 as &#34;stack&#34; {
+file f14
+}
+storage e15 as &#34;storage&#34; {
+file f15
+}
+@enduml
+</textarea>
+        <div id="out811d030d549e24c14ee7e09d1e70858e">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="1455" height="135" class="scale"
+              src="/imgw/img-811d030d549e24c14ee7e09d1e70858e.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="a2583a8e681fd647"></a>
+      <!--heading-->
+      <h2 class="chap">Appendix: Test of stereotype with style on all element</h2>
+      <p></p>
+      <h3>Simple element</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+&lt;style&gt;
+.stereo {
+  BackgroundColor palegreen
+}
+&lt;/style&gt;
+actor actor &lt;&lt; stereo &gt;&gt;
+actor/ &#34;actor/&#34; &lt;&lt; stereo &gt;&gt;
+agent agent &lt;&lt; stereo &gt;&gt;
+artifact artifact &lt;&lt; stereo &gt;&gt;
+boundary boundary &lt;&lt; stereo &gt;&gt;
+card card &lt;&lt; stereo &gt;&gt;
+circle circle &lt;&lt; stereo &gt;&gt;
+cloud cloud &lt;&lt; stereo &gt;&gt;
+collections collections &lt;&lt; stereo &gt;&gt;
+component component &lt;&lt; stereo &gt;&gt;
+control control &lt;&lt; stereo &gt;&gt;
+database database &lt;&lt; stereo &gt;&gt;
+entity entity &lt;&lt; stereo &gt;&gt;
+file file &lt;&lt; stereo &gt;&gt;
+folder folder &lt;&lt; stereo &gt;&gt;
+frame frame &lt;&lt; stereo &gt;&gt;
+hexagon hexagon &lt;&lt; stereo &gt;&gt;
+interface interface &lt;&lt; stereo &gt;&gt;
+label label &lt;&lt; stereo &gt;&gt;
+node node &lt;&lt; stereo &gt;&gt;
+package package &lt;&lt; stereo &gt;&gt;
+person person &lt;&lt; stereo &gt;&gt;
+queue queue &lt;&lt; stereo &gt;&gt;
+rectangle rectangle &lt;&lt; stereo &gt;&gt;
+stack stack &lt;&lt; stereo &gt;&gt;
+storage storage &lt;&lt; stereo &gt;&gt;
+usecase usecase &lt;&lt; stereo &gt;&gt;
+usecase/ &#34;usecase/&#34; &lt;&lt; stereo &gt;&gt;
+@enduml
+</textarea>
+        <div id="out7c6fe27df9e2399f7c19ddd5caa46d4c">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="712" height="635" class="scale"
+              src="/imgw/img-7c6fe27df9e2399f7c19ddd5caa46d4c.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="770d6bd35757f49a"></a>
+      <!--heading-->
+      <h2 class="chap">Display JSON Data on Deployment diagram</h2>
+      <p></p>
+      <h3>Simple example</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+allowmixing
+
+component Component
+actor     Actor
+usecase   Usecase
+()        Interface
+node      Node
+cloud     Cloud
+
+json JSON {
+   &#34;fruit&#34;:&#34;Apple&#34;,
+   &#34;size&#34;:&#34;Large&#34;,
+   &#34;color&#34;: [&#34;Red&#34;, &#34;Green&#34;]
+}
+@enduml
+</textarea>
+        <div id="out87b2d68589866ae4b4bd55103ec8f150">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="331" height="389" class="scale"
+              src="/imgw/img-87b2d68589866ae4b4bd55103ec8f150.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a
+          href="https://forum.plantuml.net/15481/possible-link-elements-from-two-jsons-with-both-jsons-embeded?show=15567#c15567">QA-15481</a>]</em>
+      <p></p>
+      For another example, see on <a href="json#2fyxla9p9ob6l3t3tjre">JSON page</a>.
+      <a style="position:relative;top:-38px;" name="e75c1203eb5d242a"></a>
+      <!--heading-->
+      <h2 class="chap">Mixing Deployment (Usecase, Component, Deployment) element within a Class or Object diagram</h2>
+      <p></p>
+      In order to add a Deployment element or a State element within a Class or Object diagram, you can use the <code
+        class="cod">allowmixing</code> or <code class="cod">allow_mixing</code> directive.
+      <p></p>
+      <h3>Mixing all elements</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+allowmixing
+skinparam nodesep 10
+hide empty members
+
+abstract        abstract
+abstract class  &#34;abstract class&#34;
+annotation      annotation
+circle          circle
+()              circle_short_form
+class           class
+class           class_stereo  &lt;&lt;stereotype&gt;&gt;
+dataclass       dataclass
+diamond         diamond
+&lt;&gt;              diamond_short_form
+entity          entity
+enum            enum
+exception       exception
+interface       interface
+metaclass       metaclass
+protocol        protocol
+record          record
+stereotype      stereotype
+struct          struct
+object          object
+map map {
+ key =&gt; value
+}
+json JSON {
+   &#34;fruit&#34;:&#34;Apple&#34;,
+   &#34;size&#34;:&#34;Large&#34;,
+   &#34;color&#34;: [&#34;Red&#34;, &#34;Green&#34;]
+}
+action action
+actor actor
+actor/ &#34;actor/&#34;
+agent agent
+artifact artifact
+boundary boundary
+card card
+circle circle
+cloud cloud
+collections collections
+component component
+control control
+database database
+entity entity
+file file
+folder folder
+frame frame
+hexagon hexagon
+interface interface
+label label
+node node
+package package
+person person
+process process
+queue queue
+rectangle rectangle
+stack stack
+storage storage
+usecase usecase
+usecase/ &#34;usecase/&#34;
+state state
+@enduml
+</textarea>
+        <div id="outfbb11e771c135cffbe356eac5d24db37">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="842" height="821" class="scale"
+              src="/imgw/img-fbb11e771c135cffbe356eac5d24db37.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/2335/use-of-actor-inside-class-diagrams">QA-2335</a> and <a
+          href="https://forum.plantuml.net/5329/language-definition">QA-5329</a>]</em>
+      <a style="position:relative;top:-38px;" name="76402ab93d6541bf"></a>
+      <!--heading-->
+      <h2 class="chap">Port [port, portIn, portOut]</h2>
+      <p></p>
+      You can added <strong>port</strong> with <code class="cod">port</code>, <code class="cod">portin</code>and <code
+        class="cod">portout</code> keywords.
+      <p></p>
+      <h3>Port</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+[c]
+node node {
+  port p1
+  port p2
+  port p3
+  file f1
+}
+
+c --&gt; p1
+c --&gt; p2
+c --&gt; p3
+p1 --&gt; f1
+p2 --&gt; f1
+@enduml
+</textarea>
+        <div id="out2bf63287ceeb1084dfc8ea3471104dbd">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="184" height="265" class="scale"
+              src="/imgw/img-2bf63287ceeb1084dfc8ea3471104dbd.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>PortIn</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+[c]
+node node {
+  portin p1
+  portin p2
+  portin p3
+  file f1
+}
+
+c --&gt; p1
+c --&gt; p2
+c --&gt; p3
+p1 --&gt; f1
+p2 --&gt; f1
+@enduml
+</textarea>
+        <div id="outfc5c382fe27c93444a37cea726633a6d">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="184" height="265" class="scale"
+              src="/imgw/img-fc5c382fe27c93444a37cea726633a6d.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>PortOut</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+node node {
+  portout p1
+  portout p2
+  portout p3
+  file f1
+}
+[o]
+p1 --&gt; o
+p2 --&gt; o
+p3 --&gt; o
+f1 --&gt; p1
+@enduml
+</textarea>
+        <div id="out75aff3df83aaff41e13eec15e91fed0d">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="190" height="252" class="scale"
+              src="/imgw/img-75aff3df83aaff41e13eec15e91fed0d.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>Mixing PortIn &amp; PortOut</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+[i]
+node node {
+  portin p1
+  portin p2
+  portin p3
+  portout po1
+  portout po2
+  portout po3
+  file f1
+}
+[o]
+
+i --&gt; p1
+i --&gt; p2
+i --&gt; p3
+p1 --&gt; f1
+p2 --&gt; f1
+po1 --&gt; o
+po2 --&gt; o
+po3 --&gt; o
+f1 --&gt; po1
+@enduml
+</textarea>
+        <div id="out583e263a042917834db3e0b6dcb3daee">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="190" height="417" class="scale"
+              src="/imgw/img-583e263a042917834db3e0b6dcb3daee.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="3530c544ab82f199"></a>
+      <!--heading-->
+      <h2 class="chap">Change diagram orientation</h2>
+      <p></p>
+      You can change (whole) diagram orientation with:
+      <ul>
+        <li><code class="cod">top to bottom direction</code> <em>(by default)</em></li>
+        <li><code class="cod">left to right direction</code></li>
+      </ul>
+      <p></p>
+      <h3>Top to bottom <em>(by default)</em></h3>
+      <p></p>
+      <h4>With <a href="graphviz-dot">Graphviz</a> <em>(layout engine by default)</em></h4>
+      <p></p>
+      The main rule is: <strong>Nested element first, then simple element.</strong>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+card a
+card b
+package A {
+  card a1
+  card a2
+  card a3
+  card a4
+  card a5
+  package sub_a {
+   card sa1
+   card sa2
+   card sa3
+  }
+}
+  
+package B {
+  card b1
+  card b2
+  card b3
+  card b4
+  card b5
+  package sub_b {
+   card sb1
+   card sb2
+   card sb3
+  }
+}
+@enduml
+</textarea>
+        <div id="out1c569e98aa617a6b79151af238050b23">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="931" height="248" class="scale"
+              src="/imgw/img-1c569e98aa617a6b79151af238050b23.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h4>With <a href="smetana02">Smetana</a> <em>(internal layout engine)</em></h4>
+      <p></p>
+      The main rule is the opposite: <strong>Simple element first, then nested element.</strong>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+!pragma layout smetana
+card a
+card b
+package A {
+  card a1
+  card a2
+  card a3
+  card a4
+  card a5
+  package sub_a {
+   card sa1
+   card sa2
+   card sa3
+  }
+}
+  
+package B {
+  card b1
+  card b2
+  card b3
+  card b4
+  card b5
+  package sub_b {
+   card sb1
+   card sb2
+   card sb3
+  }
+}
+@enduml
+</textarea>
+        <div id="out72b51e81cfd8cbf5254ce10e4788bc88">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="695" height="167" class="scale"
+              src="/imgw/img-72b51e81cfd8cbf5254ce10e4788bc88.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>Left to right</h3>
+      <p></p>
+      <h4>With <a href="graphviz-dot">Graphviz</a> <em>(layout engine by default)</em></h4>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+left to right direction
+card a
+card b
+package A {
+  card a1
+  card a2
+  card a3
+  card a4
+  card a5
+  package sub_a {
+   card sa1
+   card sa2
+   card sa3
+  }
+}
+  
+package B {
+  card b1
+  card b2
+  card b3
+  card b4
+  card b5
+  package sub_b {
+   card sb1
+   card sb2
+   card sb3
+  }
+}
+@enduml
+</textarea>
+        <div id="out0434f215501c32cf65ad37d155d79dbb">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="246" height="856" class="scale"
+              src="/imgw/img-0434f215501c32cf65ad37d155d79dbb.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h4>With <a href="smetana02">Smetana</a> <em>(internal layout engine)</em></h4>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+!pragma layout smetana
+left to right direction
+card a
+card b
+package A {
+  card a1
+  card a2
+  card a3
+  card a4
+  card a5
+  package sub_a {
+   card sa1
+   card sa2
+   card sa3
+  }
+}
+  
+package B {
+  card b1
+  card b2
+  card b3
+  card b4
+  card b5
+  package sub_b {
+   card sb1
+   card sb2
+   card sb3
+  }
+}
+@enduml
+</textarea>
+        <div id="out159c470a77d2ac937361821cbddfeee5">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="175" height="607" class="scale"
+              src="/imgw/img-159c470a77d2ac937361821cbddfeee5.png" />
+          </div>
+        </div>
+      </div>
+
+
+    </main>
+
+
+    <aside id="C6">
+      <!--toc-->
+      <div id="toc">
+        <ul>
+          <li><a href="#e5cec68ef9127fc4">Declaring element</a>
+          </li>
+          <li><a href="#ccbc4c57abc698a9">Declaring element (using short form)</a>
+          </li>
+          <li><a href="#bb3fdb917676e9ae">Linking or arrow</a>
+          </li>
+          <li><a href="#b5f6831632fd63c1">Bracketed arrow style</a>
+          </li>
+          <li><a href="#39a64d49d97a1ea0">Change arrow color and style (inline style)</a>
+          </li>
+          <li><a href="#ded8ac71cf351121">Change element color and style (inline style)</a>
+          </li>
+          <li><a href="#b2ecd56c45d3d896">Nestable elements</a>
+          </li>
+          <li><a href="#f36f2582540e74f1">Packages and nested elements</a>
+          </li>
+          <li><a href="#effdb9ce6c5d44df">Alias</a>
+          </li>
+          <li><a href="#d6ace33a51767250">Round corner</a>
+          </li>
+          <li><a href="#75b4984abd04b14f">Specific SkinParameter</a>
+          </li>
+          <li><a href="#85f50efefa90c284">Appendix: All type of arrow line</a>
+          </li>
+          <li><a href="#e281b137af34842a">Appendix: All type of arrow head or &#39;0&#39; arrow</a>
+          </li>
+          <li><a href="#a1f5e07fd64da2cc">Appendix: Test of inline style on all element</a>
+          </li>
+          <li><a href="#b3234841348a68e0">Appendix: Test of style on all element</a>
+          </li>
+          <li><a href="#a2583a8e681fd647">Appendix: Test of stereotype with style on all element</a>
+          </li>
+          <li><a href="#770d6bd35757f49a">Display JSON Data on Deployment diagram</a>
+          </li>
+          <li><a href="#e75c1203eb5d242a">Mixing Deployment (Usecase, Component, Deployment) element within a Class or
+              Object diagram</a>
+          </li>
+          <li><a href="#76402ab93d6541bf">Port [port, portIn, portOut]</a>
+          </li>
+          <li><a href="#3530c544ab82f199">Change diagram orientation</a>
+          </li>
+        </ul>
+      </div>
+    </aside>
+
+  </div>
+    <script src="../../viz-global.js"></script>
+    <script src="../../plantuml.js"></script>
+    <script>
+        (function () {
+            const render = window.plantumlRender;
+            if (typeof render !== "function") {
+                console.error("PlantUML renderer is unavailable.");
+                return;
+            }
+
+            const renderOptions = {};
+            let counter = 0;
+
+            document.querySelectorAll(".mycell").forEach((mycell) => {
+                const host = mycell.parentElement;
+                const textarea = host ? host.previousElementSibling : null;
+                if (!textarea || textarea.tagName !== "TEXTAREA") return;
+
+                if (!mycell.id) {
+                    counter += 1;
+                    mycell.id = "mycell-render-" + counter;
+                }
+
+                const draw = () => {
+                    mycell.innerHTML = "";
+                    render(textarea.value.split(/\r\n|\r|\n/), mycell.id, renderOptions);
+                };
+
+                textarea.addEventListener("input", draw);
+                draw();
+            });
+        })();
+    </script>
+</body>
+
+</html>

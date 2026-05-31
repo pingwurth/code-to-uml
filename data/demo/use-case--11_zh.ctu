@@ -1,0 +1,16 @@
+Title: 分割图示
+Describe: None
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+用 `newpage` 关键字将图示分解为多个页面。
+
+[UML]
+@startuml
+:actor1: --> (Usecase1)
+newpage
+:actor2: --> (Usecase2)
+@enduml
+------------------------------------------------------------

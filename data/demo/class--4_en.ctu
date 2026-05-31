@@ -1,0 +1,35 @@
+Title: Using non-letters in element names and relation labels
+Describe: None
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+If you want to use in the class (or enum...) display name, you can either :
+- Use the `as` keyword in the class definition to assign an alias
+- Put quotes `""` around the class name
+
+[UML]
+@startuml
+class "This is my class" as class1
+class class2 as "It works this way too"
+
+class2 *-- "foo/dummy" : use
+@enduml
+------------------------------------------------------------
+[Example]
+Starting names with `$`
+
+[Description]
+Note that names starting with `$` cannot be hidden or removed later, because `hide` and `remove` command will consider the name a `$tag` instead of a component name. To later remove such elements they must have an alias or must be tagged.
+
+[UML]
+@startuml
+class $C1
+class $C2 $C2
+class "$C2" as dollarC2
+remove $C1
+remove $C2
+remove dollarC2
+@enduml
+------------------------------------------------------------

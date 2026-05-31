@@ -1,0 +1,73 @@
+Title: 声明参与者
+Describe: None
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+如果使用关键字 `participant` 来声明参与者，就可以对该参与者进行更多的控制。
+声明的顺序将是（默认的）显示顺序。
+使用这些其他的关键字来声明参与者，将改变参与者的表示形状。
+- `actor`（角色）
+- `boundary`（边界）
+- `control`（控制）
+- `entity`（实体）
+- `database`（数据库）
+- `collections`（集合）
+- `queue`（队列）
+
+[UML]
+@startuml
+participant Participant as Foo
+actor       Actor       as Foo1
+boundary    Boundary    as Foo2
+control     Control     as Foo3
+entity      Entity      as Foo4
+database    Database    as Foo5
+collections Collections as Foo6
+queue       Queue       as Foo7
+Foo -> Foo1 : To actor 
+Foo -> Foo2 : To boundary
+Foo -> Foo3 : To control
+Foo -> Foo4 : To entity
+Foo -> Foo5 : To database
+Foo -> Foo6 : To collections
+Foo -> Foo7: To queue
+@enduml
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+使用 `as` 关键字重命名参与者。
+你也可以改变 演员或参与者的背景颜色。
+
+[UML]
+@startuml
+actor Bob #red
+' The only difference between actor
+'and participant is the drawing
+participant Alice
+participant "I have a really\nlong name" as L #99FF99
+/' You can also declare:
+   participant L as "I have a really\nlong name"  #99FF99
+  '/
+
+Alice->Bob: Authentication Request
+Bob->Alice: Authentication Response
+Bob->L: Log transaction
+@enduml
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+您可以使用 `order` 关键字来定制参与者的显示顺序。
+
+[UML]
+@startuml
+participant Last order 30
+participant Middle order 20
+participant First order 10
+@enduml
+------------------------------------------------------------

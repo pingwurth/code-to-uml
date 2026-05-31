@@ -1,0 +1,18 @@
+Title: 在参与者中使用非字母
+Describe: None
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+你可以使用引号来定义参与者。 而且你可以使用 `as` 关键字来给这些参与者一个别名。
+
+[UML]
+@startuml
+Alice -> "Bob()" : Hello
+"Bob()" -> "This is very\nlong" as Long
+' You can also declare:
+' "Bob()" -> Long as "This is very\nlong"
+Long --> "Bob()" : ok
+@enduml
+------------------------------------------------------------

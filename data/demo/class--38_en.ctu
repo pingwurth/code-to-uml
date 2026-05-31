@@ -1,0 +1,51 @@
+Title: Change class color and style (inline style)
+Describe: None
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+You can change the or style of individual class using the two following notations:
+- `#color ##[style]color`
+With background color first ( `#color` ), then line style and line color ( `##[style]color` )
+
+[UML]
+@startuml
+abstract   abstract
+annotation annotation #pink ##[bold]red
+class      class      #palegreen ##[dashed]green
+interface  interface  #aliceblue ##[dotted]blue
+@enduml
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+- `#[color|back:color];header:color;line:color;line.[bold|dashed|dotted];text:color`
+
+[UML]
+@startuml
+abstract   abstract
+annotation annotation #pink;line:red;line.bold;text:red
+class      class      #palegreen;line:green;line.dashed;text:green
+interface  interface  #aliceblue;line:blue;line.dotted;text:blue
+@enduml
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+First original example:
+
+[UML]
+@startuml
+class bar #line:green;back:lightblue
+class bar2 #lightblue;line:green
+
+class Foo1 #back:red;line:00FFFF
+class FooDashed #line.dashed:blue
+class FooDotted #line.dotted:blue
+class FooBold #line.bold
+class Demo1 #back:lightgreen|yellow;header:blue/red
+@enduml
+------------------------------------------------------------

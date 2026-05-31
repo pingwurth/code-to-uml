@@ -1,0 +1,128 @@
+Title: Bracketed relations (linking or arrow) style
+Describe: None
+------------------------------------------------------------
+[Example]
+Line style
+
+[Description]
+It's also possible to have explicitly `bold` , `dashed` , `dotted` , `hidden` or `plain` relation, links or arrows:
+- without label
+
+[UML]
+@startuml
+title Bracketed line style without label
+class foo
+class bar
+bar1 : [bold]  
+bar2 : [dashed]
+bar3 : [dotted]
+bar4 : [hidden]
+bar5 : [plain] 
+
+foo --> bar
+foo -[bold]-> bar1
+foo -[dashed]-> bar2
+foo -[dotted]-> bar3
+foo -[hidden]-> bar4
+foo -[plain]-> bar5
+@enduml
+------------------------------------------------------------
+[Example]
+Line style
+
+[Description]
+- with label
+
+[UML]
+@startuml
+title Bracketed line style with label
+class foo
+class bar
+bar1 : [bold]  
+bar2 : [dashed]
+bar3 : [dotted]
+bar4 : [hidden]
+bar5 : [plain] 
+
+foo --> bar          : ∅
+foo -[bold]-> bar1   : [bold]
+foo -[dashed]-> bar2 : [dashed]
+foo -[dotted]-> bar3 : [dotted]
+foo -[hidden]-> bar4 : [hidden]
+foo -[plain]-> bar5  : [plain]
+
+@enduml
+------------------------------------------------------------
+[Example]
+Line color
+
+[Description]
+None
+
+[UML]
+@startuml
+title Bracketed line color
+class foo
+class bar
+bar1 : [#red]
+bar2 : [#green]
+bar3 : [#blue]
+
+foo --> bar
+foo -[#red]-> bar1     : [#red]
+foo -[#green]-> bar2   : [#green]
+foo -[#blue]-> bar3    : [#blue]
+'foo -[#blue;#yellow;#green]-> bar4
+@enduml
+------------------------------------------------------------
+[Example]
+Line thickness
+
+[Description]
+None
+
+[UML]
+@startuml
+title Bracketed line thickness
+class foo
+class bar
+bar1 : [thickness=1]
+bar2 : [thickness=2]
+bar3 : [thickness=4]
+bar4 : [thickness=8]
+bar5 : [thickness=16]
+
+foo --> bar                 : ∅
+foo -[thickness=1]-> bar1   : [1]
+foo -[thickness=2]-> bar2   : [2]
+foo -[thickness=4]-> bar3   : [4]
+foo -[thickness=8]-> bar4   : [8]
+foo -[thickness=16]-> bar5  : [16]
+
+@enduml
+------------------------------------------------------------
+[Example]
+Mix
+
+[Description]
+None
+
+[UML]
+@startuml
+title Bracketed line style mix
+class foo
+class bar
+bar1 : [#red,thickness=1]
+bar2 : [#red,dashed,thickness=2]
+bar3 : [#green,dashed,thickness=4]
+bar4 : [#blue,dotted,thickness=8]
+bar5 : [#blue,plain,thickness=16]
+
+foo --> bar                             : ∅
+foo -[#red,thickness=1]-> bar1          : [#red,1]
+foo -[#red,dashed,thickness=2]-> bar2   : [#red,dashed,2]
+foo -[#green,dashed,thickness=4]-> bar3 : [#green,dashed,4]
+foo -[#blue,dotted,thickness=8]-> bar4  : [blue,dotted,8]
+foo -[#blue,plain,thickness=16]-> bar5  : [blue,plain,16]
+@enduml
+------------------------------------------------------------

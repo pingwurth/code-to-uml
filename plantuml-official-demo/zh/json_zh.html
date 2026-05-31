@@ -1,0 +1,1650 @@
+<html lang="zh">
+
+<head>
+
+
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Organization",
+  "url": "https://plantuml.com",
+  "name": "PlantUML",
+  "sameAs" : ["https://twitter.com/plantuml","https://en.wikipedia.org/wiki/PlantUML","https://www.wikidata.org/wiki/Q18346546"],
+  "logo": "https://cdn-0.plantuml.com/logo3.png",
+  "contactPoint": [{
+    "@type": "ContactPoint",
+    "email": "plantuml@gmail.com",
+    "url": "https://plantuml.com",
+    "contactType": "customer service"
+  }]
+}
+</script>
+  <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+    "@type": "ListItem",
+    "position": 1,
+    "item": {
+      "@id": "https://plantuml.com",
+      "name": "Home"
+    }
+  },{
+    "@type": "ListItem",
+    "position": 2,
+    "item": {
+      "@id": "https://plantuml.com/sitemap-language-specification",
+      "name": "Language specification"
+    }
+  },{
+    "@type": "ListItem",
+    "position": 3,
+    "item": {
+      "@id": "https://plantuml.com/json",
+      "name": "Json Diagram"
+  }
+  }]
+}
+</script>
+  <link rel="canonical" href="https://plantuml.com/zh/json" />
+  <link rel="alternate" hreflang="x-default" href="https://plantuml.com/json" />
+  <link rel="alternate" hreflang="de" href="https://plantuml.com/de/json" />
+  <link rel="alternate" hreflang="en" href="https://plantuml.com/json" />
+  <link rel="alternate" hreflang="es" href="https://plantuml.com/es/json" />
+  <link rel="alternate" hreflang="fr" href="https://plantuml.com/fr/json" />
+  <link rel="alternate" hreflang="ja" href="https://plantuml.com/ja/json" />
+  <link rel="alternate" hreflang="ko" href="https://plantuml.com/ko/json" />
+  <link rel="alternate" hreflang="zh" href="https://plantuml.com/zh/json" />
+
+  <link rel="shortcut icon" href="/favicon.ico" />
+
+
+  <!-- link rel="preload" as="image" href="https://img.shields.io/liberapay/patrons/plantuml.svg?logo=liberapay" -->
+
+
+  <meta property="og:type" content="article" />
+  <!-- volt:dokuwiki titleog: -->
+  <!-- volt:dokuwiki descriptionog: -->
+
+  <meta property="og:url" content="https://plantuml.com/zh/json" />
+  <meta property="og:site_name" content="PlantUML.com" />
+
+  <!-- meta property="og:image" content="https://plantuml.com/og-json" -->
+  <meta name="twitter:image" content="https://plantuml.com/og-json" />
+  <meta property="og:locale" content="zh" />
+
+  <meta name="twitter:card" content="summary" />
+  <!-- volt:dokuwiki titletwitter: -->
+  <!-- volt:dokuwiki descriptiontwitter: -->
+  <meta name="twitter:site" content="@PlantUML" />
+  <meta name="twitter:creator" content="@PlantUML" />
+
+
+  <!-- https://www.w3schools.com/colors/colors_picker.asp -->
+  <!-- filter css https://codepen.io/sosuke/pen/Pjoqqp -->
+
+
+  <style>
+    .scale {}
+
+    li {
+      margin: 2px;
+    }
+
+    #external li {
+      margin: 13px;
+    }
+
+    @media screen and (max-width: 1190px) {
+    }
+
+
+    .coptable {
+      max-width: 90%;
+    }
+
+    .mytab {
+      display: inline-block;
+      border-radius: 3px;
+      border: 1px solid #e1e4e8;
+    }
+
+    .mytab:hover {
+      border: 1px dashed #0366d6;
+      cursor: pointer;
+      color: #0366d6;
+      background: #f6f8fa;
+    }
+
+    .cop {
+      margin: 25px 10px 0 10px;
+    }
+
+    .cop:hover {
+      cursor: pointer;
+      filter: invert(30%) sepia(75%) saturate(4001%) hue-rotate(201deg) brightness(88%) contrast(98%);
+    }
+
+    .cop2 {
+      margin: 25px 10px 0 10px;
+    }
+
+    .cop2:hover {
+      cursor: pointer;
+    }
+
+    .msg {
+      position: absolute;
+      color: #339966;
+      background-color: #FFF;
+      margin-top: 55px;
+      display: none;
+      border-radius: 3px;
+      border: 1px solid #4dff00;
+    }
+
+    .mycell0 {
+      float: left;
+      vertical-align: top;
+      padding: 10px;
+    }
+
+    .mycell0 code:hover {
+      cursor: default;
+      color: #000;
+    }
+
+    .mycell {
+      float: right;
+      vertical-align: top;
+      padding: 10px;
+      max-width: 55vw;
+      overflow-x: auto;
+    }
+
+    .mycell0 pre {
+      max-width: 55vw;
+      overflow-x: auto;
+    }
+
+    .cod {
+      background: #edeff3;
+      padding: 2px 5px;
+      border-radius: 3px;
+    }
+
+    .colo {
+      display: inline-block;
+      background: #edeff3;
+      padding: 7px 12px;
+      border-radius: 3px;
+    }
+
+    .tag,
+    .tagg,
+    .tago,
+    .tagr {
+      text-rendering: optimizeLegibility;
+      display: inline-block;
+      padding: 3px 5px 2px 4px;
+      text-decoration: none;
+      white-space: nowrap;
+      border: 1px solid #999;
+      text-transform: uppercase;
+      text-align: center;
+      border-radius: 3px;
+      font-size: 11px;
+      font-weight: bold;
+      line-height: 90%;
+    }
+
+    .tag {
+      background-color: #EEEEEE;
+    }
+
+    .tagg {
+      background-color: #98FB98;
+    }
+
+    .tago {
+      background-color: #fafa00;
+    }
+
+    .tagr {
+      background-color: #FF4500;
+    }
+
+
+    a {
+      text-decoration: none;
+      color: #0366d6;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .menu1 {
+      display: flex;
+      flex-direction: row;
+      border: 0;
+      font-size: 14px;
+      padding: 0;
+      margin: 0;
+      white-space: nowrap;
+    }
+
+    .menu1 a {
+      white-space: nowrap;
+      padding: 0 8px;
+      text-decoration: none;
+      color: #5e6d7d;
+      line-height: 30px;
+      height: 30px;
+    }
+
+    .menu1 a:hover {
+      background: #fefefe;
+      color: #0366d6;
+    }
+
+    .menuside2 {
+      display: flex;
+      flex-direction: column;
+      border: 0;
+      font-size: 14px;
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+      justify-content: center;
+    }
+
+    .menuside2 img {
+      vertical-align: top;
+      padding: 0 8px;
+      filter: brightness(0) saturate(100%) invert(42%) sepia(22%) saturate(385%) hue-rotate(170deg) brightness(92%) contrast(84%);
+    }
+
+    .menuside2 a {
+      padding: 6px 0;
+      text-decoration: none;
+      color: #5e6d7d;
+    }
+
+    .menuside2 a:hover {
+      color: #0366d6;
+      background: #fefefe;
+    }
+
+    .menuside2 a:hover img {
+      filter: brightness(0) saturate(100%) invert(23%) sepia(44%) saturate(7029%) hue-rotate(203deg) brightness(94%) contrast(98%);
+    }
+
+    .breadcrumb {
+      z-index: 1;
+      font-size: 14px;
+      text-align: center;
+      display: inline-block;
+      overflow: hidden;
+      border-radius: 5px;
+    }
+
+
+    .breadcrumb a {
+      text-decoration: none;
+      outline: none;
+      display: block;
+      float: left;
+      font-size: 12px;
+      line-height: 24px;
+      color: #373f49;
+      padding: 0 10px 0 35px;
+      background: #f0f1f1;
+      background: linear-gradient(#f0f1f1, #c6d2d2);
+      position: relative;
+    }
+
+    .breadcrumb a:first-child {
+      padding-left: 21px;
+      border-radius: 5px 0 0 5px;
+      /*to match with the parent's radius*/
+    }
+
+    .breadcrumb a:first-child:before {
+      left: 14px;
+    }
+
+    .breadcrumb a:last-child {
+      visibility: hidden;
+    }
+
+    .breadcrumb a.active,
+    .breadcrumb a:hover {
+      color: #0366d6;
+      background: #c6d2d2;
+      background: linear-gradient(#e3e4e4, #b8c7c7);
+    }
+
+    .breadcrumb a.active:after,
+    .breadcrumb a:hover:after {
+      background: #c6d2d2;
+      background: linear-gradient(135deg, #e3e4e4, #b8c7c7);
+    }
+
+    .breadcrumb a:after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: -12px;
+      /*half of square's length*/
+      /*same dimension as the line-height of .breadcrumb a */
+      width: 24px;
+      height: 24px;
+      transform: scale(0.707) rotate(45deg);
+      /*we need to prevent the arrows from getting buried under the next link*/
+      z-index: 1;
+      /*background same as links but the gradient will be rotated to compensate with the transform applied*/
+      background: #f0f1f1;
+      background: linear-gradient(135deg, #f0f1f1, #c6d2d2);
+      /*stylish arrow design using box shadow*/
+      box-shadow:
+        2px -2px 0 2px rgba(0, 0, 0, 0.1),
+        3px -3px 0 2px rgba(255, 255, 255, 0.1);
+      /*
+		5px - for rounded arrows and 
+		50px - to prevent hover glitches on the border created using shadows*/
+      border-radius: 0 5px 0 50px;
+    }
+
+    /*we dont need an arrow after the last link*/
+    .breadcrumb a:last-child:after {
+      content: none;
+      visibility: hidden;
+    }
+
+
+    .lga,
+    .lga a,
+    .lgi,
+    .lgi a {
+      font-size: 13px;
+      text-align: center;
+      color: #fff;
+      padding: 0 5px;
+      margin: 0;
+    }
+
+    .lga,
+    .lga a {
+      background-color: #008;
+    }
+
+    .lgi,
+    .lgi a {
+      background-color: #888;
+    }
+
+    .lga:hover,
+    .lga:hover a {
+      text-decoration: none;
+      color: #BBB;
+    }
+
+    .lgi:hover,
+    .lgi:hover a {
+      text-decoration: none;
+      color: #CCC;
+    }
+  </style>
+  <style>
+    body {
+      font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+      font-size: 14px;
+      line-height: 1.5;
+      margin: auto;
+      overflow-x: hidden;
+      background: #fefefe;
+    }
+
+    h1.chap {
+      font-size: 1.8em;
+    }
+
+    h2.chap {
+      font-size: 1.35em;
+    }
+
+    h3,
+    h3.chap {
+      font-size: 1.15em;
+    }
+
+    h4 {
+      font-size: 1.05em;
+    }
+
+    table {
+      font-size: inherit;
+    }
+  </style>
+
+
+  <style>
+    .dyn {
+      display: flex;
+      flex-direction: row;
+      gap: 3em;
+      align-items: stretch;
+      flex-wrap: wrap;
+      margin: 10px 0;
+    }
+
+    .dyn textarea {
+      font-family: monospace;
+      font-size: 13px;
+      line-height: 1.4;
+      min-width: 30ch;
+      max-width: 90ch;
+      box-sizing: border-box;
+      resize: both;
+      white-space: pre;
+      overflow: auto;
+      field-sizing: content;
+      align-self: stretch;
+      border: 1px solid #888;
+      border-radius: 3px;
+      margin: 0;
+      padding: 4px 8px;
+      background: #fefefe;
+    }
+
+    .dyn>div {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      display: flex;
+    }
+
+    .dyn>div>div {
+      margin: 0;
+      padding: 0;
+    }
+
+    .dyn img {
+      margin: 0;
+      padding: 0;
+    }
+
+    .scale {
+      max-width: 100%;
+      height: auto;
+      border: 1px solid #dde;
+      border-radius: 4px;
+    }
+  </style>
+
+
+  <script>
+    var llg = "zh";
+    var az = 0;
+    var amdark = 0;
+    function ljs(n) {
+      if (az) return false;
+      var sc = document.createElement("script");
+      sc.type = "text/javascript";
+      sc.src = "/btn-" + n + ".js";
+      document.body.innerHTML = "<i style='position:absolute;top:30%;width:100%;'><center>Loading in progress...";
+      document.body.appendChild(sc);
+    }
+    function ctc(id) {
+      document.getElementById('img' + id).classList.remove('cop'); document.getElementById('img' + id).classList.add('cop2');
+      document.getElementById('pre' + id).style.backgroundColor = '#4dff00';
+      document.getElementById('msg' + id).style.display = 'inline';
+
+      setTimeout(function () { document.getElementById('img' + id).classList.remove('cop2'); document.getElementById('img' + id).classList.add('cop'); document.getElementById('pre' + id).style.backgroundColor = ''; document.getElementById('msg' + id).style.display = 'none'; }, 800);
+
+
+      text = document.getElementById('pre' + id).innerText;
+      if (window.clipboardData && window.clipboardData.setData)
+        return window.clipboardData.setData("Text", text);
+      else if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
+        var ta = document.createElement("textarea");
+        ta.textContent = text;
+        ta.style.position = "fixed";
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          return document.execCommand("copy");
+        }
+        catch (ex) {
+          return false;
+        }
+        finally {
+          document.body.removeChild(ta);
+        }
+      }
+    }
+  </script>
+</head>
+
+<body>
+  <style>
+    body,
+    .container,
+    #B3,
+    #C5,
+    #C6,
+    #C7,
+    #D7,
+    #D8 {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      overflow-y: scroll;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      grid-template-rows: auto 1fr auto;
+      min-height: 100vh;
+    }
+
+    #B3 {
+      grid-column: 1 / 5;
+      grid-row: 1;
+      position: sticky;
+      top: 0;
+      height: 30px;
+      padding: 0;
+      z-index: 10;
+      overflow: hidden;
+      background: #edeff3;
+      border-bottom: 1px solid #d4d8de;
+    }
+
+    #D7 {
+      grid-column: 1;
+      grid-row: 2;
+      margin: 0;
+      padding: 0;
+      padding-left: 30px;
+      line-height: 1.6;
+    }
+
+    #D8 {
+      grid-column: 1;
+      grid-row: 3;
+      position: sticky;
+      bottom: 0;
+      z-index: 5;
+      background: #fefefe;
+    }
+
+    #C5 {
+      grid-column: 2;
+      grid-row: 1 / -1;
+      position: sticky;
+      top: 40px;
+      align-self: start;
+      height: calc(98vh - 60px);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #C6 {
+      grid-column: 3;
+      grid-row: 1 / -1;
+      position: sticky;
+      top: 40px;
+      align-self: start;
+      height: calc(98vh - 60px);
+      max-width: 200px;
+      overflow: hidden;
+      margin: 0 10px;
+      padding: 8px 5px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #C7 {
+      grid-column: 4;
+      grid-row: 1 / -1;
+      position: sticky;
+      top: 40px;
+      align-self: start;
+      height: calc(98vh - 60px);
+      margin: 0 20px 0 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #toc {
+      z-index: 15;
+      overflow-x: hidden;
+      overflow-y: auto;
+      background: #f6f8fa;
+      border-width: 2px;
+      border-style: groove;
+      border-radius: 3px;
+      border-color: #e1e4e8;
+      margin: 0 5px;
+      padding: 0;
+      max-height: 100%;
+    }
+
+    #toc ul {
+      margin: 0;
+      list-style-type: none;
+      padding: 0;
+    }
+
+    #toc li {
+      padding: 0 10px;
+      margin: 0;
+    }
+
+    #toc li a {
+      padding: 5px 0;
+      display: inline-block;
+      text-decoration: none;
+      width: 100%;
+      color: #5e6d7d;
+    }
+
+    #toc li a:hover {
+      color: #0366d6;
+    }
+
+    #toc li:hover {
+      background: #fefefe;
+    }
+
+    #magic {
+      position: absolute;
+      top: 0;
+      right: 50px;
+      width: 30px;
+      height: 30px;
+      overflow: hidden;
+      background: #edeff3;
+      z-index: 14;
+    }
+
+    #magic:hover {
+      width: calc(100% - 50px);
+    }
+
+    #magic .menu1 {
+      position: absolute;
+      top: 0;
+      right: 30px;
+      height: 30px;
+      padding-left: 10px;
+      background: #edeff3;
+      border-left: 1px solid #d4d8de;
+      border-bottom: 1px solid #d4d8de;
+    }
+
+    .menu1-tail {
+      flex-grow: 1;
+      flex-shrink: 0;
+      height: 30px;
+      position: relative;
+      z-index: 15;
+      background: #edeff3;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: auto auto auto;
+      grid-auto-rows: auto;
+      gap: 5px;
+      margin: 0;
+      padding: 0;
+    }
+
+    .merged {
+      grid-column: 1 / -1;
+    }
+
+    #C6 {
+      display: none;
+    }
+
+    @media (min-width: 1401px) {
+      #C6:has(#toc li) {
+        display: flex;
+      }
+    }
+
+    @media (max-width: 1100px) {
+      #C5,
+      #C7 {
+        display: none;
+      }
+    }
+
+    @media (max-width: 1200px) {
+      .merged {
+        display: none;
+      }
+    }
+  </style>
+
+  <div class="container">
+
+    <footer id="D8">
+
+      <p>
+      </p>
+      <p>
+
+      </p>
+    </footer>
+
+
+    <header id="B3">
+      <div class="menu1">
+        <a id="titem10" href="sequence-diagram_zh.html">时序图</a>
+        <a id="titem20" href="use-case-diagram_zh.html">用例图</a>
+        <a id="titem30" href="class-diagram_zh.html">类图</a>
+        <a id="titem40" href="activity-diagram-beta_zh.html">活动图</a>
+        <a id="titem50" href="component-diagram_zh.html">组件图</a>
+        <a id="titem60" href="state-diagram_zh.html">状态图</a>
+        <a id="titem70" href="object-diagram_zh.html">对象图</a>
+        <a id="titem80" href="deployment-diagram_zh.html">部署图</a>
+        <a id="titem90" href="timing-diagram_zh.html">定时图</a>
+
+        <a id="titem99" href="regex_zh.html">Regex</a>
+        <a id="titem100" href="nwdiag_zh.html">Network</a>
+        <a id="titem110" href="salt_zh.html">Wireframe</a>
+        <a id="titem120" href="archimate-diagram_zh.html">Archimate</a>
+        <a id="titem130" href="gantt-diagram_zh.html">Gantt</a>
+        <a id="titem140" href="mindmap-diagram_zh.html">MindMap</a>
+        <a id="titem150" href="wbs-diagram_zh.html">WBS</a>
+        <a id="titem151" href="ebnf_zh.html">EBNF</a>
+        <a id="titem160" href="json_zh.html">JSON</a>
+        <a id="titem170" href="yaml_zh.html">YAML</a>
+
+        <div class="menu1-tail"></div>
+      </div>
+      <div id="magic">
+        <div class="menu1">
+          <a id="titem10" href="sequence-diagram_zh.html">时序图</a>
+          <a id="titem20" href="use-case-diagram_zh.html">用例图</a>
+          <a id="titem30" href="class-diagram_zh.html">类图</a>
+          <a id="titem40" href="activity-diagram-beta_zh.html">活动图</a>
+          <a id="titem50" href="component-diagram_zh.html">组件图</a>
+          <a id="titem60" href="state-diagram_zh.html">状态图</a>
+          <a id="titem70" href="object-diagram_zh.html">对象图</a>
+          <a id="titem80" href="deployment-diagram_zh.html">部署图</a>
+          <a id="titem90" href="timing-diagram_zh.html">定时图</a>
+
+          <a id="titem99" href="regex_zh.html">Regex</a>
+          <a id="titem100" href="nwdiag_zh.html">Network</a>
+          <a id="titem110" href="salt_zh.html">Wireframe</a>
+          <a id="titem120" href="archimate-diagram_zh.html">Archimate</a>
+          <a id="titem130" href="gantt-diagram_zh.html">Gantt</a>
+          <a id="titem140" href="mindmap-diagram_zh.html">MindMap</a>
+          <a id="titem150" href="wbs-diagram_zh.html">WBS</a>
+          <a id="titem151" href="ebnf_zh.html">EBNF</a>
+          <a id="titem160" href="json_zh.html">JSON</a>
+          <a id="titem170" href="yaml_zh.html">YAML</a>
+
+          <div class="menu1-tail"></div>
+        </div>
+      </div><!-- magic -->
+    </header>
+
+    <main id="D7">
+
+      <style>
+        #donate {
+          padding-top: 10px;
+          min-height: 30px;
+        }
+      </style>
+
+
+      <p style="clear:both;">
+
+
+        <style>
+          #titem160 {
+            color: #0366d6;
+            background-color: #fefefe;
+          }
+
+          #titem160 img {
+            filter: brightness(0) saturate(100%) invert(23%) sepia(44%) saturate(7029%) hue-rotate(203deg) brightness(94%) contrast(98%);
+          }
+
+          .menu1:hover #titem160 {
+            color: #5e6d7d;
+          }
+
+          .menu1:hover #titem160:hover {
+            color: #0366d6;
+          }
+
+          .menu1:hover #titem160 img {
+            filter: brightness(0) saturate(100%) invert(42%) sepia(22%) saturate(385%) hue-rotate(170deg) brightness(92%) contrast(84%);
+          }
+        </style>
+
+        <a style="position:relative;top:-38px;" name="1eeee11bf3bd2c55"></a>
+        <!--heading-->
+      </p>
+      <h1 class="chap">JSON数据可视化</h1>
+      <p></p>
+      <a href="https://en.wikipedia.org/wiki/JSON">JSON</a> 在软件中被广泛应用.
+      <p></p>
+      你可以用PlantUML来将JSON数据可视化。
+      <p></p>
+      使用如下的语法激活json可视化语法：
+      <ul>
+        <li>开始关键字 <code class="cod">@startjson</code></li>
+        <li>结束关键字 <code class="cod">@endjson</code> </li>
+      </ul>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startjson
+{
+   &#34;fruit&#34;:&#34;Apple&#34;,
+   &#34;size&#34;:&#34;Large&#34;,
+   &#34;color&#34;: [&#34;Red&#34;, &#34;Green&#34;]
+}
+@endjson
+</textarea>
+        <div id="out559d9d075dbc6423565f71d0fac2f72c">
+          <div class="mycell">
+            <img loading="lazy" width="196" height="97" class="scale"
+              src="/imgw/img-559d9d075dbc6423565f71d0fac2f72c.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      🛈 <em>PlantUML处理JSON的更多细节: 可以查看 <a href="preprocessing-json">Preprocessing JSON</a>.</em>
+      <a style="position:relative;top:-38px;" name="9b905dab753004a4"></a>
+      <!--heading-->
+      <h2 class="chap">复杂一些的例子</h2>
+      <p></p>
+      一些结构复杂的JSON数据也能轻松查看
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startjson
+{
+  &#34;firstName&#34;: &#34;John&#34;,
+  &#34;lastName&#34;: &#34;Smith&#34;,
+  &#34;isAlive&#34;: true,
+  &#34;age&#34;: 27,
+  &#34;address&#34;: {
+    &#34;streetAddress&#34;: &#34;21 2nd Street&#34;,
+    &#34;city&#34;: &#34;New York&#34;,
+    &#34;state&#34;: &#34;NY&#34;,
+    &#34;postalCode&#34;: &#34;10021-3100&#34;
+  },
+  &#34;phoneNumbers&#34;: [
+    {
+      &#34;type&#34;: &#34;home&#34;,
+      &#34;number&#34;: &#34;212 555-1234&#34;
+    },
+    {
+      &#34;type&#34;: &#34;office&#34;,
+      &#34;number&#34;: &#34;646 555-4567&#34;
+    }
+  ],
+  &#34;children&#34;: [],
+  &#34;spouse&#34;: null
+}
+@endjson
+</textarea>
+        <div id="outdc220d45d4a40423ea747e9a09d445fc">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="613" height="201" class="scale"
+              src="/imgw/img-dc220d45d4a40423ea747e9a09d445fc.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="1b6b8d6c715c3de9"></a>
+      <!--heading-->
+      <h2 class="chap">如何高亮显示</h2>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startjson
+#highlight &#34;lastName&#34;
+#highlight &#34;address&#34; / &#34;city&#34;
+#highlight &#34;phoneNumbers&#34; / &#34;0&#34; / &#34;number&#34;
+{
+  &#34;firstName&#34;: &#34;John&#34;,
+  &#34;lastName&#34;: &#34;Smith&#34;,
+  &#34;isAlive&#34;: true,
+  &#34;age&#34;: 28,
+  &#34;address&#34;: {
+    &#34;streetAddress&#34;: &#34;21 2nd Street&#34;,
+    &#34;city&#34;: &#34;New York&#34;,
+    &#34;state&#34;: &#34;NY&#34;,
+    &#34;postalCode&#34;: &#34;10021-3100&#34;
+  },
+  &#34;phoneNumbers&#34;: [
+    {
+      &#34;type&#34;: &#34;home&#34;,
+      &#34;number&#34;: &#34;212 555-1234&#34;
+    },
+    {
+      &#34;type&#34;: &#34;office&#34;,
+      &#34;number&#34;: &#34;646 555-4567&#34;
+    }
+  ],
+  &#34;children&#34;: [],
+  &#34;spouse&#34;: null
+}
+@endjson
+</textarea>
+        <div id="out5884f8d67e054ce552987962e195b75a">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="613" height="201" class="scale"
+              src="/imgw/img-5884f8d67e054ce552987962e195b75a.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="d8ffd91ff7cbc8d8"></a>
+      <!--heading-->
+      <h2 class="chap">使用不同风格的高亮 </h2>
+      <p></p>
+      你可以使用不同的风格来显示高亮效果。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startjson
+&lt;style&gt;
+  .h1 {
+    BackGroundColor green
+    FontColor white
+    FontStyle italic
+  }
+  .h2 {
+    BackGroundColor red
+    FontColor white
+    FontStyle bold
+  }
+&lt;/style&gt;
+#highlight &#34;lastName&#34;
+#highlight &#34;address&#34; / &#34;city&#34; &lt;&lt;h1&gt;&gt;
+#highlight &#34;phoneNumbers&#34; / &#34;0&#34; / &#34;number&#34; &lt;&lt;h2&gt;&gt;
+{
+  &#34;firstName&#34;: &#34;John&#34;,
+  &#34;lastName&#34;: &#34;Smith&#34;,
+  &#34;isAlive&#34;: true,
+  &#34;age&#34;: 28,
+  &#34;address&#34;: {
+    &#34;streetAddress&#34;: &#34;21 2nd Street&#34;,
+    &#34;city&#34;: &#34;New York&#34;,
+    &#34;state&#34;: &#34;NY&#34;,
+    &#34;postalCode&#34;: &#34;10021-3100&#34;
+  },
+  &#34;phoneNumbers&#34;: [
+    {
+      &#34;type&#34;: &#34;home&#34;,
+      &#34;number&#34;: &#34;212 555-1234&#34;
+    },
+    {
+      &#34;type&#34;: &#34;office&#34;,
+      &#34;number&#34;: &#34;646 555-4567&#34;
+    }
+  ],
+  &#34;children&#34;: [],
+  &#34;spouse&#34;: null
+}
+@endjson
+</textarea>
+        <div id="outc54c5e8f66a0c530cd2bfcb1bca62650">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="613" height="201" class="scale"
+              src="/imgw/img-c54c5e8f66a0c530cd2bfcb1bca62650.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/15756/yaml-multiple-highlight-defs">QA-15756</a>, <a
+          href="https://github.com/plantuml/plantuml/issues/1393">GH-1393</a>]</em>
+      <a style="position:relative;top:-38px;" name="9115e9f65aae7e9b"></a>
+      <!--heading-->
+      <h2 class="chap">JSON基本类型</h2>
+      <p></p>
+      <h3>所有支持的JSON类型</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startjson
+{
+&#34;null&#34;: null,
+&#34;true&#34;: true,
+&#34;false&#34;: false,
+&#34;JSON_Number&#34;: [-1, -1.1, &#34;&lt;color:green&gt;TBC&#34;],
+&#34;JSON_String&#34;: &#34;a\nb\rc\td &lt;color:green&gt;TBC...&#34;,
+&#34;JSON_Object&#34;: {
+  &#34;{}&#34;: {},
+  &#34;k_int&#34;: 123,
+  &#34;k_str&#34;: &#34;abc&#34;,
+  &#34;k_obj&#34;: {&#34;k&#34;: &#34;v&#34;}
+},
+&#34;JSON_Array&#34; : [
+  [],
+  [true, false],
+  [-1, 1],
+  [&#34;a&#34;, &#34;b&#34;, &#34;c&#34;],
+  [&#34;mix&#34;, null, true, 1, {&#34;k&#34;: &#34;v&#34;}]
+]
+}
+@endjson
+</textarea>
+        <div id="out2480cdf9fd48af49ed8817f7767be009">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="503" height="530" class="scale"
+              src="/imgw/img-2480cdf9fd48af49ed8817f7767be009.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="63f1e241ceb6fdac"></a>
+      <!--heading-->
+      <h2 class="chap">JSON 数组或表格</h2>
+      <p></p>
+      <h3>数组</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startjson
+{
+&#34;Numeric&#34;: [1, 2, 3],
+&#34;String &#34;: [&#34;v1a&#34;, &#34;v2b&#34;, &#34;v3c&#34;],
+&#34;Boolean&#34;: [true, false, true]
+}
+@endjson
+</textarea>
+        <div id="outaf6617a4f05f6a80586f9cc69aba08fa">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="201" height="251" class="scale"
+              src="/imgw/img-af6617a4f05f6a80586f9cc69aba08fa.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <h3>最小化的数组或表格</h3>
+      <h4>数字类型数组</h4>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startjson
+[1, 2, 3]
+@endjson
+</textarea>
+        <div id="out348417fe36cc27783761d2284df8976e">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="38" height="85" class="scale"
+              src="/imgw/img-348417fe36cc27783761d2284df8976e.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h4>字符串类型数组</h4>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startjson
+[&#34;1a&#34;, &#34;2b&#34;, &#34;3c&#34;]
+@endjson
+</textarea>
+        <div id="out6cb59a11a8fc1245c1c5df16efdbcd41">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="46" height="85" class="scale"
+              src="/imgw/img-6cb59a11a8fc1245c1c5df16efdbcd41.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h4>布尔型数组</h4>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startjson
+[true, false, true]
+@endjson
+</textarea>
+        <div id="out6d26a64d7c18173c162351844cc94b9c">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="76" height="85" class="scale"
+              src="/imgw/img-6d26a64d7c18173c162351844cc94b9c.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="c41fecdfa808fd99"></a>
+      <!--heading-->
+      <h2 class="chap">JSON 数字</h2>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startjson
+{
+&#34;DecimalNumber&#34;: [-1, 0, 1],
+&#34;DecimalNumber . Digits&#34;: [-1.1, 0.1, 1.1],
+&#34;DecimalNumber ExponentPart&#34;: [1E5]
+}
+@endjson
+</textarea>
+        <div id="oute6bbf2b24214e0cb6c07654a7043fec3">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="325" height="209" class="scale"
+              src="/imgw/img-e6bbf2b24214e0cb6c07654a7043fec3.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="75ae50593375d93e"></a>
+      <!--heading-->
+      <h2 class="chap">JSON 字符串</h2>
+      <p></p>
+      <h3>JSON Unicode</h3>
+      <p></p>
+      在JSON图表中，你可以是直接使用Unicode或者使用反斜线格式 <code class="cod">\uXXXX</code>.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startjson
+{
+  &#34;&lt;color:blue&gt;&lt;b&gt;code&#34;: &#34;&lt;color:blue&gt;&lt;b&gt;value&#34;,
+  &#34;a\\u005Cb&#34;:           &#34;a\u005Cb&#34;,
+  &#34;\\uD83D\\uDE10&#34;:      &#34;\uD83D\uDE10&#34;,
+  &#34;😐&#34;:                  &#34;😐&#34;
+}
+@endjson
+</textarea>
+        <div id="out7a77b050437d9647f396a8d86fae2388">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="172" height="107" class="scale"
+              src="/imgw/img-7a77b050437d9647f396a8d86fae2388.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>JSON 双字符转义序列</h3>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startjson
+{
+ &#34;**legend**: character name&#34;:               [&#34;**two-character escape sequence**&#34;, &#34;example (between &#39;a&#39; and &#39;b&#39;)&#34;],
+ &#34;quotation mark character (U+0022)&#34;:        [&#34;\\\&#34;&#34;, &#34;a\&#34;b&#34;],
+ &#34;reverse solidus character (U+005C)&#34;:       [&#34;\\\\&#34;, &#34;a\\b&#34;],
+ &#34;solidus character (U+002F)&#34;:               [&#34;\\\/&#34;, &#34;a\/b&#34;],
+ &#34;backspace character (U+0008)&#34;:             [&#34;\\b&#34;, &#34;a\bb&#34;],
+ &#34;form feed character (U+000C)&#34;:             [&#34;\\f&#34;, &#34;a\fb&#34;],
+ &#34;line feed character (U+000A)&#34;:             [&#34;\\n&#34;, &#34;a\nb&#34;],
+ &#34;carriage return character (U+000D)&#34;:       [&#34;\\r&#34;, &#34;a\rb&#34;],
+ &#34;character tabulation character (U+0009)&#34;:  [&#34;\\t&#34;, &#34;a\tb&#34;]
+}
+@endjson
+</textarea>
+        <div id="outb42bc2351f36100f919cf35fd3aeff81">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="574" height="588" class="scale"
+              src="/imgw/img-b42bc2351f36100f919cf35fd3aeff81.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <div class="tag" style="background:#661111;">FIXME</div>
+      FIXME or not 😉, on the same item as <code class="cod">\n</code> management in PlantUML 😉
+      <em>See <a href="https://forum.plantuml.net/13066">Report Bug on QA-13066</a></em>
+      <div class="tag" style="background:#661111;">FIXME</div>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startjson
+[
+&#34;\\\\&#34;,
+&#34;\\n&#34;,
+&#34;\\r&#34;,
+&#34;\\t&#34;
+]
+@endjson
+</textarea>
+        <div id="out96b35c8dbc8e462930369c6287a7d6c9">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="62" height="142" class="scale"
+              src="/imgw/img-96b35c8dbc8e462930369c6287a7d6c9.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="e160bb058913090e"></a>
+      <!--heading-->
+      <h2 class="chap">最小化 JSON 的例子</h2>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startjson
+&#34;Hello world!&#34;
+@endjson
+</textarea>
+        <div id="out26c4fc26ceb0f46b239ed71055e46203">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="104" height="42" class="scale"
+              src="/imgw/img-26c4fc26ceb0f46b239ed71055e46203.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startjson
+42
+@endjson
+</textarea>
+        <div id="outfceccb4e981c760dceefdbc79f17fe43">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="46" height="42" class="scale"
+              src="/imgw/img-fceccb4e981c760dceefdbc79f17fe43.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startjson
+true
+@endjson
+</textarea>
+        <div id="out4148a625c466057a33c1462af981b824">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="71" height="42" class="scale"
+              src="/imgw/img-4148a625c466057a33c1462af981b824.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>(例子来源 <a href="https://tools.ietf.org/html/std90#page-13">STD 90 - Examples</a>)</em>
+      <a style="position:relative;top:-38px;" name="ad48b04942bf8c78"></a>
+      <!--heading-->
+      <h2 class="chap">空表格或列表</h2>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startjson
+{
+  &#34;empty_tab&#34;: [],
+  &#34;empty_list&#34;: {}
+}
+@endjson
+</textarea>
+        <div id="out1c3e41c6b86735faf4e83beba988129b">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="189" height="68" class="scale"
+              src="/imgw/img-1c3e41c6b86735faf4e83beba988129b.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/14397">QA-14397</a>]</em>
+      <a style="position:relative;top:-38px;" name="bb2ede32ce6accb8"></a>
+      <!--heading-->
+      <h2 class="chap">使用管局样式或局部样式</h2>
+      <p></p>
+      <h3>无样式的情况 <em>(默认)</em></h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startjson
+#highlight &#34;1&#34; / &#34;hr&#34;
+[
+  {
+    &#34;name&#34;: &#34;Mark McGwire&#34;,
+    &#34;hr&#34;:   65,
+    &#34;avg&#34;:  0.278
+  },
+  {
+    &#34;name&#34;: &#34;Sammy Sosa&#34;,
+    &#34;hr&#34;:   63,
+    &#34;avg&#34;:  0.288
+  }
+]
+@endjson
+</textarea>
+        <div id="out8171d4c3b3b3c2289654bb9cc4d78518">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="226" height="168" class="scale"
+              src="/imgw/img-8171d4c3b3b3c2289654bb9cc4d78518.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <h3>增加样式</h3>
+      <p></p>
+      你可以使用语法 <a href="style-evolution">style</a> 来改变元素的样式.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startjson
+&lt;style&gt;
+jsonDiagram {
+  node {
+    BackGroundColor Khaki
+    LineColor lightblue
+    FontName Helvetica
+    FontColor red
+    FontSize 18
+    FontStyle bold
+    RoundCorner 0
+    LineThickness 2
+    LineStyle 10-5
+    separator {
+      LineThickness 0.5
+      LineColor black
+      LineStyle 1-5
+    }
+  }
+  arrow {
+    BackGroundColor lightblue
+    LineColor green
+    LineThickness 2
+    LineStyle 2-5
+  }
+  highlight {
+    BackGroundColor red
+    FontColor white
+    FontStyle italic
+  }
+}
+&lt;/style&gt;
+#highlight &#34;1&#34; / &#34;hr&#34;
+[
+  {
+    &#34;name&#34;: &#34;Mark McGwire&#34;,
+    &#34;hr&#34;:   65,
+    &#34;avg&#34;:  0.278
+  },
+  {
+    &#34;name&#34;: &#34;Sammy Sosa&#34;,
+    &#34;hr&#34;:   63,
+    &#34;avg&#34;:  0.288
+  }
+]
+@endjson
+</textarea>
+        <div id="outa7d64cf440f04ff537f9d1bdaf36595a">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="272" height="198" class="scale"
+              src="/imgw/img-a7d64cf440f04ff537f9d1bdaf36595a.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Adapted from <a href="https://forum.plantuml.net/13123">QA-13123</a> and <a
+          href="https://forum.plantuml.net/13288/">QA-13288</a>]</em>
+      <a style="position:relative;top:-38px;" name="a3e433077b7a6be8"></a>
+      <!--heading-->
+      <h2 class="chap">使用类或者对象的像是显示JSON数据</h2>
+      <p></p>
+      <h3>简单例子</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+class Class
+object Object
+json JSON {
+   &#34;fruit&#34;:&#34;Apple&#34;,
+   &#34;size&#34;:&#34;Large&#34;,
+   &#34;color&#34;: [&#34;Red&#34;, &#34;Green&#34;]
+}
+@enduml
+</textarea>
+        <div id="out6a7ee08059d72d372b482acd31af4d40">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="187" height="241" class="scale"
+              src="/imgw/img-6a7ee08059d72d372b482acd31af4d40.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a
+          href="https://forum.plantuml.net/15481/possible-link-elements-from-two-jsons-with-both-jsons-embeded?show=15567#c15567">QA-15481</a>]</em>
+      <p></p>
+      <h3>复杂例子: 包括所有的JSON的结构</h3>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+json &#34;&lt;b&gt;JSON basic element&#34; as J {
+&#34;null&#34;: null,
+&#34;true&#34;: true,
+&#34;false&#34;: false,
+&#34;JSON_Number&#34;: [-1, -1.1, &#34;&lt;color:green&gt;TBC&#34;],
+&#34;JSON_String&#34;: &#34;a\nb\rc\td &lt;color:green&gt;TBC...&#34;,
+&#34;JSON_Object&#34;: {
+  &#34;{}&#34;: {},
+  &#34;k_int&#34;: 123,
+  &#34;k_str&#34;: &#34;abc&#34;,
+  &#34;k_obj&#34;: {&#34;k&#34;: &#34;v&#34;}
+},
+&#34;JSON_Array&#34; : [
+  [],
+  [true, false],
+  [-1, 1],
+  [&#34;a&#34;, &#34;b&#34;, &#34;c&#34;],
+  [&#34;mix&#34;, null, true, 1, {&#34;k&#34;: &#34;v&#34;}]
+]
+}
+@enduml
+</textarea>
+        <div id="outf55867d15ced0557d6efb0644740f52d">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="216" height="537" class="scale"
+              src="/imgw/img-f55867d15ced0557d6efb0644740f52d.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="c70df468139db338"></a>
+      <!--heading-->
+      <h2 class="chap">在部署图中显示JSON数据（用例，组件，部署）</h2>
+      <p></p>
+      <h3>简单例子</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+allowmixing
+
+component Component
+actor     Actor
+usecase   Usecase
+()        Interface
+node      Node
+cloud     Cloud
+
+json JSON {
+   &#34;fruit&#34;:&#34;Apple&#34;,
+   &#34;size&#34;:&#34;Large&#34;,
+   &#34;color&#34;: [&#34;Red&#34;, &#34;Green&#34;]
+}
+@enduml
+</textarea>
+        <div id="out87b2d68589866ae4b4bd55103ec8f150">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="331" height="389" class="scale"
+              src="/imgw/img-87b2d68589866ae4b4bd55103ec8f150.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a
+          href="https://forum.plantuml.net/15481/possible-link-elements-from-two-jsons-with-both-jsons-embeded?show=15567#c15567">QA-15481</a>]</em>
+      <p></p>
+      复杂例子: 带箭头
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+allowmixing
+
+agent Agent
+stack {
+  json &#34;JSON_file.json&#34; as J {
+    &#34;fruit&#34;:&#34;Apple&#34;,
+    &#34;size&#34;:&#34;Large&#34;,
+    &#34;color&#34;: [&#34;Red&#34;, &#34;Green&#34;]
+  }
+}
+database Database
+
+Agent -&gt; J
+J -&gt; Database
+@enduml
+</textarea>
+        <div id="outff483cf884ce96786cedb94b69e20da1">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="360" height="169" class="scale"
+              src="/imgw/img-ff483cf884ce96786cedb94b69e20da1.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="84fccc92ba6ffe09"></a>
+      <!--heading-->
+      <h2 class="chap">在状态图中显示JSON数据</h2>
+      <p></p>
+      <h3>简单例子</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+state &#34;A&#34; as stateA
+state &#34;C&#34; as stateC {
+ state B
+}
+
+json J {
+   &#34;fruit&#34;:&#34;Apple&#34;,
+   &#34;size&#34;:&#34;Large&#34;,
+   &#34;color&#34;: [&#34;Red&#34;, &#34;Green&#34;]
+}
+@enduml
+</textarea>
+        <div id="out748e3652a3c5899833fec112aef3b09c">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="324" height="129" class="scale"
+              src="/imgw/img-748e3652a3c5899833fec112aef3b09c.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a
+          href="https://forum.plantuml.net/17275/composite-state-functionality-with-allow_mixing?show=17287#a17287">QA-17275</a>]</em>
+      <a style="position:relative;top:-38px;" name="0fc8b739906c385d"></a>
+      <!--heading-->
+      <h2 class="chap">Creole on JSON</h2>
+      <p></p>
+      在wiki标记语言或HTML标记语言中使用JSON <a href="creole">Creole or HTML Creole</a>:
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startjson
+{
+&#34;Creole&#34;:
+  {
+  &#34;wave&#34;: &#34;~~wave~~&#34;,
+  &#34;bold&#34;: &#34;**bold**&#34;,
+  &#34;italics&#34;: &#34;//italics//&#34;,
+  &#34;stricken-out&#34;: &#34;--stricken-out--&#34;,
+  &#34;underlined&#34;: &#34;__underlined__&#34;,
+  &#34;not-underlined&#34;: &#34;~__not underlined__&#34;,
+  &#34;wave-underlined&#34;: &#34;~~wave-underlined~~&#34;
+  },
+&#34;HTML Creole&#34;:
+  {
+  &#34;bold&#34;: &#34;&lt;b&gt;bold&#34;,
+  &#34;italics&#34;: &#34;&lt;i&gt;italics&#34;,
+  &#34;monospaced&#34;: &#34;&lt;font:monospaced&gt;monospaced&#34;,
+  &#34;stroked&#34;: &#34;&lt;s&gt;stroked&#34;,
+  &#34;underlined&#34;: &#34;&lt;u&gt;underlined&#34;,
+  &#34;waved&#34;: &#34;&lt;w&gt;waved&#34;,
+  &#34;green-stroked&#34;: &#34;&lt;s:green&gt;stroked&#34;,
+  &#34;red-underlined&#34;: &#34;&lt;u:red&gt;underlined&#34;,
+  &#34;blue-waved&#34;: &#34;&lt;w:#0000FF&gt;waved&#34;,
+  &#34;Blue&#34;: &#34;&lt;color:blue&gt;Blue&#34;,
+  &#34;Orange&#34;: &#34;&lt;back:orange&gt;Orange background&#34;,
+  &#34;big&#34;: &#34;&lt;size:20&gt;big&#34;
+  },
+&#34;Graphic&#34;:
+  {
+  &#34;OpenIconic&#34;: &#34;account-login &lt;&amp;account-login&gt;&#34;, 
+  &#34;Unicode&#34;: &#34;This is &lt;U+221E&gt; long&#34;,
+  &#34;Emoji&#34;: &#34;&lt;:calendar:&gt; Calendar&#34;,
+  &#34;Image&#34;: &#34;&lt;img:https://plantuml.com/logo3.png&gt;&#34;
+  }
+}
+@endjson
+</textarea>
+        <div id="out6fa5106d28f5cbb4f22195cf539680f0">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="426" height="702" class="scale"
+              src="/imgw/img-6fa5106d28f5cbb4f22195cf539680f0.png" />
+          </div>
+        </div>
+      </div>
+
+
+    </main>
+
+
+    <aside id="C6">
+      <!--toc-->
+      <div id="toc">
+        <ul>
+          <li><a href="#9b905dab753004a4">复杂一些的例子</a>
+          </li>
+          <li><a href="#1b6b8d6c715c3de9">如何高亮显示</a>
+          </li>
+          <li><a href="#d8ffd91ff7cbc8d8">使用不同风格的高亮</a>
+          </li>
+          <li><a href="#9115e9f65aae7e9b">JSON基本类型</a>
+          </li>
+          <li><a href="#63f1e241ceb6fdac">JSON 数组或表格</a>
+          </li>
+          <li><a href="#c41fecdfa808fd99">JSON 数字</a>
+          </li>
+          <li><a href="#75ae50593375d93e">JSON 字符串</a>
+          </li>
+          <li><a href="#e160bb058913090e">最小化 JSON 的例子</a>
+          </li>
+          <li><a href="#ad48b04942bf8c78">空表格或列表</a>
+          </li>
+          <li><a href="#bb2ede32ce6accb8">使用管局样式或局部样式</a>
+          </li>
+          <li><a href="#a3e433077b7a6be8">使用类或者对象的像是显示JSON数据</a>
+          </li>
+          <li><a href="#c70df468139db338">在部署图中显示JSON数据（用例，组件，部署）</a>
+          </li>
+          <li><a href="#84fccc92ba6ffe09">在状态图中显示JSON数据</a>
+          </li>
+          <li><a href="#0fc8b739906c385d">Creole on JSON</a>
+          </li>
+        </ul>
+      </div>
+    </aside>
+
+  </div>
+    <script src="../../viz-global.js"></script>
+    <script src="../../plantuml.js"></script>
+    <script>
+        (function () {
+            const render = window.plantumlRender;
+            if (typeof render !== "function") {
+                console.error("PlantUML renderer is unavailable.");
+                return;
+            }
+
+            const renderOptions = {};
+            let counter = 0;
+
+            document.querySelectorAll(".mycell").forEach((mycell) => {
+                const host = mycell.parentElement;
+                const textarea = host ? host.previousElementSibling : null;
+                if (!textarea || textarea.tagName !== "TEXTAREA") return;
+
+                if (!mycell.id) {
+                    counter += 1;
+                    mycell.id = "mycell-render-" + counter;
+                }
+
+                const draw = () => {
+                    mycell.innerHTML = "";
+                    render(textarea.value.split(/\r\n|\r|\n/), mycell.id, renderOptions);
+                };
+
+                textarea.addEventListener("input", draw);
+                draw();
+            });
+        })();
+    </script>
+</body>
+
+</html>

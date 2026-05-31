@@ -1,0 +1,58 @@
+Title: 改变箭头方向
+Describe: None
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+默认情况下，类之间的链接有两个破折号 `--` ，并且是垂直方向的。 可以通过像这样放一个破折号（或点）来使用水平链接。
+
+[UML]
+@startuml
+:user: --> (Use case 1)
+:user: -> (Use case 2)
+@enduml
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+你也可以通过反转链接来改变方向。
+
+[UML]
+@startuml
+(Use case 1) <.. :user:
+(Use case 2) <- :user:
+@enduml
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+也可以通过在箭头内添加 `left`, `right`, `up` 或 `down` 关键字来改变箭头方向。
+
+[UML]
+@startuml
+:user: -left-> (dummyLeft)
+:user: -right-> (dummyRight)
+:user: -up-> (dummyUp)
+:user: -down-> (dummyDown)
+@enduml
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+你可以通过只使用方向的第一个字符来缩短箭头（例如， `-d-` ，而不是 `-down-` ） 或两个第一个字符( `-do-` )。 
+请注意，你不应该滥用这个功能： Graphviz 通常在没有 调整的情况下给出良好的结果。 
+并使用 `left to right direction` 参数。
+
+[UML]
+@startuml
+left to right direction
+:user: -left-> (dummyLeft)
+:user: -right-> (dummyRight)
+:user: -up-> (dummyUp)
+:user: -down-> (dummyDown)
+@enduml
+------------------------------------------------------------

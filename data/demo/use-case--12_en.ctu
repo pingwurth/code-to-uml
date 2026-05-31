@@ -1,0 +1,33 @@
+Title: Left to right direction
+Describe: None
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+The general default behavior when building diagram is top to bottom.
+
+[UML]
+@startuml
+'default
+top to bottom direction
+user1 --> (Usecase 1)
+user2 --> (Usecase 2)
+
+@enduml
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+You may change to left to right using the `left to right direction` command. The result is often better with this direction.
+
+[UML]
+@startuml
+
+left to right direction
+user1 --> (Usecase 1)
+user2 --> (Usecase 2)
+
+@enduml
+------------------------------------------------------------

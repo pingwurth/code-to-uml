@@ -1,0 +1,56 @@
+Title: Adding methods
+Describe: None
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+To declare fields and methods, you can use the symbol `:` followed by the field's or method's name.
+The system checks for parenthesis to choose between methods and fields.
+
+[UML]
+@startuml
+Object <|-- ArrayList
+
+Object : equals()
+ArrayList : Object[] elementData
+ArrayList : size()
+
+@enduml
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+It is also possible to group between brackets `{}` all fields and methods.
+Note that the syntax is highly flexible about type/name order.
+
+[UML]
+@startuml
+class Dummy {
+  String data
+  void methods()
+}
+
+class Flight {
+   flightNumber : Integer
+   departureTime : Date
+}
+@enduml
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+You can use `{field}` and `{method}` modifiers to
+override default behaviour of the parser about fields and methods.
+
+[UML]
+@startuml
+class Dummy {
+  {field} A field (despite parentheses)
+  {method} Some method
+}
+
+@enduml
+------------------------------------------------------------

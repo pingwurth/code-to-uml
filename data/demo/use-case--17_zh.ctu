@@ -1,0 +1,18 @@
+Title: 改变元素的颜色和样式（内联样式）
+Describe: None
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+你可以用以下符号改变单个元素的 颜色 或样式。 
+ - `#[color|back:color];line:color;line.[bold|dashed|dotted];text:color`
+
+[UML]
+@startuml
+actor a
+actor b #pink;line:red;line.bold;text:red
+usecase c #palegreen;line:green;line.dashed;text:green
+usecase d #aliceblue;line:blue;line.dotted;text:blue
+@enduml
+------------------------------------------------------------

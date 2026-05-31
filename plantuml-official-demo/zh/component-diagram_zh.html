@@ -1,0 +1,1830 @@
+<html lang="zh">
+
+<head>
+
+
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Organization",
+  "url": "https://plantuml.com",
+  "name": "PlantUML",
+  "sameAs" : ["https://twitter.com/plantuml","https://en.wikipedia.org/wiki/PlantUML","https://www.wikidata.org/wiki/Q18346546"],
+  "logo": "https://cdn-0.plantuml.com/logo3.png",
+  "contactPoint": [{
+    "@type": "ContactPoint",
+    "email": "plantuml@gmail.com",
+    "url": "https://plantuml.com",
+    "contactType": "customer service"
+  }]
+}
+</script>
+  <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+    "@type": "ListItem",
+    "position": 1,
+    "item": {
+      "@id": "https://plantuml.com",
+      "name": "Home"
+    }
+  },{
+    "@type": "ListItem",
+    "position": 2,
+    "item": {
+      "@id": "https://plantuml.com/sitemap-language-specification",
+      "name": "Language specification"
+    }
+  },{
+    "@type": "ListItem",
+    "position": 3,
+    "item": {
+      "@id": "https://plantuml.com/component-diagram",
+      "name": "Component Diagram"
+  }
+  }]
+}
+</script>
+  <link rel="canonical" href="https://plantuml.com/zh/component-diagram" />
+  <link rel="alternate" hreflang="x-default" href="https://plantuml.com/component-diagram" />
+  <link rel="alternate" hreflang="de" href="https://plantuml.com/de/component-diagram" />
+  <link rel="alternate" hreflang="en" href="https://plantuml.com/component-diagram" />
+  <link rel="alternate" hreflang="es" href="https://plantuml.com/es/component-diagram" />
+  <link rel="alternate" hreflang="fr" href="https://plantuml.com/fr/component-diagram" />
+  <link rel="alternate" hreflang="ja" href="https://plantuml.com/ja/component-diagram" />
+  <link rel="alternate" hreflang="ko" href="https://plantuml.com/ko/component-diagram" />
+  <link rel="alternate" hreflang="zh" href="https://plantuml.com/zh/component-diagram" />
+
+  <link rel="shortcut icon" href="/favicon.ico" />
+
+
+  <!-- link rel="preload" as="image" href="https://img.shields.io/liberapay/patrons/plantuml.svg?logo=liberapay" -->
+
+
+  <title>组件图的语法和功能</title>
+  <meta name="description" content="PlantUML组件图语法：您可以定义界面、组件、关系、分组、备注...也可以改变字体和颜色。" />
+
+  <meta property="og:type" content="article" />
+  <!-- volt:dokuwiki titleog: -->
+  <!-- volt:dokuwiki descriptionog: -->
+
+  <meta property="og:url" content="https://plantuml.com/zh/component-diagram" />
+  <meta property="og:site_name" content="PlantUML.com" />
+
+  <!-- meta property="og:image" content="https://plantuml.com/og-component-diagram" -->
+  <meta name="twitter:image" content="https://plantuml.com/og-component-diagram" />
+  <meta property="og:locale" content="zh" />
+
+  <meta name="twitter:card" content="summary" />
+  <!-- volt:dokuwiki titletwitter: -->
+  <!-- volt:dokuwiki descriptiontwitter: -->
+  <meta name="twitter:site" content="@PlantUML" />
+  <meta name="twitter:creator" content="@PlantUML" />
+
+
+  <!-- https://www.w3schools.com/colors/colors_picker.asp -->
+  <!-- filter css https://codepen.io/sosuke/pen/Pjoqqp -->
+
+
+  <style>
+    .scale {}
+
+    li {
+      margin: 2px;
+    }
+
+    #external li {
+      margin: 13px;
+    }
+
+    @media screen and (max-width: 1190px) {
+    }
+
+
+    .coptable {
+      max-width: 90%;
+    }
+
+    .mytab {
+      display: inline-block;
+      border-radius: 3px;
+      border: 1px solid #e1e4e8;
+    }
+
+    .mytab:hover {
+      border: 1px dashed #0366d6;
+      cursor: pointer;
+      color: #0366d6;
+      background: #f6f8fa;
+    }
+
+    .cop {
+      margin: 25px 10px 0 10px;
+    }
+
+    .cop:hover {
+      cursor: pointer;
+      filter: invert(30%) sepia(75%) saturate(4001%) hue-rotate(201deg) brightness(88%) contrast(98%);
+    }
+
+    .cop2 {
+      margin: 25px 10px 0 10px;
+    }
+
+    .cop2:hover {
+      cursor: pointer;
+    }
+
+    .msg {
+      position: absolute;
+      color: #339966;
+      background-color: #FFF;
+      margin-top: 55px;
+      display: none;
+      border-radius: 3px;
+      border: 1px solid #4dff00;
+    }
+
+    .mycell0 {
+      float: left;
+      vertical-align: top;
+      padding: 10px;
+    }
+
+    .mycell0 code:hover {
+      cursor: default;
+      color: #000;
+    }
+
+    .mycell {
+      float: right;
+      vertical-align: top;
+      padding: 10px;
+      max-width: 55vw;
+      overflow-x: auto;
+    }
+
+    .mycell0 pre {
+      max-width: 55vw;
+      overflow-x: auto;
+    }
+
+    .cod {
+      background: #edeff3;
+      padding: 2px 5px;
+      border-radius: 3px;
+    }
+
+    .colo {
+      display: inline-block;
+      background: #edeff3;
+      padding: 7px 12px;
+      border-radius: 3px;
+    }
+
+    .tag,
+    .tagg,
+    .tago,
+    .tagr {
+      text-rendering: optimizeLegibility;
+      display: inline-block;
+      padding: 3px 5px 2px 4px;
+      text-decoration: none;
+      white-space: nowrap;
+      border: 1px solid #999;
+      text-transform: uppercase;
+      text-align: center;
+      border-radius: 3px;
+      font-size: 11px;
+      font-weight: bold;
+      line-height: 90%;
+    }
+
+    .tag {
+      background-color: #EEEEEE;
+    }
+
+    .tagg {
+      background-color: #98FB98;
+    }
+
+    .tago {
+      background-color: #fafa00;
+    }
+
+    .tagr {
+      background-color: #FF4500;
+    }
+
+
+    a {
+      text-decoration: none;
+      color: #0366d6;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .menu1 {
+      display: flex;
+      flex-direction: row;
+      border: 0;
+      font-size: 14px;
+      padding: 0;
+      margin: 0;
+      white-space: nowrap;
+    }
+
+    .menu1 a {
+      white-space: nowrap;
+      padding: 0 8px;
+      text-decoration: none;
+      color: #5e6d7d;
+      line-height: 30px;
+      height: 30px;
+    }
+
+    .menu1 a:hover {
+      background: #fefefe;
+      color: #0366d6;
+    }
+
+    .menuside2 {
+      display: flex;
+      flex-direction: column;
+      border: 0;
+      font-size: 14px;
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+      justify-content: center;
+    }
+
+    .menuside2 img {
+      vertical-align: top;
+      padding: 0 8px;
+      filter: brightness(0) saturate(100%) invert(42%) sepia(22%) saturate(385%) hue-rotate(170deg) brightness(92%) contrast(84%);
+    }
+
+    .menuside2 a {
+      padding: 6px 0;
+      text-decoration: none;
+      color: #5e6d7d;
+    }
+
+    .menuside2 a:hover {
+      color: #0366d6;
+      background: #fefefe;
+    }
+
+    .menuside2 a:hover img {
+      filter: brightness(0) saturate(100%) invert(23%) sepia(44%) saturate(7029%) hue-rotate(203deg) brightness(94%) contrast(98%);
+    }
+
+    .breadcrumb {
+      z-index: 1;
+      font-size: 14px;
+      text-align: center;
+      display: inline-block;
+      overflow: hidden;
+      border-radius: 5px;
+    }
+
+
+    .breadcrumb a {
+      text-decoration: none;
+      outline: none;
+      display: block;
+      float: left;
+      font-size: 12px;
+      line-height: 24px;
+      color: #373f49;
+      padding: 0 10px 0 35px;
+      background: #f0f1f1;
+      background: linear-gradient(#f0f1f1, #c6d2d2);
+      position: relative;
+    }
+
+    .breadcrumb a:first-child {
+      padding-left: 21px;
+      border-radius: 5px 0 0 5px;
+      /*to match with the parent's radius*/
+    }
+
+    .breadcrumb a:first-child:before {
+      left: 14px;
+    }
+
+    .breadcrumb a:last-child {
+      visibility: hidden;
+    }
+
+    .breadcrumb a.active,
+    .breadcrumb a:hover {
+      color: #0366d6;
+      background: #c6d2d2;
+      background: linear-gradient(#e3e4e4, #b8c7c7);
+    }
+
+    .breadcrumb a.active:after,
+    .breadcrumb a:hover:after {
+      background: #c6d2d2;
+      background: linear-gradient(135deg, #e3e4e4, #b8c7c7);
+    }
+
+    .breadcrumb a:after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: -12px;
+      /*half of square's length*/
+      /*same dimension as the line-height of .breadcrumb a */
+      width: 24px;
+      height: 24px;
+      transform: scale(0.707) rotate(45deg);
+      /*we need to prevent the arrows from getting buried under the next link*/
+      z-index: 1;
+      /*background same as links but the gradient will be rotated to compensate with the transform applied*/
+      background: #f0f1f1;
+      background: linear-gradient(135deg, #f0f1f1, #c6d2d2);
+      /*stylish arrow design using box shadow*/
+      box-shadow:
+        2px -2px 0 2px rgba(0, 0, 0, 0.1),
+        3px -3px 0 2px rgba(255, 255, 255, 0.1);
+      /*
+		5px - for rounded arrows and 
+		50px - to prevent hover glitches on the border created using shadows*/
+      border-radius: 0 5px 0 50px;
+    }
+
+    /*we dont need an arrow after the last link*/
+    .breadcrumb a:last-child:after {
+      content: none;
+      visibility: hidden;
+    }
+
+
+    .lga,
+    .lga a,
+    .lgi,
+    .lgi a {
+      font-size: 13px;
+      text-align: center;
+      color: #fff;
+      padding: 0 5px;
+      margin: 0;
+    }
+
+    .lga,
+    .lga a {
+      background-color: #008;
+    }
+
+    .lgi,
+    .lgi a {
+      background-color: #888;
+    }
+
+    .lga:hover,
+    .lga:hover a {
+      text-decoration: none;
+      color: #BBB;
+    }
+
+    .lgi:hover,
+    .lgi:hover a {
+      text-decoration: none;
+      color: #CCC;
+    }
+  </style>
+  <style>
+    body {
+      font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+      font-size: 14px;
+      line-height: 1.5;
+      margin: auto;
+      overflow-x: hidden;
+      background: #fefefe;
+    }
+
+    h1.chap {
+      font-size: 1.8em;
+    }
+
+    h2.chap {
+      font-size: 1.35em;
+    }
+
+    h3,
+    h3.chap {
+      font-size: 1.15em;
+    }
+
+    h4 {
+      font-size: 1.05em;
+    }
+
+    table {
+      font-size: inherit;
+    }
+  </style>
+
+
+  <style>
+    .dyn {
+      display: flex;
+      flex-direction: row;
+      gap: 3em;
+      align-items: stretch;
+      flex-wrap: wrap;
+      margin: 10px 0;
+    }
+
+    .dyn textarea {
+      font-family: monospace;
+      font-size: 13px;
+      line-height: 1.4;
+      min-width: 30ch;
+      max-width: 90ch;
+      box-sizing: border-box;
+      resize: both;
+      white-space: pre;
+      overflow: auto;
+      field-sizing: content;
+      align-self: stretch;
+      border: 1px solid #888;
+      border-radius: 3px;
+      margin: 0;
+      padding: 4px 8px;
+      background: #fefefe;
+    }
+
+    .dyn>div {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      display: flex;
+    }
+
+    .dyn>div>div {
+      margin: 0;
+      padding: 0;
+    }
+
+    .dyn img {
+      margin: 0;
+      padding: 0;
+    }
+
+    .scale {
+      max-width: 100%;
+      height: auto;
+      border: 1px solid #dde;
+      border-radius: 4px;
+    }
+  </style>
+
+
+  <script>
+    var llg = "zh";
+    var az = 0;
+    var amdark = 0;
+    function ljs(n) {
+      if (az) return false;
+      var sc = document.createElement("script");
+      sc.type = "text/javascript";
+      sc.src = "/btn-" + n + ".js";
+      document.body.innerHTML = "<i style='position:absolute;top:30%;width:100%;'><center>Loading in progress...";
+      document.body.appendChild(sc);
+    }
+    function ctc(id) {
+      document.getElementById('img' + id).classList.remove('cop'); document.getElementById('img' + id).classList.add('cop2');
+      document.getElementById('pre' + id).style.backgroundColor = '#4dff00';
+      document.getElementById('msg' + id).style.display = 'inline';
+
+      setTimeout(function () { document.getElementById('img' + id).classList.remove('cop2'); document.getElementById('img' + id).classList.add('cop'); document.getElementById('pre' + id).style.backgroundColor = ''; document.getElementById('msg' + id).style.display = 'none'; }, 800);
+
+
+      text = document.getElementById('pre' + id).innerText;
+      if (window.clipboardData && window.clipboardData.setData)
+        return window.clipboardData.setData("Text", text);
+      else if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
+        var ta = document.createElement("textarea");
+        ta.textContent = text;
+        ta.style.position = "fixed";
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          return document.execCommand("copy");
+        }
+        catch (ex) {
+          return false;
+        }
+        finally {
+          document.body.removeChild(ta);
+        }
+      }
+    }
+  </script>
+</head>
+
+<body>
+  <style>
+    body,
+    .container,
+    #B3,
+    #C5,
+    #C6,
+    #C7,
+    #D7,
+    #D8 {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      overflow-y: scroll;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      grid-template-rows: auto 1fr auto;
+      min-height: 100vh;
+    }
+
+    #B3 {
+      grid-column: 1 / 5;
+      grid-row: 1;
+      position: sticky;
+      top: 0;
+      height: 30px;
+      padding: 0;
+      z-index: 10;
+      overflow: hidden;
+      background: #edeff3;
+      border-bottom: 1px solid #d4d8de;
+    }
+
+    #D7 {
+      grid-column: 1;
+      grid-row: 2;
+      margin: 0;
+      padding: 0;
+      padding-left: 30px;
+      line-height: 1.6;
+    }
+
+    #D8 {
+      grid-column: 1;
+      grid-row: 3;
+      position: sticky;
+      bottom: 0;
+      z-index: 5;
+      background: #fefefe;
+    }
+
+    #C5 {
+      grid-column: 2;
+      grid-row: 1 / -1;
+      position: sticky;
+      top: 40px;
+      align-self: start;
+      height: calc(98vh - 60px);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #C6 {
+      grid-column: 3;
+      grid-row: 1 / -1;
+      position: sticky;
+      top: 40px;
+      align-self: start;
+      height: calc(98vh - 60px);
+      max-width: 200px;
+      overflow: hidden;
+      margin: 0 10px;
+      padding: 8px 5px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #C7 {
+      grid-column: 4;
+      grid-row: 1 / -1;
+      position: sticky;
+      top: 40px;
+      align-self: start;
+      height: calc(98vh - 60px);
+      margin: 0 20px 0 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #toc {
+      z-index: 15;
+      overflow-x: hidden;
+      overflow-y: auto;
+      background: #f6f8fa;
+      border-width: 2px;
+      border-style: groove;
+      border-radius: 3px;
+      border-color: #e1e4e8;
+      margin: 0 5px;
+      padding: 0;
+      max-height: 100%;
+    }
+
+    #toc ul {
+      margin: 0;
+      list-style-type: none;
+      padding: 0;
+    }
+
+    #toc li {
+      padding: 0 10px;
+      margin: 0;
+    }
+
+    #toc li a {
+      padding: 5px 0;
+      display: inline-block;
+      text-decoration: none;
+      width: 100%;
+      color: #5e6d7d;
+    }
+
+    #toc li a:hover {
+      color: #0366d6;
+    }
+
+    #toc li:hover {
+      background: #fefefe;
+    }
+
+    #magic {
+      position: absolute;
+      top: 0;
+      right: 50px;
+      width: 30px;
+      height: 30px;
+      overflow: hidden;
+      background: #edeff3;
+      z-index: 14;
+    }
+
+    #magic:hover {
+      width: calc(100% - 50px);
+    }
+
+    #magic .menu1 {
+      position: absolute;
+      top: 0;
+      right: 30px;
+      height: 30px;
+      padding-left: 10px;
+      background: #edeff3;
+      border-left: 1px solid #d4d8de;
+      border-bottom: 1px solid #d4d8de;
+    }
+
+    .menu1-tail {
+      flex-grow: 1;
+      flex-shrink: 0;
+      height: 30px;
+      position: relative;
+      z-index: 15;
+      background: #edeff3;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: auto auto auto;
+      grid-auto-rows: auto;
+      gap: 5px;
+      margin: 0;
+      padding: 0;
+    }
+
+    .merged {
+      grid-column: 1 / -1;
+    }
+
+    #C6 {
+      display: none;
+    }
+
+    @media (min-width: 1401px) {
+      #C6:has(#toc li) {
+        display: flex;
+      }
+    }
+
+    @media (max-width: 1100px) {
+      #C5,
+      #C7 {
+        display: none;
+      }
+    }
+
+    @media (max-width: 1200px) {
+      .merged {
+        display: none;
+      }
+    }
+  </style>
+
+  <div class="container">
+
+    <footer id="D8">
+
+      <p>
+      </p>
+      <p>
+
+      </p>
+    </footer>
+
+
+    <header id="B3">
+      <div class="menu1">
+        <a id="titem10" href="sequence-diagram_zh.html">时序图</a>
+        <a id="titem20" href="use-case-diagram_zh.html">用例图</a>
+        <a id="titem30" href="class-diagram_zh.html">类图</a>
+        <a id="titem40" href="activity-diagram-beta_zh.html">活动图</a>
+        <a id="titem50" href="component-diagram_zh.html">组件图</a>
+        <a id="titem60" href="state-diagram_zh.html">状态图</a>
+        <a id="titem70" href="object-diagram_zh.html">对象图</a>
+        <a id="titem80" href="deployment-diagram_zh.html">部署图</a>
+        <a id="titem90" href="timing-diagram_zh.html">定时图</a>
+
+        <a id="titem99" href="regex_zh.html">Regex</a>
+        <a id="titem100" href="nwdiag_zh.html">Network</a>
+        <a id="titem110" href="salt_zh.html">Wireframe</a>
+        <a id="titem120" href="archimate-diagram_zh.html">Archimate</a>
+        <a id="titem130" href="gantt-diagram_zh.html">Gantt</a>
+        <a id="titem140" href="mindmap-diagram_zh.html">MindMap</a>
+        <a id="titem150" href="wbs-diagram_zh.html">WBS</a>
+        <a id="titem151" href="ebnf_zh.html">EBNF</a>
+        <a id="titem160" href="json_zh.html">JSON</a>
+        <a id="titem170" href="yaml_zh.html">YAML</a>
+
+        <div class="menu1-tail"></div>
+      </div>
+      <div id="magic">
+        <div class="menu1">
+          <a id="titem10" href="sequence-diagram_zh.html">时序图</a>
+          <a id="titem20" href="use-case-diagram_zh.html">用例图</a>
+          <a id="titem30" href="class-diagram_zh.html">类图</a>
+          <a id="titem40" href="activity-diagram-beta_zh.html">活动图</a>
+          <a id="titem50" href="component-diagram_zh.html">组件图</a>
+          <a id="titem60" href="state-diagram_zh.html">状态图</a>
+          <a id="titem70" href="object-diagram_zh.html">对象图</a>
+          <a id="titem80" href="deployment-diagram_zh.html">部署图</a>
+          <a id="titem90" href="timing-diagram_zh.html">定时图</a>
+
+          <a id="titem99" href="regex_zh.html">Regex</a>
+          <a id="titem100" href="nwdiag_zh.html">Network</a>
+          <a id="titem110" href="salt_zh.html">Wireframe</a>
+          <a id="titem120" href="archimate-diagram_zh.html">Archimate</a>
+          <a id="titem130" href="gantt-diagram_zh.html">Gantt</a>
+          <a id="titem140" href="mindmap-diagram_zh.html">MindMap</a>
+          <a id="titem150" href="wbs-diagram_zh.html">WBS</a>
+          <a id="titem151" href="ebnf_zh.html">EBNF</a>
+          <a id="titem160" href="json_zh.html">JSON</a>
+          <a id="titem170" href="yaml_zh.html">YAML</a>
+
+          <div class="menu1-tail"></div>
+        </div>
+      </div><!-- magic -->
+    </header>
+
+    <main id="D7">
+
+      <style>
+        #donate {
+          padding-top: 10px;
+          min-height: 30px;
+        }
+      </style>
+
+
+      <p style="clear:both;">
+
+
+        <style>
+          #titem50 {
+            color: #0366d6;
+            background-color: #fefefe;
+          }
+
+          #titem50 img {
+            filter: brightness(0) saturate(100%) invert(23%) sepia(44%) saturate(7029%) hue-rotate(203deg) brightness(94%) contrast(98%);
+          }
+
+          .menu1:hover #titem50 {
+            color: #5e6d7d;
+          }
+
+          .menu1:hover #titem50:hover {
+            color: #0366d6;
+          }
+
+          .menu1:hover #titem50 img {
+            filter: brightness(0) saturate(100%) invert(42%) sepia(22%) saturate(385%) hue-rotate(170deg) brightness(92%) contrast(84%);
+          }
+        </style>
+
+
+        <a style="position:relative;top:-38px;" name="b17b94e5873c5faf"></a>
+        <!--heading-->
+      </p>
+      <h1 class="chap">组件图</h1>
+      <p></p>
+      <strong>组件图</strong>：组件图是 UML（统一建模语言）中的一种结构图，用于可视化系统组件的组织和关系。这些图有助于将复杂的系统分解成易于管理的组件，展示它们之间的相互依存关系，确保高效的系统设计和架构。
+      <p></p>
+      <strong>PlantUML 的优势</strong>：
+      <ul>
+        <li><strong>简单</strong>：使用 PlantUML，您可以使用简单直观的文本描述来创建组件图，无需使用复杂的绘图工具。</li>
+        <li><strong>集成</strong>：PlantUML 可* 与各种工具和平台无缝集成，是开发人员和建筑师的多功能选择。</li>
+        <li><strong>协作</strong>：<a href="https://forum.plantuml.net/">PlantUML
+            论坛</a>为用户提供了一个讨论、分享和寻求图表帮助的平台，从而培养了一个协作社区。</li>
+      </ul>
+      <a style="position:relative;top:-38px;" name="05bbb43b3d923283"></a>
+      <!--heading-->
+      <h2 class="chap">组件</h2>
+      组件必须用中括号括起来。
+      <p></p>
+      还可以使用关键字<code class="cod">component</code>定义一个组件。
+      并且可以用关键字<code class="cod">as</code>给组件定义一个别名。
+      这个别名可以在稍后定义关系的时候使用。
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+[First component]
+[Another component] as Comp2
+component Comp3
+component [Last\ncomponent] as Comp4
+
+@enduml
+</textarea>
+        <div id="out87880803702e6613add26e36f08d0d55">
+          <div class="mycell">
+            <img loading="lazy" width="357" height="193" class="scale"
+              src="/imgw/img-87880803702e6613add26e36f08d0d55.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>命名例外</h3>
+      注意，以<code class="cod">$</code> 开头的组件名以后不能隐藏或删除，因为<code class="cod">hide</code> 和<code class="cod">remove</code>
+      命令会将该名称视为<code class="cod">$tag</code> ，而不是组件名。要删除此类组件，必须为其添加别名或标记。
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+component [$C1]
+component [$C2] $C2
+component [$C2] as dollarC2
+remove $C1
+remove $C2
+remove dollarC2
+@enduml
+</textarea>
+        <div id="out633dda921e5d1a81ad422559a4a34546">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="85" height="67" class="scale"
+              src="/imgw/img-633dda921e5d1a81ad422559a4a34546.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="756640f0aea5f5be"></a>
+      <!--heading-->
+      <h2 class="chap">接口</h2>
+      <p></p>
+      接口可以使用<code class="cod">()</code>来定义(因为这个看起来像个圆)。
+      <p></p>
+      还可以使用关键字<code class="cod">interface</code>关键字来定义接口。
+      并且还可以使用关键字<code class="cod">as</code>定义一个别名。
+      这个别名可以在稍后定义关系的时候使用。
+      <p></p>
+      我们稍后可以看到，接口的定义是可选的。
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+() &#34;First Interface&#34;
+() &#34;Another interface&#34; as Interf2
+interface Interf3
+interface &#34;Last\ninterface&#34; as Interf4
+
+@enduml
+</textarea>
+        <div id="outc2fe1b8ca4e4814089558350ef839f6f">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="262" height="179" class="scale"
+              src="/imgw/img-c2fe1b8ca4e4814089558350ef839f6f.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <a style="position:relative;top:-38px;" name="c96ad883675e26af"></a>
+      <!--heading-->
+      <h2 class="chap">基础示例</h2>
+      <p></p>
+      <p></p>
+      各元素之间可以使用虚线(<code class="cod">..</code>)、直线(<code class="cod">--</code>)、箭头(<code
+        class="cod">--&gt;</code>)的组合进行连接。
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+DataAccess - [First Component]
+[First Component] ..&gt; HTTP : use
+
+@enduml
+</textarea>
+        <div id="oute0af4bbfc620a4ce2f170c95db108786">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="244" height="210" class="scale"
+              src="/imgw/img-e0af4bbfc620a4ce2f170c95db108786.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="d50d8f9219a41435"></a>
+      <!--heading-->
+      <h2 class="chap">使用注释</h2>
+      <p></p>
+      你可以使用
+      <code class="cod">note left of</code> , <code class="cod">note right of</code> ,
+      <code class="cod">note top of</code> , <code class="cod">note bottom of</code>
+      等关键字定义相对于对象位置的注释。
+      <p></p>
+      <p></p>
+      也可以使用关键字<code class="cod">note</code>单独定义注释，然后使用虚线(<code class="cod">..</code>)将其连接到其他对象。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+interface &#34;Data Access&#34; as DA
+
+DA - [First Component]
+[First Component] ..&gt; HTTP : use
+
+note left of HTTP : Web Service only
+
+note right of [First Component]
+  A note can also
+  be on several lines
+end note
+
+@enduml
+</textarea>
+        <div id="out272bfc6b4e2ddb4f4f691093f769f65b">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="421" height="193" class="scale"
+              src="/imgw/img-272bfc6b4e2ddb4f4f691093f769f65b.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <p></p>
+      <center>
+        <div class="tago">WARNING</div> <b>This translation need to be updated.</b> <div class="tago">WARNING</div>
+      </center>
+      <a style="position:relative;top:-38px;" name="58bb821cf05c48a2"></a>
+      <!--heading-->
+      <h2 class="chap">组合组件</h2>
+      <p></p>
+      你可以使用多个关键字将组件和接口组合在一起。
+      <ul>
+        <li><code class="cod">package</code></li>
+        <li><code class="cod">node</code></li>
+        <li><code class="cod">folder</code></li>
+        <li><code class="cod">frame</code></li>
+        <li><code class="cod">cloud</code></li>
+        <li><code class="cod">database</code></li>
+      </ul>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+package &#34;Some Group&#34; {
+  HTTP - [First Component]
+  [Another Component]
+}
+
+node &#34;Other Groups&#34; {
+  FTP - [Second Component]
+  [First Component] --&gt; FTP
+}
+
+cloud {
+  [Example 1]
+}
+
+
+database &#34;MySql&#34; {
+  folder &#34;This is my folder&#34; {
+    [Folder 3]
+  }
+  frame &#34;Foo&#34; {
+    [Frame 4]
+  }
+}
+
+
+[Another Component] --&gt; [Example 1]
+[Example 1] --&gt; [Folder 3]
+[Folder 3] --&gt; [Frame 4]
+
+@enduml
+</textarea>
+        <div id="outaad1d881d43f00401657479de07b50ac">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="491" height="590" class="scale"
+              src="/imgw/img-aad1d881d43f00401657479de07b50ac.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="9a49d5ae2dd333a4"></a>
+      <!--heading-->
+      <h2 class="chap">改变箭头方向</h2>
+      <p></p>
+      <p></p>
+      默认情况下，对象之间用<code class="cod">--</code>连接，并且连接是竖直的。不过可以使用一个横线或者点设置水平方向的连接，就行这样：
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+[Component] --&gt; Interface1
+[Component] -&gt; Interface2
+@enduml
+</textarea>
+        <div id="outb64b07bc3722c2363d66894047dcafcb">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="208" height="192" class="scale"
+              src="/imgw/img-b64b07bc3722c2363d66894047dcafcb.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      也可以使用反向连接：
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+Interface1 &lt;-- [Component]
+Interface2 &lt;- [Component]
+@enduml
+</textarea>
+        <div id="out56cf9bd61213bc4a6838377c90fc31ed">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="206" height="175" class="scale"
+              src="/imgw/img-56cf9bd61213bc4a6838377c90fc31ed.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      还可以使用关键字<code class="cod">left</code>, <code class="cod">right</code>, <code class="cod">up</code>
+      or <code class="cod">down</code>改变箭头方向。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+[Component] -left-&gt; left
+[Component] -right-&gt; right
+[Component] -up-&gt; up
+[Component] -down-&gt; down
+@enduml
+</textarea>
+        <div id="outc66179c2b966fc2dd2e76590775024bf">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="242" height="289" class="scale"
+              src="/imgw/img-c66179c2b966fc2dd2e76590775024bf.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      允许使用方向单词的首字母或者前两个字母表示方向(例如<code class="cod">-d-</code>, <code class="cod">-do-</code>, <code
+        class="cod">-down-</code>都是等价的)。
+      <p></p>
+      请不要乱用这些功能：<em>Graphviz</em>(PlantUML的后端引擎)不喜欢这个样子。
+      <p></p>
+      <p></p>
+      _See also &#39;Change diagram orientation&#39; on [Deployment diagram](deployment-diagram) page._
+      <a style="position:relative;top:-38px;" name="7709bf1c8595d539"></a>
+      <!--heading-->
+      <h2 class="chap">使用 UML2 标记</h2>
+      <p></p>
+      By default <em>(from v1.2020.13-14)</em>, UML2 notation is used.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+interface &#34;Data Access&#34; as DA
+
+DA - [First Component]
+[First Component] ..&gt; HTTP : use
+
+@enduml
+</textarea>
+        <div id="outc24dd9bb376179ecdea673573fe6ea78">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="246" height="210" class="scale"
+              src="/imgw/img-c24dd9bb376179ecdea673573fe6ea78.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="ad4599d2cea99367"></a>
+      <!--heading-->
+      <h2 class="chap">使用UML1标记符</h2>
+      <p></p>
+      命令<code class="cod">skinparam componentStyle uml1</code> 可以切换到UML1标记符。
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+skinparam componentStyle uml1
+
+interface &#34;Data Access&#34; as DA
+
+DA - [First Component]
+[First Component] ..&gt; HTTP : use
+
+@enduml
+</textarea>
+        <div id="out6a2b7ea9c095a80af0a3b95d63fdfdee">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="226" height="200" class="scale"
+              src="/imgw/img-6a2b7ea9c095a80af0a3b95d63fdfdee.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="209c2b6d887c7fde"></a>
+      <!--heading-->
+      <h2 class="chap">使用矩形符号（去除 UML 符号）</h2>
+      <p></p>
+      <code class="cod">skinparam componentStyle rectangle</code> 命令用来切换到矩形符号 <em>(没有任何 UML 符号)</em>.
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+skinparam componentStyle rectangle
+
+interface &#34;Data Access&#34; as DA
+
+DA - [First Component]
+[First Component] ..&gt; HTTP : use
+
+@enduml
+</textarea>
+        <div id="out788144b2a9a22c69b08cedc404ff5ec0">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="226" height="200" class="scale"
+              src="/imgw/img-788144b2a9a22c69b08cedc404ff5ec0.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="a52ab216dd03c499"></a>
+      <!--heading-->
+      <h2 class="chap">长描述</h2>
+      可以用方括号&#34;[ ]&#34;在多行添加描述。
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+component comp1 [
+This component
+has a long comment
+on several lines
+]
+@enduml
+</textarea>
+        <div id="outbb6a25ab1408f14d3e0411bb10a5af42">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="185" height="101" class="scale"
+              src="/imgw/img-bb6a25ab1408f14d3e0411bb10a5af42.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="ea805db4a048a1b7"></a>
+      <!--heading-->
+      <h2 class="chap">不同的颜色表示</h2>
+      <p></p>
+      <p></p>
+      你可以在声明一个组件的后面加上颜色的声明。
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+component  [Web Server] #Yellow
+@enduml
+</textarea>
+        <div id="outf6c7ee4479b8345446f6ca9f331b6241">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="132" height="66" class="scale"
+              src="/imgw/img-f6c7ee4479b8345446f6ca9f331b6241.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="1f0a05cc7e120849"></a>
+      <!--heading-->
+      <h2 class="chap">在定型组件中使用精灵图</h2>
+      你可以在定型组件中使用精灵图（sprite）。
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+sprite $businessProcess [16x16/16] {
+FFFFFFFFFFFFFFFF
+FFFFFFFFFFFFFFFF
+FFFFFFFFFFFFFFFF
+FFFFFFFFFFFFFFFF
+FFFFFFFFFF0FFFFF
+FFFFFFFFFF00FFFF
+FF00000000000FFF
+FF000000000000FF
+FF00000000000FFF
+FFFFFFFFFF00FFFF
+FFFFFFFFFF0FFFFF
+FFFFFFFFFFFFFFFF
+FFFFFFFFFFFFFFFF
+FFFFFFFFFFFFFFFF
+FFFFFFFFFFFFFFFF
+FFFFFFFFFFFFFFFF
+}
+
+
+rectangle &#34; End to End\nbusiness process&#34; &lt;&lt;$businessProcess&gt;&gt; {
+ rectangle &#34;inner process 1&#34; &lt;&lt;$businessProcess&gt;&gt; as src
+ rectangle &#34;inner process 2&#34; &lt;&lt;$businessProcess&gt;&gt; as tgt
+ src -&gt; tgt
+}
+@enduml
+</textarea>
+        <div id="out4820b9a0814b47f7fac94ad474df5090">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="319" height="160" class="scale"
+              src="/imgw/img-4820b9a0814b47f7fac94ad474df5090.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <a style="position:relative;top:-38px;" name="7aa53dbdfc2137bf"></a>
+      <!--heading-->
+      <h2 class="chap">显示参数</h2>
+      <p></p>
+      你可以使用<a href="skinparam">skinparam</a>命令来改变绘图的字体和颜色。
+      <p></p>
+      你可以在下列场景中使用该命令：
+      <ul>
+        <li>在图表的定义中；</li>
+        <li>在<a href="preprocessing">引用的文件</a>中；</li>
+        <li>在<a href="command-line">命令行</a>或者<a href="ant-task">Ant 任务</a>提供的配置文件中。</li>
+      </ul>
+      <p></p>
+      你可以为构造型组件和接口定义特定的颜色和字体。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+skinparam interface {
+  backgroundColor RosyBrown
+  borderColor orange
+}
+
+skinparam component {
+  FontSize 13
+  BackgroundColor&lt;&lt;Apache&gt;&gt; Pink
+  BorderColor&lt;&lt;Apache&gt;&gt; #FF6655
+  FontName Courier
+  BorderColor black
+  BackgroundColor gold
+  ArrowFontName Impact
+  ArrowColor #FF6655
+  ArrowFontColor #777777
+}
+
+() &#34;Data Access&#34; as DA
+Component &#34;Web Server&#34; as WS &lt;&lt; Apache &gt;&gt;
+
+DA - [First Component]
+[First Component] ..&gt; () HTTP : use
+HTTP - WS
+
+@enduml
+</textarea>
+        <div id="out0d583960e486fe90b915aee399be3c7b">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="323" height="208" class="scale"
+              src="/imgw/img-0d583960e486fe90b915aee399be3c7b.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+skinparam component {
+    backgroundColor&lt;&lt;static_lib&gt;&gt; DarkKhaki
+    backgroundColor&lt;&lt;shared_lib&gt;&gt; Green
+}
+
+skinparam node {
+borderColor Green
+backgroundColor Yellow
+backgroundColor&lt;&lt;shared_node&gt;&gt; Magenta
+}
+skinparam databaseBackgroundColor Aqua
+
+[AA] &lt;&lt;static_lib&gt;&gt;
+[BB] &lt;&lt;shared_lib&gt;&gt;
+[CC] &lt;&lt;static_lib&gt;&gt;
+
+node node1
+node node2 &lt;&lt;shared node&gt;&gt;
+database Production
+
+@enduml
+</textarea>
+        <div id="outaa9cd3153e5d03aba4d45d54f62f466e">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="436" height="221" class="scale"
+              src="/imgw/img-aa9cd3153e5d03aba4d45d54f62f466e.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="75b4984abd04b14f"></a>
+      <!--heading-->
+      <h2 class="chap">特定皮肤参数</h2>
+      <p></p>
+      <h3>组件样式 </h3>
+      <p></p>
+      <ul>
+        <li>默认情况下（或使用<code class="cod">skinparam componentStyle uml2</code> ），组件有一个图标。</li>
+      </ul>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+skinparam BackgroundColor transparent
+skinparam componentStyle uml2
+component A {
+   component &#34;A.1&#34; {
+}
+   component A.44 {
+      [A4.1]
+}
+   component &#34;A.2&#34;
+   [A.3]
+   component A.5 [
+A.5] 
+   component A.6 [
+]
+}
+[a]-&gt;[b]
+@enduml
+</textarea>
+        <div id="out300f25e643397c2106fc91de3bdb25ac">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="584" height="272" class="scale"
+              src="/imgw/img-300f25e643397c2106fc91de3bdb25ac.png" />
+          </div>
+        </div>
+      </div>
+      <ul>
+        <li>如果您想取消它，只使用矩形图标，可以使用<code class="cod">skinparam componentStyle rectangle</code></li>
+      </ul>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+skinparam BackgroundColor transparent
+skinparam componentStyle rectangle
+component A {
+   component &#34;A.1&#34; {
+}
+   component A.44 {
+      [A4.1]
+}
+   component &#34;A.2&#34;
+   [A.3]
+   component A.5 [
+A.5] 
+   component A.6 [
+]
+}
+[a]-&gt;[b]
+@enduml
+</textarea>
+        <div id="outd7ec650745982e36fe9e2ae5f49c2e7a">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="464" height="252" class="scale"
+              src="/imgw/img-d7ec650745982e36fe9e2ae5f49c2e7a.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[参考文献<a href="https://forum.plantuml.net/10798">10798］</a></em>
+      <a style="position:relative;top:-38px;" name="0a05899a20325958"></a>
+      <!--heading-->
+      <h2 class="chap">隐藏或删除未链接的组件</h2>
+      <p></p>
+      默认情况下，所有的组件都显示出来：
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+component C1
+component C2
+component C3
+C1 -- C2
+@enduml
+</textarea>
+        <div id="out9b8065661756a5b5e1a7247fe5805b2f">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="170" height="175" class="scale"
+              src="/imgw/img-9b8065661756a5b5e1a7247fe5805b2f.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      但你可以：
+      <ul>
+        <li><code class="cod">hide @unlinked</code> 组件：</li>
+      </ul>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+component C1
+component C2
+component C3
+C1 -- C2
+
+hide @unlinked
+@enduml
+</textarea>
+        <div id="out1f1a31b9f1c6cf3691e5695d46a77582">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="170" height="175" class="scale"
+              src="/imgw/img-1f1a31b9f1c6cf3691e5695d46a77582.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <ul>
+        <li>或<code class="cod">remove @unlinked</code> 组件：</li>
+      </ul>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+component C1
+component C2
+component C3
+C1 -- C2
+
+remove @unlinked
+@enduml
+</textarea>
+        <div id="outbf5cc64b2e5f0db7d2f6c496f206854a">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="77" height="175" class="scale"
+              src="/imgw/img-bf5cc64b2e5f0db7d2f6c496f206854a.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <em>[参考<a href="https://forum.plantuml.net/11052">QA-11052</a>]</em>
+      <a style="position:relative;top:-38px;" name="e966f55ffa507384"></a>
+      <!--heading-->
+      <h2 class="chap">隐藏、删除或恢复被标记的组件或通配符</h2>
+      <p></p>
+      你可以在组件中添加 <code class="cod">$tags</code> (使用 <code class="cod">$</code> 符号) , 然后单独或者按照标记删除、隐藏或者还原组件.
+      <p></p>
+      默认情况下，所有的组件都会显示:
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+component C1 $tag13
+component C2
+component C3 $tag13
+C1 -- C2
+@enduml
+</textarea>
+        <div id="out7da6f39f173a905993e242816a5ccb6f">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="170" height="175" class="scale"
+              src="/imgw/img-7da6f39f173a905993e242816a5ccb6f.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      但是你可以:
+      <ul>
+        <li><code class="cod">hide $tag13</code> 以隐藏组件组件:</li>
+      </ul>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+component C1 $tag13
+component C2
+component C3 $tag13
+C1 -- C2
+
+hide $tag13
+@enduml
+</textarea>
+        <div id="out2af739cdda180d610dffcb4d1e742272">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="170" height="175" class="scale"
+              src="/imgw/img-2af739cdda180d610dffcb4d1e742272.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <ul>
+        <li>或者 <code class="cod">remove $tag13</code> 以移除组件:</li>
+      </ul>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+component C1 $tag13
+component C2
+component C3 $tag13
+C1 -- C2
+
+remove $tag13
+@enduml
+</textarea>
+        <div id="outc05a592e389e18671c14db6ad51abd6b">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="77" height="67" class="scale"
+              src="/imgw/img-c05a592e389e18671c14db6ad51abd6b.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <ul>
+        <li>或者 <code class="cod">remove $tag13 and restore $tag1</code> 以移除一个标记下的组件并还原另一个标记下的组件:</li>
+      </ul>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+component C1 $tag13 $tag1
+component C2
+component C3 $tag13
+C1 -- C2
+
+remove $tag13
+restore $tag1
+@enduml
+</textarea>
+        <div id="out958468509b35b07f174e8a1e77f5e3dc">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="77" height="175" class="scale"
+              src="/imgw/img-958468509b35b07f174e8a1e77f5e3dc.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <ul>
+        <li>或者 <code class="cod">remove * and restore $tag1</code> 以移除全部组件并且还原一个被标记的组件:</li>
+      </ul>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+component C1 $tag13 $tag1
+component C2
+component C3 $tag13
+C1 -- C2
+
+remove *
+restore $tag1
+@enduml
+</textarea>
+        <div id="outed6ee56b34cfff445df18d1dbe9febf5">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="77" height="67" class="scale"
+              src="/imgw/img-ed6ee56b34cfff445df18d1dbe9febf5.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/7337">QA-7337</a> and <a
+          href="https://forum.plantuml.net/11052">QA-11052</a>]</em>
+      <a style="position:relative;top:-38px;" name="82248f3257b14836"></a>
+      <!--heading-->
+      <h2 class="chap">在组件图上显示JSON数据</h2>
+      <p></p>
+      <h3>简单的例子</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+allowmixing
+
+component Component
+()        Interface
+
+json JSON {
+   &#34;fruit&#34;:&#34;Apple&#34;,
+   &#34;size&#34;:&#34;Large&#34;,
+   &#34;color&#34;: [&#34;Red&#34;, &#34;Green&#34;]
+}
+@enduml
+</textarea>
+        <div id="out04eb097e7c609f7c89a0d347049a45e0">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="230" height="247" class="scale"
+              src="/imgw/img-04eb097e7c609f7c89a0d347049a45e0.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref.<a
+          href="https://forum.plantuml.net/15481/possible-link-elements-from-two-jsons-with-both-jsons-embeded?show=15567#c15567">QA-15481</a>]</em>
+      <p></p>
+      关于另一个例子，请看[JSON页面](json#2fyxla9p9ob6l3t3tjre)。
+      <a style="position:relative;top:-38px;" name="76402ab93d6541bf"></a>
+      <!--heading-->
+      <h2 class="chap">端口 [port, portIn, portOut]</h2>
+      <p></p>
+      您可以用<code class="cod">port</code>,<code class="cod">portin</code>和<code class="cod">portout</code>
+      关键词添加<strong>端口</strong>。
+      <p></p>
+      <h3>端口</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+[c]
+component C {
+  port p1
+  port p2
+  port p3
+  component c1
+}
+
+c --&gt; p1
+c --&gt; p2
+c --&gt; p3
+p1 --&gt; c1
+p2 --&gt; c1
+@enduml
+</textarea>
+        <div id="outb470d811bcef33ff986b6c8b2a83ba56">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="158" height="264" class="scale"
+              src="/imgw/img-b470d811bcef33ff986b6c8b2a83ba56.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>端口输入</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+[c]
+component C {
+  portin p1
+  portin p2
+  portin p3
+  component c1
+}
+
+c --&gt; p1
+c --&gt; p2
+c --&gt; p3
+p1 --&gt; c1
+p2 --&gt; c1
+@enduml
+</textarea>
+        <div id="out3abae1659d73af6bc5d8808211e36e41">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="158" height="264" class="scale"
+              src="/imgw/img-3abae1659d73af6bc5d8808211e36e41.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>端口输出</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+component C {
+  portout p1
+  portout p2
+  portout p3
+  component c1
+}
+[o]
+p1 --&gt; o
+p2 --&gt; o
+p3 --&gt; o
+c1 --&gt; p1
+@enduml
+</textarea>
+        <div id="outd82015db3abfae53fb409ac7c4f450ce">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="165" height="263" class="scale"
+              src="/imgw/img-d82015db3abfae53fb409ac7c4f450ce.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>混合使用 PortIn 和 PortOut</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+[i]
+component C {
+  portin p1
+  portin p2
+  portin p3
+  portout po1
+  portout po2
+  portout po3
+  component c1
+}
+[o]
+
+i --&gt; p1
+i --&gt; p2
+i --&gt; p3
+p1 --&gt; c1
+p2 --&gt; c1
+po1 --&gt; o
+po2 --&gt; o
+po3 --&gt; o
+c1 --&gt; po1
+@enduml
+</textarea>
+        <div id="outcbaf2cc7886aae2c79980c9c1fb6dbf9">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="165" height="427" class="scale"
+              src="/imgw/img-cbaf2cc7886aae2c79980c9c1fb6dbf9.png" />
+          </div>
+        </div>
+      </div>
+
+
+    </main>
+
+
+    <aside id="C6">
+      <!--toc-->
+      <div id="toc">
+        <ul>
+          <li><a href="#05bbb43b3d923283">组件</a>
+          </li>
+          <li><a href="#756640f0aea5f5be">接口</a>
+          </li>
+          <li><a href="#c96ad883675e26af">基础示例</a>
+          </li>
+          <li><a href="#d50d8f9219a41435">使用注释</a>
+          </li>
+          <li><a href="#58bb821cf05c48a2">组合组件</a>
+          </li>
+          <li><a href="#9a49d5ae2dd333a4">改变箭头方向</a>
+          </li>
+          <li><a href="#7709bf1c8595d539">使用 UML2 标记</a>
+          </li>
+          <li><a href="#ad4599d2cea99367">使用UML1标记符</a>
+          </li>
+          <li><a href="#209c2b6d887c7fde">使用矩形符号（去除 UML 符号）</a>
+          </li>
+          <li><a href="#a52ab216dd03c499">长描述</a>
+          </li>
+          <li><a href="#ea805db4a048a1b7">不同的颜色表示</a>
+          </li>
+          <li><a href="#1f0a05cc7e120849">在定型组件中使用精灵图</a>
+          </li>
+          <li><a href="#7aa53dbdfc2137bf">显示参数</a>
+          </li>
+          <li><a href="#75b4984abd04b14f">特定皮肤参数</a>
+          </li>
+          <li><a href="#0a05899a20325958">隐藏或删除未链接的组件</a>
+          </li>
+          <li><a href="#e966f55ffa507384">隐藏、删除或恢复被标记的组件或通配符</a>
+          </li>
+          <li><a href="#82248f3257b14836">在组件图上显示JSON数据</a>
+          </li>
+          <li><a href="#76402ab93d6541bf">端口 [port, portIn, portOut]</a>
+          </li>
+        </ul>
+      </div>
+    </aside>
+
+  </div>
+    <script src="../../viz-global.js"></script>
+    <script src="../../plantuml.js"></script>
+    <script>
+        (function () {
+            const render = window.plantumlRender;
+            if (typeof render !== "function") {
+                console.error("PlantUML renderer is unavailable.");
+                return;
+            }
+
+            const renderOptions = {};
+            let counter = 0;
+
+            document.querySelectorAll(".mycell").forEach((mycell) => {
+                const host = mycell.parentElement;
+                const textarea = host ? host.previousElementSibling : null;
+                if (!textarea || textarea.tagName !== "TEXTAREA") return;
+
+                if (!mycell.id) {
+                    counter += 1;
+                    mycell.id = "mycell-render-" + counter;
+                }
+
+                const draw = () => {
+                    mycell.innerHTML = "";
+                    render(textarea.value.split(/\r\n|\r|\n/), mycell.id, renderOptions);
+                };
+
+                textarea.addEventListener("input", draw);
+                draw();
+            });
+        })();
+    </script>
+</body>
+
+</html>

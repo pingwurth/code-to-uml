@@ -1,0 +1,44 @@
+Title: Association classes
+Describe: None
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+You can define after that a relation has been
+defined between two classes, like in this example:
+
+[UML]
+@startuml
+class Student {
+  Name
+}
+Student "0..*" - "1..*" Course
+(Student, Course) .. Enrollment
+
+class Enrollment {
+  drop()
+  cancel()
+}
+@enduml
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+You can define it in another direction:
+
+[UML]
+@startuml
+class Student {
+  Name
+}
+Student "0..*" -- "1..*" Course
+(Student, Course) . Enrollment
+
+class Enrollment {
+  drop()
+  cancel()
+}
+@enduml
+------------------------------------------------------------

@@ -1,0 +1,1416 @@
+<html lang="en">
+
+<head>
+
+
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Organization",
+  "url": "https://plantuml.com",
+  "name": "PlantUML",
+  "sameAs" : ["https://twitter.com/plantuml","https://en.wikipedia.org/wiki/PlantUML","https://www.wikidata.org/wiki/Q18346546"],
+  "logo": "https://cdn-0.plantuml.com/logo3.png",
+  "contactPoint": [{
+    "@type": "ContactPoint",
+    "email": "plantuml@gmail.com",
+    "url": "https://plantuml.com",
+    "contactType": "customer service"
+  }]
+}
+</script>
+    <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+    "@type": "ListItem",
+    "position": 1,
+    "item": {
+      "@id": "https://plantuml.com",
+      "name": "Home"
+    }
+  },{
+    "@type": "ListItem",
+    "position": 2,
+    "item": {
+      "@id": "https://plantuml.com/sitemap-language-specification",
+      "name": "Language specification"
+    }
+  },{
+    "@type": "ListItem",
+    "position": 3,
+    "item": {
+      "@id": "https://plantuml.com/object-diagram",
+      "name": "Object Diagram"
+  }
+  }]
+}
+</script>
+    <link rel="canonical" href="https://plantuml.com/object-diagram" />
+    <link rel="alternate" hreflang="x-default" href="https://plantuml.com/object-diagram" />
+    <link rel="alternate" hreflang="de" href="https://plantuml.com/de/object-diagram" />
+    <link rel="alternate" hreflang="en" href="https://plantuml.com/object-diagram" />
+    <link rel="alternate" hreflang="es" href="https://plantuml.com/es/object-diagram" />
+    <link rel="alternate" hreflang="fr" href="https://plantuml.com/fr/object-diagram" />
+    <link rel="alternate" hreflang="ja" href="https://plantuml.com/ja/object-diagram" />
+    <link rel="alternate" hreflang="ko" href="https://plantuml.com/ko/object-diagram" />
+    <link rel="alternate" hreflang="zh" href="https://plantuml.com/zh/object-diagram" />
+
+    <link rel="shortcut icon" href="/favicon.ico" />
+
+
+    <!-- link rel="preload" as="image" href="https://img.shields.io/liberapay/patrons/plantuml.svg?logo=liberapay" -->
+
+
+    <title>Object Diagram syntax and features</title>
+    <meta name="description"
+        content="PlantUML object diagram syntax: You can define objects, fields, relationships, packages, notes...  Changing fonts and colors is also possible." />
+
+    <meta property="og:type" content="article" />
+    <!-- volt:dokuwiki titleog: -->
+    <!-- volt:dokuwiki descriptionog: -->
+
+    <meta property="og:url" content="https://plantuml.com/object-diagram" />
+    <meta property="og:site_name" content="PlantUML.com" />
+
+    <!-- meta property="og:image" content="https://plantuml.com/og-object-diagram" -->
+    <meta name="twitter:image" content="https://plantuml.com/og-object-diagram" />
+    <meta property="og:locale" content="en" />
+
+    <meta name="twitter:card" content="summary" />
+    <!-- volt:dokuwiki titletwitter: -->
+    <!-- volt:dokuwiki descriptiontwitter: -->
+    <meta name="twitter:site" content="@PlantUML" />
+    <meta name="twitter:creator" content="@PlantUML" />
+
+    <script>
+        if (window.location.href.indexOf("/en/") == -1) {
+            var lg = navigator.language.substring(0, 2);
+            if (lg == "de") window.location.href = "/de/object-diagram";
+            if (lg == "es") window.location.href = "/es/object-diagram";
+            if (lg == "fr") window.location.href = "/fr/object-diagram";
+            if (lg == "ja") window.location.href = "/ja/object-diagram";
+            if (lg == "ko") window.location.href = "/ko/object-diagram";
+            if (lg == "ru") window.location.href = "/ru/object-diagram";
+            if (lg == "zh") window.location.href = "/zh/object-diagram";
+        }
+    </script>
+
+
+    <!-- https://www.w3schools.com/colors/colors_picker.asp -->
+    <!-- filter css https://codepen.io/sosuke/pen/Pjoqqp -->
+
+
+    <style>
+        .scale {}
+
+        li {
+            margin: 2px;
+        }
+
+        #external li {
+            margin: 13px;
+        }
+
+        @media screen and (max-width: 1190px) {
+        }
+
+
+        .coptable {
+            max-width: 90%;
+        }
+
+        .mytab {
+            display: inline-block;
+            border-radius: 3px;
+            border: 1px solid #e1e4e8;
+        }
+
+        .mytab:hover {
+            border: 1px dashed #0366d6;
+            cursor: pointer;
+            color: #0366d6;
+            background: #f6f8fa;
+        }
+
+        .cop {
+            margin: 25px 10px 0 10px;
+        }
+
+        .cop:hover {
+            cursor: pointer;
+            filter: invert(30%) sepia(75%) saturate(4001%) hue-rotate(201deg) brightness(88%) contrast(98%);
+        }
+
+        .cop2 {
+            margin: 25px 10px 0 10px;
+        }
+
+        .cop2:hover {
+            cursor: pointer;
+        }
+
+        .msg {
+            position: absolute;
+            color: #339966;
+            background-color: #FFF;
+            margin-top: 55px;
+            display: none;
+            border-radius: 3px;
+            border: 1px solid #4dff00;
+        }
+
+        .mycell0 {
+            float: left;
+            vertical-align: top;
+            padding: 10px;
+        }
+
+        .mycell0 code:hover {
+            cursor: default;
+            color: #000;
+        }
+
+        .mycell {
+            float: right;
+            vertical-align: top;
+            padding: 10px;
+            max-width: 55vw;
+            overflow-x: auto;
+        }
+
+        .mycell0 pre {
+            max-width: 55vw;
+            overflow-x: auto;
+        }
+
+        .cod {
+            background: #edeff3;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+
+        .colo {
+            display: inline-block;
+            background: #edeff3;
+            padding: 7px 12px;
+            border-radius: 3px;
+        }
+
+        .tag,
+        .tagg,
+        .tago,
+        .tagr {
+            text-rendering: optimizeLegibility;
+            display: inline-block;
+            padding: 3px 5px 2px 4px;
+            text-decoration: none;
+            white-space: nowrap;
+            border: 1px solid #999;
+            text-transform: uppercase;
+            text-align: center;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: bold;
+            line-height: 90%;
+        }
+
+        .tag {
+            background-color: #EEEEEE;
+        }
+
+        .tagg {
+            background-color: #98FB98;
+        }
+
+        .tago {
+            background-color: #fafa00;
+        }
+
+        .tagr {
+            background-color: #FF4500;
+        }
+
+
+        a {
+            text-decoration: none;
+            color: #0366d6;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .menu1 {
+            display: flex;
+            flex-direction: row;
+            border: 0;
+            font-size: 14px;
+            padding: 0;
+            margin: 0;
+            white-space: nowrap;
+        }
+
+        .menu1 a {
+            white-space: nowrap;
+            padding: 0 8px;
+            text-decoration: none;
+            color: #5e6d7d;
+            line-height: 30px;
+            height: 30px;
+        }
+
+        .menu1 a:hover {
+            background: #fefefe;
+            color: #0366d6;
+        }
+
+        .menuside2 {
+            display: flex;
+            flex-direction: column;
+            border: 0;
+            font-size: 14px;
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
+            justify-content: center;
+        }
+
+        .menuside2 img {
+            vertical-align: top;
+            padding: 0 8px;
+            filter: brightness(0) saturate(100%) invert(42%) sepia(22%) saturate(385%) hue-rotate(170deg) brightness(92%) contrast(84%);
+        }
+
+        .menuside2 a {
+            padding: 6px 0;
+            text-decoration: none;
+            color: #5e6d7d;
+        }
+
+        .menuside2 a:hover {
+            color: #0366d6;
+            background: #fefefe;
+        }
+
+        .menuside2 a:hover img {
+            filter: brightness(0) saturate(100%) invert(23%) sepia(44%) saturate(7029%) hue-rotate(203deg) brightness(94%) contrast(98%);
+        }
+
+        .breadcrumb {
+            z-index: 1;
+            font-size: 14px;
+            text-align: center;
+            display: inline-block;
+            overflow: hidden;
+            border-radius: 5px;
+        }
+
+
+        .breadcrumb a {
+            text-decoration: none;
+            outline: none;
+            display: block;
+            float: left;
+            font-size: 12px;
+            line-height: 24px;
+            color: #373f49;
+            padding: 0 10px 0 35px;
+            background: #f0f1f1;
+            background: linear-gradient(#f0f1f1, #c6d2d2);
+            position: relative;
+        }
+
+        .breadcrumb a:first-child {
+            padding-left: 21px;
+            border-radius: 5px 0 0 5px;
+            /*to match with the parent's radius*/
+        }
+
+        .breadcrumb a:first-child:before {
+            left: 14px;
+        }
+
+        .breadcrumb a:last-child {
+            visibility: hidden;
+        }
+
+        .breadcrumb a.active,
+        .breadcrumb a:hover {
+            color: #0366d6;
+            background: #c6d2d2;
+            background: linear-gradient(#e3e4e4, #b8c7c7);
+        }
+
+        .breadcrumb a.active:after,
+        .breadcrumb a:hover:after {
+            background: #c6d2d2;
+            background: linear-gradient(135deg, #e3e4e4, #b8c7c7);
+        }
+
+        .breadcrumb a:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: -12px;
+            /*half of square's length*/
+            /*same dimension as the line-height of .breadcrumb a */
+            width: 24px;
+            height: 24px;
+            transform: scale(0.707) rotate(45deg);
+            /*we need to prevent the arrows from getting buried under the next link*/
+            z-index: 1;
+            /*background same as links but the gradient will be rotated to compensate with the transform applied*/
+            background: #f0f1f1;
+            background: linear-gradient(135deg, #f0f1f1, #c6d2d2);
+            /*stylish arrow design using box shadow*/
+            box-shadow:
+                2px -2px 0 2px rgba(0, 0, 0, 0.1),
+                3px -3px 0 2px rgba(255, 255, 255, 0.1);
+            /*
+		5px - for rounded arrows and 
+		50px - to prevent hover glitches on the border created using shadows*/
+            border-radius: 0 5px 0 50px;
+        }
+
+        /*we dont need an arrow after the last link*/
+        .breadcrumb a:last-child:after {
+            content: none;
+            visibility: hidden;
+        }
+
+
+        .lga,
+        .lga a,
+        .lgi,
+        .lgi a {
+            font-size: 13px;
+            text-align: center;
+            color: #fff;
+            padding: 0 5px;
+            margin: 0;
+        }
+
+        .lga,
+        .lga a {
+            background-color: #008;
+        }
+
+        .lgi,
+        .lgi a {
+            background-color: #888;
+        }
+
+        .lga:hover,
+        .lga:hover a {
+            text-decoration: none;
+            color: #BBB;
+        }
+
+        .lgi:hover,
+        .lgi:hover a {
+            text-decoration: none;
+            color: #CCC;
+        }
+    </style>
+    <style>
+        body {
+            font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            font-size: 14px;
+            line-height: 1.5;
+            margin: auto;
+            overflow-x: hidden;
+            background: #fefefe;
+        }
+
+        h1.chap {
+            font-size: 1.8em;
+        }
+
+        h2.chap {
+            font-size: 1.35em;
+        }
+
+        h3,
+        h3.chap {
+            font-size: 1.15em;
+        }
+
+        h4 {
+            font-size: 1.05em;
+        }
+
+        table {
+            font-size: inherit;
+        }
+    </style>
+
+
+    <style>
+        .dyn {
+            display: flex;
+            flex-direction: row;
+            gap: 3em;
+            align-items: stretch;
+            flex-wrap: wrap;
+            margin: 10px 0;
+        }
+
+        .dyn textarea {
+            font-family: monospace;
+            font-size: 13px;
+            line-height: 1.4;
+            min-width: 30ch;
+            max-width: 90ch;
+            box-sizing: border-box;
+            resize: both;
+            white-space: pre;
+            overflow: auto;
+            field-sizing: content;
+            align-self: stretch;
+            border: 1px solid #888;
+            border-radius: 3px;
+            margin: 0;
+            padding: 4px 8px;
+            background: #fefefe;
+        }
+
+        .dyn>div {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            display: flex;
+        }
+
+        .dyn>div>div {
+            margin: 0;
+            padding: 0;
+        }
+
+        .dyn img {
+            margin: 0;
+            padding: 0;
+        }
+
+        .scale {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #dde;
+            border-radius: 4px;
+        }
+    </style>
+
+
+    <script>
+        var llg = "en";
+        var az = 0;
+        var amdark = 0;
+        function ljs(n) {
+            if (az) return false;
+            var sc = document.createElement("script");
+            sc.type = "text/javascript";
+            sc.src = "/btn-" + n + ".js";
+            document.body.innerHTML = "<i style='position:absolute;top:30%;width:100%;'><center>Loading in progress...";
+            document.body.appendChild(sc);
+        }
+        function ctc(id) {
+            document.getElementById('img' + id).classList.remove('cop'); document.getElementById('img' + id).classList.add('cop2');
+            document.getElementById('pre' + id).style.backgroundColor = '#4dff00';
+            document.getElementById('msg' + id).style.display = 'inline';
+
+            setTimeout(function () { document.getElementById('img' + id).classList.remove('cop2'); document.getElementById('img' + id).classList.add('cop'); document.getElementById('pre' + id).style.backgroundColor = ''; document.getElementById('msg' + id).style.display = 'none'; }, 800);
+
+
+            text = document.getElementById('pre' + id).innerText;
+            if (window.clipboardData && window.clipboardData.setData)
+                return window.clipboardData.setData("Text", text);
+            else if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
+                var ta = document.createElement("textarea");
+                ta.textContent = text;
+                ta.style.position = "fixed";
+                document.body.appendChild(ta);
+                ta.select();
+                try {
+                    return document.execCommand("copy");
+                }
+                catch (ex) {
+                    return false;
+                }
+                finally {
+                    document.body.removeChild(ta);
+                }
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <style>
+        body,
+        .container,
+        #B3,
+        #C5,
+        #C6,
+        #C7,
+        #D7,
+        #D8 {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            overflow-y: scroll;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr auto auto auto;
+            grid-template-rows: auto 1fr auto;
+            min-height: 100vh;
+        }
+
+        #B3 {
+            grid-column: 1 / 5;
+            grid-row: 1;
+            position: sticky;
+            top: 0;
+            height: 30px;
+            padding: 0;
+            z-index: 10;
+            overflow: hidden;
+            background: #edeff3;
+            border-bottom: 1px solid #d4d8de;
+        }
+
+        #D7 {
+            grid-column: 1;
+            grid-row: 2;
+            margin: 0;
+            padding: 0;
+            padding-left: 30px;
+            line-height: 1.6;
+        }
+
+        #D8 {
+            grid-column: 1;
+            grid-row: 3;
+            position: sticky;
+            bottom: 0;
+            z-index: 5;
+            background: #fefefe;
+        }
+
+        #C5 {
+            grid-column: 2;
+            grid-row: 1 / -1;
+            position: sticky;
+            top: 40px;
+            align-self: start;
+            height: calc(98vh - 60px);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        #C6 {
+            grid-column: 3;
+            grid-row: 1 / -1;
+            position: sticky;
+            top: 40px;
+            align-self: start;
+            height: calc(98vh - 60px);
+            max-width: 200px;
+            overflow: hidden;
+            margin: 0 10px;
+            padding: 8px 5px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        #C7 {
+            grid-column: 4;
+            grid-row: 1 / -1;
+            position: sticky;
+            top: 40px;
+            align-self: start;
+            height: calc(98vh - 60px);
+            margin: 0 20px 0 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        #toc {
+            z-index: 15;
+            overflow-x: hidden;
+            overflow-y: auto;
+            background: #f6f8fa;
+            border-width: 2px;
+            border-style: groove;
+            border-radius: 3px;
+            border-color: #e1e4e8;
+            margin: 0 5px;
+            padding: 0;
+            max-height: 100%;
+        }
+
+        #toc ul {
+            margin: 0;
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #toc li {
+            padding: 0 10px;
+            margin: 0;
+        }
+
+        #toc li a {
+            padding: 5px 0;
+            display: inline-block;
+            text-decoration: none;
+            width: 100%;
+            color: #5e6d7d;
+        }
+
+        #toc li a:hover {
+            color: #0366d6;
+        }
+
+        #toc li:hover {
+            background: #fefefe;
+        }
+
+        #magic {
+            position: absolute;
+            top: 0;
+            right: 50px;
+            width: 30px;
+            height: 30px;
+            overflow: hidden;
+            background: #edeff3;
+            z-index: 14;
+        }
+
+        #magic:hover {
+            width: calc(100% - 50px);
+        }
+
+        #magic .menu1 {
+            position: absolute;
+            top: 0;
+            right: 30px;
+            height: 30px;
+            padding-left: 10px;
+            background: #edeff3;
+            border-left: 1px solid #d4d8de;
+            border-bottom: 1px solid #d4d8de;
+        }
+
+        .menu1-tail {
+            flex-grow: 1;
+            flex-shrink: 0;
+            height: 30px;
+            position: relative;
+            z-index: 15;
+            background: #edeff3;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: auto auto auto;
+            grid-auto-rows: auto;
+            gap: 5px;
+            margin: 0;
+            padding: 0;
+        }
+
+        .merged {
+            grid-column: 1 / -1;
+        }
+
+        #C6 {
+            display: none;
+        }
+
+        @media (min-width: 1401px) {
+            #C6:has(#toc li) {
+                display: flex;
+            }
+        }
+
+        @media (max-width: 1100px) {
+            #C5,
+            #C7 {
+                display: none;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .merged {
+                display: none;
+            }
+        }
+    </style>
+
+    <div class="container">
+
+        <footer id="D8">
+
+            <p>
+            </p>
+            <p>
+
+            </p>
+        </footer>
+
+
+        <header id="B3">
+            <div class="menu1">
+                <a id="titem10" href="sequence-diagram_en.html">Sequence</a>
+                <a id="titem20" href="use-case-diagram_en.html">Use Case</a>
+                <a id="titem30" href="class-diagram_en.html">Class</a>
+                <a id="titem40" href="activity-diagram-beta_en.html">Activity</a>
+                <a id="titem50" href="component-diagram_en.html">Component</a>
+                <a id="titem60" href="state-diagram_en.html">State</a>
+                <a id="titem70" href="object-diagram_en.html">Object</a>
+                <a id="titem80" href="deployment-diagram_en.html">Deployment</a>
+                <a id="titem90" href="timing-diagram_en.html">Timing</a>
+
+                <a id="titem99" href="regex_en.html">Regex</a>
+                <a id="titem100" href="nwdiag_en.html">Network</a>
+                <a id="titem110" href="salt_en.html">Wireframe</a>
+                <a id="titem120" href="archimate-diagram_en.html">Archimate</a>
+                <a id="titem130" href="gantt-diagram_en.html">Gantt</a>
+                <a id="titem140" href="mindmap-diagram_en.html">MindMap</a>
+                <a id="titem150" href="wbs-diagram_en.html">WBS</a>
+                <a id="titem151" href="ebnf_en.html">EBNF</a>
+                <a id="titem160" href="json_en.html">JSON</a>
+                <a id="titem170" href="yaml_en.html">YAML</a>
+
+                <div class="menu1-tail"></div>
+            </div>
+            <div id="magic">
+                <div class="menu1">
+                    <a id="titem10" href="sequence-diagram_en.html">Sequence</a>
+                    <a id="titem20" href="use-case-diagram_en.html">Use Case</a>
+                    <a id="titem30" href="class-diagram_en.html">Class</a>
+                    <a id="titem40" href="activity-diagram-beta_en.html">Activity</a>
+                    <a id="titem50" href="component-diagram_en.html">Component</a>
+                    <a id="titem60" href="state-diagram_en.html">State</a>
+                    <a id="titem70" href="object-diagram_en.html">Object</a>
+                    <a id="titem80" href="deployment-diagram_en.html">Deployment</a>
+                    <a id="titem90" href="timing-diagram_en.html">Timing</a>
+
+                    <a id="titem99" href="regex_en.html">Regex</a>
+                    <a id="titem100" href="nwdiag_en.html">Network</a>
+                    <a id="titem110" href="salt_en.html">Wireframe</a>
+                    <a id="titem120" href="archimate-diagram_en.html">Archimate</a>
+                    <a id="titem130" href="gantt-diagram_en.html">Gantt</a>
+                    <a id="titem140" href="mindmap-diagram_en.html">MindMap</a>
+                    <a id="titem150" href="wbs-diagram_en.html">WBS</a>
+                    <a id="titem151" href="ebnf_en.html">EBNF</a>
+                    <a id="titem160" href="json_en.html">JSON</a>
+                    <a id="titem170" href="yaml_en.html">YAML</a>
+
+                    <div class="menu1-tail"></div>
+                </div>
+            </div><!-- magic -->
+        </header>
+
+        <main id="D7">
+
+            <style>
+                #donate {
+                    padding-top: 10px;
+                    min-height: 30px;
+                }
+            </style>
+
+
+            <p style="clear:both;">
+
+
+                <style>
+                    #titem70 {
+                        color: #0366d6;
+                        background-color: #fefefe;
+                    }
+
+                    #titem70 img {
+                        filter: brightness(0) saturate(100%) invert(23%) sepia(44%) saturate(7029%) hue-rotate(203deg) brightness(94%) contrast(98%);
+                    }
+
+                    .menu1:hover #titem70 {
+                        color: #5e6d7d;
+                    }
+
+                    .menu1:hover #titem70:hover {
+                        color: #0366d6;
+                    }
+
+                    .menu1:hover #titem70 img {
+                        filter: brightness(0) saturate(100%) invert(42%) sepia(22%) saturate(385%) hue-rotate(170deg) brightness(92%) contrast(84%);
+                    }
+                </style>
+
+                <a style="position:relative;top:-38px;" name="fb01426efa51410a"></a>
+                <!--heading-->
+            </p>
+            <h1 class="chap">Object Diagram</h1>
+            <p></p>
+            An <strong>object diagram</strong> is a graphical representation that showcases objects and their
+            relationships at a specific moment in time. It provides a snapshot of the system&#39;s structure, capturing
+            the static view of the instances present and their associations.
+            <p></p>
+            <strong>PlantUML</strong> offers a simple and intuitive way to create object diagrams using plain text. Its
+            user-friendly syntax allows for quick diagram creation without the need for complex GUI tools. Moreover, the
+            <a href="https://forum.plantuml.net/">PlantUML forum</a> provides a platform for users to discuss, share,
+            and seek assistance, fostering a collaborative community. By choosing PlantUML, users benefit from both the
+            efficiency of markdown-based diagramming and the support of an active community.
+            <a style="position:relative;top:-38px;" name="29df1b044e936302"></a>
+            <!--heading-->
+            <h2 class="chap">Definition of objects</h2>
+            <p></p>
+            You define instances of objects using the <code class="cod">object</code>
+            keyword.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+object firstObject
+object &#34;My Second Object&#34; as o2
+@enduml
+</textarea>
+                <div id="outa0c09ac864fb505c2bb013d6c113db99">
+                    <div class="mycell">
+                        <img loading="lazy" width="260" height="57" class="scale"
+                            src="/imgw/img-a0c09ac864fb505c2bb013d6c113db99.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="e79e7df1fbafe644"></a>
+            <!--heading-->
+            <h2 class="chap">Relations between objects</h2>
+            <p></p>
+            Relations between objects are defined using the following symbols :
+            <p></p>
+            <p></p>
+            <table border="1" cellspacing="0" cellpadding="5">
+                <tbody>
+                    <tr>
+                        <td><b>
+                                Type
+                            </b></td>
+                        <td><b>
+                                Symbol
+                            </b></td>
+                        <td><b>
+                                Purpose
+                            </b></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Extension
+                        </td>
+                        <td>
+                            <code class="cod">&lt;|--</code>
+                        </td>
+                        <td>
+                            Specialization of a class in a hierarchy
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Implementation
+                        </td>
+                        <td>
+                            <code class="cod">&lt;|..</code>
+                        </td>
+                        <td>
+                            Realization of an interface by a class
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Composition
+                        </td>
+                        <td>
+                            <code class="cod">*--</code>
+                        </td>
+                        <td>
+                            The part cannot exist without the whole
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Aggregation
+                        </td>
+                        <td>
+                            <code class="cod">o--</code>
+                        </td>
+                        <td>
+                            The part can exist independently of the whole
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Dependency
+                        </td>
+                        <td>
+                            <code class="cod">--&gt;</code>
+                        </td>
+                        <td>
+                            The object uses another object
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Dependency
+                        </td>
+                        <td>
+                            <code class="cod">..&gt;</code>
+                        </td>
+                        <td>
+                            A weaker form of dependency
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <p></p>
+            <p></p>
+            It is possible to replace <code class="cod">--</code> by <code class="cod">..</code> to have a dotted line.
+            <p></p>
+            Knowing those rules, it is possible to draw the following drawings.
+            <p></p>
+            It is possible a add a label on the relation, using <code class="cod">:</code> followed by the text of the
+            label.
+            <p></p>
+            For cardinality, you can use double-quotes <code class="cod">&#34;&#34;</code> on
+            each side of the relation.
+            <p></p>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+object Object01
+object Object02
+object Object03
+object Object04
+object Object05
+object Object06
+object Object07
+object Object08
+
+Object01 &lt;|-- Object02
+Object03 *-- Object04
+Object05 o-- &#34;4&#34; Object06
+Object07 .. Object08 : some labels
+@enduml
+</textarea>
+                <div id="outc7b9fa2f1562ae02ebb1131729142a70">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="442" height="173" class="scale"
+                            src="/imgw/img-c7b9fa2f1562ae02ebb1131729142a70.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="5f6416a7e094d77e"></a>
+            <!--heading-->
+            <h2 class="chap">Associations objects</h2>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+object o1
+object o2
+diamond dia
+object o3
+
+o1  --&gt; dia
+o2  --&gt; dia
+dia --&gt; o3
+@enduml
+</textarea>
+                <div id="out95df1c717a91a841bf9c107486659490">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="114" height="239" class="scale"
+                            src="/imgw/img-95df1c717a91a841bf9c107486659490.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="60a833de4109a30e"></a>
+            <!--heading-->
+            <h2 class="chap">Adding fields</h2>
+            <p></p>
+            To declare fields, you can use the symbol <code class="cod">:</code> followed by
+            the field&#39;s name.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+
+object user
+
+user : name = &#34;Dummy&#34;
+user : id = 123
+
+@enduml
+</textarea>
+                <div id="out2f286b67e9f846f5eba8ce28ddb7b252">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="140" height="83" class="scale"
+                            src="/imgw/img-2f286b67e9f846f5eba8ce28ddb7b252.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            And you can mix objet&#39;s fields definition:
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+
+object user1
+object user2
+
+user1 : name = &#34;User A&#34;
+user2 : name = &#34;User B&#34;
+
+user1 : id = 123
+user2 : id = 456
+
+@enduml
+</textarea>
+                <div id="out38eda5d5c41fcd1d9f2005d8cd8eaec6">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="287" height="85" class="scale"
+                            src="/imgw/img-38eda5d5c41fcd1d9f2005d8cd8eaec6.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <p></p>
+            It is also possible to group all fields between brackets <code class="cod">{}</code>.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+
+object user {
+  name = &#34;Dummy&#34;
+  id = 123
+}
+
+@enduml
+</textarea>
+                <div id="oute7bd450b6fc44a4483d6049919962be4">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="140" height="83" class="scale"
+                            src="/imgw/img-e7bd450b6fc44a4483d6049919962be4.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="7e9e334df13386bb"></a>
+            <!--heading-->
+            <h2 class="chap">Common features with class diagrams</h2>
+            <p></p>
+            <ul>
+                <li><a href="class-diagram#Hide">Hide attributes, methods...</a></li>
+                <li><a href="class-diagram#Notes">Defines notes</a></li>
+                <li><a href="class-diagram#Using">Use packages</a></li>
+                <li><a href="class-diagram#Skinparam">Skin the output</a></li>
+            </ul>
+            <a style="position:relative;top:-38px;" name="6c738a9019f7ac08"></a>
+            <!--heading-->
+            <h2 class="chap">Map table or associative array</h2>
+            <p></p>
+            You can define a map table or <a href="https://en.wikipedia.org/wiki/Associative_array">associative
+                array</a>, with <code class="cod">map</code> keyword and <code class="cod">=&gt;</code> separator.
+
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+map CapitalCity {
+ UK =&gt; London
+ USA =&gt; Washington
+ Germany =&gt; Berlin
+}
+@enduml
+</textarea>
+                <div id="out099adf2255aa9153e2e391c0b380063b">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="170" height="105" class="scale"
+                            src="/imgw/img-099adf2255aa9153e2e391c0b380063b.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+map &#34;Map **Contry =&gt; CapitalCity**&#34; as CC {
+ UK =&gt; London
+ USA =&gt; Washington
+ Germany =&gt; Berlin
+}
+@enduml
+</textarea>
+                <div id="outb2b80bec7e7b0e9cc65b73aad3899d3d">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="206" height="105" class="scale"
+                            src="/imgw/img-b2b80bec7e7b0e9cc65b73aad3899d3d.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+map &#34;map: Map&lt;Integer, String&gt;&#34; as users {
+ 1 =&gt; Alice
+ 2 =&gt; Bob
+ 3 =&gt; Charlie
+}
+@enduml
+</textarea>
+                <div id="out6d706ce1554f88571e9ada84ab4eb945">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="199" height="105" class="scale"
+                            src="/imgw/img-6d706ce1554f88571e9ada84ab4eb945.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <p></p>
+            And add link with object.
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+object London
+
+map CapitalCity {
+ UK *-&gt; London
+ USA =&gt; Washington
+ Germany =&gt; Berlin
+}
+@enduml
+</textarea>
+                <div id="outc48eb11be80078fed863ea59a82878cf">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="274" height="107" class="scale"
+                            src="/imgw/img-c48eb11be80078fed863ea59a82878cf.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+object London
+object Washington
+object Berlin
+object NewYork
+
+map CapitalCity {
+ UK *-&gt; London
+ USA *--&gt; Washington
+ Germany *---&gt; Berlin
+}
+
+NewYork --&gt; CapitalCity::USA
+@enduml
+</textarea>
+                <div id="out185a2392d1071a0cf3892e25b8ace1b9">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="255" height="407" class="scale"
+                            src="/imgw/img-185a2392d1071a0cf3892e25b8ace1b9.png" />
+                    </div>
+                </div>
+            </div>
+            <em>[Ref. <a href="https://github.com/plantuml/plantuml/issues/307">#307</a>]</em>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+package foo {
+    object baz
+}
+
+package bar {
+    map A {
+        b *-&gt; foo.baz
+        c =&gt;
+    }
+}
+
+A::c --&gt; foo
+@enduml
+</textarea>
+                <div id="out220a5a1e15365dffcf1248ac5b590908">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="131" height="282" class="scale"
+                            src="/imgw/img-220a5a1e15365dffcf1248ac5b590908.png" />
+                    </div>
+                </div>
+            </div>
+            <em>[Ref. <a href="https://forum.plantuml.net/12934">QA-12934</a>]</em>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+object Foo
+map Bar {
+  abc=&gt;
+  def=&gt;
+}
+object Baz
+
+Bar::abc --&gt; Baz : Label one
+Foo --&gt; Bar::def : Label two
+@enduml
+</textarea>
+                <div id="out076c1a893f817efae2344ced4b919c93">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="135" height="323" class="scale"
+                            src="/imgw/img-076c1a893f817efae2344ced4b919c93.png" />
+                    </div>
+                </div>
+            </div>
+            <em>[Ref. <a href="https://github.com/plantuml/plantuml/issues/307">#307</a>]</em>
+            <a style="position:relative;top:-38px;" name="d1f08bf69f3d9b45"></a>
+            <!--heading-->
+            <h2 class="chap">Program (or project) evaluation and review technique (PERT) with map</h2>
+            <p></p>
+            You can use <code class="cod">map table</code> in order to make <a
+                href="https://en.wikipedia.org/wiki/Program_evaluation_and_review_technique">Program (or project)
+                evaluation and review technique (PERT)</a> diagram.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml PERT
+left to right direction
+&#39; Horizontal lines: --&gt;, &lt;--, &lt;--&gt;
+&#39; Vertical lines: -&gt;, &lt;-, &lt;-&gt;
+title PERT: Project Name
+
+map Kick.Off {
+}
+map task.1 {
+    Start =&gt; End
+}
+map task.2 {
+    Start =&gt; End
+}
+map task.3 {
+    Start =&gt; End
+}
+map task.4 {
+    Start =&gt; End
+}
+map task.5 {
+    Start =&gt; End
+}
+Kick.Off --&gt; task.1 : Label 1
+Kick.Off --&gt; task.2 : Label 2
+Kick.Off --&gt; task.3 : Label 3
+task.1 --&gt; task.4
+task.2 --&gt; task.4
+task.3 --&gt; task.4
+task.4 --&gt; task.5 : Label 4
+@enduml
+</textarea>
+                <div id="outec5b9ccb97f06a79f8f89c376036ee60">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="674" height="334" class="scale"
+                            src="/imgw/img-ec5b9ccb97f06a79f8f89c376036ee60.png" />
+                    </div>
+                </div>
+            </div>
+            <em>[Ref. <a
+                    href="https://forum.plantuml.net/12337/there-any-support-for-pert-style-project-management-diagrams?show=14426#a14426">QA-12337</a>]</em>
+            <a style="position:relative;top:-38px;" name="a3e433077b7a6be8"></a>
+            <!--heading-->
+            <h2 class="chap">Display JSON Data on Class or Object diagram</h2>
+            <p></p>
+            <h3>Simple example</h3>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+class Class
+object Object
+json JSON {
+   &#34;fruit&#34;:&#34;Apple&#34;,
+   &#34;size&#34;:&#34;Large&#34;,
+   &#34;color&#34;: [&#34;Red&#34;, &#34;Green&#34;]
+}
+@enduml
+</textarea>
+                <div id="out6a7ee08059d72d372b482acd31af4d40">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="187" height="241" class="scale"
+                            src="/imgw/img-6a7ee08059d72d372b482acd31af4d40.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <em>[Ref. <a
+                    href="https://forum.plantuml.net/15481/possible-link-elements-from-two-jsons-with-both-jsons-embeded?show=15567#c15567">QA-15481</a>]</em>
+            <p></p>
+            For another example, see on <a href="json#jinnkhaa7d65l0fkhfec">JSON page</a>.
+
+
+        </main>
+
+
+        <aside id="C6">
+            <!--toc-->
+            <div id="toc">
+                <ul>
+                    <li><a href="#29df1b044e936302">Definition of objects</a>
+                    </li>
+                    <li><a href="#e79e7df1fbafe644">Relations between objects</a>
+                    </li>
+                    <li><a href="#5f6416a7e094d77e">Associations objects</a>
+                    </li>
+                    <li><a href="#60a833de4109a30e">Adding fields</a>
+                    </li>
+                    <li><a href="#7e9e334df13386bb">Common features with class diagrams</a>
+                    </li>
+                    <li><a href="#6c738a9019f7ac08">Map table or associative array</a>
+                    </li>
+                    <li><a href="#d1f08bf69f3d9b45">Program (or project) evaluation and review technique (PERT) with
+                            map</a>
+                    </li>
+                    <li><a href="#a3e433077b7a6be8">Display JSON Data on Class or Object diagram</a>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+    </div>
+    <script src="../../viz-global.js"></script>
+    <script src="../../plantuml.js"></script>
+    <script>
+        (function () {
+            const render = window.plantumlRender;
+            if (typeof render !== "function") {
+                console.error("PlantUML renderer is unavailable.");
+                return;
+            }
+
+            const renderOptions = {};
+            let counter = 0;
+
+            document.querySelectorAll(".mycell").forEach((mycell) => {
+                const host = mycell.parentElement;
+                const textarea = host ? host.previousElementSibling : null;
+                if (!textarea || textarea.tagName !== "TEXTAREA") return;
+
+                if (!mycell.id) {
+                    counter += 1;
+                    mycell.id = "mycell-render-" + counter;
+                }
+
+                const draw = () => {
+                    mycell.innerHTML = "";
+                    render(textarea.value.split(/\r\n|\r|\n/), mycell.id, renderOptions);
+                };
+
+                textarea.addEventListener("input", draw);
+                draw();
+            });
+        })();
+    </script>
+</body>
+
+</html>

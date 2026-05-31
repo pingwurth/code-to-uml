@@ -1,0 +1,1426 @@
+<html lang="en">
+
+<head>
+
+
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Organization",
+  "url": "https://plantuml.com",
+  "name": "PlantUML",
+  "sameAs" : ["https://twitter.com/plantuml","https://en.wikipedia.org/wiki/PlantUML","https://www.wikidata.org/wiki/Q18346546"],
+  "logo": "https://cdn-0.plantuml.com/logo3.png",
+  "contactPoint": [{
+    "@type": "ContactPoint",
+    "email": "plantuml@gmail.com",
+    "url": "https://plantuml.com",
+    "contactType": "customer service"
+  }]
+}
+</script>
+    <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+    "@type": "ListItem",
+    "position": 1,
+    "item": {
+      "@id": "https://plantuml.com",
+      "name": "Home"
+    }
+  },{
+    "@type": "ListItem",
+    "position": 2,
+    "item": {
+      "@id": "https://plantuml.com/sitemap-news-and-information",
+      "name": "News and information"
+    }
+  },{
+    "@type": "ListItem",
+    "position": 3,
+    "item": {
+      "@id": "https://plantuml.com/regex",
+      "name": "Regular Expression"
+  }
+  }]
+}
+</script>
+    <link rel="canonical" href="https://plantuml.com/regex" />
+    <link rel="alternate" hreflang="x-default" href="https://plantuml.com/regex" />
+    <link rel="alternate" hreflang="de" href="https://plantuml.com/de/regex" />
+    <link rel="alternate" hreflang="en" href="https://plantuml.com/regex" />
+    <link rel="alternate" hreflang="es" href="https://plantuml.com/es/regex" />
+    <link rel="alternate" hreflang="fr" href="https://plantuml.com/fr/regex" />
+    <link rel="alternate" hreflang="ja" href="https://plantuml.com/ja/regex" />
+    <link rel="alternate" hreflang="ko" href="https://plantuml.com/ko/regex" />
+    <link rel="alternate" hreflang="zh" href="https://plantuml.com/zh/regex" />
+
+    <link rel="shortcut icon" href="/favicon.ico" />
+
+
+    <!-- link rel="preload" as="image" href="https://img.shields.io/liberapay/patrons/plantuml.svg?logo=liberapay" -->
+
+
+    <title>Regular expression</title>
+    <meta name="description" content="Use PlantUML to print your regex." />
+
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Regular expression" />
+    <meta property="og:description" content="Use PlantUML to print your regex." />
+
+    <meta property="og:url" content="https://plantuml.com/regex" />
+    <meta property="og:site_name" content="PlantUML.com" />
+
+    <!-- meta property="og:image" content="https://plantuml.com/og-regex" -->
+    <meta name="twitter:image" content="https://plantuml.com/og-regex" />
+    <meta property="og:locale" content="en" />
+
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Regular expression" />
+    <meta name="twitter:description" content="Use PlantUML to print your regex." />
+    <meta name="twitter:site" content="@PlantUML" />
+    <meta name="twitter:creator" content="@PlantUML" />
+
+    <script>
+        if (window.location.href.indexOf("/en/") == -1) {
+            var lg = navigator.language.substring(0, 2);
+            if (lg == "de") window.location.href = "/de/regex";
+            if (lg == "es") window.location.href = "/es/regex";
+            if (lg == "fr") window.location.href = "/fr/regex";
+            if (lg == "ja") window.location.href = "/ja/regex";
+            if (lg == "ko") window.location.href = "/ko/regex";
+            if (lg == "ru") window.location.href = "/ru/regex";
+            if (lg == "zh") window.location.href = "/zh/regex";
+        }
+    </script>
+
+
+    <!-- https://www.w3schools.com/colors/colors_picker.asp -->
+    <!-- filter css https://codepen.io/sosuke/pen/Pjoqqp -->
+
+
+    <style>
+        .scale {}
+
+        li {
+            margin: 2px;
+        }
+
+        #external li {
+            margin: 13px;
+        }
+
+        @media screen and (max-width: 1190px) {
+        }
+
+
+        .coptable {
+            max-width: 90%;
+        }
+
+        .mytab {
+            display: inline-block;
+            border-radius: 3px;
+            border: 1px solid #e1e4e8;
+        }
+
+        .mytab:hover {
+            border: 1px dashed #0366d6;
+            cursor: pointer;
+            color: #0366d6;
+            background: #f6f8fa;
+        }
+
+        .cop {
+            margin: 25px 10px 0 10px;
+        }
+
+        .cop:hover {
+            cursor: pointer;
+            filter: invert(30%) sepia(75%) saturate(4001%) hue-rotate(201deg) brightness(88%) contrast(98%);
+        }
+
+        .cop2 {
+            margin: 25px 10px 0 10px;
+        }
+
+        .cop2:hover {
+            cursor: pointer;
+        }
+
+        .msg {
+            position: absolute;
+            color: #339966;
+            background-color: #FFF;
+            margin-top: 55px;
+            display: none;
+            border-radius: 3px;
+            border: 1px solid #4dff00;
+        }
+
+        .mycell0 {
+            float: left;
+            vertical-align: top;
+            padding: 10px;
+        }
+
+        .mycell0 code:hover {
+            cursor: default;
+            color: #000;
+        }
+
+        .mycell {
+            float: right;
+            vertical-align: top;
+            padding: 10px;
+            max-width: 55vw;
+            overflow-x: auto;
+        }
+
+        .mycell0 pre {
+            max-width: 55vw;
+            overflow-x: auto;
+        }
+
+        .cod {
+            background: #edeff3;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+
+        .colo {
+            display: inline-block;
+            background: #edeff3;
+            padding: 7px 12px;
+            border-radius: 3px;
+        }
+
+        .tag,
+        .tagg,
+        .tago,
+        .tagr {
+            text-rendering: optimizeLegibility;
+            display: inline-block;
+            padding: 3px 5px 2px 4px;
+            text-decoration: none;
+            white-space: nowrap;
+            border: 1px solid #999;
+            text-transform: uppercase;
+            text-align: center;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: bold;
+            line-height: 90%;
+        }
+
+        .tag {
+            background-color: #EEEEEE;
+        }
+
+        .tagg {
+            background-color: #98FB98;
+        }
+
+        .tago {
+            background-color: #fafa00;
+        }
+
+        .tagr {
+            background-color: #FF4500;
+        }
+
+
+        a {
+            text-decoration: none;
+            color: #0366d6;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .menu1 {
+            display: flex;
+            flex-direction: row;
+            border: 0;
+            font-size: 14px;
+            padding: 0;
+            margin: 0;
+            white-space: nowrap;
+        }
+
+        .menu1 a {
+            white-space: nowrap;
+            padding: 0 8px;
+            text-decoration: none;
+            color: #5e6d7d;
+            line-height: 30px;
+            height: 30px;
+        }
+
+        .menu1 a:hover {
+            background: #fefefe;
+            color: #0366d6;
+        }
+
+        .menuside2 {
+            display: flex;
+            flex-direction: column;
+            border: 0;
+            font-size: 14px;
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
+            justify-content: center;
+        }
+
+        .menuside2 img {
+            vertical-align: top;
+            padding: 0 8px;
+            filter: brightness(0) saturate(100%) invert(42%) sepia(22%) saturate(385%) hue-rotate(170deg) brightness(92%) contrast(84%);
+        }
+
+        .menuside2 a {
+            padding: 6px 0;
+            text-decoration: none;
+            color: #5e6d7d;
+        }
+
+        .menuside2 a:hover {
+            color: #0366d6;
+            background: #fefefe;
+        }
+
+        .menuside2 a:hover img {
+            filter: brightness(0) saturate(100%) invert(23%) sepia(44%) saturate(7029%) hue-rotate(203deg) brightness(94%) contrast(98%);
+        }
+
+        .breadcrumb {
+            z-index: 1;
+            font-size: 14px;
+            text-align: center;
+            display: inline-block;
+            overflow: hidden;
+            border-radius: 5px;
+        }
+
+
+        .breadcrumb a {
+            text-decoration: none;
+            outline: none;
+            display: block;
+            float: left;
+            font-size: 12px;
+            line-height: 24px;
+            color: #373f49;
+            padding: 0 10px 0 35px;
+            background: #f0f1f1;
+            background: linear-gradient(#f0f1f1, #c6d2d2);
+            position: relative;
+        }
+
+        .breadcrumb a:first-child {
+            padding-left: 21px;
+            border-radius: 5px 0 0 5px;
+            /*to match with the parent's radius*/
+        }
+
+        .breadcrumb a:first-child:before {
+            left: 14px;
+        }
+
+        .breadcrumb a:last-child {
+            visibility: hidden;
+        }
+
+        .breadcrumb a.active,
+        .breadcrumb a:hover {
+            color: #0366d6;
+            background: #c6d2d2;
+            background: linear-gradient(#e3e4e4, #b8c7c7);
+        }
+
+        .breadcrumb a.active:after,
+        .breadcrumb a:hover:after {
+            background: #c6d2d2;
+            background: linear-gradient(135deg, #e3e4e4, #b8c7c7);
+        }
+
+        .breadcrumb a:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: -12px;
+            /*half of square's length*/
+            /*same dimension as the line-height of .breadcrumb a */
+            width: 24px;
+            height: 24px;
+            transform: scale(0.707) rotate(45deg);
+            /*we need to prevent the arrows from getting buried under the next link*/
+            z-index: 1;
+            /*background same as links but the gradient will be rotated to compensate with the transform applied*/
+            background: #f0f1f1;
+            background: linear-gradient(135deg, #f0f1f1, #c6d2d2);
+            /*stylish arrow design using box shadow*/
+            box-shadow:
+                2px -2px 0 2px rgba(0, 0, 0, 0.1),
+                3px -3px 0 2px rgba(255, 255, 255, 0.1);
+            /*
+		5px - for rounded arrows and 
+		50px - to prevent hover glitches on the border created using shadows*/
+            border-radius: 0 5px 0 50px;
+        }
+
+        /*we dont need an arrow after the last link*/
+        .breadcrumb a:last-child:after {
+            content: none;
+            visibility: hidden;
+        }
+
+
+        .lga,
+        .lga a,
+        .lgi,
+        .lgi a {
+            font-size: 13px;
+            text-align: center;
+            color: #fff;
+            padding: 0 5px;
+            margin: 0;
+        }
+
+        .lga,
+        .lga a {
+            background-color: #008;
+        }
+
+        .lgi,
+        .lgi a {
+            background-color: #888;
+        }
+
+        .lga:hover,
+        .lga:hover a {
+            text-decoration: none;
+            color: #BBB;
+        }
+
+        .lgi:hover,
+        .lgi:hover a {
+            text-decoration: none;
+            color: #CCC;
+        }
+    </style>
+    <style>
+        body {
+            font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            font-size: 14px;
+            line-height: 1.5;
+            margin: auto;
+            overflow-x: hidden;
+            background: #fefefe;
+        }
+
+        h1.chap {
+            font-size: 1.8em;
+        }
+
+        h2.chap {
+            font-size: 1.35em;
+        }
+
+        h3,
+        h3.chap {
+            font-size: 1.15em;
+        }
+
+        h4 {
+            font-size: 1.05em;
+        }
+
+        table {
+            font-size: inherit;
+        }
+    </style>
+
+
+    <style>
+        .dyn {
+            display: flex;
+            flex-direction: row;
+            gap: 3em;
+            align-items: stretch;
+            flex-wrap: wrap;
+            margin: 10px 0;
+        }
+
+        .dyn textarea {
+            font-family: monospace;
+            font-size: 13px;
+            line-height: 1.4;
+            min-width: 30ch;
+            max-width: 90ch;
+            box-sizing: border-box;
+            resize: both;
+            white-space: pre;
+            overflow: auto;
+            field-sizing: content;
+            align-self: stretch;
+            border: 1px solid #888;
+            border-radius: 3px;
+            margin: 0;
+            padding: 4px 8px;
+            background: #fefefe;
+        }
+
+        .dyn>div {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            display: flex;
+        }
+
+        .dyn>div>div {
+            margin: 0;
+            padding: 0;
+        }
+
+        .dyn img {
+            margin: 0;
+            padding: 0;
+        }
+
+        .scale {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #dde;
+            border-radius: 4px;
+        }
+    </style>
+
+
+    <script>
+        var llg = "en";
+        var az = 0;
+        var amdark = 0;
+        function ljs(n) {
+            if (az) return false;
+            var sc = document.createElement("script");
+            sc.type = "text/javascript";
+            sc.src = "/btn-" + n + ".js";
+            document.body.innerHTML = "<i style='position:absolute;top:30%;width:100%;'><center>Loading in progress...";
+            document.body.appendChild(sc);
+        }
+        function ctc(id) {
+            document.getElementById('img' + id).classList.remove('cop'); document.getElementById('img' + id).classList.add('cop2');
+            document.getElementById('pre' + id).style.backgroundColor = '#4dff00';
+            document.getElementById('msg' + id).style.display = 'inline';
+
+            setTimeout(function () { document.getElementById('img' + id).classList.remove('cop2'); document.getElementById('img' + id).classList.add('cop'); document.getElementById('pre' + id).style.backgroundColor = ''; document.getElementById('msg' + id).style.display = 'none'; }, 800);
+
+
+            text = document.getElementById('pre' + id).innerText;
+            if (window.clipboardData && window.clipboardData.setData)
+                return window.clipboardData.setData("Text", text);
+            else if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
+                var ta = document.createElement("textarea");
+                ta.textContent = text;
+                ta.style.position = "fixed";
+                document.body.appendChild(ta);
+                ta.select();
+                try {
+                    return document.execCommand("copy");
+                }
+                catch (ex) {
+                    return false;
+                }
+                finally {
+                    document.body.removeChild(ta);
+                }
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <style>
+        body,
+        .container,
+        #B3,
+        #C5,
+        #C6,
+        #C7,
+        #D7,
+        #D8 {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            overflow-y: scroll;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr auto auto auto;
+            grid-template-rows: auto 1fr auto;
+            min-height: 100vh;
+        }
+
+        #B3 {
+            grid-column: 1 / 5;
+            grid-row: 1;
+            position: sticky;
+            top: 0;
+            height: 30px;
+            padding: 0;
+            z-index: 10;
+            overflow: hidden;
+            background: #edeff3;
+            border-bottom: 1px solid #d4d8de;
+        }
+
+        #D7 {
+            grid-column: 1;
+            grid-row: 2;
+            margin: 0;
+            padding: 0;
+            padding-left: 30px;
+            line-height: 1.6;
+        }
+
+        #D8 {
+            grid-column: 1;
+            grid-row: 3;
+            position: sticky;
+            bottom: 0;
+            z-index: 5;
+            background: #fefefe;
+        }
+
+        #C5 {
+            grid-column: 2;
+            grid-row: 1 / -1;
+            position: sticky;
+            top: 40px;
+            align-self: start;
+            height: calc(98vh - 60px);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        #C6 {
+            grid-column: 3;
+            grid-row: 1 / -1;
+            position: sticky;
+            top: 40px;
+            align-self: start;
+            height: calc(98vh - 60px);
+            max-width: 200px;
+            overflow: hidden;
+            margin: 0 10px;
+            padding: 8px 5px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        #C7 {
+            grid-column: 4;
+            grid-row: 1 / -1;
+            position: sticky;
+            top: 40px;
+            align-self: start;
+            height: calc(98vh - 60px);
+            margin: 0 20px 0 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        #toc {
+            z-index: 15;
+            overflow-x: hidden;
+            overflow-y: auto;
+            background: #f6f8fa;
+            border-width: 2px;
+            border-style: groove;
+            border-radius: 3px;
+            border-color: #e1e4e8;
+            margin: 0 5px;
+            padding: 0;
+            max-height: 100%;
+        }
+
+        #toc ul {
+            margin: 0;
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #toc li {
+            padding: 0 10px;
+            margin: 0;
+        }
+
+        #toc li a {
+            padding: 5px 0;
+            display: inline-block;
+            text-decoration: none;
+            width: 100%;
+            color: #5e6d7d;
+        }
+
+        #toc li a:hover {
+            color: #0366d6;
+        }
+
+        #toc li:hover {
+            background: #fefefe;
+        }
+
+        #magic {
+            position: absolute;
+            top: 0;
+            right: 50px;
+            width: 30px;
+            height: 30px;
+            overflow: hidden;
+            background: #edeff3;
+            z-index: 14;
+        }
+
+        #magic:hover {
+            width: calc(100% - 50px);
+        }
+
+        #magic .menu1 {
+            position: absolute;
+            top: 0;
+            right: 30px;
+            height: 30px;
+            padding-left: 10px;
+            background: #edeff3;
+            border-left: 1px solid #d4d8de;
+            border-bottom: 1px solid #d4d8de;
+        }
+
+        .menu1-tail {
+            flex-grow: 1;
+            flex-shrink: 0;
+            height: 30px;
+            position: relative;
+            z-index: 15;
+            background: #edeff3;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: auto auto auto;
+            grid-auto-rows: auto;
+            gap: 5px;
+            margin: 0;
+            padding: 0;
+        }
+
+        .merged {
+            grid-column: 1 / -1;
+        }
+
+        #C6 {
+            display: none;
+        }
+
+        @media (min-width: 1401px) {
+            #C6:has(#toc li) {
+                display: flex;
+            }
+        }
+
+        @media (max-width: 1100px) {
+            #C5,
+            #C7 {
+                display: none;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .merged {
+                display: none;
+            }
+        }
+    </style>
+
+    <div class="container">
+
+        <footer id="D8">
+
+            <p>
+            </p>
+            <p>
+
+            </p>
+        </footer>
+
+
+        <header id="B3">
+            <div class="menu1">
+                <a id="titem10" href="sequence-diagram_en.html">Sequence</a>
+                <a id="titem20" href="use-case-diagram_en.html">Use Case</a>
+                <a id="titem30" href="class-diagram_en.html">Class</a>
+                <a id="titem40" href="activity-diagram-beta_en.html">Activity</a>
+                <a id="titem50" href="component-diagram_en.html">Component</a>
+                <a id="titem60" href="state-diagram_en.html">State</a>
+                <a id="titem70" href="object-diagram_en.html">Object</a>
+                <a id="titem80" href="deployment-diagram_en.html">Deployment</a>
+                <a id="titem90" href="timing-diagram_en.html">Timing</a>
+
+                <a id="titem99" href="regex_en.html">Regex</a>
+                <a id="titem100" href="nwdiag_en.html">Network</a>
+                <a id="titem110" href="salt_en.html">Wireframe</a>
+                <a id="titem120" href="archimate-diagram_en.html">Archimate</a>
+                <a id="titem130" href="gantt-diagram_en.html">Gantt</a>
+                <a id="titem140" href="mindmap-diagram_en.html">MindMap</a>
+                <a id="titem150" href="wbs-diagram_en.html">WBS</a>
+                <a id="titem151" href="ebnf_en.html">EBNF</a>
+                <a id="titem160" href="json_en.html">JSON</a>
+                <a id="titem170" href="yaml_en.html">YAML</a>
+
+                <div class="menu1-tail"></div>
+            </div>
+            <div id="magic">
+                <div class="menu1">
+                    <a id="titem10" href="sequence-diagram_en.html">Sequence</a>
+                    <a id="titem20" href="use-case-diagram_en.html">Use Case</a>
+                    <a id="titem30" href="class-diagram_en.html">Class</a>
+                    <a id="titem40" href="activity-diagram-beta_en.html">Activity</a>
+                    <a id="titem50" href="component-diagram_en.html">Component</a>
+                    <a id="titem60" href="state-diagram_en.html">State</a>
+                    <a id="titem70" href="object-diagram_en.html">Object</a>
+                    <a id="titem80" href="deployment-diagram_en.html">Deployment</a>
+                    <a id="titem90" href="timing-diagram_en.html">Timing</a>
+
+                    <a id="titem99" href="regex_en.html">Regex</a>
+                    <a id="titem100" href="nwdiag_en.html">Network</a>
+                    <a id="titem110" href="salt_en.html">Wireframe</a>
+                    <a id="titem120" href="archimate-diagram_en.html">Archimate</a>
+                    <a id="titem130" href="gantt-diagram_en.html">Gantt</a>
+                    <a id="titem140" href="mindmap-diagram_en.html">MindMap</a>
+                    <a id="titem150" href="wbs-diagram_en.html">WBS</a>
+                    <a id="titem151" href="ebnf_en.html">EBNF</a>
+                    <a id="titem160" href="json_en.html">JSON</a>
+                    <a id="titem170" href="yaml_en.html">YAML</a>
+
+                    <div class="menu1-tail"></div>
+                </div>
+            </div><!-- magic -->
+        </header>
+
+        <main id="D7">
+
+            <style>
+                #donate {
+                    padding-top: 10px;
+                    min-height: 30px;
+                }
+            </style>
+
+
+            <p style="clear:both;">
+
+
+                <style>
+                    #titem99 {
+                        color: #0366d6;
+                        background-color: #fefefe;
+                    }
+
+                    #titem99 img {
+                        filter: brightness(0) saturate(100%) invert(23%) sepia(44%) saturate(7029%) hue-rotate(203deg) brightness(94%) contrast(98%);
+                    }
+
+                    .menu1:hover #titem99 {
+                        color: #5e6d7d;
+                    }
+
+                    .menu1:hover #titem99:hover {
+                        color: #0366d6;
+                    }
+
+                    .menu1:hover #titem99 img {
+                        filter: brightness(0) saturate(100%) invert(42%) sepia(22%) saturate(385%) hue-rotate(170deg) brightness(92%) contrast(84%);
+                    }
+                </style>
+
+                <a style="position:relative;top:-38px;" name="092fb2a0713944ed"></a>
+                <!--heading-->
+            </p>
+            <h1 class="chap">Visualizing Regex with PlantUML</h1>
+            <p></p>
+            <h2>Introduction to Regex and Visualization Challenges</h2>
+            <p></p>
+            <a href="https://en.wikipedia.org/wiki/Regular_expression">Regular expressions (Regex)</a> are powerful
+            tools in programming, used for pattern matching and text manipulation. While extremely useful, regex
+            patterns can often be dense and difficult to interpret, especially as they grow in complexity. The syntax,
+            although efficient, can become obscure and hard to read for both beginners and experienced developers. This
+            is where visual tools like PlantUML come into play.
+            <p></p>
+            <h2>Why PlantUML for Regex?</h2>
+            <p></p>
+            <h3>Simplifying Complexity with Visualization</h3>
+            PlantUML, a popular tool for creating UML diagrams, offers a unique feature for those grappling with the
+            intricacies of regex. By turning regex patterns into visual diagrams, PlantUML helps in:
+            <p></p>
+            <ul>
+                <li><strong>Demystifying Regex Syntax:</strong> The visual representation breaks down the regex into
+                    comprehensible components, making it easier to understand each part of the expression.</li>
+                <li><strong>Enhancing Pattern Recognition:</strong> Visual diagrams allow users to identify repeating
+                    patterns and structures in regex, which might be missed in the textual form.</li>
+                <li><strong>Debugging and Optimization:</strong> By laying out the regex structure visually, PlantUML
+                    can aid in spotting redundancies and errors, facilitating more efficient pattern design.</li>
+            </ul>
+            <p></p>
+            <h3>An Invaluable Tool for Learning and Collaboration</h3>
+            <ul>
+                <li>For learners, visual diagrams serve as educational aids, simplifying the learning curve associated
+                    with regex syntax.</li>
+                <li>In collaborative environments, visual representations can bridge the gap in understanding, ensuring
+                    that team members are on the same page regarding the logic and function of a regex pattern.</li>
+            </ul>
+            <p></p>
+            By transforming abstract regex patterns into tangible diagrams, PlantUML not only aids in comprehension but
+            also enhances the overall experience of working with regular expressions. Whether you are a novice trying to
+            get a grip on regex syntax or a seasoned developer looking to optimize complex patterns, PlantUML&#39;s
+            visualization feature can be an invaluable asset.
+            <a style="position:relative;top:-38px;" name="9ad33d887caa6514"></a>
+            <!--heading-->
+            <h2 class="chap">Fundamentals of Regular Expressions</h2>
+            <p></p>
+            <strong>Literal Text</strong>: PlantUML can visualize simple literal texts in regular expressions, as shown
+            with the example <code class="cod">abc</code>.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startregex
+title litteralText
+abc
+@endregex
+</textarea>
+                <div id="out76118bc8fb50f4a062d3543c31548005">
+                    <div class="mycell">
+                        <img loading="lazy" width="111" height="96" class="scale"
+                            src="/imgw/img-76118bc8fb50f4a062d3543c31548005.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="c1c737be1cb1acfd"></a>
+            <!--heading-->
+            <h2 class="chap">Character Classes and Sequences</h2>
+            <p></p>
+            <h3>Shorthand Character Classes</h3>
+            <p></p>
+            In regular expressions, shorthand character classes offer a concise way to match common character types. The
+            class <code class="cod">\d</code> matches any digit, <code class="cod">\w</code> matches any word character
+            (including letters, digits, and underscores), and <code class="cod">\s</code> matches any whitespace
+            character (including spaces, tabs, and line breaks).
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startregex
+title shorthandCharacterClasses
+\d\w\s
+@endregex
+</textarea>
+                <div id="outf874345ddbb9d7d550c449b87d242439">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="227" height="96" class="scale"
+                            src="/imgw/img-f874345ddbb9d7d550c449b87d242439.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <h3>Literal Character Sequences</h3>
+            <p></p>
+            To ensure that a specific sequence of characters is interpreted exactly as written, without any special
+            meaning, the <code class="cod">\Q...\E</code> escape sequence is used. For example, <code
+                class="cod">\Qfoo\E</code> treats &#34;foo&#34; as a literal string, not as separate characters with
+            potential special meanings in regex.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startregex
+title litteralCharacterSequence
+\Qfoo\E
+@endregex
+</textarea>
+                <div id="out401da1c6dff2bc423276adfa9cfd6d47">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="214" height="96" class="scale"
+                            src="/imgw/img-401da1c6dff2bc423276adfa9cfd6d47.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <p></p>
+            <h3>Character Ranges</h3>
+            <p></p>
+            Character ranges are a flexible way to specify a set of characters to match. For instance, <code
+                class="cod">[0-9]</code> represents any digit from 0 to 9. This is particularly useful for matching
+            characters within a specific range, like letters or numbers.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startregex
+title range
+[0-9]
+@endregex
+</textarea>
+                <div id="out6ec6400e59896bb1265d540da8fa1c0f">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="79" height="86" class="scale"
+                            src="/imgw/img-6ec6400e59896bb1265d540da8fa1c0f.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <h3>Any Character</h3>
+            <p></p>
+            The dot <code class="cod">.</code> in regular expressions is a powerful tool that matches any character
+            except for newline characters. It&#39;s often used when the specific character is not important, or when
+            matching a wide range of characters.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startregex
+title anyCharacter
+.
+@endregex
+</textarea>
+                <div id="outf62087d31a6850d6322c463fbc920ddd">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="130" height="96" class="scale"
+                            src="/imgw/img-f62087d31a6850d6322c463fbc920ddd.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <p></p>
+            <h3>Special Escapes</h3>
+            <p></p>
+            Special escape sequences in regular expressions provide a way to include non-printable and hard-to-type
+            characters in patterns. For example, <code class="cod">\t</code> represents a tab, <code
+                class="cod">\r</code> a carriage return, and <code class="cod">+++&lt;br&gt;+++</code> a newline. These
+            escapes are essential for patterns that involve whitespace or other non-visible characters.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startregex
+title specialEscapes
+\t\r\n\a\e\f
+@endregex
+</textarea>
+                <div id="out2524f83121a1b8e723c5dfdcd4dc38ed">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="249" height="96" class="scale"
+                            src="/imgw/img-2524f83121a1b8e723c5dfdcd4dc38ed.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="b5cb146b1015e355"></a>
+            <!--heading-->
+            <h2 class="chap">Descriptive Name and Language </h2>
+            <p></p>
+            You can activate the Descriptive Names with <code class="cod">!option useDescriptiveNames true</code>.
+            Then you can also choose the language of the Descriptive Names, with the <code
+                class="cod">!option language &lt;xx&gt;</code> option where <code class="cod">&lt;xx&gt;</code> is the
+            <a href="https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes">ISO 639 code</a> of the language.
+            <p></p>
+            <h3>Without Descriptive Name <em>(by default)</em></h3>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startregex
+!option useDescriptiveNames false
+
+\d?\D+\w*\W{1,2}|\s.\S
+@endregex
+</textarea>
+                <div id="out98e51643dd775e2d837b48b951546938">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="420" height="158" class="scale"
+                            src="/imgw/img-98e51643dd775e2d837b48b951546938.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <p></p>
+            <h3>With Descriptive Name</h3>
+            <p></p>
+            <h4>English (en)</h4>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startregex
+!option language en
+!option useDescriptiveNames true
+
+\d?\D+\w*\W{1,2}|\s.\S
+@endregex
+</textarea>
+                <div id="out6b9115d6214e8e1587b5e1209ec8ae68">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="538" height="158" class="scale"
+                            src="/imgw/img-6b9115d6214e8e1587b5e1209ec8ae68.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <h4>Deutsch (de)</h4>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startregex
+!option language de
+!option useDescriptiveNames true
+
+\d?\D+\w*\W{1,2}|\s.\S
+@endregex
+</textarea>
+                <div id="outfe8183826f07afdc90ab1ee90e38f57d">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="554" height="158" class="scale"
+                            src="/imgw/img-fe8183826f07afdc90ab1ee90e38f57d.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <h4>Japanese (ja)</h4>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startregex
+!option language ja
+!option useDescriptiveNames true
+
+\d?\D+\w*\W{1,2}|\s.\S
+@endregex
+</textarea>
+                <div id="out86b718ab917e689eed90a08fc3f623a6">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="504" height="158" class="scale"
+                            src="/imgw/img-86b718ab917e689eed90a08fc3f623a6.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <em>[Ref. <a href="https://github.com/plantuml/plantuml/pull/2036">GH-2036</a>]</em>
+            <a style="position:relative;top:-38px;" name="d5a2e49ab0527412"></a>
+            <!--heading-->
+            <h2 class="chap">Special Escapes</h2>
+            <p></p>
+            <h3>Octal and Unicode Escapes</h3>
+            <p></p>
+            Regular expressions can also include octal and Unicode escapes to represent specific characters.
+            <p></p>
+            PlantUML Code for Octal Escapes:
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startregex
+title octalEscapes
+\0377\337
+@endregex
+</textarea>
+                <div id="outd49e165c62e0ac926c14d18cf1a2cbd3">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="162" height="96" class="scale"
+                            src="/imgw/img-d49e165c62e0ac926c14d18cf1a2cbd3.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            PlantUML Code for Unicode Escapes:
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startregex
+title unicodeEscapes
+\uFFFF\x{FFFF}
+@endregex
+</textarea>
+                <div id="outd0db3732a8a65e404eb81adf30c58a5c">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="170" height="96" class="scale"
+                            src="/imgw/img-d0db3732a8a65e404eb81adf30c58a5c.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="14dae16a08ba1a91"></a>
+            <!--heading-->
+            <h2 class="chap">Repetitions and Alternation</h2>
+            <p></p>
+            <h3>Repetitions</h3>
+            <p></p>
+            Regular expressions provide versatile options for specifying how many times a particular pattern should
+            occur. These repetition constructs make it possible to match varying lengths of text and are fundamental to
+            the flexibility of regex.
+            <p></p>
+            <h4>Optional Repetition</h4>
+            <p></p>
+            The <code class="cod">?</code> symbol indicates that the preceding element is optional, meaning it may
+            appear zero or one time. For example, <code class="cod">ab?</code> matches either &#34;a&#34; or
+            &#34;ab&#34;.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startregex
+title optional
+ab?
+@endregex
+</textarea>
+                <div id="out60b8a43aa162f605bcc93ae047f8c8c9">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="133" height="120" class="scale"
+                            src="/imgw/img-60b8a43aa162f605bcc93ae047f8c8c9.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <h4>Required Repetition</h4>
+            <p></p>
+            The <code class="cod">+</code> symbol requires the preceding element to appear one or more times. In the
+            pattern <code class="cod">ab+</code>, &#34;b&#34; must occur at least once following &#34;a&#34;.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startregex
+title requiredRepetition
+ab+
+@endregex
+</textarea>
+                <div id="outb0e4fdf731d8b0e5637acd73afb91a48">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="165" height="108" class="scale"
+                            src="/imgw/img-b0e4fdf731d8b0e5637acd73afb91a48.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <h4>Zero or More Repetitions</h4>
+            <p></p>
+            The &#34;*&#34; symbol allows the preceding element to appear zero or more times.
+            For instance, &#34;ab*&#34; matches &#34;a&#34;, &#34;ab&#34;, &#34;abb&#34;, &#34;abbb&#34;, and so on.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startregex
+title optionalRepetition
+ab*
+@endregex
+</textarea>
+                <div id="out998ac7619e2a59a003bf037ecda6c7d3">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="163" height="132" class="scale"
+                            src="/imgw/img-998ac7619e2a59a003bf037ecda6c7d3.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <p></p>
+            <h4>Specified Range of Repetitions</h4>
+            Curly braces <code class="cod">{}</code> are used to specify an exact number or range of repetitions. For
+            example, <code class="cod">ab{1,2}</code> matches &#34;ab&#34; or &#34;abb&#34;.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startregex
+title rangeRepetition
+ab{1,2}
+@endregex
+</textarea>
+                <div id="outfa9d9582afb5c1b889a4dd5ede75bc3c">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="147" height="123" class="scale"
+                            src="/imgw/img-fa9d9582afb5c1b889a4dd5ede75bc3c.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <p></p>
+            <h4>Minimum Number of Repetitions</h4>
+            To indicate a minimum number of repetitions, use the format <code class="cod">{n,}</code>. In <code
+                class="cod">ab{1}c{1,}</code>, &#34;a&#34; is followed by at least one &#34;b&#34; and one or more
+            &#34;c&#34;.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startregex
+title minimumRepetition
+ab{1}c{1,}
+@endregex
+</textarea>
+                <div id="out1c367bcc5797842c579dc5d35441e45a">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="182" height="123" class="scale"
+                            src="/imgw/img-1c367bcc5797842c579dc5d35441e45a.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <p></p>
+            <h4>Repetition Equivalence</h4>
+            Repetition constructs can often be expressed in multiple ways. For instance, <code
+                class="cod">a{0,1}b{1,}</code> is equivalent to <code class="cod">a?b+</code>, both representing
+            &#34;a&#34; as optional and &#34;b&#34; as required one or more times.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startregex
+title repetitionEquivalance
+a{0,1}b{1,} is the same as a?b+
+@endregex
+@enduml
+</textarea>
+                <div id="out6e6289c577a512f4241e3454b3fdcb9a">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="445" height="147" class="scale"
+                            src="/imgw/img-6e6289c577a512f4241e3454b3fdcb9a.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <p></p>
+            <h3>Alternation</h3>
+            <p></p>
+            Alternation, represented by the <code class="cod">|</code> symbol, allows choosing between multiple
+            sequences, as in the example <code class="cod">a|b</code>, where either &#34;a&#34; or &#34;b&#34; is
+            accepted.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startregex
+title alternation
+a|b
+@endregex
+</textarea>
+                <div id="out6c8cd06ec27b9070d182d39ce2267b40">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="112" height="133" class="scale"
+                            src="/imgw/img-6c8cd06ec27b9070d182d39ce2267b40.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="7f6c02d96265dd1d"></a>
+            <!--heading-->
+            <h2 class="chap">Unicode</h2>
+            <p></p>
+            <h3>Unicode Categories</h3>
+            <p></p>
+            Unicode character categories in regular expressions allow for the matching of specific types of characters,
+            such as letters or numbers, across various languages and scripts. PlantUML can visualize these categories,
+            making it easier to understand their coverage.
+            <p></p>
+            <ul>
+                <li><strong>Letters (<code class="cod">\p{L}</code>)</strong>: Matches any letter from any language.
+                </li>
+                <li><strong>Lowercase Letters (<code class="cod">\p{Ll}</code>)</strong>: Specifically matches lowercase
+                    letters.</li>
+            </ul>
+            <p></p>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startregex
+title unicodeCategories
+letter \p{L}\p{Letter} lower \p{Ll}\p{Lowercase_letter}
+@endregex
+</textarea>
+                <div id="outd3b609368b840fbd649ed9b18a56da9e">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="511" height="96" class="scale"
+                            src="/imgw/img-d3b609368b840fbd649ed9b18a56da9e.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <h3>Unicode Scripts</h3>
+            <p></p>
+            Unicode scripts are used to match characters from specific writing systems. For example, <code
+                class="cod">\p{Latin}</code> matches any character from the Latin script, commonly used in Western
+            languages.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startregex
+title unicodeScripts
+latin \p{Latin}
+@endregex
+</textarea>
+                <div id="out6fe194e0ce021672ac29e7643803883b">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="150" height="96" class="scale"
+                            src="/imgw/img-6fe194e0ce021672ac29e7643803883b.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <h3>Unicode Blocks</h3>
+            <p></p>
+            Unicode blocks refer to specific ranges of characters as defined in the Unicode standard. For instance,
+            <code class="cod">\p{InGeometric_Shapes}</code> matches characters that are part of the Geometric Shapes
+            block.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startregex
+title unicodeBlocks
+\p{InGeometric_Shapes}
+@endregex
+</textarea>
+                <div id="outb8489776ae058d564995bbedb89e3c7a">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="192" height="96" class="scale"
+                            src="/imgw/img-b8489776ae058d564995bbedb89e3c7a.png" />
+                    </div>
+                </div>
+            </div>
+
+
+        </main>
+
+
+        <aside id="C6">
+            <!--toc-->
+            <div id="toc">
+                <ul>
+                    <li><a href="#9ad33d887caa6514">Fundamentals of Regular Expressions</a>
+                    </li>
+                    <li><a href="#c1c737be1cb1acfd">Character Classes and Sequences</a>
+                    </li>
+                    <li><a href="#b5cb146b1015e355">Descriptive Name and Language</a>
+                    </li>
+                    <li><a href="#d5a2e49ab0527412">Special Escapes</a>
+                    </li>
+                    <li><a href="#14dae16a08ba1a91">Repetitions and Alternation</a>
+                    </li>
+                    <li><a href="#7f6c02d96265dd1d">Unicode</a>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+    </div>
+    <script src="../../viz-global.js"></script>
+    <script src="../../plantuml.js"></script>
+    <script>
+        (function () {
+            const render = window.plantumlRender;
+            if (typeof render !== "function") {
+                console.error("PlantUML renderer is unavailable.");
+                return;
+            }
+
+            const renderOptions = {};
+            let counter = 0;
+
+            document.querySelectorAll(".mycell").forEach((mycell) => {
+                const host = mycell.parentElement;
+                const textarea = host ? host.previousElementSibling : null;
+                if (!textarea || textarea.tagName !== "TEXTAREA") return;
+
+                if (!mycell.id) {
+                    counter += 1;
+                    mycell.id = "mycell-render-" + counter;
+                }
+
+                const draw = () => {
+                    mycell.innerHTML = "";
+                    render(textarea.value.split(/\r\n|\r|\n/), mycell.id, renderOptions);
+                };
+
+                textarea.addEventListener("input", draw);
+                draw();
+            });
+        })();
+    </script>
+</body>
+
+</html>

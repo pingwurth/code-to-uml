@@ -1,0 +1,19 @@
+Title: Lollipop interface
+Describe: None
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+You can also define lollipops interface on classes, using the following
+syntax:
+- `bar ()- foo`
+- `bar ()-- foo`
+- `foo -() bar`
+
+[UML]
+@startuml
+class foo
+bar ()- foo
+@enduml
+------------------------------------------------------------

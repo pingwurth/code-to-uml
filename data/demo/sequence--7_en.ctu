@@ -1,0 +1,15 @@
+Title: Change arrow color
+Describe: None
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+You can change the color of individual arrows using the following notation:
+
+[UML]
+@startuml
+Bob -[#red]> Alice : hello
+Alice -[#0000FF]->Bob : ok
+@enduml
+------------------------------------------------------------

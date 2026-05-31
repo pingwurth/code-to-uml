@@ -1,0 +1,2250 @@
+<html lang="zh">
+
+<head>
+
+
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Organization",
+  "url": "https://plantuml.com",
+  "name": "PlantUML",
+  "sameAs" : ["https://twitter.com/plantuml","https://en.wikipedia.org/wiki/PlantUML","https://www.wikidata.org/wiki/Q18346546"],
+  "logo": "https://cdn-0.plantuml.com/logo3.png",
+  "contactPoint": [{
+    "@type": "ContactPoint",
+    "email": "plantuml@gmail.com",
+    "url": "https://plantuml.com",
+    "contactType": "customer service"
+  }]
+}
+</script>
+  <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+    "@type": "ListItem",
+    "position": 1,
+    "item": {
+      "@id": "https://plantuml.com",
+      "name": "Home"
+    }
+  },{
+    "@type": "ListItem",
+    "position": 2,
+    "item": {
+      "@id": "https://plantuml.com/sitemap-language-specification",
+      "name": "Language specification"
+    }
+  },{
+    "@type": "ListItem",
+    "position": 3,
+    "item": {
+      "@id": "https://plantuml.com/state-diagram",
+      "name": "State Diagram"
+  }
+  }]
+}
+</script>
+  <link rel="canonical" href="https://plantuml.com/zh/state-diagram" />
+  <link rel="alternate" hreflang="x-default" href="https://plantuml.com/state-diagram" />
+  <link rel="alternate" hreflang="de" href="https://plantuml.com/de/state-diagram" />
+  <link rel="alternate" hreflang="en" href="https://plantuml.com/state-diagram" />
+  <link rel="alternate" hreflang="es" href="https://plantuml.com/es/state-diagram" />
+  <link rel="alternate" hreflang="fr" href="https://plantuml.com/fr/state-diagram" />
+  <link rel="alternate" hreflang="ja" href="https://plantuml.com/ja/state-diagram" />
+  <link rel="alternate" hreflang="ko" href="https://plantuml.com/ko/state-diagram" />
+  <link rel="alternate" hreflang="zh" href="https://plantuml.com/zh/state-diagram" />
+
+  <link rel="shortcut icon" href="/favicon.ico" />
+
+
+  <!-- link rel="preload" as="image" href="https://img.shields.io/liberapay/patrons/plantuml.svg?logo=liberapay" -->
+
+
+  <title>状态图的语法和功能</title>
+  <meta name="description" content="PlantUML状态图语法：你可以简单的状态，复合状态，并发状态，关系，笔记...改变字体和颜色也有可能。" />
+
+  <meta property="og:type" content="article" />
+  <!-- volt:dokuwiki titleog: -->
+  <!-- volt:dokuwiki descriptionog: -->
+
+  <meta property="og:url" content="https://plantuml.com/zh/state-diagram" />
+  <meta property="og:site_name" content="PlantUML.com" />
+
+  <!-- meta property="og:image" content="https://plantuml.com/og-state-diagram" -->
+  <meta name="twitter:image" content="https://plantuml.com/og-state-diagram" />
+  <meta property="og:locale" content="zh" />
+
+  <meta name="twitter:card" content="summary" />
+  <!-- volt:dokuwiki titletwitter: -->
+  <!-- volt:dokuwiki descriptiontwitter: -->
+  <meta name="twitter:site" content="@PlantUML" />
+  <meta name="twitter:creator" content="@PlantUML" />
+
+
+  <!-- https://www.w3schools.com/colors/colors_picker.asp -->
+  <!-- filter css https://codepen.io/sosuke/pen/Pjoqqp -->
+
+
+  <style>
+    .scale {}
+
+    li {
+      margin: 2px;
+    }
+
+    #external li {
+      margin: 13px;
+    }
+
+    @media screen and (max-width: 1190px) {
+    }
+
+
+    .coptable {
+      max-width: 90%;
+    }
+
+    .mytab {
+      display: inline-block;
+      border-radius: 3px;
+      border: 1px solid #e1e4e8;
+    }
+
+    .mytab:hover {
+      border: 1px dashed #0366d6;
+      cursor: pointer;
+      color: #0366d6;
+      background: #f6f8fa;
+    }
+
+    .cop {
+      margin: 25px 10px 0 10px;
+    }
+
+    .cop:hover {
+      cursor: pointer;
+      filter: invert(30%) sepia(75%) saturate(4001%) hue-rotate(201deg) brightness(88%) contrast(98%);
+    }
+
+    .cop2 {
+      margin: 25px 10px 0 10px;
+    }
+
+    .cop2:hover {
+      cursor: pointer;
+    }
+
+    .msg {
+      position: absolute;
+      color: #339966;
+      background-color: #FFF;
+      margin-top: 55px;
+      display: none;
+      border-radius: 3px;
+      border: 1px solid #4dff00;
+    }
+
+    .mycell0 {
+      float: left;
+      vertical-align: top;
+      padding: 10px;
+    }
+
+    .mycell0 code:hover {
+      cursor: default;
+      color: #000;
+    }
+
+    .mycell {
+      float: right;
+      vertical-align: top;
+      padding: 10px;
+      max-width: 55vw;
+      overflow-x: auto;
+    }
+
+    .mycell0 pre {
+      max-width: 55vw;
+      overflow-x: auto;
+    }
+
+    .cod {
+      background: #edeff3;
+      padding: 2px 5px;
+      border-radius: 3px;
+    }
+
+    .colo {
+      display: inline-block;
+      background: #edeff3;
+      padding: 7px 12px;
+      border-radius: 3px;
+    }
+
+    .tag,
+    .tagg,
+    .tago,
+    .tagr {
+      text-rendering: optimizeLegibility;
+      display: inline-block;
+      padding: 3px 5px 2px 4px;
+      text-decoration: none;
+      white-space: nowrap;
+      border: 1px solid #999;
+      text-transform: uppercase;
+      text-align: center;
+      border-radius: 3px;
+      font-size: 11px;
+      font-weight: bold;
+      line-height: 90%;
+    }
+
+    .tag {
+      background-color: #EEEEEE;
+    }
+
+    .tagg {
+      background-color: #98FB98;
+    }
+
+    .tago {
+      background-color: #fafa00;
+    }
+
+    .tagr {
+      background-color: #FF4500;
+    }
+
+
+    a {
+      text-decoration: none;
+      color: #0366d6;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .menu1 {
+      display: flex;
+      flex-direction: row;
+      border: 0;
+      font-size: 14px;
+      padding: 0;
+      margin: 0;
+      white-space: nowrap;
+    }
+
+    .menu1 a {
+      white-space: nowrap;
+      padding: 0 8px;
+      text-decoration: none;
+      color: #5e6d7d;
+      line-height: 30px;
+      height: 30px;
+    }
+
+    .menu1 a:hover {
+      background: #fefefe;
+      color: #0366d6;
+    }
+
+    .menuside2 {
+      display: flex;
+      flex-direction: column;
+      border: 0;
+      font-size: 14px;
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+      justify-content: center;
+    }
+
+    .menuside2 img {
+      vertical-align: top;
+      padding: 0 8px;
+      filter: brightness(0) saturate(100%) invert(42%) sepia(22%) saturate(385%) hue-rotate(170deg) brightness(92%) contrast(84%);
+    }
+
+    .menuside2 a {
+      padding: 6px 0;
+      text-decoration: none;
+      color: #5e6d7d;
+    }
+
+    .menuside2 a:hover {
+      color: #0366d6;
+      background: #fefefe;
+    }
+
+    .menuside2 a:hover img {
+      filter: brightness(0) saturate(100%) invert(23%) sepia(44%) saturate(7029%) hue-rotate(203deg) brightness(94%) contrast(98%);
+    }
+
+    .breadcrumb {
+      z-index: 1;
+      font-size: 14px;
+      text-align: center;
+      display: inline-block;
+      overflow: hidden;
+      border-radius: 5px;
+    }
+
+
+    .breadcrumb a {
+      text-decoration: none;
+      outline: none;
+      display: block;
+      float: left;
+      font-size: 12px;
+      line-height: 24px;
+      color: #373f49;
+      padding: 0 10px 0 35px;
+      background: #f0f1f1;
+      background: linear-gradient(#f0f1f1, #c6d2d2);
+      position: relative;
+    }
+
+    .breadcrumb a:first-child {
+      padding-left: 21px;
+      border-radius: 5px 0 0 5px;
+      /*to match with the parent's radius*/
+    }
+
+    .breadcrumb a:first-child:before {
+      left: 14px;
+    }
+
+    .breadcrumb a:last-child {
+      visibility: hidden;
+    }
+
+    .breadcrumb a.active,
+    .breadcrumb a:hover {
+      color: #0366d6;
+      background: #c6d2d2;
+      background: linear-gradient(#e3e4e4, #b8c7c7);
+    }
+
+    .breadcrumb a.active:after,
+    .breadcrumb a:hover:after {
+      background: #c6d2d2;
+      background: linear-gradient(135deg, #e3e4e4, #b8c7c7);
+    }
+
+    .breadcrumb a:after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: -12px;
+      /*half of square's length*/
+      /*same dimension as the line-height of .breadcrumb a */
+      width: 24px;
+      height: 24px;
+      transform: scale(0.707) rotate(45deg);
+      /*we need to prevent the arrows from getting buried under the next link*/
+      z-index: 1;
+      /*background same as links but the gradient will be rotated to compensate with the transform applied*/
+      background: #f0f1f1;
+      background: linear-gradient(135deg, #f0f1f1, #c6d2d2);
+      /*stylish arrow design using box shadow*/
+      box-shadow:
+        2px -2px 0 2px rgba(0, 0, 0, 0.1),
+        3px -3px 0 2px rgba(255, 255, 255, 0.1);
+      /*
+		5px - for rounded arrows and 
+		50px - to prevent hover glitches on the border created using shadows*/
+      border-radius: 0 5px 0 50px;
+    }
+
+    /*we dont need an arrow after the last link*/
+    .breadcrumb a:last-child:after {
+      content: none;
+      visibility: hidden;
+    }
+
+
+    .lga,
+    .lga a,
+    .lgi,
+    .lgi a {
+      font-size: 13px;
+      text-align: center;
+      color: #fff;
+      padding: 0 5px;
+      margin: 0;
+    }
+
+    .lga,
+    .lga a {
+      background-color: #008;
+    }
+
+    .lgi,
+    .lgi a {
+      background-color: #888;
+    }
+
+    .lga:hover,
+    .lga:hover a {
+      text-decoration: none;
+      color: #BBB;
+    }
+
+    .lgi:hover,
+    .lgi:hover a {
+      text-decoration: none;
+      color: #CCC;
+    }
+  </style>
+  <style>
+    body {
+      font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+      font-size: 14px;
+      line-height: 1.5;
+      margin: auto;
+      overflow-x: hidden;
+      background: #fefefe;
+    }
+
+    h1.chap {
+      font-size: 1.8em;
+    }
+
+    h2.chap {
+      font-size: 1.35em;
+    }
+
+    h3,
+    h3.chap {
+      font-size: 1.15em;
+    }
+
+    h4 {
+      font-size: 1.05em;
+    }
+
+    table {
+      font-size: inherit;
+    }
+  </style>
+
+
+  <style>
+    .dyn {
+      display: flex;
+      flex-direction: row;
+      gap: 3em;
+      align-items: stretch;
+      flex-wrap: wrap;
+      margin: 10px 0;
+    }
+
+    .dyn textarea {
+      font-family: monospace;
+      font-size: 13px;
+      line-height: 1.4;
+      min-width: 30ch;
+      max-width: 90ch;
+      box-sizing: border-box;
+      resize: both;
+      white-space: pre;
+      overflow: auto;
+      field-sizing: content;
+      align-self: stretch;
+      border: 1px solid #888;
+      border-radius: 3px;
+      margin: 0;
+      padding: 4px 8px;
+      background: #fefefe;
+    }
+
+    .dyn>div {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      display: flex;
+    }
+
+    .dyn>div>div {
+      margin: 0;
+      padding: 0;
+    }
+
+    .dyn img {
+      margin: 0;
+      padding: 0;
+    }
+
+    .scale {
+      max-width: 100%;
+      height: auto;
+      border: 1px solid #dde;
+      border-radius: 4px;
+    }
+  </style>
+
+
+  <script>
+    var llg = "zh";
+    var az = 0;
+    var amdark = 0;
+    function ljs(n) {
+      if (az) return false;
+      var sc = document.createElement("script");
+      sc.type = "text/javascript";
+      sc.src = "/btn-" + n + ".js";
+      document.body.innerHTML = "<i style='position:absolute;top:30%;width:100%;'><center>Loading in progress...";
+      document.body.appendChild(sc);
+    }
+    function ctc(id) {
+      document.getElementById('img' + id).classList.remove('cop'); document.getElementById('img' + id).classList.add('cop2');
+      document.getElementById('pre' + id).style.backgroundColor = '#4dff00';
+      document.getElementById('msg' + id).style.display = 'inline';
+
+      setTimeout(function () { document.getElementById('img' + id).classList.remove('cop2'); document.getElementById('img' + id).classList.add('cop'); document.getElementById('pre' + id).style.backgroundColor = ''; document.getElementById('msg' + id).style.display = 'none'; }, 800);
+
+
+      text = document.getElementById('pre' + id).innerText;
+      if (window.clipboardData && window.clipboardData.setData)
+        return window.clipboardData.setData("Text", text);
+      else if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
+        var ta = document.createElement("textarea");
+        ta.textContent = text;
+        ta.style.position = "fixed";
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          return document.execCommand("copy");
+        }
+        catch (ex) {
+          return false;
+        }
+        finally {
+          document.body.removeChild(ta);
+        }
+      }
+    }
+  </script>
+</head>
+
+<body>
+  <style>
+    body,
+    .container,
+    #B3,
+    #C5,
+    #C6,
+    #C7,
+    #D7,
+    #D8 {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      overflow-y: scroll;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      grid-template-rows: auto 1fr auto;
+      min-height: 100vh;
+    }
+
+    #B3 {
+      grid-column: 1 / 5;
+      grid-row: 1;
+      position: sticky;
+      top: 0;
+      height: 30px;
+      padding: 0;
+      z-index: 10;
+      overflow: hidden;
+      background: #edeff3;
+      border-bottom: 1px solid #d4d8de;
+    }
+
+    #D7 {
+      grid-column: 1;
+      grid-row: 2;
+      margin: 0;
+      padding: 0;
+      padding-left: 30px;
+      line-height: 1.6;
+    }
+
+    #D8 {
+      grid-column: 1;
+      grid-row: 3;
+      position: sticky;
+      bottom: 0;
+      z-index: 5;
+      background: #fefefe;
+    }
+
+    #C5 {
+      grid-column: 2;
+      grid-row: 1 / -1;
+      position: sticky;
+      top: 40px;
+      align-self: start;
+      height: calc(98vh - 60px);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #C6 {
+      grid-column: 3;
+      grid-row: 1 / -1;
+      position: sticky;
+      top: 40px;
+      align-self: start;
+      height: calc(98vh - 60px);
+      max-width: 200px;
+      overflow: hidden;
+      margin: 0 10px;
+      padding: 8px 5px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #C7 {
+      grid-column: 4;
+      grid-row: 1 / -1;
+      position: sticky;
+      top: 40px;
+      align-self: start;
+      height: calc(98vh - 60px);
+      margin: 0 20px 0 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #toc {
+      z-index: 15;
+      overflow-x: hidden;
+      overflow-y: auto;
+      background: #f6f8fa;
+      border-width: 2px;
+      border-style: groove;
+      border-radius: 3px;
+      border-color: #e1e4e8;
+      margin: 0 5px;
+      padding: 0;
+      max-height: 100%;
+    }
+
+    #toc ul {
+      margin: 0;
+      list-style-type: none;
+      padding: 0;
+    }
+
+    #toc li {
+      padding: 0 10px;
+      margin: 0;
+    }
+
+    #toc li a {
+      padding: 5px 0;
+      display: inline-block;
+      text-decoration: none;
+      width: 100%;
+      color: #5e6d7d;
+    }
+
+    #toc li a:hover {
+      color: #0366d6;
+    }
+
+    #toc li:hover {
+      background: #fefefe;
+    }
+
+    #magic {
+      position: absolute;
+      top: 0;
+      right: 50px;
+      width: 30px;
+      height: 30px;
+      overflow: hidden;
+      background: #edeff3;
+      z-index: 14;
+    }
+
+    #magic:hover {
+      width: calc(100% - 50px);
+    }
+
+    #magic .menu1 {
+      position: absolute;
+      top: 0;
+      right: 30px;
+      height: 30px;
+      padding-left: 10px;
+      background: #edeff3;
+      border-left: 1px solid #d4d8de;
+      border-bottom: 1px solid #d4d8de;
+    }
+
+    .menu1-tail {
+      flex-grow: 1;
+      flex-shrink: 0;
+      height: 30px;
+      position: relative;
+      z-index: 15;
+      background: #edeff3;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: auto auto auto;
+      grid-auto-rows: auto;
+      gap: 5px;
+      margin: 0;
+      padding: 0;
+    }
+
+    .merged {
+      grid-column: 1 / -1;
+    }
+
+    #C6 {
+      display: none;
+    }
+
+    @media (min-width: 1401px) {
+      #C6:has(#toc li) {
+        display: flex;
+      }
+    }
+
+    @media (max-width: 1100px) {
+      #C5,
+      #C7 {
+        display: none;
+      }
+    }
+
+    @media (max-width: 1200px) {
+      .merged {
+        display: none;
+      }
+    }
+  </style>
+
+  <div class="container">
+
+    <footer id="D8">
+
+      <p>
+      </p>
+      <p>
+
+      </p>
+    </footer>
+
+
+    <header id="B3">
+      <div class="menu1">
+        <a id="titem10" href="sequence-diagram_zh.html">时序图</a>
+        <a id="titem20" href="use-case-diagram_zh.html">用例图</a>
+        <a id="titem30" href="class-diagram_zh.html">类图</a>
+        <a id="titem40" href="activity-diagram-beta_zh.html">活动图</a>
+        <a id="titem50" href="component-diagram_zh.html">组件图</a>
+        <a id="titem60" href="state-diagram_zh.html">状态图</a>
+        <a id="titem70" href="object-diagram_zh.html">对象图</a>
+        <a id="titem80" href="deployment-diagram_zh.html">部署图</a>
+        <a id="titem90" href="timing-diagram_zh.html">定时图</a>
+
+        <a id="titem99" href="regex_zh.html">Regex</a>
+        <a id="titem100" href="nwdiag_zh.html">Network</a>
+        <a id="titem110" href="salt_zh.html">Wireframe</a>
+        <a id="titem120" href="archimate-diagram_zh.html">Archimate</a>
+        <a id="titem130" href="gantt-diagram_zh.html">Gantt</a>
+        <a id="titem140" href="mindmap-diagram_zh.html">MindMap</a>
+        <a id="titem150" href="wbs-diagram_zh.html">WBS</a>
+        <a id="titem151" href="ebnf_zh.html">EBNF</a>
+        <a id="titem160" href="json_zh.html">JSON</a>
+        <a id="titem170" href="yaml_zh.html">YAML</a>
+
+        <div class="menu1-tail"></div>
+      </div>
+      <div id="magic">
+        <div class="menu1">
+          <a id="titem10" href="sequence-diagram_zh.html">时序图</a>
+          <a id="titem20" href="use-case-diagram_zh.html">用例图</a>
+          <a id="titem30" href="class-diagram_zh.html">类图</a>
+          <a id="titem40" href="activity-diagram-beta_zh.html">活动图</a>
+          <a id="titem50" href="component-diagram_zh.html">组件图</a>
+          <a id="titem60" href="state-diagram_zh.html">状态图</a>
+          <a id="titem70" href="object-diagram_zh.html">对象图</a>
+          <a id="titem80" href="deployment-diagram_zh.html">部署图</a>
+          <a id="titem90" href="timing-diagram_zh.html">定时图</a>
+
+          <a id="titem99" href="regex_zh.html">Regex</a>
+          <a id="titem100" href="nwdiag_zh.html">Network</a>
+          <a id="titem110" href="salt_zh.html">Wireframe</a>
+          <a id="titem120" href="archimate-diagram_zh.html">Archimate</a>
+          <a id="titem130" href="gantt-diagram_zh.html">Gantt</a>
+          <a id="titem140" href="mindmap-diagram_zh.html">MindMap</a>
+          <a id="titem150" href="wbs-diagram_zh.html">WBS</a>
+          <a id="titem151" href="ebnf_zh.html">EBNF</a>
+          <a id="titem160" href="json_zh.html">JSON</a>
+          <a id="titem170" href="yaml_zh.html">YAML</a>
+
+          <div class="menu1-tail"></div>
+        </div>
+      </div><!-- magic -->
+    </header>
+
+    <main id="D7">
+
+      <style>
+        #donate {
+          padding-top: 10px;
+          min-height: 30px;
+        }
+      </style>
+
+
+      <p style="clear:both;">
+
+
+        <style>
+          #titem60 {
+            color: #0366d6;
+            background-color: #fefefe;
+          }
+
+          #titem60 img {
+            filter: brightness(0) saturate(100%) invert(23%) sepia(44%) saturate(7029%) hue-rotate(203deg) brightness(94%) contrast(98%);
+          }
+
+          .menu1:hover #titem60 {
+            color: #5e6d7d;
+          }
+
+          .menu1:hover #titem60:hover {
+            color: #0366d6;
+          }
+
+          .menu1:hover #titem60 img {
+            filter: brightness(0) saturate(100%) invert(42%) sepia(22%) saturate(385%) hue-rotate(170deg) brightness(92%) contrast(84%);
+          }
+        </style>
+
+        <a style="position:relative;top:-38px;" name="884021fe8248cf7e"></a>
+        <!--heading-->
+      </p>
+      <h1 class="chap">状态图</h1>
+      <p></p>
+      <a href="https://en.wikipedia.org/wiki/State_diagram"><strong>状态图</strong></a>
+      提供了一个系统或对象可能处于的各种状态的视觉表示，以及状态之间的转换。它们在模拟系统的动态行为方面至关重要，捕获它们如何随着时间的推移响应不同的事件。状态图描述了系统的生命周期，使其行为更易于理解、设计和优化。
+      <p></p>
+      使用 <a href="https://plantuml.com/"><strong>PlantUML</strong></a> 创建状态图提供了几个优势：
+      <ul>
+        <li><strong>基于文本的语言</strong>：快速定义并可视化状态和转换，无需手动绘图的麻烦。</li>
+        <li><strong>效率与一致性</strong>：确保流线型的图表创建和简单的版本控制。</li>
+        <li><strong>多功能性</strong>：与各种文档平台集成，并支持多种输出格式。</li>
+        <li><strong>开源和社区支持</strong>：由一个<a
+            href="https://forum.plantuml.net/"><strong>强大的社区</strong></a>支持，该社区不断为其改进作出贡献，并提供无价的资源。</li>
+      </ul>
+      <a style="position:relative;top:-38px;" name="7d9e703ac421ea25"></a>
+      <!--heading-->
+      <h2 class="chap">普通状态</h2>
+      使用(<code class="cod">[*]</code>)绘制状态图的起点或终点。
+      <p></p>
+      使用<code class="cod">--&gt;</code>添加箭头。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+[*] --&gt; State1
+State1 --&gt; [*]
+State1 : this is a string
+State1 : this is another string
+
+State1 -&gt; State2
+State2 --&gt; [*]
+
+@enduml
+</textarea>
+        <div id="outf69b5e8389ac5656d7852415a086b639">
+          <div class="mycell">
+            <img loading="lazy" width="261" height="254" class="scale"
+              src="/imgw/img-f69b5e8389ac5656d7852415a086b639.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="b99e918943f68545"></a>
+      <!--heading-->
+      <h2 class="chap">简化状态</h2>
+      <p></p>
+      你可以使用隐藏空描述，即 <code class="cod">hide empty description</code> 关键字，渲染一个简单的状态。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+hide empty description
+[*] --&gt; 状态1
+状态1 --&gt; [*]
+状态1 : 这是一段字符串
+状态1 : 这是另一段字符串
+
+状态1 -&gt; 状态2
+状态2 --&gt; [*]
+@enduml
+</textarea>
+        <div id="out5455f149bfd2d893a1eae8bae18c8b2c">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="237" height="254" class="scale"
+              src="/imgw/img-5455f149bfd2d893a1eae8bae18c8b2c.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="a70cc614da79064a"></a>
+      <!--heading-->
+      <h2 class="chap">复杂状态</h2>
+      <p></p>
+      <p></p>
+      一个状态也可能是嵌套的，必须使用关键字<code class="cod">state</code>和花括号来定义复杂状态。
+      <p></p>
+      <h3>内部子状态</h3>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+scale 350 width
+[*] --&gt; NotShooting
+
+state NotShooting {
+  [*] --&gt; Idle
+  Idle --&gt; Configuring : EvConfig
+  Configuring --&gt; Idle : EvConfig
+}
+
+state Configuring {
+  [*] --&gt; NewValueSelection
+  NewValueSelection --&gt; NewValuePreview : EvNewValue
+  NewValuePreview --&gt; NewValueSelection : EvNewValueRejected
+  NewValuePreview --&gt; NewValueSelection : EvNewValueSaved
+
+  state NewValuePreview {
+     State1 -&gt; State2
+  }
+
+}
+@enduml
+</textarea>
+        <div id="out57466b656a38644acbd44c111e7ef70b">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="350" height="468" class="scale"
+              src="/imgw/img-57466b656a38644acbd44c111e7ef70b.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>子状态间的连接</h3>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+state A {
+  state X {
+  }
+  state Y {
+  }
+}
+ 
+state B {
+  state Z {
+  }
+}
+
+X --&gt; Z
+Z --&gt; Y
+@enduml
+</textarea>
+        <div id="oute3892db4cbb27a02d0a8266850d76bca">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="188" height="248" class="scale"
+              src="/imgw/img-e3892db4cbb27a02d0a8266850d76bca.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/3300/add-a-new-state-diagram-example">QA-3300</a>]</em>
+      <p></p>
+      <center>
+        <div class="tago">WARNING</div> <b>This translation need to be updated.</b> <div class="tago">WARNING</div>
+      </center>
+      <a style="position:relative;top:-38px;" name="ed8ef97e6d16ba84"></a>
+      <!--heading-->
+      <h2 class="chap">长状态名</h2>
+      <p></p>
+      <p></p>
+      也可以使用关键字<code class="cod">state</code>来给状态描述较长的状态名，并定义其指代名。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+scale 600 width
+
+[*] -&gt; State1
+State1 --&gt; State2 : Succeeded
+State1 --&gt; [*] : Aborted
+State2 --&gt; State3 : Succeeded
+State2 --&gt; [*] : Aborted
+state State3 {
+  state &#34;Accumulate Enough Data\nLong State Name&#34; as long1
+  long1 : Just a test
+  [*] --&gt; long1
+  long1 --&gt; long1 : New Data
+  long1 --&gt; ProcessData : Enough Data
+}
+State3 --&gt; State3 : Failed
+State3 --&gt; [*] : Succeeded / Save Result
+State3 --&gt; [*] : Aborted
+
+@enduml
+</textarea>
+        <div id="outd539ce9be30b70072597e9a4a71f0b68">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="600" height="670" class="scale"
+              src="/imgw/img-d539ce9be30b70072597e9a4a71f0b68.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="73b918d90b24a6c6"></a>
+      <!--heading-->
+      <h2 class="chap">历史状态 [[H], [H*]]</h2>
+      <p></p>
+      在嵌套状态中，你可以用 <code class="cod">[H]</code> 来表示历史状态， <code class="cod">[H*]</code> 表示深层历史状态.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+[*] -&gt; State1
+State1 --&gt; State2 : Succeeded
+State1 --&gt; [*] : Aborted
+State2 --&gt; State3 : Succeeded
+State2 --&gt; [*] : Aborted
+state State3 {
+  state &#34;Accumulate Enough Data&#34; as long1
+  long1 : Just a test
+  [*] --&gt; long1
+  long1 --&gt; long1 : New Data
+  long1 --&gt; ProcessData : Enough Data
+  State2 --&gt; [H]: Resume
+}
+State3 --&gt; State2 : Pause
+State2 --&gt; State3[H*]: DeepResume
+State3 --&gt; State3 : Failed
+State3 --&gt; [*] : Succeeded / Save Result
+State3 --&gt; [*] : Aborted
+@enduml
+</textarea>
+        <div id="out956479c7001d3ac0c8356e898c8b95be">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="690" height="624" class="scale"
+              src="/imgw/img-956479c7001d3ac0c8356e898c8b95be.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="7443558300f98341"></a>
+      <!--heading-->
+      <h2 class="chap">分支状态 [fork, join]</h2>
+      <p></p>
+      <p></p>
+      你可以使用版型 <code class="cod">&lt;&lt;fork&gt;&gt;</code> 和 <code class="cod">&lt;&lt;join&gt;&gt;</code> 来表示状态的分叉及合并。
+      <p></p>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+state fork_state &lt;&lt;fork&gt;&gt;
+[*] --&gt; fork_state
+fork_state --&gt; State2
+fork_state --&gt; State3
+
+state join_state &lt;&lt;join&gt;&gt;
+State2 --&gt; join_state
+State3 --&gt; join_state
+join_state --&gt; State4
+State4 --&gt; [*]
+
+@enduml
+</textarea>
+        <div id="outac09f1a8870052a89f07a1f4cd3daf24">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="176" height="477" class="scale"
+              src="/imgw/img-ac09f1a8870052a89f07a1f4cd3daf24.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="cb648904a5cede7d"></a>
+      <!--heading-->
+      <h2 class="chap">并发状态 [--, ||]</h2>
+      <p></p>
+      <p></p>
+      用<code class="cod">--</code> or <code class="cod">||</code>作为分隔符来合成并发状态。
+      <p></p>
+      <h3>水平分隔 <code class="cod">--</code></h3>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+[*] --&gt; Active
+
+state Active {
+  [*] -&gt; NumLockOff
+  NumLockOff --&gt; NumLockOn : EvNumLockPressed
+  NumLockOn --&gt; NumLockOff : EvNumLockPressed
+  --
+  [*] -&gt; CapsLockOff
+  CapsLockOff --&gt; CapsLockOn : EvCapsLockPressed
+  CapsLockOn --&gt; CapsLockOff : EvCapsLockPressed
+  --
+  [*] -&gt; ScrollLockOff
+  ScrollLockOff --&gt; ScrollLockOn : EvCapsLockPressed
+  ScrollLockOn --&gt; ScrollLockOff : EvCapsLockPressed
+}
+
+@enduml
+</textarea>
+        <div id="outc24735eed1d49795ea8b56ab73305596">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="321" height="643" class="scale"
+              src="/imgw/img-c24735eed1d49795ea8b56ab73305596.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>竖直分隔 <code class="cod">||</code></h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+[*] --&gt; Active
+
+state Active {
+  [*] -&gt; NumLockOff
+  NumLockOff --&gt; NumLockOn : EvNumLockPressed
+  NumLockOn --&gt; NumLockOff : EvNumLockPressed
+  ||
+  [*] -&gt; CapsLockOff
+  CapsLockOff --&gt; CapsLockOn : EvCapsLockPressed
+  CapsLockOn --&gt; CapsLockOff : EvCapsLockPressed
+  ||
+  [*] -&gt; ScrollLockOff
+  ScrollLockOff --&gt; ScrollLockOn : EvCapsLockPressed
+  ScrollLockOn --&gt; ScrollLockOff : EvCapsLockPressed
+}
+
+@enduml
+</textarea>
+        <div id="out3fcc654da0237e680868c313da5be136">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="875" height="309" class="scale"
+              src="/imgw/img-3fcc654da0237e680868c313da5be136.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      *[Ref. [QA-3086](https://forum.plantuml.net/3086/state-diagram-concurrent-state-horizontal-line)]*
+      <center>
+        <div class="tago">WARNING</div> <b>This translation need to be updated.</b> <div class="tago">WARNING</div>
+      </center>
+      <a style="position:relative;top:-38px;" name="8bd6f7be727fb20e"></a>
+      <!--heading-->
+      <h2 class="chap">选择结点 [choice]</h2>
+      <p></p>
+      版型 <code class="cod">&lt;&lt;choice&gt;&gt;</code>可以用来表示一个选择结点，表示状态条件。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+state &#34;Req(Id)&#34; as ReqId &lt;&lt;sdlreceive&gt;&gt;
+state &#34;Minor(Id)&#34; as MinorId
+state &#34;Major(Id)&#34; as MajorId
+ 
+state c &lt;&lt;choice&gt;&gt;
+ 
+Idle --&gt; ReqId
+ReqId --&gt; c
+c --&gt; MinorId : [Id &lt;= 10]
+c --&gt; MajorId : [Id &gt; 10]
+@enduml
+</textarea>
+        <div id="out3ab7746c5e10582ca377c85f2e4d4f90">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="208" height="392" class="scale"
+              src="/imgw/img-3ab7746c5e10582ca377c85f2e4d4f90.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="da4d531e5be7260c"></a>
+      <!--heading-->
+      <h2 class="chap">一个使用版型的完整样例 [start, choice, fork, join, end]</h2>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+state start1  &lt;&lt;start&gt;&gt;
+state choice1 &lt;&lt;choice&gt;&gt;
+state fork1   &lt;&lt;fork&gt;&gt;
+state join2   &lt;&lt;join&gt;&gt;
+state end3    &lt;&lt;end&gt;&gt;
+
+[*]     --&gt; choice1 : from start\nto choice
+start1  --&gt; choice1 : from start stereo\nto choice
+
+choice1 --&gt; fork1   : from choice\nto fork
+choice1 --&gt; join2   : from choice\nto join
+choice1 --&gt; end3    : from choice\nto end stereo
+
+fork1   ---&gt; State1 : from fork\nto state
+fork1   --&gt; State2  : from fork\nto state
+
+State2  --&gt; join2   : from state\nto join
+State1  --&gt; [*]     : from state\nto end
+
+join2   --&gt; [*]     : from join\nto end
+@enduml
+</textarea>
+        <div id="out07c9526828cbf00f077a428be70b6fc0">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="364" height="677" class="scale"
+              src="/imgw/img-07c9526828cbf00f077a428be70b6fc0.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <em>[参考<a href="https://forum.plantuml.net/404/choice-pseudostate?show=436#c436">QA-404</a>,<a
+          href="https://forum.plantuml.net/1159/choice-pseudostate-and-guard-condition-in-state-diagrams?show=1161#a1161">QA-1159</a>和<a
+          href="https://github.com/plantuml/plantuml/pull/887">GH-887</a>]</em>
+      <p></p>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/19174/is-there-a-list-of-things-like-sdlreceive">QA-19174</a>]</em>
+      <center>
+        <div class="tago">WARNING</div> <b>This translation need to be updated.</b> <div class="tago">WARNING</div>
+      </center>
+      <a style="position:relative;top:-38px;" name="6929d1066a9e828a"></a>
+      <!--heading-->
+      <h2 class="chap">入口和出口 [entryPoint, exitPoint]</h2>
+      <p></p>
+      你可以用以下版型给合成状态添加<strong>入口</strong>结点<code class="cod">&lt;&lt;entryPoint&gt;&gt;</code>和<strong>出口</strong>结点
+      <code class="cod">&lt;&lt;exitPoint&gt;&gt;</code>。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+state Somp {
+  state entry1 &lt;&lt;entryPoint&gt;&gt;
+  state entry2 &lt;&lt;entryPoint&gt;&gt;
+  state sin
+  entry1 --&gt; sin
+  entry2 -&gt; sin
+  sin -&gt; sin2
+  sin2 --&gt; exitA &lt;&lt;exitPoint&gt;&gt;
+}
+
+[*] --&gt; entry1
+exitA --&gt; Foo
+Foo1 -&gt; entry2
+@enduml
+</textarea>
+        <div id="outf4593b4f218c6b2f1f7220095dcfac45">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="247" height="479" class="scale"
+              src="/imgw/img-f4593b4f218c6b2f1f7220095dcfac45.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <center>
+        <div class="tago">WARNING</div> <b>This translation need to be updated.</b> <div class="tago">WARNING</div>
+      </center>
+      <a style="position:relative;top:-38px;" name="f38ba2410a08cd85"></a>
+      <!--heading-->
+      <h2 class="chap">引脚 [inputPin, outputPin]</h2>
+      <p></p>
+      你可以用以下版型添加<strong>引脚</strong>结点<code class="cod">&lt;&lt;inputPin&gt;&gt;</code>和 <code
+        class="cod">&lt;&lt;outputPin&gt;&gt;</code>。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+state Somp {
+  state entry1 &lt;&lt;inputPin&gt;&gt;
+  state entry2 &lt;&lt;inputPin&gt;&gt;
+  state sin
+  entry1 --&gt; sin
+  entry2 -&gt; sin
+  sin -&gt; sin2
+  sin2 --&gt; exitA &lt;&lt;outputPin&gt;&gt;
+}
+
+[*] --&gt; entry1
+exitA --&gt; Foo
+Foo1 -&gt; entry2
+@enduml
+</textarea>
+        <div id="outcc69dbd9caff4c7518488a0249db6fce">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="247" height="479" class="scale"
+              src="/imgw/img-cc69dbd9caff4c7518488a0249db6fce.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref.<a
+          href="https://forum.plantuml.net/4309/entrypoints-exitpoints-expansioninput-expansionoutput">QA-4309</a>]</em>
+      <p></p>
+      <p></p>
+      <center>
+        <div class="tago">WARNING</div> <b>This translation need to be updated.</b> <div class="tago">WARNING</div>
+      </center>
+      <a style="position:relative;top:-38px;" name="45b17c6b99df6bf4"></a>
+      <!--heading-->
+      <h2 class="chap">扩展 [expansionInput, expansionOutput]</h2>
+      <p></p>
+      你可以用以下版型添加<strong>扩展</strong>结点<code class="cod">&lt;&lt;expansionInput&gt;&gt;</code>和 <code
+        class="cod">&lt;&lt;expansionOutput&gt;&gt;</code>。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+state Somp {
+  state entry1 &lt;&lt;expansionInput&gt;&gt;
+  state entry2 &lt;&lt;expansionInput&gt;&gt;
+  state sin
+  entry1 --&gt; sin
+  entry2 -&gt; sin
+  sin -&gt; sin2
+  sin2 --&gt; exitA &lt;&lt;expansionOutput&gt;&gt;
+}
+
+[*] --&gt; entry1
+exitA --&gt; Foo
+Foo1 -&gt; entry2
+@enduml
+</textarea>
+        <div id="outfe93975fe3556dbdbe9a8a3f480e35f1">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="251" height="479" class="scale"
+              src="/imgw/img-fe93975fe3556dbdbe9a8a3f480e35f1.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref.<a
+          href="https://forum.plantuml.net/4309/entrypoints-exitpoints-expansioninput-expansionoutput">QA-4309</a>]</em>
+      <p></p>
+      <p></p>
+      <center>
+        <div class="tago">WARNING</div> <b>This translation need to be updated.</b> <div class="tago">WARNING</div>
+      </center>
+      <a style="position:relative;top:-38px;" name="764824584d438a62"></a>
+      <!--heading-->
+      <h2 class="chap">箭头方向</h2>
+      <p></p>
+      使用<code class="cod">-&gt;</code>定义水平箭头，也可以使用下列格式强制设置箭头方向：
+      <ul>
+        <li><code class="cod">-down-&gt;</code> (default arrow)</li>
+        <li><code class="cod">-right-&gt;</code> or <code class="cod">-&gt;</code></li>
+        <li><code class="cod">-left-&gt;</code></li>
+        <li><code class="cod">-up-&gt;</code></li>
+      </ul>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+[*] -up-&gt; First
+First -right-&gt; Second
+Second --&gt; Third
+Third -left-&gt; Last
+
+@enduml
+</textarea>
+        <div id="out4cb245e6a5258c1af162648d6ece50fa">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="211" height="180" class="scale"
+              src="/imgw/img-4cb245e6a5258c1af162648d6ece50fa.png" />
+          </div>
+        </div>
+      </div>
+      可以用首字母缩写或者开始的两个字母定义方向(如, <code class="cod">-d-</code>，<code class="cod">-down-</code>和<code
+        class="cod">-do-</code>是完全等价的)。
+      <p></p>
+      请不要滥用这些功能，<em>Graphviz</em>不喜欢这样。
+      <p></p>
+      <a style="position:relative;top:-38px;" name="9e62e79149a86c5d"></a>
+      <!--heading-->
+      <h2 class="chap">更改箭头线条的颜色和风格</h2>
+      <p></p>
+      你可以更改线条的<a href="color">颜色</a>及风格.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+State S1
+State S2
+S1 -[#DD00AA]-&gt; S2
+S1 -left[#yellow]-&gt; S3
+S1 -up[#red,dashed]-&gt; S4
+S1 -right[dotted,#blue]-&gt; S5
+
+X1 -[dashed]-&gt; X2
+Z1 -[dotted]-&gt; Z2
+Y1 -[#blue,bold]-&gt; Y2
+@enduml
+</textarea>
+        <div id="outf359ce0f2508f7819a3e0f0f9b349a7a">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="496" height="290" class="scale"
+              src="/imgw/img-f359ce0f2508f7819a3e0f0f9b349a7a.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="http://wiki.plantuml.net/site/incubation#change_line_color_in_state_diagrams">Incubation:
+          Change line color in state diagrams</a>]</em>
+      <p></p>
+      <p></p>
+      *[Ref. [QA-93](https://forum.plantuml.net/93/how-use-different-color-for-arrows-in-state-diagram)]*
+      <center>
+        <div class="tago">WARNING</div> <b>This translation need to be updated.</b> <div class="tago">WARNING</div>
+      </center>
+      <a style="position:relative;top:-38px;" name="8dfb58c1479319e8"></a>
+      <!--heading-->
+      <h2 class="chap">Change head or tail of arrow line</h2>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+state a
+
+a -&gt; b : -&gt;
+c x-&gt; d : x-&gt;
+e -&gt;o f : &lt;U+0020&gt;-&gt;o
+g x-&gt;o h : x-&gt;o
+@enduml
+</textarea>
+        <div id="out3f5a83e545a2e406010fc7d459335e27">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="750" height="70" class="scale"
+              src="/imgw/img-3f5a83e545a2e406010fc7d459335e27.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="3b0649c72650c313"></a>
+      <!--heading-->
+      <h2 class="chap">注释</h2>
+      <p></p>
+      可以用
+      <code class="cod">note left of</code>, <code class="cod">note right of</code>, <code
+        class="cod">note top of</code>, <code class="cod">note bottom of</code>
+      关键字来定义注释。
+      <p></p>
+      还可以定义多行注释。
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+[*] --&gt; Active
+Active --&gt; Inactive
+
+note left of Active : this is a short\nnote
+
+note right of Inactive
+  A note can also
+  be defined on
+  several lines
+end note
+
+@enduml
+</textarea>
+        <div id="out8331ca52dd0cc44e54226d2b7465acab">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="362" height="269" class="scale"
+              src="/imgw/img-8331ca52dd0cc44e54226d2b7465acab.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      以及浮动注释。
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+state foo
+note &#34;This is a floating note&#34; as N1
+
+@enduml
+</textarea>
+        <div id="out0cb44d8597a1421f898ba935d847a16d">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="249" height="70" class="scale"
+              src="/imgw/img-0cb44d8597a1421f898ba935d847a16d.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <center>
+        <div class="tago">WARNING</div> <b>This translation need to be updated.</b> <div class="tago">WARNING</div>
+      </center>
+      <a style="position:relative;top:-38px;" name="e1b0c1a155ce6cc5"></a>
+      <!--heading-->
+      <h2 class="chap">在箭头上添加注释</h2>
+      <p></p>
+      你可以在连接箭头上使用 <code class="cod">note on link</code> 关键字来添加注释.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+[*] -&gt; State1
+State1 --&gt; State2
+note on link 
+  this is a state-transition note 
+end note
+@enduml
+</textarea>
+        <div id="outbb8f7c873eb09a5197f9a97fc0fa7690">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="296" height="216" class="scale"
+              src="/imgw/img-bb8f7c873eb09a5197f9a97fc0fa7690.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="c8857585cebfbd1c"></a>
+      <!--heading-->
+      <h2 class="chap">给复杂状态添加注释</h2>
+      <p></p>
+      <p></p>
+      可以给嵌套的状态添加注释。
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+[*] --&gt; NotShooting
+
+state &#34;Not Shooting State&#34; as NotShooting {
+  state &#34;Idle mode&#34; as Idle
+  state &#34;Configuring mode&#34; as Configuring
+  [*] --&gt; Idle
+  Idle --&gt; Configuring : EvConfig
+  Configuring --&gt; Idle : EvConfig
+}
+
+note right of NotShooting : This is a note on a composite state
+
+@enduml
+</textarea>
+        <div id="out994457e7da5d0f9fa520e5afddf36b52">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="451" height="361" class="scale"
+              src="/imgw/img-994457e7da5d0f9fa520e5afddf36b52.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="536671b19fc4b7e0"></a>
+      <!--heading-->
+      <h2 class="chap">颜色</h2>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+state CurrentSite #pink {
+    state HardwareSetup #lightblue {
+       state Site #brown
+        Site -[hidden]-&gt; Controller
+        Controller -[hidden]-&gt; Devices
+    }
+    state PresentationSetup{
+        Groups -[hidden]-&gt; PlansAndGraphics
+    }
+    state Trends #FFFF77
+    state Schedule #magenta
+    state AlarmSupression
+}
+@enduml
+</textarea>
+        <div id="out7b3a42058bb2da61f7ab709ed3fa9741">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="687" height="349" class="scale"
+              src="/imgw/img-7b3a42058bb2da61f7ab709ed3fa9741.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[参考<a href="https://forum.plantuml.net/1812">QA-1812</a>]</em>
+      <a style="position:relative;top:-38px;" name="7aa53dbdfc2137bf"></a>
+      <!--heading-->
+      <h2 class="chap">显示参数</h2>
+      <p></p>
+      用<a href="skinparam">skinparam</a>改变字体和颜色。
+      <p></p>
+      可以在如下场景中使用：
+      <ul>
+        <li>在图示的定义中，</li>
+        <li>在<a href="preprocessing">导入的文件</a>中，</li>
+        <li>在<a href="command-line">命令行</a>或者<a href="ant-task">ANT任务</a>提供的配置文件中。</li>
+      </ul>
+      <p></p>
+      还可以为状态的构造类型指定特殊的字体和颜色。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+skinparam backgroundColor LightYellow
+skinparam state {
+  StartColor MediumBlue
+  EndColor Red
+  BackgroundColor Peru
+  BackgroundColor&lt;&lt;Warning&gt;&gt; Olive
+  BorderColor Gray
+  FontName Impact
+}
+
+[*] --&gt; NotShooting
+
+state &#34;Not Shooting State&#34; as NotShooting {
+  state &#34;Idle mode&#34; as Idle &lt;&lt;Warning&gt;&gt;
+  state &#34;Configuring mode&#34; as Configuring
+  [*] --&gt; Idle
+  Idle --&gt; Configuring : EvConfig
+  Configuring --&gt; Idle : EvConfig
+}
+
+NotShooting --&gt; [*]
+@enduml
+</textarea>
+        <div id="out26c6d72d4b87033fa9c5198ae670a3cc">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="190" height="443" class="scale"
+              src="/imgw/img-26c6d72d4b87033fa9c5198ae670a3cc.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>状态图所有显示参数测试</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+skinparam State {
+  AttributeFontColor blue
+  AttributeFontName serif
+  AttributeFontSize  9
+  AttributeFontStyle italic
+  BackgroundColor palegreen
+  BorderColor violet
+  EndColor gold
+  FontColor red
+  FontName Sanserif
+  FontSize 15
+  FontStyle bold
+  StartColor silver
+}
+
+state A : a a a\na
+state B : b b b\nb
+
+[*] -&gt; A  : start
+A -&gt; B : a2b
+B -&gt; [*] : end
+@enduml
+</textarea>
+        <div id="oute21fcadcb1a1762b82396fb5f3e848bf">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="347" height="96" class="scale"
+              src="/imgw/img-e21fcadcb1a1762b82396fb5f3e848bf.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <center>
+        <div class="tago">WARNING</div> <b>This translation need to be updated.</b> <div class="tago">WARNING</div>
+      </center>
+      <a style="position:relative;top:-38px;" name="edc06c934e9e5fc5"></a>
+      <!--heading-->
+      <h2 class="chap">Changing style</h2>
+      <p></p>
+      You can change <a href="style-evolution">style</a>.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+&lt;style&gt;
+stateDiagram {
+  BackgroundColor Peru
+  &#39;LineColor Gray
+  FontName Impact
+  FontColor Red
+  arrow {
+    FontSize 13
+    LineColor Blue
+  }
+}
+&lt;/style&gt;
+
+
+[*] --&gt; NotShooting
+
+state &#34;Not Shooting State&#34; as NotShooting {
+  state &#34;Idle mode&#34; as Idle &lt;&lt;Warning&gt;&gt;
+  state &#34;Configuring mode&#34; as Configuring
+  [*] --&gt; Idle
+  Idle --&gt; Configuring : EvConfig
+  Configuring --&gt; Idle : EvConfig
+}
+
+NotShooting --&gt; [*]
+@enduml
+</textarea>
+        <div id="out2ab85e548538889deead164cfc9199d9">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="179" height="442" class="scale"
+              src="/imgw/img-2ab85e548538889deead164cfc9199d9.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+&lt;style&gt;
+  diamond {
+    BackgroundColor #palegreen
+    LineColor #green
+    LineThickness 2.5
+}
+&lt;/style&gt;
+state state1
+state state2 
+state choice1 &lt;&lt;choice&gt;&gt;
+state end3    &lt;&lt;end&gt;&gt;
+
+state1  --&gt; choice1 : 1
+choice1 --&gt; state2  : 2
+choice1 --&gt; end3    : 3
+@enduml
+</textarea>
+        <div id="out07d21a3864731733dcc514ab51f8ace4">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="135" height="300" class="scale"
+              src="/imgw/img-07d21a3864731733dcc514ab51f8ace4.png" />
+          </div>
+        </div>
+      </div>
+      <em>[Ref. <a href="https://github.com/plantuml/plantuml/issues/880#issuecomment-1022278138">GH-880</a>]</em>
+      <a style="position:relative;top:-38px;" name="671b82c7f585444b"></a>
+      <!--heading-->
+      <h2 class="chap">Change state color and style (inline style)</h2>
+      <p></p>
+      You can change the <a href="color">color</a> or style of individual state using the following notation:
+      <p></p>
+      <ul>
+        <li><code class="cod">#color ##[style]color</code> </li>
+      </ul>
+      <p></p>
+      With background color first (<code class="cod">#color</code>), then line style and line color (<code
+        class="cod">##[style]color</code> ).
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+state FooGradient #red-green ##00FFFF
+state FooDashed #red|green ##[dashed]blue {
+}
+state FooDotted ##[dotted]blue {
+}
+state FooBold ##[bold] {
+}
+state Foo1 ##[dotted]green {
+state inner1 ##[dotted]yellow
+}
+
+state out ##[dotted]gold
+
+state Foo2 ##[bold]green {
+state inner2 ##[dotted]yellow
+}
+inner1 -&gt; inner2
+out -&gt; inner2
+@enduml
+</textarea>
+        <div id="out07b869100fa903c834941a3d7f00406d">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="786" height="122" class="scale"
+              src="/imgw/img-07b869100fa903c834941a3d7f00406d.png" />
+          </div>
+        </div>
+      </div>
+      <em>[Ref. <a href="https://forum.plantuml.net/1487">QA-1487</a>]</em>
+      <p></p>
+      <p></p>
+      <ul>
+        <li><code class="cod">#color;line:color;line.[bold|dashed|dotted];text:color</code></li>
+      </ul>
+      <p></p>
+      <div class="tag" style="background:#FFD700;">FIXME</div> 🚩
+      <code class="cod">text:color</code> seems not to be taken into account
+      <div class="tag" style="background:#FFD700;">FIXME</div>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+@startuml
+state FooGradient #red-green;line:00FFFF
+state FooDashed #red|green;line.dashed;line:blue {
+}
+state FooDotted #line.dotted;line:blue {
+}
+state FooBold #line.bold {
+}
+state Foo1 #line.dotted;line:green {
+state inner1 #line.dotted;line:yellow
+}
+
+state out #line.dotted;line:gold
+
+state Foo2 #line.bold;line:green {
+state inner2 #line.dotted;line:yellow
+}
+inner1 -&gt; inner2
+out -&gt; inner2
+@enduml
+@enduml
+</textarea>
+        <div id="out50076172598175731915996b3de9f3a9">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="786" height="122" class="scale"
+              src="/imgw/img-50076172598175731915996b3de9f3a9.png" />
+          </div>
+        </div>
+      </div>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+state s1 : s1 description
+state s2 #pink;line:red;line.bold;text:red : s2 description
+state s3 #palegreen;line:green;line.dashed;text:green : s3 description
+state s4 #aliceblue;line:blue;line.dotted;text:blue   : s4 description
+@enduml
+</textarea>
+        <div id="out99a79e55237e7060c67f2892e60fd152">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="550" height="75" class="scale"
+              src="/imgw/img-99a79e55237e7060c67f2892e60fd152.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Adapted from <a href="https://forum.plantuml.net/3770">QA-3770</a>]</em>
+      <a style="position:relative;top:-38px;" name="effdb9ce6c5d44df"></a>
+      <!--heading-->
+      <h2 class="chap">别名</h2>
+      <p></p>
+      有了State，你可以使用<code class="cod">alias</code> ，比如。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+state alias1 
+state &#34;alias2&#34;
+state &#34;long name&#34; as alias3
+state alias4 as &#34;long name&#34;
+
+alias1 : &#34;&#34;state alias1&#34;&#34;
+alias2 : &#34;&#34;state &#34;alias2&#34;&#34;&#34;
+alias3 : &#34;&#34;state &#34;long name&#34; as alias3&#34;&#34;
+alias4 : &#34;&#34;state alias4 as &#34;long name&#34;&#34;&#34;
+
+alias1 -&gt; alias2
+alias2 -&gt; alias3
+alias3 -&gt; alias4
+@enduml
+</textarea>
+        <div id="out8c26115665965b569711e6c6e1f673d8">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="872" height="75" class="scale"
+              src="/imgw/img-8c26115665965b569711e6c6e1f673d8.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      或。
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+state alias1 : &#34;&#34;state alias1&#34;&#34;
+state &#34;alias2&#34; : &#34;&#34;state &#34;alias2&#34;&#34;&#34;
+state &#34;long name&#34; as alias3 : &#34;&#34;state &#34;long name&#34; as alias3&#34;&#34;
+state alias4 as &#34;long name&#34; : &#34;&#34;state alias4 as &#34;long name&#34;&#34;&#34;
+
+alias1 -&gt; alias2
+alias2 -&gt; alias3
+alias3 -&gt; alias4
+@enduml
+</textarea>
+        <div id="outb1f4a0ddcfe1c4e1711420220d9b5248">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="872" height="75" class="scale"
+              src="/imgw/img-b1f4a0ddcfe1c4e1711420220d9b5248.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/1748/one-line-declaration-in-state-diagram">QA-1748</a>, <a
+          href="https://forum.plantuml.net/14560/how-to-properly-use-as-with-state-declaration">QA-14560</a>]</em>
+      <a style="position:relative;top:-38px;" name="84fccc92ba6ffe09"></a>
+      <!--heading-->
+      <h2 class="chap">Display JSON Data on State diagram</h2>
+      <p></p>
+      <h3>Simple example</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+state &#34;A&#34; as stateA
+state &#34;C&#34; as stateC {
+ state B
+}
+
+json jsonJ {
+   &#34;fruit&#34;:&#34;Apple&#34;,
+   &#34;size&#34;:&#34;Large&#34;,
+   &#34;color&#34;: [&#34;Red&#34;, &#34;Green&#34;]
+}
+@enduml
+</textarea>
+        <div id="outadf7571f5eb4858a94b95c02e3b3b486">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="324" height="129" class="scale"
+              src="/imgw/img-adf7571f5eb4858a94b95c02e3b3b486.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a
+          href="https://forum.plantuml.net/17275/composite-state-functionality-with-allow_mixing?show=17287#a17287">QA-17275</a>]</em>
+      <p></p>
+      For another example, see on <a href="json#wqimfur1rox7ld5sjljq">JSON page</a>.
+      <a style="position:relative;top:-38px;" name="b9db94234440e49a"></a>
+      <!--heading-->
+      <h2 class="chap">State description </h2>
+      <p></p>
+      You can add description to a state or to a composite state.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+hide empty description 
+
+state s0
+
+state &#34;This is the State 1&#34; as s1 {
+  s1: State description
+  state s2
+  state s3: long descr.
+  state s4
+  s4: long descr.
+}
+
+[*] -&gt; s0
+s0 --&gt; s2
+
+s2 -&gt; s3
+s3 -&gt; s4
+@enduml
+</textarea>
+        <div id="out204143c37a321b7407905b87c03bc344">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="387" height="206" class="scale"
+              src="/imgw/img-204143c37a321b7407905b87c03bc344.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <em>[Ref. <a
+          href="https://forum.plantuml.net/16719/how-state-description-when-using-composite-state-notation">QA-16719</a>]</em>
+      <a style="position:relative;top:-38px;" name="b99bf2ac000b8157"></a>
+      <!--heading-->
+      <h2 class="chap">Style for Nested State Body</h2>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+&lt;style&gt;
+.foo {
+  state,stateBody {
+    BackGroundColor lightblue;
+  }
+}
+&lt;/style&gt;
+
+state MainState &lt;&lt;foo&gt;&gt; {
+  state SubA
+}
+@enduml
+</textarea>
+        <div id="out42b7519e252f34c833d170c26c361f8b">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="111" height="123" class="scale"
+              src="/imgw/img-42b7519e252f34c833d170c26c361f8b.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/16774/state-and-sub-states-background">QA-16774</a>]</em>
+      <a style="position:relative;top:-38px;" name="13cc7210102a8c33"></a>
+      <!--heading-->
+      <h2 class="chap">Mainframe and frame</h2>
+      <p></p>
+      <h3>Mainframe</h3>
+      You can use global mainframe:
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+mainframe mainframe
+state a
+
+state b
+a --&gt; b
+b--&gt; [*]
+@enduml
+</textarea>
+        <div id="out433701bd756877bd908aae4db509d65e">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="101" height="321" class="scale"
+              src="/imgw/img-433701bd756877bd908aae4db509d65e.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>See also: <a href="https://plantuml.com/commons#20754e54bda3b28b">Mainframe on all diagram</a>.</em>
+      <p></p>
+      <h3>Frame</h3>
+      Or simply local frame:
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+frame frame {
+state a
+}
+state b
+a --&gt; b
+b--&gt; [*]
+@enduml
+</textarea>
+        <div id="outeabbc0dd652ed7ff77163c44aa62b48b">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="102" height="298" class="scale"
+              src="/imgw/img-eabbc0dd652ed7ff77163c44aa62b48b.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a
+          href="https://forum.plantuml.net/15340/add-capability-to-nest-state-diagrams-in-package-or-frame?show=15351#a15351">QA-15340</a>]</em>
+      <a style="position:relative;top:-38px;" name="75b4984abd04b14f"></a>
+      <!--heading-->
+      <h2 class="chap">Specific SkinParameter</h2>
+      <p></p>
+      <h3>By default</h3>
+      <p></p>
+      By default label are near arrow.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+[*] --&gt; State1
+State1 --&gt; State2 : next step
+State2 --&gt; State3 : next step
+State3 --&gt; [*]
+@enduml
+</textarea>
+        <div id="out61587b63002654ef43675ca2bd5af4af">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="105" height="489" class="scale"
+              src="/imgw/img-61587b63002654ef43675ca2bd5af4af.png" />
+          </div>
+        </div>
+      </div>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+[*] --&gt; Opened
+
+Opened --&gt; Closed : close
+Opened &lt;-- Closed : open
+
+Closed --&gt; Locked : lock
+Closed &lt;-- Locked : unlock
+@enduml
+</textarea>
+        <div id="out3d894ff3613e2dd68734d1837edc3845">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="102" height="406" class="scale"
+              src="/imgw/img-3d894ff3613e2dd68734d1837edc3845.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>Edge Label Style</h3>
+      <p></p>
+      You can use <code class="cod">skinparam  stateDiagramEdgeLabelStyle node</code> to put label on the middle of the
+      arrow, and create a pseudo node.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+skinparam stateDiagramEdgeLabelStyle node
+skinparam ranksep 20
+
+[*] --&gt; State1
+State1 --&gt; State2 : next step
+State2 --&gt; State3 : next step
+State3 --&gt; [*]
+@enduml
+</textarea>
+        <div id="outc013614262f563cd688015a1765508aa">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="81" height="379" class="scale"
+              src="/imgw/img-c013614262f563cd688015a1765508aa.png" />
+          </div>
+        </div>
+      </div>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+skinparam stateDiagramEdgeLabelStyle node
+skinparam ranksep 20
+
+[*] --&gt; Opened
+
+Opened --&gt; Closed : close
+Opened &lt;-- Closed : open
+
+Closed --&gt; Locked : lock
+Closed &lt;-- Locked : unlock
+@enduml
+</textarea>
+        <div id="outd856b8d0bfd33a75c6fbaa38be859cd2">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="136" height="337" class="scale"
+              src="/imgw/img-d856b8d0bfd33a75c6fbaa38be859cd2.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://github.com/plantuml/plantuml/pull/2379">GH-2379</a>]</em>
+      <p></p>
+      <h3>Mix label defintion</h3>
+      <p></p>
+      By using localy <code class="cod">-[node]-&gt;</code> form.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+skinparam ranksep 30
+[*] --&gt; State1
+State1 --&gt; State2 : next step
+State2 -[node]-&gt; State3 : next step\n(on the middle of the arrow)
+State3 --&gt; [*]
+@enduml
+</textarea>
+        <div id="out18e8ab9be05d779b4354ea19165b3f53">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="186" height="424" class="scale"
+              src="/imgw/img-18e8ab9be05d779b4354ea19165b3f53.png" />
+          </div>
+        </div>
+      </div>
+
+
+    </main>
+
+
+    <aside id="C6">
+      <!--toc-->
+      <div id="toc">
+        <ul>
+          <li><a href="#7d9e703ac421ea25">普通状态</a>
+          </li>
+          <li><a href="#b99e918943f68545">简化状态</a>
+          </li>
+          <li><a href="#a70cc614da79064a">复杂状态</a>
+          </li>
+          <li><a href="#ed8ef97e6d16ba84">长状态名</a>
+          </li>
+          <li><a href="#73b918d90b24a6c6">历史状态 [[H], [H\*]]</a>
+          </li>
+          <li><a href="#7443558300f98341">分支状态 [fork, join]</a>
+          </li>
+          <li><a href="#cb648904a5cede7d">并发状态 [--, \|\|]</a>
+          </li>
+          <li><a href="#8bd6f7be727fb20e">选择结点 [choice]</a>
+          </li>
+          <li><a href="#da4d531e5be7260c">一个使用版型的完整样例 [start, choice, fork, join, end]</a>
+          </li>
+          <li><a href="#6929d1066a9e828a">入口和出口 [entryPoint, exitPoint]</a>
+          </li>
+          <li><a href="#f38ba2410a08cd85">引脚 [inputPin, outputPin]</a>
+          </li>
+          <li><a href="#45b17c6b99df6bf4">扩展 [expansionInput, expansionOutput]</a>
+          </li>
+          <li><a href="#764824584d438a62">箭头方向</a>
+          </li>
+          <li><a href="#9e62e79149a86c5d">更改箭头线条的颜色和风格</a>
+          </li>
+          <li><a href="#8dfb58c1479319e8">Change head or tail of arrow line</a>
+          </li>
+          <li><a href="#3b0649c72650c313">注释</a>
+          </li>
+          <li><a href="#e1b0c1a155ce6cc5">在箭头上添加注释</a>
+          </li>
+          <li><a href="#c8857585cebfbd1c">给复杂状态添加注释</a>
+          </li>
+          <li><a href="#536671b19fc4b7e0">颜色</a>
+          </li>
+          <li><a href="#7aa53dbdfc2137bf">显示参数</a>
+          </li>
+          <li><a href="#edc06c934e9e5fc5">Changing style</a>
+          </li>
+          <li><a href="#671b82c7f585444b">Change state color and style (inline style)</a>
+          </li>
+          <li><a href="#effdb9ce6c5d44df">别名</a>
+          </li>
+          <li><a href="#84fccc92ba6ffe09">Display JSON Data on State diagram</a>
+          </li>
+          <li><a href="#b9db94234440e49a">State description</a>
+          </li>
+          <li><a href="#b99bf2ac000b8157">Style for Nested State Body</a>
+          </li>
+          <li><a href="#13cc7210102a8c33">Mainframe and frame</a>
+          </li>
+          <li><a href="#75b4984abd04b14f">Specific SkinParameter</a>
+          </li>
+        </ul>
+      </div>
+    </aside>
+
+  </div>
+    <script src="../../viz-global.js"></script>
+    <script src="../../plantuml.js"></script>
+    <script>
+        (function () {
+            const render = window.plantumlRender;
+            if (typeof render !== "function") {
+                console.error("PlantUML renderer is unavailable.");
+                return;
+            }
+
+            const renderOptions = {};
+            let counter = 0;
+
+            document.querySelectorAll(".mycell").forEach((mycell) => {
+                const host = mycell.parentElement;
+                const textarea = host ? host.previousElementSibling : null;
+                if (!textarea || textarea.tagName !== "TEXTAREA") return;
+
+                if (!mycell.id) {
+                    counter += 1;
+                    mycell.id = "mycell-render-" + counter;
+                }
+
+                const draw = () => {
+                    mycell.innerHTML = "";
+                    render(textarea.value.split(/\r\n|\r|\n/), mycell.id, renderOptions);
+                };
+
+                textarea.addEventListener("input", draw);
+                draw();
+            });
+        })();
+    </script>
+</body>
+
+</html>

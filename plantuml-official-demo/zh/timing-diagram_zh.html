@@ -1,0 +1,2701 @@
+<html lang="zh">
+
+<head>
+
+
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Organization",
+  "url": "https://plantuml.com",
+  "name": "PlantUML",
+  "sameAs" : ["https://twitter.com/plantuml","https://en.wikipedia.org/wiki/PlantUML","https://www.wikidata.org/wiki/Q18346546"],
+  "logo": "https://cdn-0.plantuml.com/logo3.png",
+  "contactPoint": [{
+    "@type": "ContactPoint",
+    "email": "plantuml@gmail.com",
+    "url": "https://plantuml.com",
+    "contactType": "customer service"
+  }]
+}
+</script>
+  <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+    "@type": "ListItem",
+    "position": 1,
+    "item": {
+      "@id": "https://plantuml.com",
+      "name": "Home"
+    }
+  },{
+    "@type": "ListItem",
+    "position": 2,
+    "item": {
+      "@id": "https://plantuml.com/sitemap-language-specification",
+      "name": "Language specification"
+    }
+  },{
+    "@type": "ListItem",
+    "position": 3,
+    "item": {
+      "@id": "https://plantuml.com/timing-diagram",
+      "name": "Timing Diagram"
+  }
+  }]
+}
+</script>
+  <link rel="canonical" href="https://plantuml.com/zh/timing-diagram" />
+  <link rel="alternate" hreflang="x-default" href="https://plantuml.com/timing-diagram" />
+  <link rel="alternate" hreflang="de" href="https://plantuml.com/de/timing-diagram" />
+  <link rel="alternate" hreflang="en" href="https://plantuml.com/timing-diagram" />
+  <link rel="alternate" hreflang="es" href="https://plantuml.com/es/timing-diagram" />
+  <link rel="alternate" hreflang="fr" href="https://plantuml.com/fr/timing-diagram" />
+  <link rel="alternate" hreflang="ja" href="https://plantuml.com/ja/timing-diagram" />
+  <link rel="alternate" hreflang="ko" href="https://plantuml.com/ko/timing-diagram" />
+  <link rel="alternate" hreflang="zh" href="https://plantuml.com/zh/timing-diagram" />
+
+  <link rel="shortcut icon" href="/favicon.ico" />
+
+
+  <!-- link rel="preload" as="image" href="https://img.shields.io/liberapay/patrons/plantuml.svg?logo=liberapay" -->
+
+
+  <title>时序图的语法和特性</title>
+  <meta name="description" content="PlantUML 时序图尚未完全实现。 目前的工作还处于草稿阶段，随时可以讨论修改." />
+
+  <meta property="og:type" content="article" />
+  <!-- volt:dokuwiki titleog: -->
+  <!-- volt:dokuwiki descriptionog: -->
+
+  <meta property="og:url" content="https://plantuml.com/zh/timing-diagram" />
+  <meta property="og:site_name" content="PlantUML.com" />
+
+  <!-- meta property="og:image" content="https://plantuml.com/og-timing-diagram" -->
+  <meta name="twitter:image" content="https://plantuml.com/og-timing-diagram" />
+  <meta property="og:locale" content="zh" />
+
+  <meta name="twitter:card" content="summary" />
+  <!-- volt:dokuwiki titletwitter: -->
+  <!-- volt:dokuwiki descriptiontwitter: -->
+  <meta name="twitter:site" content="@PlantUML" />
+  <meta name="twitter:creator" content="@PlantUML" />
+
+
+  <!-- https://www.w3schools.com/colors/colors_picker.asp -->
+  <!-- filter css https://codepen.io/sosuke/pen/Pjoqqp -->
+
+
+  <style>
+    .scale {}
+
+    li {
+      margin: 2px;
+    }
+
+    #external li {
+      margin: 13px;
+    }
+
+    @media screen and (max-width: 1190px) {
+    }
+
+
+    .coptable {
+      max-width: 90%;
+    }
+
+    .mytab {
+      display: inline-block;
+      border-radius: 3px;
+      border: 1px solid #e1e4e8;
+    }
+
+    .mytab:hover {
+      border: 1px dashed #0366d6;
+      cursor: pointer;
+      color: #0366d6;
+      background: #f6f8fa;
+    }
+
+    .cop {
+      margin: 25px 10px 0 10px;
+    }
+
+    .cop:hover {
+      cursor: pointer;
+      filter: invert(30%) sepia(75%) saturate(4001%) hue-rotate(201deg) brightness(88%) contrast(98%);
+    }
+
+    .cop2 {
+      margin: 25px 10px 0 10px;
+    }
+
+    .cop2:hover {
+      cursor: pointer;
+    }
+
+    .msg {
+      position: absolute;
+      color: #339966;
+      background-color: #FFF;
+      margin-top: 55px;
+      display: none;
+      border-radius: 3px;
+      border: 1px solid #4dff00;
+    }
+
+    .mycell0 {
+      float: left;
+      vertical-align: top;
+      padding: 10px;
+    }
+
+    .mycell0 code:hover {
+      cursor: default;
+      color: #000;
+    }
+
+    .mycell {
+      float: right;
+      vertical-align: top;
+      padding: 10px;
+      max-width: 55vw;
+      overflow-x: auto;
+    }
+
+    .mycell0 pre {
+      max-width: 55vw;
+      overflow-x: auto;
+    }
+
+    .cod {
+      background: #edeff3;
+      padding: 2px 5px;
+      border-radius: 3px;
+    }
+
+    .colo {
+      display: inline-block;
+      background: #edeff3;
+      padding: 7px 12px;
+      border-radius: 3px;
+    }
+
+    .tag,
+    .tagg,
+    .tago,
+    .tagr {
+      text-rendering: optimizeLegibility;
+      display: inline-block;
+      padding: 3px 5px 2px 4px;
+      text-decoration: none;
+      white-space: nowrap;
+      border: 1px solid #999;
+      text-transform: uppercase;
+      text-align: center;
+      border-radius: 3px;
+      font-size: 11px;
+      font-weight: bold;
+      line-height: 90%;
+    }
+
+    .tag {
+      background-color: #EEEEEE;
+    }
+
+    .tagg {
+      background-color: #98FB98;
+    }
+
+    .tago {
+      background-color: #fafa00;
+    }
+
+    .tagr {
+      background-color: #FF4500;
+    }
+
+
+    a {
+      text-decoration: none;
+      color: #0366d6;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .menu1 {
+      display: flex;
+      flex-direction: row;
+      border: 0;
+      font-size: 14px;
+      padding: 0;
+      margin: 0;
+      white-space: nowrap;
+    }
+
+    .menu1 a {
+      white-space: nowrap;
+      padding: 0 8px;
+      text-decoration: none;
+      color: #5e6d7d;
+      line-height: 30px;
+      height: 30px;
+    }
+
+    .menu1 a:hover {
+      background: #fefefe;
+      color: #0366d6;
+    }
+
+    .menuside2 {
+      display: flex;
+      flex-direction: column;
+      border: 0;
+      font-size: 14px;
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+      justify-content: center;
+    }
+
+    .menuside2 img {
+      vertical-align: top;
+      padding: 0 8px;
+      filter: brightness(0) saturate(100%) invert(42%) sepia(22%) saturate(385%) hue-rotate(170deg) brightness(92%) contrast(84%);
+    }
+
+    .menuside2 a {
+      padding: 6px 0;
+      text-decoration: none;
+      color: #5e6d7d;
+    }
+
+    .menuside2 a:hover {
+      color: #0366d6;
+      background: #fefefe;
+    }
+
+    .menuside2 a:hover img {
+      filter: brightness(0) saturate(100%) invert(23%) sepia(44%) saturate(7029%) hue-rotate(203deg) brightness(94%) contrast(98%);
+    }
+
+    .breadcrumb {
+      z-index: 1;
+      font-size: 14px;
+      text-align: center;
+      display: inline-block;
+      overflow: hidden;
+      border-radius: 5px;
+    }
+
+
+    .breadcrumb a {
+      text-decoration: none;
+      outline: none;
+      display: block;
+      float: left;
+      font-size: 12px;
+      line-height: 24px;
+      color: #373f49;
+      padding: 0 10px 0 35px;
+      background: #f0f1f1;
+      background: linear-gradient(#f0f1f1, #c6d2d2);
+      position: relative;
+    }
+
+    .breadcrumb a:first-child {
+      padding-left: 21px;
+      border-radius: 5px 0 0 5px;
+      /*to match with the parent's radius*/
+    }
+
+    .breadcrumb a:first-child:before {
+      left: 14px;
+    }
+
+    .breadcrumb a:last-child {
+      visibility: hidden;
+    }
+
+    .breadcrumb a.active,
+    .breadcrumb a:hover {
+      color: #0366d6;
+      background: #c6d2d2;
+      background: linear-gradient(#e3e4e4, #b8c7c7);
+    }
+
+    .breadcrumb a.active:after,
+    .breadcrumb a:hover:after {
+      background: #c6d2d2;
+      background: linear-gradient(135deg, #e3e4e4, #b8c7c7);
+    }
+
+    .breadcrumb a:after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: -12px;
+      /*half of square's length*/
+      /*same dimension as the line-height of .breadcrumb a */
+      width: 24px;
+      height: 24px;
+      transform: scale(0.707) rotate(45deg);
+      /*we need to prevent the arrows from getting buried under the next link*/
+      z-index: 1;
+      /*background same as links but the gradient will be rotated to compensate with the transform applied*/
+      background: #f0f1f1;
+      background: linear-gradient(135deg, #f0f1f1, #c6d2d2);
+      /*stylish arrow design using box shadow*/
+      box-shadow:
+        2px -2px 0 2px rgba(0, 0, 0, 0.1),
+        3px -3px 0 2px rgba(255, 255, 255, 0.1);
+      /*
+		5px - for rounded arrows and 
+		50px - to prevent hover glitches on the border created using shadows*/
+      border-radius: 0 5px 0 50px;
+    }
+
+    /*we dont need an arrow after the last link*/
+    .breadcrumb a:last-child:after {
+      content: none;
+      visibility: hidden;
+    }
+
+
+    .lga,
+    .lga a,
+    .lgi,
+    .lgi a {
+      font-size: 13px;
+      text-align: center;
+      color: #fff;
+      padding: 0 5px;
+      margin: 0;
+    }
+
+    .lga,
+    .lga a {
+      background-color: #008;
+    }
+
+    .lgi,
+    .lgi a {
+      background-color: #888;
+    }
+
+    .lga:hover,
+    .lga:hover a {
+      text-decoration: none;
+      color: #BBB;
+    }
+
+    .lgi:hover,
+    .lgi:hover a {
+      text-decoration: none;
+      color: #CCC;
+    }
+  </style>
+  <style>
+    body {
+      font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+      font-size: 14px;
+      line-height: 1.5;
+      margin: auto;
+      overflow-x: hidden;
+      background: #fefefe;
+    }
+
+    h1.chap {
+      font-size: 1.8em;
+    }
+
+    h2.chap {
+      font-size: 1.35em;
+    }
+
+    h3,
+    h3.chap {
+      font-size: 1.15em;
+    }
+
+    h4 {
+      font-size: 1.05em;
+    }
+
+    table {
+      font-size: inherit;
+    }
+  </style>
+
+
+  <style>
+    .dyn {
+      display: flex;
+      flex-direction: row;
+      gap: 3em;
+      align-items: stretch;
+      flex-wrap: wrap;
+      margin: 10px 0;
+    }
+
+    .dyn textarea {
+      font-family: monospace;
+      font-size: 13px;
+      line-height: 1.4;
+      min-width: 30ch;
+      max-width: 90ch;
+      box-sizing: border-box;
+      resize: both;
+      white-space: pre;
+      overflow: auto;
+      field-sizing: content;
+      align-self: stretch;
+      border: 1px solid #888;
+      border-radius: 3px;
+      margin: 0;
+      padding: 4px 8px;
+      background: #fefefe;
+    }
+
+    .dyn>div {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      display: flex;
+    }
+
+    .dyn>div>div {
+      margin: 0;
+      padding: 0;
+    }
+
+    .dyn img {
+      margin: 0;
+      padding: 0;
+    }
+
+    .scale {
+      max-width: 100%;
+      height: auto;
+      border: 1px solid #dde;
+      border-radius: 4px;
+    }
+  </style>
+
+
+  <script>
+    var llg = "zh";
+    var az = 0;
+    var amdark = 0;
+    function ljs(n) {
+      if (az) return false;
+      var sc = document.createElement("script");
+      sc.type = "text/javascript";
+      sc.src = "/btn-" + n + ".js";
+      document.body.innerHTML = "<i style='position:absolute;top:30%;width:100%;'><center>Loading in progress...";
+      document.body.appendChild(sc);
+    }
+    function ctc(id) {
+      document.getElementById('img' + id).classList.remove('cop'); document.getElementById('img' + id).classList.add('cop2');
+      document.getElementById('pre' + id).style.backgroundColor = '#4dff00';
+      document.getElementById('msg' + id).style.display = 'inline';
+
+      setTimeout(function () { document.getElementById('img' + id).classList.remove('cop2'); document.getElementById('img' + id).classList.add('cop'); document.getElementById('pre' + id).style.backgroundColor = ''; document.getElementById('msg' + id).style.display = 'none'; }, 800);
+
+
+      text = document.getElementById('pre' + id).innerText;
+      if (window.clipboardData && window.clipboardData.setData)
+        return window.clipboardData.setData("Text", text);
+      else if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
+        var ta = document.createElement("textarea");
+        ta.textContent = text;
+        ta.style.position = "fixed";
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          return document.execCommand("copy");
+        }
+        catch (ex) {
+          return false;
+        }
+        finally {
+          document.body.removeChild(ta);
+        }
+      }
+    }
+  </script>
+</head>
+
+<body>
+  <style>
+    body,
+    .container,
+    #B3,
+    #C5,
+    #C6,
+    #C7,
+    #D7,
+    #D8 {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      overflow-y: scroll;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      grid-template-rows: auto 1fr auto;
+      min-height: 100vh;
+    }
+
+    #B3 {
+      grid-column: 1 / 5;
+      grid-row: 1;
+      position: sticky;
+      top: 0;
+      height: 30px;
+      padding: 0;
+      z-index: 10;
+      overflow: hidden;
+      background: #edeff3;
+      border-bottom: 1px solid #d4d8de;
+    }
+
+    #D7 {
+      grid-column: 1;
+      grid-row: 2;
+      margin: 0;
+      padding: 0;
+      padding-left: 30px;
+      line-height: 1.6;
+    }
+
+    #D8 {
+      grid-column: 1;
+      grid-row: 3;
+      position: sticky;
+      bottom: 0;
+      z-index: 5;
+      background: #fefefe;
+    }
+
+    #C5 {
+      grid-column: 2;
+      grid-row: 1 / -1;
+      position: sticky;
+      top: 40px;
+      align-self: start;
+      height: calc(98vh - 60px);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #C6 {
+      grid-column: 3;
+      grid-row: 1 / -1;
+      position: sticky;
+      top: 40px;
+      align-self: start;
+      height: calc(98vh - 60px);
+      max-width: 200px;
+      overflow: hidden;
+      margin: 0 10px;
+      padding: 8px 5px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #C7 {
+      grid-column: 4;
+      grid-row: 1 / -1;
+      position: sticky;
+      top: 40px;
+      align-self: start;
+      height: calc(98vh - 60px);
+      margin: 0 20px 0 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #toc {
+      z-index: 15;
+      overflow-x: hidden;
+      overflow-y: auto;
+      background: #f6f8fa;
+      border-width: 2px;
+      border-style: groove;
+      border-radius: 3px;
+      border-color: #e1e4e8;
+      margin: 0 5px;
+      padding: 0;
+      max-height: 100%;
+    }
+
+    #toc ul {
+      margin: 0;
+      list-style-type: none;
+      padding: 0;
+    }
+
+    #toc li {
+      padding: 0 10px;
+      margin: 0;
+    }
+
+    #toc li a {
+      padding: 5px 0;
+      display: inline-block;
+      text-decoration: none;
+      width: 100%;
+      color: #5e6d7d;
+    }
+
+    #toc li a:hover {
+      color: #0366d6;
+    }
+
+    #toc li:hover {
+      background: #fefefe;
+    }
+
+    #magic {
+      position: absolute;
+      top: 0;
+      right: 50px;
+      width: 30px;
+      height: 30px;
+      overflow: hidden;
+      background: #edeff3;
+      z-index: 14;
+    }
+
+    #magic:hover {
+      width: calc(100% - 50px);
+    }
+
+    #magic .menu1 {
+      position: absolute;
+      top: 0;
+      right: 30px;
+      height: 30px;
+      padding-left: 10px;
+      background: #edeff3;
+      border-left: 1px solid #d4d8de;
+      border-bottom: 1px solid #d4d8de;
+    }
+
+    .menu1-tail {
+      flex-grow: 1;
+      flex-shrink: 0;
+      height: 30px;
+      position: relative;
+      z-index: 15;
+      background: #edeff3;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: auto auto auto;
+      grid-auto-rows: auto;
+      gap: 5px;
+      margin: 0;
+      padding: 0;
+    }
+
+    .merged {
+      grid-column: 1 / -1;
+    }
+
+    #C6 {
+      display: none;
+    }
+
+    @media (min-width: 1401px) {
+      #C6:has(#toc li) {
+        display: flex;
+      }
+    }
+
+    @media (max-width: 1100px) {
+      #C5,
+      #C7 {
+        display: none;
+      }
+    }
+
+    @media (max-width: 1200px) {
+      .merged {
+        display: none;
+      }
+    }
+  </style>
+
+  <div class="container">
+
+    <footer id="D8">
+
+      <p>
+      </p>
+      <p>
+
+      </p>
+    </footer>
+
+
+    <header id="B3">
+      <div class="menu1">
+        <a id="titem10" href="sequence-diagram_zh.html">时序图</a>
+        <a id="titem20" href="use-case-diagram_zh.html">用例图</a>
+        <a id="titem30" href="class-diagram_zh.html">类图</a>
+        <a id="titem40" href="activity-diagram-beta_zh.html">活动图</a>
+        <a id="titem50" href="component-diagram_zh.html">组件图</a>
+        <a id="titem60" href="state-diagram_zh.html">状态图</a>
+        <a id="titem70" href="object-diagram_zh.html">对象图</a>
+        <a id="titem80" href="deployment-diagram_zh.html">部署图</a>
+        <a id="titem90" href="timing-diagram_zh.html">定时图</a>
+
+        <a id="titem99" href="regex_zh.html">Regex</a>
+        <a id="titem100" href="nwdiag_zh.html">Network</a>
+        <a id="titem110" href="salt_zh.html">Wireframe</a>
+        <a id="titem120" href="archimate-diagram_zh.html">Archimate</a>
+        <a id="titem130" href="gantt-diagram_zh.html">Gantt</a>
+        <a id="titem140" href="mindmap-diagram_zh.html">MindMap</a>
+        <a id="titem150" href="wbs-diagram_zh.html">WBS</a>
+        <a id="titem151" href="ebnf_zh.html">EBNF</a>
+        <a id="titem160" href="json_zh.html">JSON</a>
+        <a id="titem170" href="yaml_zh.html">YAML</a>
+
+        <div class="menu1-tail"></div>
+      </div>
+      <div id="magic">
+        <div class="menu1">
+          <a id="titem10" href="sequence-diagram_zh.html">时序图</a>
+          <a id="titem20" href="use-case-diagram_zh.html">用例图</a>
+          <a id="titem30" href="class-diagram_zh.html">类图</a>
+          <a id="titem40" href="activity-diagram-beta_zh.html">活动图</a>
+          <a id="titem50" href="component-diagram_zh.html">组件图</a>
+          <a id="titem60" href="state-diagram_zh.html">状态图</a>
+          <a id="titem70" href="object-diagram_zh.html">对象图</a>
+          <a id="titem80" href="deployment-diagram_zh.html">部署图</a>
+          <a id="titem90" href="timing-diagram_zh.html">定时图</a>
+
+          <a id="titem99" href="regex_zh.html">Regex</a>
+          <a id="titem100" href="nwdiag_zh.html">Network</a>
+          <a id="titem110" href="salt_zh.html">Wireframe</a>
+          <a id="titem120" href="archimate-diagram_zh.html">Archimate</a>
+          <a id="titem130" href="gantt-diagram_zh.html">Gantt</a>
+          <a id="titem140" href="mindmap-diagram_zh.html">MindMap</a>
+          <a id="titem150" href="wbs-diagram_zh.html">WBS</a>
+          <a id="titem151" href="ebnf_zh.html">EBNF</a>
+          <a id="titem160" href="json_zh.html">JSON</a>
+          <a id="titem170" href="yaml_zh.html">YAML</a>
+
+          <div class="menu1-tail"></div>
+        </div>
+      </div><!-- magic -->
+    </header>
+
+    <main id="D7">
+
+      <style>
+        #donate {
+          padding-top: 10px;
+          min-height: 30px;
+        }
+      </style>
+
+
+      <p style="clear:both;">
+
+
+        <style>
+          #titem90 {
+            color: #0366d6;
+            background-color: #fefefe;
+          }
+
+          #titem90 img {
+            filter: brightness(0) saturate(100%) invert(23%) sepia(44%) saturate(7029%) hue-rotate(203deg) brightness(94%) contrast(98%);
+          }
+
+          .menu1:hover #titem90 {
+            color: #5e6d7d;
+          }
+
+          .menu1:hover #titem90:hover {
+            color: #0366d6;
+          }
+
+          .menu1:hover #titem90 img {
+            filter: brightness(0) saturate(100%) invert(42%) sepia(22%) saturate(385%) hue-rotate(170deg) brightness(92%) contrast(84%);
+          }
+        </style>
+
+        <a style="position:relative;top:-38px;" name="92e56312a0a931e3"></a>
+        <!--heading-->
+      </p>
+      <h1 class="chap">时序图</h1>
+      <p></p>
+      UML 中的<a
+        href="https://en.wikipedia.org/wiki/Timing_diagram_%28Unified_Modeling_Language%29">时序图</a>是一种特定类型的<strong>交互图</strong>，可视化系统的<strong>时序约束</strong>。它侧重于<strong>事件的时间顺序</strong>，展示不同对象如何随着时间的推移相互影响。<strong>定时图</strong>在<strong>实时系统</strong>和<strong>嵌入式系统</strong>中特别有用，可用于了解对象在整个给定时间段内的行为。
+      <p></p>
+      <em>[Ref. of initial request <a
+          href="https://forum.plantuml.net/5383/please-implement-timing-diagrams">QA-5383</a>]</em>
+      <a style="position:relative;top:-38px;" name="bf7a556a85b0b957"></a>
+      <!--heading-->
+      <h2 class="chap">声明参与者</h2>
+      <p></p>
+      使用以下关键字声明参与者, 可根据需要选择显示样式。
+      <p></p>
+      <table border="1" cellspacing="0" cellpadding="5">
+        <tbody>
+          <tr>
+            <td><b>
+                关键词
+              </b></td>
+            <td><b>
+                描述
+              </b></td>
+          </tr>
+          <tr>
+            <td>
+              <code class="cod">analog</code>
+            </td>
+            <td>
+              模拟信号的变化是连续的，其值在给定值之间会进行线性插值。
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <code class="cod">binary</code>
+            </td>
+            <td>
+              二进制信号，只有两个状态。 (<code class="cod">binary</code>)
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <code class="cod">clock</code>
+            </td>
+            <td>
+              时钟信号 ，即从高电平到低电平反复转换的信号，需要用<code class="cod">period</code>设置周期。可选的参数还有脉冲时长<code
+                class="cod">pulse</code>和偏移量<code class="cod">offset</code>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <code class="cod">concise</code>
+            </td>
+            <td>
+              简明的图形化数据表示，可表示数据的移动（非常适合表示信息）。
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <code class="cod">robust</code>
+            </td>
+            <td>
+              用信号线表示的状态，便于呈现状态间的转化（可设置多种状态）。
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p></p>
+      <p></p>
+      通过 <code class="cod">@</code> 标注, 和 <code class="cod">is</code> 动词定义状态.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+robust &#34;Web 浏览器&#34; as WB
+concise &#34;Web 用户&#34; as WU
+
+@0
+WU is 空闲
+WB is 空闲
+
+@100
+WU is 等待中
+WB is 处理中
+
+@300
+WB is 等待中
+@enduml
+</textarea>
+        <div id="out16e9c5f71e0fa8af48c1243b44106ed1">
+          <div class="mycell">
+            <img loading="lazy" width="286" height="198" class="scale"
+              src="/imgw/img-16e9c5f71e0fa8af48c1243b44106ed1.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+clock   &#34;Clock_0&#34;   as C0 with period 50
+clock   &#34;Clock_1&#34;   as C1 with period 50 pulse 15 offset 10
+binary  &#34;Binary&#34;  as B
+concise &#34;Concise&#34; as C
+robust  &#34;Robust&#34;  as R
+analog  &#34;Analog&#34;  as A
+
+
+@0
+C is Idle
+R is Idle
+A is 0
+
+@100
+B is high
+C is Waiting
+R is Processing
+A is 3
+
+@300
+R is Waiting
+A is 1
+@enduml
+</textarea>
+        <div id="out9b6766f97da7a4ca6df1e1ba7cf36d9e">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="459" height="462" class="scale"
+              src="/imgw/img-9b6766f97da7a4ca6df1e1ba7cf36d9e.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/14631">QA-14631</a> and <a
+          href="https://forum.plantuml.net/14647">QA-14647</a> and <a
+          href="https://forum.plantuml.net/11288/mixed-signal-timing-diagram">QA-11288</a>]</em>
+      <p></p>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/14631">QA-14631</a>, <a
+          href="https://forum.plantuml.net/14647">QA-14647</a>, <a
+          href="https://forum.plantuml.net/11288/mixed-signal-timing-diagram">QA-11288</a> and <a
+          href="https://github.com/plantuml/plantuml/issues/2409">GH-2409</a>]</em>
+      <center>
+        <div class="tago">WARNING</div> <b>This translation need to be updated.</b> <div class="tago">WARNING</div>
+      </center>
+      <a style="position:relative;top:-38px;" name="7e2cce1005e19316"></a>
+      <!--heading-->
+      <h2 class="chap">二进制及时钟信号</h2>
+      <p></p>
+      使用以下关键字可以绘制二进制及时钟信号：
+      <ul>
+        <li><code class="cod">binary</code></li>
+        <li><code class="cod">clock</code></li>
+      </ul>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+clock clk with period 1
+binary &#34;Enable&#34; as EN
+
+@0
+EN is low
+
+@5
+EN is high
+
+@10
+EN is low
+@enduml
+</textarea>
+        <div id="out42b97e77b2e0dd1103cd7af68fb0256e">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="605" height="133" class="scale"
+              src="/imgw/img-42b97e77b2e0dd1103cd7af68fb0256e.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="dad25c3a390c6194"></a>
+      <!--heading-->
+      <h2 class="chap">增加标示</h2>
+      <p></p>
+      使用下述的语法，增加对某一时刻信号变动的描述。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+robust &#34;Web 浏览器&#34; as WB
+concise &#34;Web 用户&#34; as WU
+
+@0
+WU is 空闲
+WB is 空闲
+
+@100
+WU -&gt; WB : URL
+WU is 等待中
+WB is 处理中
+
+@300
+WB is 等待中
+@enduml
+@enduml
+</textarea>
+        <div id="outb9ab37af3c9a0e8a02a31f75379a78f4">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="286" height="198" class="scale"
+              src="/imgw/img-b9ab37af3c9a0e8a02a31f75379a78f4.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <center>
+        <div class="tago">WARNING</div> <b>This translation need to be updated.</b> <div class="tago">WARNING</div>
+      </center>
+      <a style="position:relative;top:-38px;" name="41aa48e58e346c22"></a>
+      <!--heading-->
+      <h2 class="chap">相对时间</h2>
+      <p></p>
+      可以使用 <code class="cod">@+</code>和<code class="cod">@-</code> 符号表示相对时间.
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+robust &#34;DNS Resolver&#34; as DNS
+robust &#34;Web Browser&#34; as WB
+concise &#34;Web User&#34; as WU
+
+@0
+WU is Idle
+WB is Idle
+DNS is Idle
+
+@+100
+WU -&gt; WB : URL
+WU is Waiting
+WB is Processing
+
+@+200
+WB is Waiting
+WB -&gt; DNS@+50 : Resolve URL
+
+@+100
+DNS is Processing
+
+@+300
+DNS is Idle
+@enduml
+</textarea>
+        <div id="out711ccd3394e3f707b6bc2cd11eab615d">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="509" height="264" class="scale"
+              src="/imgw/img-711ccd3394e3f707b6bc2cd11eab615d.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="0e0d73b649261198"></a>
+      <!--heading-->
+      <h2 class="chap">锚点</h2>
+      <p></p>
+      ，而不是在绝对时间上使用绝对时间或相对时间，你可以通过使用<code class="cod">as</code> 关键字和以<code class="cod">:</code> 开始的名称来定义一个时间作为锚点。
+      <p></p>
+      <p>
+        <code></code>
+      </p>
+      <pre class="colo"><code>@XX as :&lt;anchor point name&gt;
+</code></pre>
+      <p>
+      </p>
+      <p></p>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+clock clk with period 1
+binary &#34;enable&#34; as EN
+concise &#34;dataBus&#34; as db
+
+@0 as :start
+@5 as :en_high 
+@10 as :en_low
+@:en_high-2 as :en_highMinus2
+
+@:start
+EN is low
+db is &#34;0x0000&#34;
+
+@:en_high
+EN is high
+
+@:en_low
+EN is low
+
+@:en_highMinus2
+db is &#34;0xf23a&#34;
+
+@:en_high+6
+db is &#34;0x0000&#34;
+@enduml
+</textarea>
+        <div id="outf8561364bd1b11d43e91f7df8f9c2aae">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="655" height="191" class="scale"
+              src="/imgw/img-f8561364bd1b11d43e91f7df8f9c2aae.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="8c1e31be279b1b97"></a>
+      <!--heading-->
+      <h2 class="chap">Anchor Points with decimal offset</h2>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+binary &#34;enable&#34; as EN
+
+@3          as :start
+@5.5        as :en_high 
+@10         as :en_low
+@:en_high-2 as :en_highMinus2
+
+@:start
+EN is low
+
+@:en_high+1.2
+EN is high
+
+@10.5
+EN is low
+@enduml
+</textarea>
+        <div id="out59031b0510864e407be2d80f62032d8f">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="480" height="102" class="scale"
+              src="/imgw/img-59031b0510864e407be2d80f62032d8f.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a
+          href="https://forum.plantuml.net/17885/decimal-time-values-not-accepted-in-parameters-procedures">QA-17885</a>]</em>
+      <a style="position:relative;top:-38px;" name="6449f3c11a883c41"></a>
+      <!--heading-->
+      <h2 class="chap">参与者</h2>
+      <p></p>
+      按时间顺序来描述状态变化可能会有些麻烦，不如将每个参与者的变化放在一起。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+robust &#34;Web Browser&#34; as WB
+concise &#34;Web User&#34; as WU
+
+@WB
+0 is idle
++200 is Proc.
++100 is Waiting
+
+@WU
+0 is Waiting
++500 is ok
+@enduml
+</textarea>
+        <div id="out142f5d32a2fda0eead31142e683e3d6f">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="390" height="198" class="scale"
+              src="/imgw/img-142f5d32a2fda0eead31142e683e3d6f.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="5335b971d6ed3cc8"></a>
+      <!--heading-->
+      <h2 class="chap">设置缩放</h2>
+      你还可以设置缩放比例。
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+concise &#34;Web User&#34; as WU
+scale 100 as 50 pixels
+
+@WU
+0 is Waiting
++500 is ok
+@enduml
+</textarea>
+        <div id="out5ce91bfb41da13741a1d191c4ab0a37a">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="350" height="111" class="scale"
+              src="/imgw/img-5ce91bfb41da13741a1d191c4ab0a37a.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      当使用绝对时间或者日期时，1单位为1秒。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+concise &#34;季节&#34; as S
+&#39;这里将30天缩放到50像素
+scale 2592000 as 50 pixels
+
+@2000/11/01
+S is &#34;冬&#34;
+
+@2001/02/01
+S is &#34;春&#34;
+
+@2001/05/01
+S is &#34;夏&#34;
+
+@2001/08/01
+S is &#34;秋&#34;
+@enduml
+</textarea>
+        <div id="outf7be46326f761c3818abaf2935306484">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="555" height="111" class="scale"
+              src="/imgw/img-f7be46326f761c3818abaf2935306484.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="27e9db240004b050"></a>
+      <!--heading-->
+      <h2 class="chap">初始状态</h2>
+      你可以定义初始状态。
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+robust &#34;Web Browser&#34; as WB
+concise &#34;Web User&#34; as WU
+
+WB is Initializing
+WU is Absent
+
+@WB
+0 is idle
++200 is Processing
++100 is Waiting
+
+@WU
+0 is Waiting
++500 is ok
+@enduml
+</textarea>
+        <div id="out6c80ca9c3e450772efffb374c66a0fee">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="449" height="218" class="scale"
+              src="/imgw/img-6c80ca9c3e450772efffb374c66a0fee.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="894961695270bf0f"></a>
+      <!--heading-->
+      <h2 class="chap">模糊状态</h2>
+      <p></p>
+      一个信号在某个时段可能是模糊的，有多个可能的状态区间。
+      <h3>模糊或者未定义鲁棒状态信号</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+robust &#34;Signal1&#34; as S1
+robust &#34;Signal2&#34; as S2
+S1 has 0,1,2,hello
+S2 has 0,1,2
+@0
+S1 is 0
+S2 is 0
+@100
+S1 is {0,1} #SlateGrey
+S2 is {0,1}
+@200
+S1 is 1
+S2 is 0
+@300
+S1 is hello
+S2 is {0,2}
+@enduml
+</textarea>
+        <div id="out817a96a7cf3c11b974d1d76e78177558">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="275" height="247" class="scale"
+              src="/imgw/img-817a96a7cf3c11b974d1d76e78177558.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>模糊或者未定义二进制信号</h3>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+clock &#34;Clock&#34; as C with period 2
+binary &#34;Enable&#34; as EN
+
+@0
+EN is low
+@1
+EN is high
+@3
+EN is low
+@5
+EN is {low,high}
+@10
+EN is low
+@enduml
+</textarea>
+        <div id="out03b3153fa09a1b2920dda1ceb915748c">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="605" height="151" class="scale"
+              src="/imgw/img-03b3153fa09a1b2920dda1ceb915748c.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[ Ref. <a href="https://forum.plantuml.net/11936">QA-11936</a> and <a
+          href="https://forum.plantuml.net/15933">QA-15933</a> ]</em>
+      <a style="position:relative;top:-38px;" name="ad9ec59494e6759b"></a>
+      <!--heading-->
+      <h2 class="chap">隐藏状态</h2>
+      <p></p>
+      可以隐藏某个时段的状态。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+concise &#34;Web User&#34; as WU
+
+@0
+WU is {-}
+
+@100
+WU is A1
+
+@200
+WU is {-}
+
+@300
+WU is {hidden}
+
+@400
+WU is A3
+
+@500
+WU is {-}
+@enduml
+</textarea>
+        <div id="out5d15c1c1609a268613fe0a4c87bceb26">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="350" height="111" class="scale"
+              src="/imgw/img-5d15c1c1609a268613fe0a4c87bceb26.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+scale 1 as 50 pixels
+
+concise state0
+concise substate1
+robust bit2
+
+bit2 has HIGH,LOW
+
+@state0
+0 is 18_start
+6 is s_dPause
+8 is 10_data
+14 is {hidden}
+
+@substate1
+0 is sSeq
+4 is sPause
+6 is {hidden}
+8 is dSeq
+12 is dPause
+14 is {hidden}
+
+@bit2
+0 is HIGH
+2 is LOW
+4 is {hidden}
+8 is HIGH
+10 is LOW
+12 is {hidden}
+@enduml
+</textarea>
+        <div id="out9b7a657f0dbbb83cc3322aa94bb9d21a">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="830" height="182" class="scale"
+              src="/imgw/img-9b7a657f0dbbb83cc3322aa94bb9d21a.png" />
+          </div>
+        </div>
+      </div>
+      <em>[Ref.<a href="https://forum.plantuml.net/12222">QA-12222</a>]</em>
+      <a style="position:relative;top:-38px;" name="fd723f2741a0d2d1"></a>
+      <!--heading-->
+      <h2 class="chap">Negative time value</h2>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+robust &#34;R-Deci&#34; as RD
+concise &#34;R-Algo-0&#34; as RA0
+robust &#34;R-Algo-1&#34; as RA1
+
+@200
+RD is 0
+RA0 is 0
+
+@-200
+RD is 1
+RA0 is 3
+
+@100
+RD is 0
+@enduml
+</textarea>
+        <div id="out48fff406e7bdae3b14d00429dd19451f">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="306" height="224" class="scale"
+              src="/imgw/img-48fff406e7bdae3b14d00429dd19451f.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/7698/timing-diagram-allow-negative-time-values">QA-7698</a>]</em>
+      <a style="position:relative;top:-38px;" name="e2a8e525ad8f3b28"></a>
+      <!--heading-->
+      <h2 class="chap">隐藏时间轴</h2>
+      <p></p>
+      可以隐藏时间轴。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+hide time-axis
+concise &#34;Web User&#34; as WU
+
+WU is Absent
+
+@WU
+0 is Waiting
++500 is ok
+@enduml
+</textarea>
+        <div id="outc6d31335b4aa69782be43ab41b060148">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="214" height="111" class="scale"
+              src="/imgw/img-c6d31335b4aa69782be43ab41b060148.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="a71a99ab9f38a6a7"></a>
+      <!--heading-->
+      <h2 class="chap">使用日期</h2>
+      <p></p>
+      时间轴除时间以外也可以改用日期表示。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+robust &#34;Web Browser&#34; as WB
+concise &#34;Web User&#34; as WU
+
+@2019/07/02
+WU is Idle
+WB is Idle
+
+@2019/07/04
+WU is Waiting : some note
+WB is Processing : some other note
+
+@2019/07/05
+WB is Waiting
+@enduml
+</textarea>
+        <div id="out2fa485bb9159fd484994e0c33448431c">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="309" height="213" class="scale"
+              src="/imgw/img-2fa485bb9159fd484994e0c33448431c.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+robust &#34;Web Browser&#34; as WB
+concise &#34;Web User&#34; as WU
+
+@1:15:00
+WU is Idle
+WB is Idle
+
+@1:16:30
+WU is Waiting : some note
+WB is Processing : some other note
+
+@1:17:30
+WB is Waiting
+@enduml
+</textarea>
+        <div id="outf3109aa4324a9edd6f4f8b2c437bb194">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="409" height="213" class="scale"
+              src="/imgw/img-f3109aa4324a9edd6f4f8b2c437bb194.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      *[Ref. [QA-7019](https://forum.plantuml.net/7019/hh-mm-ss-time-format-in-timing-diagram)]*
+      <a style="position:relative;top:-38px;" name="93c98970ca5b361b"></a>
+      <!--heading-->
+      <h2 class="chap">Change Date Format</h2>
+      <p></p>
+      It is also possible to change date format.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+robust &#34;Web Browser&#34; as WB
+concise &#34;Web User&#34; as WU
+
+use date format &#34;YY-MM-dd&#34;
+
+@2019/07/02
+WU is Idle
+WB is Idle
+
+@2019/07/04
+WU is Waiting : some note
+WB is Processing : some other note
+
+@2019/07/05
+WB is Waiting
+@enduml
+</textarea>
+        <div id="out6f821e765c62488dce1bb6589265243b">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="309" height="213" class="scale"
+              src="/imgw/img-6f821e765c62488dce1bb6589265243b.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="6698c85bc253da46"></a>
+      <!--heading-->
+      <h2 class="chap">Manage time axis labels</h2>
+      <p></p>
+      You can manage the time-axis labels.
+      <p></p>
+      <h3>Label on each tick <em>(by default)</em></h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+scale 31536000 as 40 pixels
+use date format &#34;yy-MM&#34;
+
+concise &#34;OpenGL Desktop&#34; as OD
+
+@1992/01/01
+OD is {hidden}
+
+@1992/06/30
+OD is 1.0
+
+@1997/03/04
+OD is 1.1
+
+@1998/03/16
+OD is 1.2
+
+@2001/08/14
+OD is 1.3
+
+@2004/09/07
+OD is 3.0
+
+@2008/08/01
+OD is 3.0
+
+@2017/07/31
+OD is 4.6
+
+@enduml
+</textarea>
+        <div id="out11cca209733328da3fcd4eb93f7d8920">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="1113" height="111" class="scale"
+              src="/imgw/img-11cca209733328da3fcd4eb93f7d8920.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <h3>Manual label <em>(only when the state changes)</em></h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+scale 31536000 as 40 pixels
+
+manual time-axis
+use date format &#34;yy-MM&#34;
+
+concise &#34;OpenGL Desktop&#34; as OD
+
+@1992/01/01
+OD is {hidden}
+
+@1992/06/30
+OD is 1.0
+
+@1997/03/04
+OD is 1.1
+
+@1998/03/16
+OD is 1.2
+
+@2001/08/14
+OD is 1.3
+
+@2004/09/07
+OD is 3.0
+
+@2008/08/01
+OD is 3.0
+
+@2017/07/31
+OD is 4.6
+
+@enduml
+</textarea>
+        <div id="out5c30d74a20fe22d10441284ddd7cda02">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="1113" height="111" class="scale"
+              src="/imgw/img-5c30d74a20fe22d10441284ddd7cda02.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://github.com/plantuml/plantuml/issues/1020">GH-1020</a>]</em>
+      <a style="position:relative;top:-38px;" name="083412d02d1ebde3"></a>
+      <!--heading-->
+      <h2 class="chap">添加约束</h2>
+      可以在图上标示时间约束。
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+robust &#34;Web Browser&#34; as WB
+concise &#34;Web User&#34; as WU
+
+WB is Initializing
+WU is Absent
+
+@WB
+0 is idle
++200 is Processing
++100 is Waiting
+WB@0 &lt;-&gt; @50 : {50 ms lag}
+
+@WU
+0 is Waiting
++500 is ok
+@200 &lt;-&gt; @+150 : {150 ms}
+@enduml
+</textarea>
+        <div id="out23e8e682ada727dda3ae033fa20c68b8">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="449" height="233" class="scale"
+              src="/imgw/img-23e8e682ada727dda3ae033fa20c68b8.png" />
+          </div>
+        </div>
+      </div>
+      <!--heading-->
+      <h3>= 设置高亮</h3>
+      <p></p>
+      你可以给图表中的某一时段设置高亮。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+robust &#34;Web Browser&#34; as WB
+concise &#34;Web User&#34; as WU
+
+@0
+WU is Idle
+WB is Idle
+
+@100
+WU -&gt; WB : URL
+WU is Waiting #LightCyan;line:Aqua
+
+@200
+WB is Proc.
+
+@300
+WU -&gt; WB@350 : URL2
+WB is Waiting
+
+@+200
+WU is ok
+
+@+200
+WB is Idle
+
+highlight 200 to 450 #Gold;line:DimGrey : This is my caption
+@enduml
+</textarea>
+        <div id="out382322fcd844ad9899619fe3fb749780">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="490" height="198" class="scale"
+              src="/imgw/img-382322fcd844ad9899619fe3fb749780.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      *[Ref. [QA-10868](https://forum.plantuml.net/10868/highlighted-periods-in-timing-diagrams)]*
+      <p></p>
+      <center>
+        <div class="tago">WARNING</div> <b>This translation need to be updated.</b> <div class="tago">WARNING</div>
+      </center>
+      <a style="position:relative;top:-38px;" name="f6f5631321f0c11a"></a>
+      <!--heading-->
+      <h2 class="chap">添加注释</h2>
+      <p></p>
+      你可以使用 <code class="cod">note top of</code> 或 <code class="cod">note bottom of</code> 关键字在某一时刻或参与者的上方或下方添加注释
+      <em>（只可以在</em> <code class="cod">concise</code> <em> 类型的参与者中使用）。</em>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+robust &#34;Web Browser&#34; as WB
+concise &#34;Web User&#34; as WU
+
+@0
+WU is Idle
+WB is Idle
+
+@100
+WU is Waiting
+WB is Processing
+note top of WU : first note\non several\nlines
+note bottom of WU : second note\non several\nlines
+
+@300
+WB is Waiting
+@enduml
+</textarea>
+        <div id="outebe630d2d1dbd25f7d5a6c89606b8626">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="309" height="336" class="scale"
+              src="/imgw/img-ebe630d2d1dbd25f7d5a6c89606b8626.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/6877">QA-6877</a>]</em>
+      <p></p>
+      <p></p>
+      *[Ref. [QA-6877](https:<em>forum.plantuml.net/6877),
+        [GH-1465](https:</em>github.com/plantuml/plantuml/issues/1465)]*
+      <center>
+        <div class="tago">WARNING</div> <b>This translation need to be updated.</b> <div class="tago">WARNING</div>
+      </center>
+      <a style="position:relative;top:-38px;" name="d50d8f9219a41435"></a>
+      <!--heading-->
+      <h2 class="chap">添加文本</h2>
+      <p></p>
+      你可以选择添加标题、页眉、页脚、图例和说明。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+Title Some title
+header: Some header
+footer: Some footer
+legend
+Some legend
+end legend
+caption Some caption
+
+robust &#34;Web Browser&#34; as WB
+concise &#34;Web User&#34; as WU
+
+@0
+WU is Idle
+WB is Idle
+
+@100
+WU is Waiting
+WB is Processing
+
+@300
+WB is Waiting
+@enduml
+</textarea>
+        <div id="outd2e6957d9dca7c7fe8742f59cc9e7d17">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="309" height="337" class="scale"
+              src="/imgw/img-d2e6957d9dca7c7fe8742f59cc9e7d17.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="058e0ddbcdf260a9"></a>
+      <!--heading-->
+      <h2 class="chap">完整样例</h2>
+      <p></p>
+      <p></p>
+      感谢<a href="https://twitter.com/arosien">Adam Rosien</a>提供该样例。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+concise &#34;Client&#34; as Client
+concise &#34;Server&#34; as Server
+concise &#34;Response freshness&#34; as Cache
+
+Server is idle
+Client is idle
+
+@Client
+0 is send
+Client -&gt; Server@+25 : GET
++25 is await
++75 is recv
++25 is idle
++25 is send
+Client -&gt; Server@+25 : GET\nIf-Modified-Since: 150
++25 is await
++50 is recv
++25 is idle
+@100 &lt;-&gt; @275 : no need to re-request from server
+
+@Server
+25 is recv
++25 is work
++25 is send
+Server -&gt; Client@+25 : 200 OK\nExpires: 275
++25 is idle
++75 is recv
++25 is send
+Server -&gt; Client@+25 : 304 Not Modified
++25 is idle
+
+@Cache
+75 is fresh
++200 is stale
+@enduml
+</textarea>
+        <div id="outdb66a15ea238cf6a842c3c3910efcedc">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="694" height="241" class="scale"
+              src="/imgw/img-db66a15ea238cf6a842c3c3910efcedc.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="d23dee2d0707a741"></a>
+      <!--heading-->
+      <h2 class="chap">数据表示样例</h2>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+scale 5 as 150 pixels
+
+clock clk with period 1
+binary &#34;enable&#34; as en
+binary &#34;R/W&#34; as rw
+binary &#34;data Valid&#34; as dv
+concise &#34;dataBus&#34; as db
+concise &#34;address bus&#34; as addr
+
+@6 as :write_beg
+@10 as :write_end
+
+@15 as :read_beg
+@19 as :read_end
+
+
+@0
+en is low
+db is &#34;0x0&#34;
+addr is &#34;0x03f&#34;
+rw is low
+dv is 0
+
+@:write_beg-3
+ en is high
+@:write_beg-2
+ db is &#34;0xDEADBEEF&#34;
+@:write_beg-1
+dv is 1
+@:write_beg
+rw is high
+
+
+@:write_end
+rw is low
+dv is low
+@:write_end+1
+rw is low
+db is &#34;0x0&#34;
+addr is &#34;0x23&#34;
+
+@12
+dv is high
+@13 
+db is &#34;0xFFFF&#34;
+
+@20
+en is low
+dv is low
+@21 
+db is &#34;0x0&#34;
+
+highlight :write_beg to :write_end #Gold:Write
+highlight :read_beg to :read_end #lightBlue:Read
+
+db@:write_beg-1 &lt;-&gt; @:write_end : setup time
+db@:write_beg-1 -&gt; addr@:write_end+1 : hold
+@enduml
+</textarea>
+        <div id="out947f0187f17289afdf45da85ac4fe5e8">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="835" height="360" class="scale"
+              src="/imgw/img-947f0187f17289afdf45da85ac4fe5e8.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="cf029fa4f9910441"></a>
+      <!--heading-->
+      <h2 class="chap">颜色</h2>
+      <p></p>
+      你可以为图表添加<a href="color">颜色</a>。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+concise &#34;LR&#34; as LR
+concise &#34;ST&#34; as ST
+
+LR is AtPlace #palegreen
+ST is AtLoad #gray
+
+@LR
+0 is Lowering
+100 is Lowered #pink
+350 is Releasing
+ 
+@ST
+200 is Moving
+@enduml
+</textarea>
+        <div id="out00d09b42f2e2397225880de5ea13f71d">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="518" height="169" class="scale"
+              src="/imgw/img-00d09b42f2e2397225880de5ea13f71d.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref.<a href="https://forum.plantuml.net/5776">QA-5776</a>]</em>
+      <a style="position:relative;top:-38px;" name="08fc1b928526644f"></a>
+      <!--heading-->
+      <h2 class="chap">使用（全局）样式</h2>
+      <p></p>
+      <h3>无样式<em>（默认样式）</em>。</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+robust &#34;Web Browser&#34; as WB
+concise &#34;Web User&#34; as WU
+
+WB is Initializing
+WU is Absent
+
+@WB
+0 is idle
++200 is Processing
++100 is Waiting
+WB@0 &lt;-&gt; @50 : {50 ms lag}
+
+@WU
+0 is Waiting
++500 is ok
+@200 &lt;-&gt; @+150 : {150 ms}
+@enduml
+</textarea>
+        <div id="out23e8e682ada727dda3ae033fa20c68b8">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="449" height="233" class="scale"
+              src="/imgw/img-23e8e682ada727dda3ae033fa20c68b8.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <h3>设置样式</h3>
+      <p></p>
+      你可以使用<a href="style-evolution">样式</a>来改变元素的渲染。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+&lt;style&gt;
+timingDiagram {
+  document {
+    BackGroundColor SandyBrown
+  }
+ constraintArrow {
+  LineStyle 2-1
+  LineThickness 3
+  LineColor Blue
+ }
+}
+&lt;/style&gt;
+robust &#34;Web Browser&#34; as WB
+concise &#34;Web User&#34; as WU
+
+WB is Initializing
+WU is Absent
+
+@WB
+0 is idle
++200 is Processing
++100 is Waiting
+WB@0 &lt;-&gt; @50 : {50 ms lag}
+
+@WU
+0 is Waiting
++500 is ok
+@200 &lt;-&gt; @+150 : {150 ms}
+@enduml
+</textarea>
+        <div id="out20a8d3040a74679fd710bd89d9db4f44">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="449" height="233" class="scale"
+              src="/imgw/img-20a8d3040a74679fd710bd89d9db4f44.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref.<a href="https://forum.plantuml.net/14340/color-of-arrow-in-timing-diagram">QA-14340</a>]</em>
+      <a style="position:relative;top:-38px;" name="bb2ede32ce6accb8"></a>
+      <!--heading-->
+      <h2 class="chap">对特定行着色</h2>
+      <p></p>
+      可以使用 <code class="cod">&lt;style&gt;</code> 标记和模板将行属性命名
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+&lt;style&gt;
+timingDiagram {
+  .red {
+    LineColor red
+  }
+  .blue {
+    LineColor blue
+    LineThickness 5
+  }
+}
+&lt;/style&gt;
+
+clock clk with period 1
+binary &#34;Input Signal 1&#34;  as IS1
+binary &#34;Input Signal 2&#34;  as IS2 &lt;&lt;blue&gt;&gt;
+binary &#34;Output Signal 1&#34; as OS1 &lt;&lt;red&gt;&gt;
+
+@0
+IS1 is low
+IS2 is high
+OS1 is low
+@2
+OS1 is high
+@4
+OS1 is low
+@5
+IS1 is high
+OS1 is high
+@6
+IS2 is low
+@10
+IS1 is low
+OS1 is low
+@enduml
+</textarea>
+        <div id="out03533d683031cdbe2faecc0894ab2d39">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="605" height="230" class="scale"
+              src="/imgw/img-03533d683031cdbe2faecc0894ab2d39.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[<a
+          href="https://forum.plantuml.net/15870/timing-diagram-assign-different-colors-single-participants?show=15870#q15870">Ref.
+          QA-15870</a>]</em>
+      <a style="position:relative;top:-38px;" name="b7e3b7dcc36df887"></a>
+      <!--heading-->
+      <h2 class="chap">紧凑模式</h2>
+      <p></p>
+      可以使用 <code class="cod">compact</code> 命令进行紧凑排版
+      <p></p>
+      <h3>默认模式</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+robust &#34;Web Browser&#34; as WB
+concise &#34;Web User&#34; as WU
+robust &#34;Web Browser2&#34; as WB2
+
+@0
+WU is Waiting
+WB is Idle
+WB2 is Idle
+
+@200
+WB is Proc.
+
+@300
+WB is Waiting
+WB2 is Waiting
+
+@500
+WU is ok
+
+@700
+WB is Idle
+@enduml
+</textarea>
+        <div id="out88f619bffeb0bce46ca7aa15d072b14e">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="490" height="264" class="scale"
+              src="/imgw/img-88f619bffeb0bce46ca7aa15d072b14e.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h4>使用 <code class="cod">mode compact</code> 的全局紧凑模式</h4>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+mode compact
+robust &#34;Web Browser&#34; as WB
+concise &#34;Web User&#34; as WU
+robust &#34;Web Browser2&#34; as WB2
+
+@0
+WU is Waiting
+WB is Idle
+WB2 is Idle
+
+@200
+WB is Proc.
+
+@300
+WB is Waiting
+WB2 is Waiting
+
+@500
+WU is ok
+
+@700
+WB is Idle
+@enduml
+</textarea>
+        <div id="outbfcce3e7832e805952d886a03c8c0f31">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="490" height="258" class="scale"
+              src="/imgw/img-bfcce3e7832e805952d886a03c8c0f31.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>使用 <code class="cod">compact</code> 实现仅针对元素的局部紧凑模式 </h3>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+compact robust &#34;Web Browser&#34; as WB
+compact concise &#34;Web User&#34; as WU
+robust &#34;Web Browser2&#34; as WB2
+
+@0
+WU is Waiting
+WB is Idle
+WB2 is Idle
+
+@200
+WB is Proc.
+
+@300
+WB is Waiting
+WB2 is Waiting
+
+@500
+WU is ok
+
+@700
+WB is Idle
+@enduml
+</textarea>
+        <div id="oute8d60733b2c6a8163abcf07cca53697c">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="490" height="260" class="scale"
+              src="/imgw/img-e8d60733b2c6a8163abcf07cca53697c.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/11130/is-there-a-compact-timing-diagram">QA-11130</a>]</em>
+      <a style="position:relative;top:-38px;" name="76d284610027d49d"></a>
+      <!--heading-->
+      <h2 class="chap">Scaling analog signal</h2>
+      <p></p>
+      You can scale analog signal.
+      <p></p>
+      <h3>Without scaling: 0-max <em>(by default)</em></h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+title Between 0-max (by default)
+analog &#34;Analog&#34; as A
+
+@0
+A is 350
+
+@100
+A is 450
+
+@300
+A is 350
+@enduml
+</textarea>
+        <div id="out5b9a3a6a6e8539264c8fee5e50b38d19">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="290" height="211" class="scale"
+              src="/imgw/img-5b9a3a6a6e8539264c8fee5e50b38d19.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <h3>With scaling: min-max</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+title Between min-max
+analog &#34;Analog&#34; between 350 and 450 as A
+
+@0
+A is 350
+
+@100
+A is 450
+
+@300
+A is 350
+@enduml
+</textarea>
+        <div id="outfc4d352cb515c826e0ac5a370a79acac">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="278" height="211" class="scale"
+              src="/imgw/img-fc4d352cb515c826e0ac5a370a79acac.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a
+          href="https://forum.plantuml.net/17161/timing-diagram-better-scaling-of-analog-values">QA-17161</a>]</em>
+      <a style="position:relative;top:-38px;" name="5a226c5e28416efe"></a>
+      <!--heading-->
+      <h2 class="chap">Customise analog signal</h2>
+      <p></p>
+      <h3>Without any customisation <em>(by default)</em></h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+analog &#34;Vcore&#34; as VDD
+analog &#34;VCC&#34; as VCC
+
+@0
+VDD is 0
+VCC is 3
+@2
+VDD is 0
+@3
+VDD is 6
+VCC is 6
+VDD@1 -&gt; VCC@2 : &#34;test&#34;
+@enduml
+</textarea>
+        <div id="outb0b890cec5f765c539b3dc1fcb50d688">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="274" height="291" class="scale"
+              src="/imgw/img-b0b890cec5f765c539b3dc1fcb50d688.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>With customisation (on scale, ticks and height)</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+analog &#34;Vcore&#34; as VDD
+analog &#34;VCC&#34; between -4.5 and 6.5 as VCC
+VCC ticks num on multiple 3
+VCC is 200 pixels height
+
+@0
+VDD is 0
+VCC is 3
+@2
+VDD is 0
+@3
+VDD is 6
+VCC is 6
+VDD@1 -&gt; VCC@2 : &#34;test&#34;
+@enduml
+</textarea>
+        <div id="out318dc18c972900fd1e75f6e29393e60f">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="279" height="391" class="scale"
+              src="/imgw/img-318dc18c972900fd1e75f6e29393e60f.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a
+          href="https://forum.plantuml.net/11288/mixed-signal-timing-diagram?show=11397#c11397">QA-11288</a>]</em>
+      <a style="position:relative;top:-38px;" name="56ac4a49c1538ccf"></a>
+      <!--heading-->
+      <h2 class="chap">Order state of robust signal</h2>
+      <p></p>
+      <h3>Without order <em>(by default)</em></h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+robust &#34;Flow rate&#34; as rate
+
+@0
+rate is high
+
+@5
+rate is none
+
+@6
+rate is low
+@enduml
+</textarea>
+        <div id="outc9993f557ed6c3ca0f048453b1e855d9">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="426" height="140" class="scale"
+              src="/imgw/img-c9993f557ed6c3ca0f048453b1e855d9.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>With order</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+robust &#34;Flow rate&#34; as rate
+rate has high,low,none
+
+@0
+rate is high
+
+@5
+rate is none
+
+@6
+rate is low
+@enduml
+</textarea>
+        <div id="out0a0b9f4668984b6749af334a5097990e">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="426" height="140" class="scale"
+              src="/imgw/img-0a0b9f4668984b6749af334a5097990e.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>With order and label</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+robust &#34;Flow rate&#34; as rate
+rate has &#34;35 gpm&#34; as high
+rate has &#34;15 gpm&#34; as low
+rate has &#34;0 gpm&#34; as none
+
+@0
+rate is high
+
+@5
+rate is none
+
+@6
+rate is low
+@enduml
+</textarea>
+        <div id="outa0ad310e54e284b9abaaa3dde3b5bc45">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="440" height="140" class="scale"
+              src="/imgw/img-a0ad310e54e284b9abaaa3dde3b5bc45.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/6651/order-of-states-in-timing-diagram">QA-6651</a>]</em>
+      <a style="position:relative;top:-38px;" name="0a7fefe807a10f38"></a>
+      <!--heading-->
+      <h2 class="chap">Defining a timing diagram</h2>
+      <p></p>
+      <h3>By Clock <em>(@clk)</em></h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+clock &#34;clk&#34; as clk with period 50
+concise &#34;Signal1&#34; as S1
+robust &#34;Signal2&#34; as S2
+binary &#34;Signal3&#34; as S3
+ 
+@clk*0
+S1 is 0
+S2 is 0
+
+@clk*1
+S1 is 1
+S3 is high
+
+@clk*2
+S3 is down
+
+@clk*3
+S1 is 1
+S2 is 1
+S3 is 1
+
+@clk*4
+S3 is down
+@enduml
+</textarea>
+        <div id="out34c8b60a95fb2ca15eb0ec8d11afa334">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="306" height="275" class="scale"
+              src="/imgw/img-34c8b60a95fb2ca15eb0ec8d11afa334.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>By Signal <em>(@S)</em></h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+clock &#34;clk&#34; as clk with period 50
+concise &#34;Signal1&#34; as S1
+robust &#34;Signal2&#34; as S2
+binary &#34;Signal3&#34; as S3
+
+@S1
+0 is 0
+50 is 1
+150 is 1
+
+@S2
+0 is 0
+150 is 1
+
+@S3
+50  is 1
+100 is low
+150 is high
+200 is 0
+@enduml
+</textarea>
+        <div id="out3ed7657f9188f013f982c27955e86ec2">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="306" height="275" class="scale"
+              src="/imgw/img-3ed7657f9188f013f982c27955e86ec2.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>By Time <em>(@time)</em></h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+clock &#34;clk&#34; as clk with period 50
+concise &#34;Signal1&#34; as S1
+robust &#34;Signal2&#34; as S2
+binary &#34;Signal3&#34; as S3
+
+@0
+S1 is 0
+S2 is 0
+
+@50
+S1 is 1
+S3 is 1
+
+@100
+S3 is low
+
+@150
+S1 is 1
+S2 is 1
+S3 is high
+
+@200
+S3 is 0
+@enduml
+</textarea>
+        <div id="outc56198e6ced8d3ddacb8cd40cfa50850">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="306" height="275" class="scale"
+              src="/imgw/img-c56198e6ced8d3ddacb8cd40cfa50850.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a
+          href="https://forum.plantuml.net/9053/timing-diagrams-for-binary-signal-and-data-buses?show=9057#a9057">QA-9053</a>]</em>
+      <a style="position:relative;top:-38px;" name="6ca6666a3b4c5bb4"></a>
+      <!--heading-->
+      <h2 class="chap">Annotate signal with comment</h2>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+binary &#34;Binary Serial Data&#34; as D
+robust &#34;Robust&#34; as R
+concise &#34;Concise&#34; as C
+
+@-3
+D is low: idle
+R is lo: idle
+C is 1: idle
+@-1
+D is high: start
+R is hi: start
+C is 0: start
+
+@0
+D is low: 1 lsb
+R is lo: 1 lsb
+C is 1: lsb
+
+@1
+D is high: 0
+R is hi: 0
+C is 0
+
+@6
+D is low: 1
+R is lo: 1
+C is 1
+
+@7
+D is high: 0 msb
+R is hi: 0 msb
+C is 0: msb
+
+@8
+D is low: stop
+R is lo: stop
+C is 1: stop
+
+@0 &lt;-&gt; @8 : Serial data bits for ASCII &#34;A&#34; (Little Endian)
+@enduml
+</textarea>
+        <div id="out259205cd29f899c7ac08a0f1cd4458b2">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="659" height="256" class="scale"
+              src="/imgw/img-259205cd29f899c7ac08a0f1cd4458b2.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/15762/annotate-binary-waveforms">QA-15762</a>, and <a
+          href="https://github.com/plantuml/plantuml/issues/888">QH-888</a>]</em>
+
+
+    </main>
+
+
+    <aside id="C6">
+      <!--toc-->
+      <div id="toc">
+        <ul>
+          <li><a href="#bf7a556a85b0b957">声明参与者</a>
+          </li>
+          <li><a href="#7e2cce1005e19316">二进制及时钟信号</a>
+          </li>
+          <li><a href="#dad25c3a390c6194">增加标示</a>
+          </li>
+          <li><a href="#41aa48e58e346c22">相对时间</a>
+          </li>
+          <li><a href="#0e0d73b649261198">锚点</a>
+          </li>
+          <li><a href="#8c1e31be279b1b97">Anchor Points with decimal offset</a>
+          </li>
+          <li><a href="#6449f3c11a883c41">参与者</a>
+          </li>
+          <li><a href="#5335b971d6ed3cc8">设置缩放</a>
+          </li>
+          <li><a href="#27e9db240004b050">初始状态</a>
+          </li>
+          <li><a href="#894961695270bf0f">模糊状态</a>
+          </li>
+          <li><a href="#ad9ec59494e6759b">隐藏状态</a>
+          </li>
+          <li><a href="#fd723f2741a0d2d1">Negative time value</a>
+          </li>
+          <li><a href="#e2a8e525ad8f3b28">隐藏时间轴</a>
+          </li>
+          <li><a href="#a71a99ab9f38a6a7">使用日期</a>
+          </li>
+          <li><a href="#93c98970ca5b361b">Change Date Format</a>
+          </li>
+          <li><a href="#6698c85bc253da46">Manage time axis labels</a>
+          </li>
+          <li><a href="#083412d02d1ebde3">添加约束</a>
+          </li>
+          <li><a href="#f6f5631321f0c11a">= 设置高亮</a>
+          </li>
+          <li><a href="#d50d8f9219a41435">添加注释</a>
+          </li>
+          <li><a href="#058e0ddbcdf260a9">添加文本</a>
+          </li>
+          <li><a href="#d23dee2d0707a741">完整样例</a>
+          </li>
+          <li><a href="#cf029fa4f9910441">数据表示样例</a>
+          </li>
+          <li><a href="#08fc1b928526644f">颜色</a>
+          </li>
+          <li><a href="#bb2ede32ce6accb8">使用（全局）样式</a>
+          </li>
+          <li><a href="#b7e3b7dcc36df887">对特定行着色</a>
+          </li>
+          <li><a href="#76d284610027d49d">紧凑模式</a>
+          </li>
+          <li><a href="#5a226c5e28416efe">Scaling analog signal</a>
+          </li>
+          <li><a href="#56ac4a49c1538ccf">Customise analog signal</a>
+          </li>
+          <li><a href="#0a7fefe807a10f38">Order state of robust signal</a>
+          </li>
+          <li><a href="#6ca6666a3b4c5bb4">Defining a timing diagram</a>
+          </li>
+          <li><a href="#0126984894218f0c">Annotate signal with comment</a>
+          </li>
+        </ul>
+      </div>
+    </aside>
+
+  </div>
+    <script src="../../viz-global.js"></script>
+    <script src="../../plantuml.js"></script>
+    <script>
+        (function () {
+            const render = window.plantumlRender;
+            if (typeof render !== "function") {
+                console.error("PlantUML renderer is unavailable.");
+                return;
+            }
+
+            const renderOptions = {};
+            let counter = 0;
+
+            document.querySelectorAll(".mycell").forEach((mycell) => {
+                const host = mycell.parentElement;
+                const textarea = host ? host.previousElementSibling : null;
+                if (!textarea || textarea.tagName !== "TEXTAREA") return;
+
+                if (!mycell.id) {
+                    counter += 1;
+                    mycell.id = "mycell-render-" + counter;
+                }
+
+                const draw = () => {
+                    mycell.innerHTML = "";
+                    render(textarea.value.split(/\r\n|\r|\n/), mycell.id, renderOptions);
+                };
+
+                textarea.addEventListener("input", draw);
+                draw();
+            });
+        })();
+    </script>
+</body>
+
+</html>

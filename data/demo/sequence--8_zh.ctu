@@ -1,0 +1,138 @@
+Title: 对消息序列编号
+Describe: None
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+关键字 `autonumber` 用于自动对消息编号。
+
+[UML]
+@startuml
+autonumber
+Bob -> Alice : Authentication Request
+Bob <- Alice : Authentication Response
+@enduml
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+语句 `autonumber //start//` 用于指定编号的初始值，而 `autonumber //start// //increment//` 可以同时指定编号的初始值和每次增加的值。
+
+[UML]
+@startuml
+autonumber
+Bob -> Alice : Authentication Request
+Bob <- Alice : Authentication Response
+
+autonumber 15
+Bob -> Alice : Another authentication Request
+Bob <- Alice : Another authentication Response
+
+autonumber 40 10
+Bob -> Alice : Yet another authentication Request
+Bob <- Alice : Yet another authentication Response
+
+@enduml
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+你可以在双引号内指定编号的格式。
+格式是由 Java 的 `DecimalFormat` 类实现的： (`0` 表示数字；`#` 也表示数字，但默认为0)。
+你也可以用 HTML 标签来制定格式。
+
+[UML]
+@startuml
+autonumber "<b>[000]"
+Bob -> Alice : Authentication Request
+Bob <- Alice : Authentication Response
+
+autonumber 15 "<b>(<u>##</u>)"
+Bob -> Alice : Another authentication Request
+Bob <- Alice : Another authentication Response
+
+autonumber 40 10 "<font color=red><b>Message 0  "
+Bob -> Alice : Yet another authentication Request
+Bob <- Alice : Yet another authentication Response
+
+@enduml
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+你还可以用语句 `autonumber stop` 和 `autonumber resume //increment// //format//` 来表示暂停或继续使用自动编号。
+
+[UML]
+@startuml
+autonumber 10 10 "<b>[000]"
+Bob -> Alice : Authentication Request
+Bob <- Alice : Authentication Response
+
+autonumber stop
+Bob -> Alice : dummy
+
+autonumber resume "<font color=red><b>Message 0  "
+Bob -> Alice : Yet another authentication Request
+Bob <- Alice : Yet another authentication Response
+
+autonumber stop
+Bob -> Alice : dummy
+
+autonumber resume 1 "<font color=blue><b>Message 0  "
+Bob -> Alice : Yet another authentication Request
+Bob <- Alice : Yet another authentication Response
+@enduml
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+你也可以使用一个2或3位的序列，中间采用一种或几种分隔符，如 `.`, `;`, `,`, `:`。例如：`1.1.1` 或 `1.1:1`。
+最后一位数字会自动递增。
+要增加第一个数字，请使用：`autonumber inc A`。要增加第二位数字，请使用：`autonumber inc B`。
+
+[UML]
+@startuml
+autonumber 1.1.1
+Alice -> Bob: Authentication request
+Bob --> Alice: Response
+
+autonumber inc A
+'Now we have 2.1.1
+Alice -> Bob: Another authentication request
+Bob --> Alice: Response
+
+autonumber inc B
+'Now we have 2.2.1
+Alice -> Bob: Another authentication request
+Bob --> Alice: Response
+
+autonumber inc A
+'Now we have 3.1.1
+Alice -> Bob: Another authentication request
+autonumber inc B
+'Now we have 3.2.1
+Bob --> Alice: Response
+@enduml
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+你也可以用 `autonumber` 的值，带有 `%autonumber%` 变量。
+
+[UML]
+@startuml
+autonumber 10
+Alice -> Bob
+note right
+  the <U+0025>autonumber<U+0025> works everywhere.
+  Here, its value is ** %autonumber% **
+end note
+Bob --> Alice: //This is the response %autonumber%//
+@enduml
+------------------------------------------------------------

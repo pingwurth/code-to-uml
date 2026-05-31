@@ -1,0 +1,23 @@
+Title: 显示 JSON 数据
+Describe: None
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+None
+
+[UML]
+@startuml
+allowmixing
+
+actor     用户
+usecase   用例
+
+json JSON {
+   "水果":"苹果",
+   "尺寸":"大",
+   "颜色": ["红", "绿"]
+}
+@enduml
+------------------------------------------------------------

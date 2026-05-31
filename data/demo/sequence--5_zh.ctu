@@ -1,0 +1,49 @@
+Title: 更改角色样式  
+Describe: 您可以将角色样式从默认的火柴人更改为：
+  - 一个拥有 `skinparam actorStyle awesome` 命令的超棒的人；
+  - 一个带有 `skinparam actorStyle hollow` 命令的空壳人。
+------------------------------------------------------------
+[Example]
+火柴人（默认）
+
+[Description]
+None
+
+[UML]
+@startuml
+actor Alice
+actor Bob
+Alice -> Bob : hello
+hide footbox
+@enduml
+------------------------------------------------------------
+[Example]
+超棒的人
+
+[Description]
+None
+
+[UML]
+@startuml
+skinparam actorStyle awesome
+actor Alice
+actor Bob
+Alice -> Bob : hello
+hide footbox
+@enduml
+------------------------------------------------------------
+[Example]
+空心人
+
+[Description]
+None
+
+[UML]
+@startuml
+skinparam actorStyle Hollow
+actor Alice
+actor Bob
+Alice -> Bob : hello
+hide footbox
+@enduml
+------------------------------------------------------------

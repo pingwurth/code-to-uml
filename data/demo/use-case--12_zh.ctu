@@ -1,0 +1,33 @@
+Title: 从左向右方向
+Describe: None
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+默认从上往下构建图示。
+
+[UML]
+@startuml
+'default
+top to bottom direction
+user1 --> (Usecase 1)
+user2 --> (Usecase 2)
+
+@enduml
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+你可以用 `left to right direction` 命令改变图示方向。
+
+[UML]
+@startuml
+
+left to right direction
+user1 --> (Usecase 1)
+user2 --> (Usecase 2)
+
+@enduml
+------------------------------------------------------------

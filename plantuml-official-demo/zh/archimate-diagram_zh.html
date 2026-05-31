@@ -1,0 +1,1339 @@
+<html lang="zh">
+
+<head>
+
+
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Organization",
+  "url": "https://plantuml.com",
+  "name": "PlantUML",
+  "sameAs" : ["https://twitter.com/plantuml","https://en.wikipedia.org/wiki/PlantUML","https://www.wikidata.org/wiki/Q18346546"],
+  "logo": "https://cdn-0.plantuml.com/logo3.png",
+  "contactPoint": [{
+    "@type": "ContactPoint",
+    "email": "plantuml@gmail.com",
+    "url": "https://plantuml.com",
+    "contactType": "customer service"
+  }]
+}
+</script>
+    <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+    "@type": "ListItem",
+    "position": 1,
+    "item": {
+      "@id": "https://plantuml.com",
+      "name": "Home"
+    }
+  },{
+    "@type": "ListItem",
+    "position": 2,
+    "item": {
+      "@id": "https://plantuml.com/sitemap-language-specification",
+      "name": "Language specification"
+    }
+  },{
+    "@type": "ListItem",
+    "position": 3,
+    "item": {
+      "@id": "https://plantuml.com/archimate-diagram",
+      "name": "Archimate Diagram"
+  }
+  }]
+}
+</script>
+    <link rel="canonical" href="https://plantuml.com/zh/archimate-diagram" />
+    <link rel="alternate" hreflang="x-default" href="https://plantuml.com/archimate-diagram" />
+    <link rel="alternate" hreflang="de" href="https://plantuml.com/de/archimate-diagram" />
+    <link rel="alternate" hreflang="en" href="https://plantuml.com/archimate-diagram" />
+    <link rel="alternate" hreflang="es" href="https://plantuml.com/es/archimate-diagram" />
+    <link rel="alternate" hreflang="fr" href="https://plantuml.com/fr/archimate-diagram" />
+    <link rel="alternate" hreflang="ja" href="https://plantuml.com/ja/archimate-diagram" />
+    <link rel="alternate" hreflang="ko" href="https://plantuml.com/ko/archimate-diagram" />
+    <link rel="alternate" hreflang="zh" href="https://plantuml.com/zh/archimate-diagram" />
+
+    <link rel="shortcut icon" href="/favicon.ico" />
+
+
+    <!-- link rel="preload" as="image" href="https://img.shields.io/liberapay/patrons/plantuml.svg?logo=liberapay" -->
+
+
+    <title></title>
+    <meta name="description" content="" />
+
+    <meta property="og:type" content="article" />
+    <!-- volt:dokuwiki titleog: -->
+    <!-- volt:dokuwiki descriptionog: -->
+
+    <meta property="og:url" content="https://plantuml.com/zh/archimate-diagram" />
+    <meta property="og:site_name" content="PlantUML.com" />
+
+    <!-- meta property="og:image" content="https://plantuml.com/og-archimate-diagram" -->
+    <meta name="twitter:image" content="https://plantuml.com/og-archimate-diagram" />
+    <meta property="og:locale" content="zh" />
+
+    <meta name="twitter:card" content="summary" />
+    <!-- volt:dokuwiki titletwitter: -->
+    <!-- volt:dokuwiki descriptiontwitter: -->
+    <meta name="twitter:site" content="@PlantUML" />
+    <meta name="twitter:creator" content="@PlantUML" />
+
+
+    <!-- https://www.w3schools.com/colors/colors_picker.asp -->
+    <!-- filter css https://codepen.io/sosuke/pen/Pjoqqp -->
+
+
+    <style>
+        .scale {}
+
+        li {
+            margin: 2px;
+        }
+
+        #external li {
+            margin: 13px;
+        }
+
+        @media screen and (max-width: 1190px) {
+        }
+
+
+        .coptable {
+            max-width: 90%;
+        }
+
+        .mytab {
+            display: inline-block;
+            border-radius: 3px;
+            border: 1px solid #e1e4e8;
+        }
+
+        .mytab:hover {
+            border: 1px dashed #0366d6;
+            cursor: pointer;
+            color: #0366d6;
+            background: #f6f8fa;
+        }
+
+        .cop {
+            margin: 25px 10px 0 10px;
+        }
+
+        .cop:hover {
+            cursor: pointer;
+            filter: invert(30%) sepia(75%) saturate(4001%) hue-rotate(201deg) brightness(88%) contrast(98%);
+        }
+
+        .cop2 {
+            margin: 25px 10px 0 10px;
+        }
+
+        .cop2:hover {
+            cursor: pointer;
+        }
+
+        .msg {
+            position: absolute;
+            color: #339966;
+            background-color: #FFF;
+            margin-top: 55px;
+            display: none;
+            border-radius: 3px;
+            border: 1px solid #4dff00;
+        }
+
+        .mycell0 {
+            float: left;
+            vertical-align: top;
+            padding: 10px;
+        }
+
+        .mycell0 code:hover {
+            cursor: default;
+            color: #000;
+        }
+
+        .mycell {
+            float: right;
+            vertical-align: top;
+            padding: 10px;
+            max-width: 55vw;
+            overflow-x: auto;
+        }
+
+        .mycell0 pre {
+            max-width: 55vw;
+            overflow-x: auto;
+        }
+
+        .cod {
+            background: #edeff3;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+
+        .colo {
+            display: inline-block;
+            background: #edeff3;
+            padding: 7px 12px;
+            border-radius: 3px;
+        }
+
+        .tag,
+        .tagg,
+        .tago,
+        .tagr {
+            text-rendering: optimizeLegibility;
+            display: inline-block;
+            padding: 3px 5px 2px 4px;
+            text-decoration: none;
+            white-space: nowrap;
+            border: 1px solid #999;
+            text-transform: uppercase;
+            text-align: center;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: bold;
+            line-height: 90%;
+        }
+
+        .tag {
+            background-color: #EEEEEE;
+        }
+
+        .tagg {
+            background-color: #98FB98;
+        }
+
+        .tago {
+            background-color: #fafa00;
+        }
+
+        .tagr {
+            background-color: #FF4500;
+        }
+
+
+        a {
+            text-decoration: none;
+            color: #0366d6;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .menu1 {
+            display: flex;
+            flex-direction: row;
+            border: 0;
+            font-size: 14px;
+            padding: 0;
+            margin: 0;
+            white-space: nowrap;
+        }
+
+        .menu1 a {
+            white-space: nowrap;
+            padding: 0 8px;
+            text-decoration: none;
+            color: #5e6d7d;
+            line-height: 30px;
+            height: 30px;
+        }
+
+        .menu1 a:hover {
+            background: #fefefe;
+            color: #0366d6;
+        }
+
+        .menuside2 {
+            display: flex;
+            flex-direction: column;
+            border: 0;
+            font-size: 14px;
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
+            justify-content: center;
+        }
+
+        .menuside2 img {
+            vertical-align: top;
+            padding: 0 8px;
+            filter: brightness(0) saturate(100%) invert(42%) sepia(22%) saturate(385%) hue-rotate(170deg) brightness(92%) contrast(84%);
+        }
+
+        .menuside2 a {
+            padding: 6px 0;
+            text-decoration: none;
+            color: #5e6d7d;
+        }
+
+        .menuside2 a:hover {
+            color: #0366d6;
+            background: #fefefe;
+        }
+
+        .menuside2 a:hover img {
+            filter: brightness(0) saturate(100%) invert(23%) sepia(44%) saturate(7029%) hue-rotate(203deg) brightness(94%) contrast(98%);
+        }
+
+        .breadcrumb {
+            z-index: 1;
+            font-size: 14px;
+            text-align: center;
+            display: inline-block;
+            overflow: hidden;
+            border-radius: 5px;
+        }
+
+
+        .breadcrumb a {
+            text-decoration: none;
+            outline: none;
+            display: block;
+            float: left;
+            font-size: 12px;
+            line-height: 24px;
+            color: #373f49;
+            padding: 0 10px 0 35px;
+            background: #f0f1f1;
+            background: linear-gradient(#f0f1f1, #c6d2d2);
+            position: relative;
+        }
+
+        .breadcrumb a:first-child {
+            padding-left: 21px;
+            border-radius: 5px 0 0 5px;
+            /*to match with the parent's radius*/
+        }
+
+        .breadcrumb a:first-child:before {
+            left: 14px;
+        }
+
+        .breadcrumb a:last-child {
+            visibility: hidden;
+        }
+
+        .breadcrumb a.active,
+        .breadcrumb a:hover {
+            color: #0366d6;
+            background: #c6d2d2;
+            background: linear-gradient(#e3e4e4, #b8c7c7);
+        }
+
+        .breadcrumb a.active:after,
+        .breadcrumb a:hover:after {
+            background: #c6d2d2;
+            background: linear-gradient(135deg, #e3e4e4, #b8c7c7);
+        }
+
+        .breadcrumb a:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: -12px;
+            /*half of square's length*/
+            /*same dimension as the line-height of .breadcrumb a */
+            width: 24px;
+            height: 24px;
+            transform: scale(0.707) rotate(45deg);
+            /*we need to prevent the arrows from getting buried under the next link*/
+            z-index: 1;
+            /*background same as links but the gradient will be rotated to compensate with the transform applied*/
+            background: #f0f1f1;
+            background: linear-gradient(135deg, #f0f1f1, #c6d2d2);
+            /*stylish arrow design using box shadow*/
+            box-shadow:
+                2px -2px 0 2px rgba(0, 0, 0, 0.1),
+                3px -3px 0 2px rgba(255, 255, 255, 0.1);
+            /*
+		5px - for rounded arrows and 
+		50px - to prevent hover glitches on the border created using shadows*/
+            border-radius: 0 5px 0 50px;
+        }
+
+        /*we dont need an arrow after the last link*/
+        .breadcrumb a:last-child:after {
+            content: none;
+            visibility: hidden;
+        }
+
+
+        .lga,
+        .lga a,
+        .lgi,
+        .lgi a {
+            font-size: 13px;
+            text-align: center;
+            color: #fff;
+            padding: 0 5px;
+            margin: 0;
+        }
+
+        .lga,
+        .lga a {
+            background-color: #008;
+        }
+
+        .lgi,
+        .lgi a {
+            background-color: #888;
+        }
+
+        .lga:hover,
+        .lga:hover a {
+            text-decoration: none;
+            color: #BBB;
+        }
+
+        .lgi:hover,
+        .lgi:hover a {
+            text-decoration: none;
+            color: #CCC;
+        }
+    </style>
+    <style>
+        body {
+            font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            font-size: 14px;
+            line-height: 1.5;
+            margin: auto;
+            overflow-x: hidden;
+            background: #fefefe;
+        }
+
+        h1.chap {
+            font-size: 1.8em;
+        }
+
+        h2.chap {
+            font-size: 1.35em;
+        }
+
+        h3,
+        h3.chap {
+            font-size: 1.15em;
+        }
+
+        h4 {
+            font-size: 1.05em;
+        }
+
+        table {
+            font-size: inherit;
+        }
+    </style>
+
+
+    <style>
+        .dyn {
+            display: flex;
+            flex-direction: row;
+            gap: 3em;
+            align-items: stretch;
+            flex-wrap: wrap;
+            margin: 10px 0;
+        }
+
+        .dyn textarea {
+            font-family: monospace;
+            font-size: 13px;
+            line-height: 1.4;
+            min-width: 30ch;
+            max-width: 90ch;
+            box-sizing: border-box;
+            resize: both;
+            white-space: pre;
+            overflow: auto;
+            field-sizing: content;
+            align-self: stretch;
+            border: 1px solid #888;
+            border-radius: 3px;
+            margin: 0;
+            padding: 4px 8px;
+            background: #fefefe;
+        }
+
+        .dyn>div {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            display: flex;
+        }
+
+        .dyn>div>div {
+            margin: 0;
+            padding: 0;
+        }
+
+        .dyn img {
+            margin: 0;
+            padding: 0;
+        }
+
+        .scale {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #dde;
+            border-radius: 4px;
+        }
+    </style>
+
+
+    <script>
+        var llg = "zh";
+        var az = 0;
+        var amdark = 0;
+        function ljs(n) {
+            if (az) return false;
+            var sc = document.createElement("script");
+            sc.type = "text/javascript";
+            sc.src = "/btn-" + n + ".js";
+            document.body.innerHTML = "<i style='position:absolute;top:30%;width:100%;'><center>Loading in progress...";
+            document.body.appendChild(sc);
+        }
+        function ctc(id) {
+            document.getElementById('img' + id).classList.remove('cop'); document.getElementById('img' + id).classList.add('cop2');
+            document.getElementById('pre' + id).style.backgroundColor = '#4dff00';
+            document.getElementById('msg' + id).style.display = 'inline';
+
+            setTimeout(function () { document.getElementById('img' + id).classList.remove('cop2'); document.getElementById('img' + id).classList.add('cop'); document.getElementById('pre' + id).style.backgroundColor = ''; document.getElementById('msg' + id).style.display = 'none'; }, 800);
+
+
+            text = document.getElementById('pre' + id).innerText;
+            if (window.clipboardData && window.clipboardData.setData)
+                return window.clipboardData.setData("Text", text);
+            else if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
+                var ta = document.createElement("textarea");
+                ta.textContent = text;
+                ta.style.position = "fixed";
+                document.body.appendChild(ta);
+                ta.select();
+                try {
+                    return document.execCommand("copy");
+                }
+                catch (ex) {
+                    return false;
+                }
+                finally {
+                    document.body.removeChild(ta);
+                }
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <style>
+        body,
+        .container,
+        #B3,
+        #C5,
+        #C6,
+        #C7,
+        #D7,
+        #D8 {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            overflow-y: scroll;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr auto auto auto;
+            grid-template-rows: auto 1fr auto;
+            min-height: 100vh;
+        }
+
+        #B3 {
+            grid-column: 1 / 5;
+            grid-row: 1;
+            position: sticky;
+            top: 0;
+            height: 30px;
+            padding: 0;
+            z-index: 10;
+            overflow: hidden;
+            background: #edeff3;
+            border-bottom: 1px solid #d4d8de;
+        }
+
+        #D7 {
+            grid-column: 1;
+            grid-row: 2;
+            margin: 0;
+            padding: 0;
+            padding-left: 30px;
+            line-height: 1.6;
+        }
+
+        #D8 {
+            grid-column: 1;
+            grid-row: 3;
+            position: sticky;
+            bottom: 0;
+            z-index: 5;
+            background: #fefefe;
+        }
+
+        #C5 {
+            grid-column: 2;
+            grid-row: 1 / -1;
+            position: sticky;
+            top: 40px;
+            align-self: start;
+            height: calc(98vh - 60px);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        #C6 {
+            grid-column: 3;
+            grid-row: 1 / -1;
+            position: sticky;
+            top: 40px;
+            align-self: start;
+            height: calc(98vh - 60px);
+            max-width: 200px;
+            overflow: hidden;
+            margin: 0 10px;
+            padding: 8px 5px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        #C7 {
+            grid-column: 4;
+            grid-row: 1 / -1;
+            position: sticky;
+            top: 40px;
+            align-self: start;
+            height: calc(98vh - 60px);
+            margin: 0 20px 0 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        #toc {
+            z-index: 15;
+            overflow-x: hidden;
+            overflow-y: auto;
+            background: #f6f8fa;
+            border-width: 2px;
+            border-style: groove;
+            border-radius: 3px;
+            border-color: #e1e4e8;
+            margin: 0 5px;
+            padding: 0;
+            max-height: 100%;
+        }
+
+        #toc ul {
+            margin: 0;
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #toc li {
+            padding: 0 10px;
+            margin: 0;
+        }
+
+        #toc li a {
+            padding: 5px 0;
+            display: inline-block;
+            text-decoration: none;
+            width: 100%;
+            color: #5e6d7d;
+        }
+
+        #toc li a:hover {
+            color: #0366d6;
+        }
+
+        #toc li:hover {
+            background: #fefefe;
+        }
+
+        #magic {
+            position: absolute;
+            top: 0;
+            right: 50px;
+            width: 30px;
+            height: 30px;
+            overflow: hidden;
+            background: #edeff3;
+            z-index: 14;
+        }
+
+        #magic:hover {
+            width: calc(100% - 50px);
+        }
+
+        #magic .menu1 {
+            position: absolute;
+            top: 0;
+            right: 30px;
+            height: 30px;
+            padding-left: 10px;
+            background: #edeff3;
+            border-left: 1px solid #d4d8de;
+            border-bottom: 1px solid #d4d8de;
+        }
+
+        .menu1-tail {
+            flex-grow: 1;
+            flex-shrink: 0;
+            height: 30px;
+            position: relative;
+            z-index: 15;
+            background: #edeff3;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: auto auto auto;
+            grid-auto-rows: auto;
+            gap: 5px;
+            margin: 0;
+            padding: 0;
+        }
+
+        .merged {
+            grid-column: 1 / -1;
+        }
+
+        #C6 {
+            display: none;
+        }
+
+        @media (min-width: 1401px) {
+            #C6:has(#toc li) {
+                display: flex;
+            }
+        }
+
+        @media (max-width: 1100px) {
+            #C5,
+            #C7 {
+                display: none;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .merged {
+                display: none;
+            }
+        }
+    </style>
+
+    <div class="container">
+
+        <footer id="D8">
+
+            <p>
+            </p>
+            <p>
+
+            </p>
+        </footer>
+
+
+        <header id="B3">
+            <div class="menu1">
+                <a id="titem10" href="sequence-diagram_zh.html">时序图</a>
+                <a id="titem20" href="use-case-diagram_zh.html">用例图</a>
+                <a id="titem30" href="class-diagram_zh.html">类图</a>
+                <a id="titem40" href="activity-diagram-beta_zh.html">活动图</a>
+                <a id="titem50" href="component-diagram_zh.html">组件图</a>
+                <a id="titem60" href="state-diagram_zh.html">状态图</a>
+                <a id="titem70" href="object-diagram_zh.html">对象图</a>
+                <a id="titem80" href="deployment-diagram_zh.html">部署图</a>
+                <a id="titem90" href="timing-diagram_zh.html">定时图</a>
+
+                <a id="titem99" href="regex_zh.html">Regex</a>
+                <a id="titem100" href="nwdiag_zh.html">Network</a>
+                <a id="titem110" href="salt_zh.html">Wireframe</a>
+                <a id="titem120" href="archimate-diagram_zh.html">Archimate</a>
+                <a id="titem130" href="gantt-diagram_zh.html">Gantt</a>
+                <a id="titem140" href="mindmap-diagram_zh.html">MindMap</a>
+                <a id="titem150" href="wbs-diagram_zh.html">WBS</a>
+                <a id="titem151" href="ebnf_zh.html">EBNF</a>
+                <a id="titem160" href="json_zh.html">JSON</a>
+                <a id="titem170" href="yaml_zh.html">YAML</a>
+
+                <div class="menu1-tail"></div>
+            </div>
+            <div id="magic">
+                <div class="menu1">
+                    <a id="titem10" href="sequence-diagram_zh.html">时序图</a>
+                    <a id="titem20" href="use-case-diagram_zh.html">用例图</a>
+                    <a id="titem30" href="class-diagram_zh.html">类图</a>
+                    <a id="titem40" href="activity-diagram-beta_zh.html">活动图</a>
+                    <a id="titem50" href="component-diagram_zh.html">组件图</a>
+                    <a id="titem60" href="state-diagram_zh.html">状态图</a>
+                    <a id="titem70" href="object-diagram_zh.html">对象图</a>
+                    <a id="titem80" href="deployment-diagram_zh.html">部署图</a>
+                    <a id="titem90" href="timing-diagram_zh.html">定时图</a>
+
+                    <a id="titem99" href="regex_zh.html">Regex</a>
+                    <a id="titem100" href="nwdiag_zh.html">Network</a>
+                    <a id="titem110" href="salt_zh.html">Wireframe</a>
+                    <a id="titem120" href="archimate-diagram_zh.html">Archimate</a>
+                    <a id="titem130" href="gantt-diagram_zh.html">Gantt</a>
+                    <a id="titem140" href="mindmap-diagram_zh.html">MindMap</a>
+                    <a id="titem150" href="wbs-diagram_zh.html">WBS</a>
+                    <a id="titem151" href="ebnf_zh.html">EBNF</a>
+                    <a id="titem160" href="json_zh.html">JSON</a>
+                    <a id="titem170" href="yaml_zh.html">YAML</a>
+
+                    <div class="menu1-tail"></div>
+                </div>
+            </div><!-- magic -->
+        </header>
+
+        <main id="D7">
+
+            <style>
+                #donate {
+                    padding-top: 10px;
+                    min-height: 30px;
+                }
+            </style>
+
+
+            <p style="clear:both;">
+
+
+                <style>
+                    #titem120 {
+                        color: #0366d6;
+                        background-color: #fefefe;
+                    }
+
+                    #titem120 img {
+                        filter: brightness(0) saturate(100%) invert(23%) sepia(44%) saturate(7029%) hue-rotate(203deg) brightness(94%) contrast(98%);
+                    }
+
+                    .menu1:hover #titem120 {
+                        color: #5e6d7d;
+                    }
+
+                    .menu1:hover #titem120:hover {
+                        color: #0366d6;
+                    }
+
+                    .menu1:hover #titem120 img {
+                        filter: brightness(0) saturate(100%) invert(42%) sepia(22%) saturate(385%) hue-rotate(170deg) brightness(92%) contrast(84%);
+                    }
+                </style>
+
+                <a style="position:relative;top:-38px;" name="fa1138215aa15fa1"></a>
+                <!--heading-->
+            </p>
+            <h1 class="chap">ArchiMate Diagram</h1>
+            <p></p>
+            <a href="https://en.wikipedia.org/wiki/ArchiMate">ArchiMate</a> is an open and independent
+            <strong>enterprise architecture modeling language</strong> that supports the description, analysis, and
+            visualization of architecture within and across business domains. An <strong>ArchiMate Diagram</strong>
+            provides a structured representation of the various components of an enterprise, their
+            <strong>interrelationships</strong>, and their integration with <strong>IT infrastructure</strong>.
+            <p></p>
+            While both <a href="https://en.wikipedia.org/wiki/ArchiMate">ArchiMate</a> and <a
+                href="https://en.wikipedia.org/wiki/Unified_Modeling_Language">UML</a> are modeling languages, they
+            serve different purposes. UML is primarily used for software design and system modeling, focusing on the
+            structural and behavioral aspects of systems. In contrast, <strong>ArchiMate</strong> is tailored for
+            <strong>enterprise architecture</strong>, offering a holistic view of the organizational, informational, and
+            technical layers of an enterprise.
+            <a style="position:relative;top:-38px;" name="1061ed3ef2fe28ea"></a>
+            <!--heading-->
+            <h2 class="chap">Archimate keyword</h2>
+            <p></p>
+            You can use the <code class="cod">archimate</code> keyword to define an element. Stereotype can optionally
+            specify an additional icon. Some colors (<code class="cod">Business</code>, <code
+                class="cod">Application</code>, <code class="cod">Motivation</code>, <code class="cod">Strategy</code>,
+            <code class="cod">Technology</code>, <code class="cod">Physical</code>, <code
+                class="cod">Implementation</code>) are also available.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+archimate #Technology &#34;VPN Server&#34; as vpnServerA &lt;&lt;technology-device&gt;&gt;
+
+rectangle GO #lightgreen
+rectangle STOP #red
+rectangle WAIT #orange
+@enduml
+</textarea>
+                <div id="outb28515ee185e8f7f1166cc050e663fb4">
+                    <div class="mycell">
+                        <img loading="lazy" width="190" height="174" class="scale"
+                            src="/imgw/img-b28515ee185e8f7f1166cc050e663fb4.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <a style="position:relative;top:-38px;" name="1c9c4afcca95a20a"></a>
+            <!--heading-->
+            <h2 class="chap">定义结点</h2>
+            <p></p>
+            使用<code class="cod">circle</code> 关键字和preprocessing[预处理程序]，你也可以创建结点。
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+!define Junction_Or circle #black
+!define Junction_And circle #whitesmoke
+
+Junction_And JunctionAnd
+Junction_Or JunctionOr
+
+archimate #Technology &#34;VPN Server&#34; as vpnServerA &lt;&lt;technology-device&gt;&gt;
+
+rectangle GO #lightgreen
+rectangle STOP #red
+rectangle WAIT #orange
+GO -up-&gt; JunctionOr
+STOP -up-&gt; JunctionOr
+STOP -down-&gt; JunctionAnd
+WAIT -down-&gt; JunctionAnd
+@enduml
+</textarea>
+                <div id="out75089af1ae4b47d6febc90b648f4a1c3">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="252" height="300" class="scale"
+                            src="/imgw/img-75089af1ae4b47d6febc90b648f4a1c3.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="5504977cb47d642d"></a>
+            <!--heading-->
+            <h2 class="chap">例1</h2>
+            <p></p>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+skinparam rectangle&lt;&lt;behavior&gt;&gt; {
+	roundCorner 25
+}
+sprite $bProcess jar:archimate/business-process
+sprite $aService jar:archimate/application-service
+sprite $aComponent jar:archimate/application-component
+
+rectangle &#34;Handle claim&#34;  as HC &lt;&lt;$bProcess&gt;&gt;&lt;&lt;behavior&gt;&gt; #Business
+rectangle &#34;Capture Information&#34;  as CI &lt;&lt;$bProcess&gt;&gt;&lt;&lt;behavior&gt;&gt; #Business
+rectangle &#34;Notify\nAdditional Stakeholders&#34; as NAS &lt;&lt;$bProcess&gt;&gt;&lt;&lt;behavior&gt;&gt; #Business
+rectangle &#34;Validate&#34; as V &lt;&lt;$bProcess&gt;&gt;&lt;&lt;behavior&gt;&gt; #Business
+rectangle &#34;Investigate&#34; as I &lt;&lt;$bProcess&gt;&gt;&lt;&lt;behavior&gt;&gt; #Business
+rectangle &#34;Pay&#34; as P &lt;&lt;$bProcess&gt;&gt;&lt;&lt;behavior&gt;&gt; #Business
+
+HC *-down- CI
+HC *-down- NAS
+HC *-down- V
+HC *-down- I
+HC *-down- P
+
+CI -right-&gt;&gt; NAS
+NAS -right-&gt;&gt; V
+V -right-&gt;&gt; I
+I -right-&gt;&gt; P
+
+rectangle &#34;Scanning&#34; as scanning &lt;&lt;$aService&gt;&gt;&lt;&lt;behavior&gt;&gt; #Application
+rectangle &#34;Customer admnistration&#34; as customerAdministration &lt;&lt;$aService&gt;&gt;&lt;&lt;behavior&gt;&gt; #Application
+rectangle &#34;Claims admnistration&#34; as claimsAdministration &lt;&lt;$aService&gt;&gt;&lt;&lt;behavior&gt;&gt; #Application
+rectangle Printing &lt;&lt;$aService&gt;&gt;&lt;&lt;behavior&gt;&gt; #Application
+rectangle Payment &lt;&lt;$aService&gt;&gt;&lt;&lt;behavior&gt;&gt; #Application
+
+scanning -up-&gt; CI
+customerAdministration  -up-&gt; CI
+claimsAdministration -up-&gt; NAS
+claimsAdministration -up-&gt; V
+claimsAdministration -up-&gt; I
+Payment -up-&gt; P
+
+Printing -up-&gt; V
+Printing -up-&gt; P
+
+rectangle &#34;Document\nManagement\nSystem&#34; as DMS &lt;&lt;$aComponent&gt;&gt; #Application
+rectangle &#34;General\nCRM\nSystem&#34; as CRM &lt;&lt;$aComponent&gt;&gt;  #Application
+rectangle &#34;Home &amp; Away\nPolicy\nAdministration&#34; as HAPA &lt;&lt;$aComponent&gt;&gt; #Application
+rectangle &#34;Home &amp; Away\nFinancial\nAdministration&#34; as HFPA &lt;&lt;$aComponent&gt;&gt;  #Application
+
+DMS .up.|&gt; scanning
+DMS .up.|&gt; Printing
+CRM .up.|&gt; customerAdministration
+HAPA .up.|&gt; claimsAdministration
+HFPA .up.|&gt; Payment
+
+legend left
+Example from the &#34;Archisurance case study&#34; (OpenGroup).
+See
+====
+&lt;$bProcess&gt; :business process
+====
+&lt;$aService&gt; : application service
+====
+&lt;$aComponent&gt; : application component
+endlegend
+@enduml
+</textarea>
+                <div id="out777ae1f4a7de17438365949e93df452a">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="745" height="641" class="scale"
+                            src="/imgw/img-777ae1f4a7de17438365949e93df452a.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <center>
+                <div class="tago">WARNING</div> <b>This translation need to be updated.</b> <div class="tago">WARNING
+                </div>
+            </center>
+            <a style="position:relative;top:-38px;" name="5f3a8aa007370d00"></a>
+            <!--heading-->
+            <h2 class="chap">Example 2</h2>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+skinparam roundcorner 25
+rectangle &#34;Capture Information&#34;  as CI &lt;&lt;$archimate/business-process&gt;&gt; #Business
+@enduml
+</textarea>
+                <div id="out0577bf6d86f52e6e8cda061330df71ff">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="162" height="75" class="scale"
+                            src="/imgw/img-0577bf6d86f52e6e8cda061330df71ff.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="9a3dbeaa372bf477"></a>
+            <!--heading-->
+            <h2 class="chap">List possible sprites</h2>
+            <p></p>
+            You can list all possible sprites for Archimate using the following diagram:
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+listsprite
+@enduml
+</textarea>
+                <div id="out363b69b649c942ea76b78c18202ab2e4">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="840" height="645" class="scale"
+                            src="/imgw/img-363b69b649c942ea76b78c18202ab2e4.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <a style="position:relative;top:-38px;" name="a2c90e037e67c631"></a>
+            <!--heading-->
+            <h2 class="chap">ArchiMate Macros</h2>
+            <p></p>
+            <h3>Archimate Macros and Library</h3>
+            <p></p>
+            A list of Archimate macros are defined <a
+                href="https://github.com/ebbypeter/Archimate-PlantUML">Archimate-PlantUML</a> here which simplifies the
+            creation of ArchiMate diagrams, and Archimate is natively on the <a href="stdlib">Standard Library</a> of
+            PlantUML.
+            <p></p>
+            <h3>Archimate elements </h3>
+            Using the macros, creation of ArchiMate elements are done using the following format:
+            <code class="cod">Category_ElementName(nameOfTheElement, &#34;description&#34;)</code>
+            <p></p>
+            For example:
+            <ul>
+                <li>To define a <em>Stakeholder</em> element, which is part of Motivation category, the syntax will be
+                    <code
+                        class="cod">Motivation_Stakeholder(StakeholderElement, &#34;Stakeholder Description&#34;)</code>:
+                </li>
+            </ul>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+!include &lt;archimate/Archimate&gt;
+Motivation_Stakeholder(StakeholderElement, &#34;Stakeholder Description&#34;)
+@enduml
+</textarea>
+                <div id="out87de93154302a51fc8418833e4227276">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="183" height="72" class="scale"
+                            src="/imgw/img-87de93154302a51fc8418833e4227276.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <p></p>
+            <ul>
+                <li>To define a <em>Business Service</em> element, <code
+                        class="cod">Business_Service(BService, &#34;Business Service&#34;)</code>:</li>
+            </ul>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+!include &lt;archimate/Archimate&gt;
+Business_Service(BService, &#34;Business Service&#34;)
+@enduml
+</textarea>
+                <div id="outcd9568d5688d5c48be17ef65b056fed0">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="159" height="72" class="scale"
+                            src="/imgw/img-cd9568d5688d5c48be17ef65b056fed0.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <h3>Archimate relationships </h3>
+            The ArchiMate relationships are defined with the following pattern:
+            <code class="cod">Rel_RelationType(fromElement, toElement, &#34;description&#34;)</code>
+            and to define the direction/orientation of the two elements:
+            <code class="cod">Rel_RelationType_Direction(fromElement, toElement, &#34;description&#34;)</code>
+            <p></p>
+            The <code class="cod">RelationTypes</code> supported are:
+            <ul>
+                <li>Access</li>
+                <li>Aggregation</li>
+                <li>Assignment</li>
+                <li>Association</li>
+                <li>Composition</li>
+                <li>Flow</li>
+                <li>Influence</li>
+                <li>Realization</li>
+                <li>Serving</li>
+                <li>Specialization</li>
+                <li>Triggering</li>
+            </ul>
+            <p></p>
+            The <code class="cod">Directions</code> supported are:
+            <ul>
+                <li>Up</li>
+                <li>Down</li>
+                <li>Left</li>
+                <li>Right</li>
+            </ul>
+            <p></p>
+            For example:
+            <ul>
+                <li>To denote a composition relationship between the <em>Stakeholder</em> and <em>Business Service</em>
+                    defined above, the syntax will be</li>
+            </ul>
+            <code
+                class="cod">Rel_Composition(StakeholderElement, BService, &#34;Description for the relationship&#34;)</code>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+!include &lt;archimate/Archimate&gt;
+Motivation_Stakeholder(StakeholderElement, &#34;Stakeholder Description&#34;)
+Business_Service(BService, &#34;Business Service&#34;)
+Rel_Composition(StakeholderElement, BService, &#34;Description for the relationship&#34;)
+@enduml
+</textarea>
+                <div id="oute15b39cb50e677e9bfdc584426405591">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="290" height="202" class="scale"
+                            src="/imgw/img-e15b39cb50e677e9bfdc584426405591.png" />
+                    </div>
+                </div>
+            </div>
+            <ul>
+                <li>Unordered List ItemTo orient the two elements in top - down position, the syntax will be</li>
+            </ul>
+            <code
+                class="cod">Rel_Composition_Down(StakeholderElement, BService, &#34;Description for the relationship&#34;)</code>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+!include &lt;archimate/Archimate&gt;
+Motivation_Stakeholder(StakeholderElement, &#34;Stakeholder Description&#34;)
+Business_Service(BService, &#34;Business Service&#34;)
+Rel_Composition_Down(StakeholderElement, BService, &#34;Description for the relationship&#34;)
+@enduml
+</textarea>
+                <div id="out191bfd5133610648f5fbcc718bcbbbc7">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="290" height="202" class="scale"
+                            src="/imgw/img-191bfd5133610648f5fbcc718bcbbbc7.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <h3>Appendice: Examples of all Archimate RelationTypes </h3>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+left to right direction
+skinparam nodesep 4
+!include &lt;archimate/Archimate&gt;
+Rel_Triggering(i15, j15, Triggering)
+Rel_Specialization(i14, j14, Specialization)
+Rel_Serving(i13, j13, Serving)
+Rel_Realization(i12, j12, Realization)
+Rel_Influence(i11, j11, Influence)
+Rel_Flow(i10, j10, Flow)
+Rel_Composition(i9, j9, Composition)
+Rel_Association_dir(i8, j8, Association_dir)
+Rel_Association(i7, j7, Association)
+Rel_Assignment(i6, j6, Assignment)
+Rel_Aggregation(i5, j5, Aggregation)
+Rel_Access_w(i4, j4, Access_w)
+Rel_Access_rw(i3, j3, Access_rw)
+Rel_Access_r(i2, j2, Access_r)
+Rel_Access(i1, j1, Access)
+@enduml
+</textarea>
+                <div id="out8d74236c7e0a3303870a5b485dd21a8e">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="327" height="878" class="scale"
+                            src="/imgw/img-8d74236c7e0a3303870a5b485dd21a8e.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+title ArchiMate Relationships Overview
+skinparam nodesep 5
+&lt;style&gt;
+interface {
+    shadowing 0
+    backgroundcolor transparent
+    linecolor transparent
+    FontColor transparent
+}
+&lt;/style&gt;
+!include &lt;archimate/Archimate&gt;
+left to right direction
+
+rectangle Other {
+() i14
+() j14
+}
+
+
+rectangle Dynamic {
+() i10
+() j10
+() i15
+() j15
+}
+
+rectangle Dependency {
+() i13
+() j13
+() i4
+() j4
+() i11
+() j11
+() i7
+() j7
+}
+
+rectangle Structural {
+() i9
+() j9
+() i5
+() j5
+() i6
+() j6
+() i12
+() j12
+}
+
+Rel_Triggering(i15, j15, Triggering)
+Rel_Specialization(i14, j14, Specialization)
+Rel_Serving(i13, j13, Serving)
+Rel_Realization(i12, j12, Realization)
+Rel_Influence(i11, j11, Influence)
+Rel_Flow(i10, j10, Flow)
+Rel_Composition(i9, j9, Composition)
+Rel_Association_dir(i7, j7, \nAssociation_dir)
+Rel_Association(i7, j7, Association)
+Rel_Assignment(i6, j6, Assignment)
+Rel_Aggregation(i5, j5, Aggregation)
+Rel_Access_w(i4, j4, Access_w)
+Rel_Access_rw(i4, j4, Access_rw)
+Rel_Access_r(i4, j4, Access_r)
+Rel_Access(i4, j4, Access)
+@enduml
+</textarea>
+                <div id="outfa2dc77749a4327bf9852e595acd0994">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="477" height="942" class="scale"
+                            src="/imgw/img-fa2dc77749a4327bf9852e595acd0994.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <em>[Adapted from <a href="https://github.com/plantuml-stdlib/Archimate-PlantUML/pull/25">Archimate
+                    PR#25</a>]</em>
+
+
+        </main>
+
+
+        <aside id="C6">
+            <!--toc-->
+            <div id="toc">
+                <ul>
+                    <li><a href="#1061ed3ef2fe28ea">Archimate keyword</a>
+                    </li>
+                    <li><a href="#1c9c4afcca95a20a">定义结点</a>
+                    </li>
+                    <li><a href="#5504977cb47d642d">例1</a>
+                    </li>
+                    <li><a href="#5f3a8aa007370d00">Example 2</a>
+                    </li>
+                    <li><a href="#9a3dbeaa372bf477">List possible sprites</a>
+                    </li>
+                    <li><a href="#a2c90e037e67c631">ArchiMate Macros</a>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+    </div>
+    <script src="../../viz-global.js"></script>
+    <script src="../../plantuml.js"></script>
+    <script>
+        (function () {
+            const render = window.plantumlRender;
+            if (typeof render !== "function") {
+                console.error("PlantUML renderer is unavailable.");
+                return;
+            }
+
+            const renderOptions = {};
+            let counter = 0;
+
+            document.querySelectorAll(".mycell").forEach((mycell) => {
+                const host = mycell.parentElement;
+                const textarea = host ? host.previousElementSibling : null;
+                if (!textarea || textarea.tagName !== "TEXTAREA") return;
+
+                if (!mycell.id) {
+                    counter += 1;
+                    mycell.id = "mycell-render-" + counter;
+                }
+
+                const draw = () => {
+                    mycell.innerHTML = "";
+                    render(textarea.value.split(/\r\n|\r|\n/), mycell.id, renderOptions);
+                };
+
+                textarea.addEventListener("input", draw);
+                draw();
+            });
+        })();
+    </script>
+</body>
+
+</html>

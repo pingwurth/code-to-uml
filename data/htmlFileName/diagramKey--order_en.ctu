@@ -1,0 +1,12 @@
+Title: Basic Example
+Describe: None
+------------------------------------------------------------
+[Example]
+Example Name
+
+[Description]
+Example description, supporting markdown syntax.
+
+[UML]
+plantuml syntax example code.
+------------------------------------------------------------

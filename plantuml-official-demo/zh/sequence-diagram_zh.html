@@ -1,0 +1,3444 @@
+<html lang="zh">
+
+<head>
+
+
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Organization",
+  "url": "https://plantuml.com",
+  "name": "PlantUML",
+  "sameAs" : ["https://twitter.com/plantuml","https://en.wikipedia.org/wiki/PlantUML","https://www.wikidata.org/wiki/Q18346546"],
+  "logo": "https://cdn-0.plantuml.com/logo3.png",
+  "contactPoint": [{
+    "@type": "ContactPoint",
+    "email": "plantuml@gmail.com",
+    "url": "https://plantuml.com",
+    "contactType": "customer service"
+  }]
+}
+</script>
+    <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+    "@type": "ListItem",
+    "position": 1,
+    "item": {
+      "@id": "https://plantuml.com",
+      "name": "Home"
+    }
+  },{
+    "@type": "ListItem",
+    "position": 2,
+    "item": {
+      "@id": "https://plantuml.com/sitemap-language-specification",
+      "name": "Language specification"
+    }
+  },{
+    "@type": "ListItem",
+    "position": 3,
+    "item": {
+      "@id": "https://plantuml.com/sequence-diagram",
+      "name": "Sequence Diagram"
+  }
+  }]
+}
+</script>
+    <link rel="canonical" href="https://plantuml.com/zh/sequence-diagram" />
+    <link rel="alternate" hreflang="x-default" href="https://plantuml.com/sequence-diagram" />
+    <link rel="alternate" hreflang="de" href="https://plantuml.com/de/sequence-diagram" />
+    <link rel="alternate" hreflang="en" href="https://plantuml.com/sequence-diagram" />
+    <link rel="alternate" hreflang="es" href="https://plantuml.com/es/sequence-diagram" />
+    <link rel="alternate" hreflang="fr" href="https://plantuml.com/fr/sequence-diagram" />
+    <link rel="alternate" hreflang="ja" href="https://plantuml.com/ja/sequence-diagram" />
+    <link rel="alternate" hreflang="ko" href="https://plantuml.com/ko/sequence-diagram" />
+    <link rel="alternate" hreflang="zh" href="https://plantuml.com/zh/sequence-diagram" />
+
+    <link rel="shortcut icon" href="/favicon.ico" />
+
+
+    <!-- link rel="preload" as="image" href="https://img.shields.io/liberapay/patrons/plantuml.svg?logo=liberapay" -->
+
+
+    <title>时序图的语法和功能</title>
+    <meta name="description" content="PlantUML时序图的语法：你可以有几种类型的参与者（演员等其他角色）、箭头、备注、分组...改变字体和颜色也是可行的。" />
+
+    <meta property="og:type" content="article" />
+    <!-- volt:dokuwiki titleog: -->
+    <!-- volt:dokuwiki descriptionog: -->
+
+    <meta property="og:url" content="https://plantuml.com/zh/sequence-diagram" />
+    <meta property="og:site_name" content="PlantUML.com" />
+
+    <!-- meta property="og:image" content="https://plantuml.com/og-sequence-diagram" -->
+    <meta name="twitter:image" content="https://plantuml.com/og-sequence-diagram" />
+    <meta property="og:locale" content="zh" />
+
+    <meta name="twitter:card" content="summary" />
+    <!-- volt:dokuwiki titletwitter: -->
+    <!-- volt:dokuwiki descriptiontwitter: -->
+    <meta name="twitter:site" content="@PlantUML" />
+    <meta name="twitter:creator" content="@PlantUML" />
+
+
+    <!-- https://www.w3schools.com/colors/colors_picker.asp -->
+    <!-- filter css https://codepen.io/sosuke/pen/Pjoqqp -->
+
+
+    <style>
+        .scale {}
+
+        li {
+            margin: 2px;
+        }
+
+        #external li {
+            margin: 13px;
+        }
+
+        @media screen and (max-width: 1190px) {
+        }
+
+
+        .coptable {
+            max-width: 90%;
+        }
+
+        .mytab {
+            display: inline-block;
+            border-radius: 3px;
+            border: 1px solid #e1e4e8;
+        }
+
+        .mytab:hover {
+            border: 1px dashed #0366d6;
+            cursor: pointer;
+            color: #0366d6;
+            background: #f6f8fa;
+        }
+
+        .cop {
+            margin: 25px 10px 0 10px;
+        }
+
+        .cop:hover {
+            cursor: pointer;
+            filter: invert(30%) sepia(75%) saturate(4001%) hue-rotate(201deg) brightness(88%) contrast(98%);
+        }
+
+        .cop2 {
+            margin: 25px 10px 0 10px;
+        }
+
+        .cop2:hover {
+            cursor: pointer;
+        }
+
+        .msg {
+            position: absolute;
+            color: #339966;
+            background-color: #FFF;
+            margin-top: 55px;
+            display: none;
+            border-radius: 3px;
+            border: 1px solid #4dff00;
+        }
+
+        .mycell0 {
+            float: left;
+            vertical-align: top;
+            padding: 10px;
+        }
+
+        .mycell0 code:hover {
+            cursor: default;
+            color: #000;
+        }
+
+        .mycell {
+            float: right;
+            vertical-align: top;
+            padding: 10px;
+            max-width: 55vw;
+            overflow-x: auto;
+        }
+
+        .mycell0 pre {
+            max-width: 55vw;
+            overflow-x: auto;
+        }
+
+        .cod {
+            background: #edeff3;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+
+        .colo {
+            display: inline-block;
+            background: #edeff3;
+            padding: 7px 12px;
+            border-radius: 3px;
+        }
+
+        .tag,
+        .tagg,
+        .tago,
+        .tagr {
+            text-rendering: optimizeLegibility;
+            display: inline-block;
+            padding: 3px 5px 2px 4px;
+            text-decoration: none;
+            white-space: nowrap;
+            border: 1px solid #999;
+            text-transform: uppercase;
+            text-align: center;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: bold;
+            line-height: 90%;
+        }
+
+        .tag {
+            background-color: #EEEEEE;
+        }
+
+        .tagg {
+            background-color: #98FB98;
+        }
+
+        .tago {
+            background-color: #fafa00;
+        }
+
+        .tagr {
+            background-color: #FF4500;
+        }
+
+
+        a {
+            text-decoration: none;
+            color: #0366d6;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .menu1 {
+            display: flex;
+            flex-direction: row;
+            border: 0;
+            font-size: 14px;
+            padding: 0;
+            margin: 0;
+            white-space: nowrap;
+        }
+
+        .menu1 a {
+            white-space: nowrap;
+            padding: 0 8px;
+            text-decoration: none;
+            color: #5e6d7d;
+            line-height: 30px;
+            height: 30px;
+        }
+
+        .menu1 a:hover {
+            background: #fefefe;
+            color: #0366d6;
+        }
+
+        .menuside2 {
+            display: flex;
+            flex-direction: column;
+            border: 0;
+            font-size: 14px;
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
+            justify-content: center;
+        }
+
+        .menuside2 img {
+            vertical-align: top;
+            padding: 0 8px;
+            filter: brightness(0) saturate(100%) invert(42%) sepia(22%) saturate(385%) hue-rotate(170deg) brightness(92%) contrast(84%);
+        }
+
+        .menuside2 a {
+            padding: 6px 0;
+            text-decoration: none;
+            color: #5e6d7d;
+        }
+
+        .menuside2 a:hover {
+            color: #0366d6;
+            background: #fefefe;
+        }
+
+        .menuside2 a:hover img {
+            filter: brightness(0) saturate(100%) invert(23%) sepia(44%) saturate(7029%) hue-rotate(203deg) brightness(94%) contrast(98%);
+        }
+
+        .breadcrumb {
+            z-index: 1;
+            font-size: 14px;
+            text-align: center;
+            display: inline-block;
+            overflow: hidden;
+            border-radius: 5px;
+        }
+
+
+        .breadcrumb a {
+            text-decoration: none;
+            outline: none;
+            display: block;
+            float: left;
+            font-size: 12px;
+            line-height: 24px;
+            color: #373f49;
+            padding: 0 10px 0 35px;
+            background: #f0f1f1;
+            background: linear-gradient(#f0f1f1, #c6d2d2);
+            position: relative;
+        }
+
+        .breadcrumb a:first-child {
+            padding-left: 21px;
+            border-radius: 5px 0 0 5px;
+            /*to match with the parent's radius*/
+        }
+
+        .breadcrumb a:first-child:before {
+            left: 14px;
+        }
+
+        .breadcrumb a:last-child {
+            visibility: hidden;
+        }
+
+        .breadcrumb a.active,
+        .breadcrumb a:hover {
+            color: #0366d6;
+            background: #c6d2d2;
+            background: linear-gradient(#e3e4e4, #b8c7c7);
+        }
+
+        .breadcrumb a.active:after,
+        .breadcrumb a:hover:after {
+            background: #c6d2d2;
+            background: linear-gradient(135deg, #e3e4e4, #b8c7c7);
+        }
+
+        .breadcrumb a:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: -12px;
+            /*half of square's length*/
+            /*same dimension as the line-height of .breadcrumb a */
+            width: 24px;
+            height: 24px;
+            transform: scale(0.707) rotate(45deg);
+            /*we need to prevent the arrows from getting buried under the next link*/
+            z-index: 1;
+            /*background same as links but the gradient will be rotated to compensate with the transform applied*/
+            background: #f0f1f1;
+            background: linear-gradient(135deg, #f0f1f1, #c6d2d2);
+            /*stylish arrow design using box shadow*/
+            box-shadow:
+                2px -2px 0 2px rgba(0, 0, 0, 0.1),
+                3px -3px 0 2px rgba(255, 255, 255, 0.1);
+            /*
+		5px - for rounded arrows and 
+		50px - to prevent hover glitches on the border created using shadows*/
+            border-radius: 0 5px 0 50px;
+        }
+
+        /*we dont need an arrow after the last link*/
+        .breadcrumb a:last-child:after {
+            content: none;
+            visibility: hidden;
+        }
+
+
+        .lga,
+        .lga a,
+        .lgi,
+        .lgi a {
+            font-size: 13px;
+            text-align: center;
+            color: #fff;
+            padding: 0 5px;
+            margin: 0;
+        }
+
+        .lga,
+        .lga a {
+            background-color: #008;
+        }
+
+        .lgi,
+        .lgi a {
+            background-color: #888;
+        }
+
+        .lga:hover,
+        .lga:hover a {
+            text-decoration: none;
+            color: #BBB;
+        }
+
+        .lgi:hover,
+        .lgi:hover a {
+            text-decoration: none;
+            color: #CCC;
+        }
+    </style>
+    <style>
+        body {
+            font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            font-size: 14px;
+            line-height: 1.5;
+            margin: auto;
+            overflow-x: hidden;
+            background: #fefefe;
+        }
+
+        h1.chap {
+            font-size: 1.8em;
+        }
+
+        h2.chap {
+            font-size: 1.35em;
+        }
+
+        h3,
+        h3.chap {
+            font-size: 1.15em;
+        }
+
+        h4 {
+            font-size: 1.05em;
+        }
+
+        table {
+            font-size: inherit;
+        }
+    </style>
+
+
+    <style>
+        .dyn {
+            display: flex;
+            flex-direction: row;
+            gap: 3em;
+            align-items: stretch;
+            flex-wrap: wrap;
+            margin: 10px 0;
+        }
+
+        .dyn textarea {
+            font-family: monospace;
+            font-size: 13px;
+            line-height: 1.4;
+            min-width: 30ch;
+            max-width: 90ch;
+            box-sizing: border-box;
+            resize: both;
+            white-space: pre;
+            overflow: auto;
+            field-sizing: content;
+            align-self: stretch;
+            border: 1px solid #888;
+            border-radius: 3px;
+            margin: 0;
+            padding: 4px 8px;
+            background: #fefefe;
+        }
+
+        .dyn>div {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            display: flex;
+        }
+
+        .dyn>div>div {
+            margin: 0;
+            padding: 0;
+        }
+
+        .dyn img {
+            margin: 0;
+            padding: 0;
+        }
+
+        .scale {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #dde;
+            border-radius: 4px;
+        }
+    </style>
+
+
+    <script>
+        var llg = "zh";
+        var az = 0;
+        var amdark = 0;
+        function ljs(n) {
+            if (az) return false;
+            var sc = document.createElement("script");
+            sc.type = "text/javascript";
+            sc.src = "/btn-" + n + ".js";
+            document.body.innerHTML = "<i style='position:absolute;top:30%;width:100%;'><center>Loading in progress...";
+            document.body.appendChild(sc);
+        }
+        function ctc(id) {
+            document.getElementById('img' + id).classList.remove('cop'); document.getElementById('img' + id).classList.add('cop2');
+            document.getElementById('pre' + id).style.backgroundColor = '#4dff00';
+            document.getElementById('msg' + id).style.display = 'inline';
+
+            setTimeout(function () { document.getElementById('img' + id).classList.remove('cop2'); document.getElementById('img' + id).classList.add('cop'); document.getElementById('pre' + id).style.backgroundColor = ''; document.getElementById('msg' + id).style.display = 'none'; }, 800);
+
+
+            text = document.getElementById('pre' + id).innerText;
+            if (window.clipboardData && window.clipboardData.setData)
+                return window.clipboardData.setData("Text", text);
+            else if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
+                var ta = document.createElement("textarea");
+                ta.textContent = text;
+                ta.style.position = "fixed";
+                document.body.appendChild(ta);
+                ta.select();
+                try {
+                    return document.execCommand("copy");
+                }
+                catch (ex) {
+                    return false;
+                }
+                finally {
+                    document.body.removeChild(ta);
+                }
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <style>
+        body,
+        .container,
+        #B3,
+        #C5,
+        #C6,
+        #C7,
+        #D7,
+        #D8 {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            overflow-y: scroll;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr auto auto auto;
+            grid-template-rows: auto 1fr auto;
+            min-height: 100vh;
+        }
+
+        #B3 {
+            grid-column: 1 / 5;
+            grid-row: 1;
+            position: sticky;
+            top: 0;
+            height: 30px;
+            padding: 0;
+            z-index: 10;
+            overflow: hidden;
+            background: #edeff3;
+            border-bottom: 1px solid #d4d8de;
+        }
+
+        #D7 {
+            grid-column: 1;
+            grid-row: 2;
+            margin: 0;
+            padding: 0;
+            padding-left: 30px;
+            line-height: 1.6;
+        }
+
+        #D8 {
+            grid-column: 1;
+            grid-row: 3;
+            position: sticky;
+            bottom: 0;
+            z-index: 5;
+            background: #fefefe;
+        }
+
+        #C5 {
+            grid-column: 2;
+            grid-row: 1 / -1;
+            position: sticky;
+            top: 40px;
+            align-self: start;
+            height: calc(98vh - 60px);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        #C6 {
+            grid-column: 3;
+            grid-row: 1 / -1;
+            position: sticky;
+            top: 40px;
+            align-self: start;
+            height: calc(98vh - 60px);
+            max-width: 200px;
+            overflow: hidden;
+            margin: 0 10px;
+            padding: 8px 5px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        #C7 {
+            grid-column: 4;
+            grid-row: 1 / -1;
+            position: sticky;
+            top: 40px;
+            align-self: start;
+            height: calc(98vh - 60px);
+            margin: 0 20px 0 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        #toc {
+            z-index: 15;
+            overflow-x: hidden;
+            overflow-y: auto;
+            background: #f6f8fa;
+            border-width: 2px;
+            border-style: groove;
+            border-radius: 3px;
+            border-color: #e1e4e8;
+            margin: 0 5px;
+            padding: 0;
+            max-height: 100%;
+        }
+
+        #toc ul {
+            margin: 0;
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #toc li {
+            padding: 0 10px;
+            margin: 0;
+        }
+
+        #toc li a {
+            padding: 5px 0;
+            display: inline-block;
+            text-decoration: none;
+            width: 100%;
+            color: #5e6d7d;
+        }
+
+        #toc li a:hover {
+            color: #0366d6;
+        }
+
+        #toc li:hover {
+            background: #fefefe;
+        }
+
+        #magic {
+            position: absolute;
+            top: 0;
+            right: 50px;
+            width: 30px;
+            height: 30px;
+            overflow: hidden;
+            background: #edeff3;
+            z-index: 14;
+        }
+
+        #magic:hover {
+            width: calc(100% - 50px);
+        }
+
+        #magic .menu1 {
+            position: absolute;
+            top: 0;
+            right: 30px;
+            height: 30px;
+            padding-left: 10px;
+            background: #edeff3;
+            border-left: 1px solid #d4d8de;
+            border-bottom: 1px solid #d4d8de;
+        }
+
+        .menu1-tail {
+            flex-grow: 1;
+            flex-shrink: 0;
+            height: 30px;
+            position: relative;
+            z-index: 15;
+            background: #edeff3;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: auto auto auto;
+            grid-auto-rows: auto;
+            gap: 5px;
+            margin: 0;
+            padding: 0;
+        }
+
+        .merged {
+            grid-column: 1 / -1;
+        }
+
+        #C6 {
+            display: none;
+        }
+
+        @media (min-width: 1401px) {
+            #C6:has(#toc li) {
+                display: flex;
+            }
+        }
+
+        @media (max-width: 1100px) {
+            #C5,
+            #C7 {
+                display: none;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .merged {
+                display: none;
+            }
+        }
+    </style>
+
+    <div class="container">
+
+        <footer id="D8">
+
+            <p>
+            </p>
+            <p>
+
+            </p>
+        </footer>
+
+
+        <header id="B3">
+            <div class="menu1">
+                <a id="titem10" href="sequence-diagram_zh.html">时序图</a>
+                <a id="titem20" href="use-case-diagram_zh.html">用例图</a>
+                <a id="titem30" href="class-diagram_zh.html">类图</a>
+                <a id="titem40" href="activity-diagram-beta_zh.html">活动图</a>
+                <a id="titem50" href="component-diagram_zh.html">组件图</a>
+                <a id="titem60" href="state-diagram_zh.html">状态图</a>
+                <a id="titem70" href="object-diagram_zh.html">对象图</a>
+                <a id="titem80" href="deployment-diagram_zh.html">部署图</a>
+                <a id="titem90" href="timing-diagram_zh.html">定时图</a>
+
+                <a id="titem99" href="regex_zh.html">Regex</a>
+                <a id="titem100" href="nwdiag_zh.html">Network</a>
+                <a id="titem110" href="salt_zh.html">Wireframe</a>
+                <a id="titem120" href="archimate-diagram_zh.html">Archimate</a>
+                <a id="titem130" href="gantt-diagram_zh.html">Gantt</a>
+                <a id="titem140" href="mindmap-diagram_zh.html">MindMap</a>
+                <a id="titem150" href="wbs-diagram_zh.html">WBS</a>
+                <a id="titem151" href="ebnf_zh.html">EBNF</a>
+                <a id="titem160" href="json_zh.html">JSON</a>
+                <a id="titem170" href="yaml_zh.html">YAML</a>
+
+                <div class="menu1-tail"></div>
+            </div>
+            <div id="magic">
+                <div class="menu1">
+                    <a id="titem10" href="sequence-diagram_zh.html">时序图</a>
+                    <a id="titem20" href="use-case-diagram_zh.html">用例图</a>
+                    <a id="titem30" href="class-diagram_zh.html">类图</a>
+                    <a id="titem40" href="activity-diagram-beta_zh.html">活动图</a>
+                    <a id="titem50" href="component-diagram_zh.html">组件图</a>
+                    <a id="titem60" href="state-diagram_zh.html">状态图</a>
+                    <a id="titem70" href="object-diagram_zh.html">对象图</a>
+                    <a id="titem80" href="deployment-diagram_zh.html">部署图</a>
+                    <a id="titem90" href="timing-diagram_zh.html">定时图</a>
+
+                    <a id="titem99" href="regex_zh.html">Regex</a>
+                    <a id="titem100" href="nwdiag_zh.html">Network</a>
+                    <a id="titem110" href="salt_zh.html">Wireframe</a>
+                    <a id="titem120" href="archimate-diagram_zh.html">Archimate</a>
+                    <a id="titem130" href="gantt-diagram_zh.html">Gantt</a>
+                    <a id="titem140" href="mindmap-diagram_zh.html">MindMap</a>
+                    <a id="titem150" href="wbs-diagram_zh.html">WBS</a>
+                    <a id="titem151" href="ebnf_zh.html">EBNF</a>
+                    <a id="titem160" href="json_zh.html">JSON</a>
+                    <a id="titem170" href="yaml_zh.html">YAML</a>
+
+                    <div class="menu1-tail"></div>
+                </div>
+            </div><!-- magic -->
+        </header>
+
+        <main id="D7">
+
+            <style>
+                #donate {
+                    padding-top: 10px;
+                    min-height: 30px;
+                }
+            </style>
+
+
+            <p style="clear:both;">
+
+
+                <style>
+                    #titem10 {
+                        color: #0366d6;
+                        background-color: #fefefe;
+                    }
+
+                    #titem10 img {
+                        filter: brightness(0) saturate(100%) invert(23%) sepia(44%) saturate(7029%) hue-rotate(203deg) brightness(94%) contrast(98%);
+                    }
+
+                    .menu1:hover #titem10 {
+                        color: #5e6d7d;
+                    }
+
+                    .menu1:hover #titem10:hover {
+                        color: #0366d6;
+                    }
+
+                    .menu1:hover #titem10 img {
+                        filter: brightness(0) saturate(100%) invert(42%) sepia(22%) saturate(385%) hue-rotate(170deg) brightness(92%) contrast(84%);
+                    }
+                </style>
+
+                <a style="position:relative;top:-38px;" name="8e3daff4198af880"></a>
+                <!--heading-->
+            </p>
+            <h1 class="chap">时序图</h1>
+            <p></p>
+            PlantUML 中的时序图完全通过文本定义。您只需描述参与者以及他们之间交换的消息，布局、间距和箭头都会自动生成。
+            <p></p>
+            <ul>
+                <li><strong>文本输入，图形输出。</strong> 源代码是唯一可信来源，所写即所得。</li>
+                <li><strong>易于编辑。</strong> 修改一行文本，而不是拖动方框。</li>
+                <li><strong>快速迭代。</strong> 实时预览工具在您输入时即时渲染，便于尽早发现错误。</li>
+            </ul>
+            <p></p>
+            所有图类型通用的功能，请参阅<a href="commons">通用命令</a>。
+            <a style="position:relative;top:-38px;" name="7aea6e3ecced51f5"></a>
+            <!--heading-->
+            <h2 class="chap">基本示例</h2>
+            <p></p>
+            在 PlantUML 序列图中，<code class="cod">-&gt;</code> 序列表示两个参与者之间发送的消息，它是自动识别的，不需要事先声明。
+            <p></p>
+            通过使用<code class="cod">--&gt;</code> 序列，利用虚线箭头，在您的图中提供独特的可视化。
+            <p></p>
+            为了提高可读性而不影响可视化表示，可使用反向箭头，如<code class="cod">&lt;-</code> 或<code class="cod">&lt;--</code>
+            。但要注意，这是专门针对序列图的，其他图类型的规则有所不同。
+            <p></p>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+Alice -&gt; Bob: Authentication Request
+Bob --&gt; Alice: Authentication Response
+
+Alice -&gt; Bob: Another authentication Request
+Alice &lt;-- Bob: Another authentication Response
+@enduml
+</textarea>
+                <div id="outa6fef298c0425dd173d72186d03a6d89">
+                    <div class="mycell">
+                        <img loading="lazy" width="272" height="216" class="scale"
+                            src="/imgw/img-a6fef298c0425dd173d72186d03a6d89.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="5d2ed256d73a7298"></a>
+            <!--heading-->
+            <h2 class="chap">声明参与者</h2>
+            <p></p>
+            如果使用关键字<code class="cod">participant</code> 来声明参与者，就可以对该参与者进行更多的控制。
+            <p></p>
+            声明的顺序将是（默认的）<strong>显示顺序</strong>。
+            <p></p>
+            使用这些其他的关键字来声明参与者，将<strong>改变</strong>参与者的表示<strong>形状</strong>。
+            <ul>
+                <li><code class="cod">actor</code>（角色）</li>
+                <li><code class="cod">boundary</code>（边界）</li>
+                <li><code class="cod">control</code>（控制）</li>
+                <li><code class="cod">entity</code>（实体）</li>
+                <li><code class="cod">database</code>（数据库）</li>
+                <li><code class="cod">collections</code>（集合）</li>
+                <li><code class="cod">queue</code>（队列）</li>
+            </ul>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+participant Participant as Foo
+actor       Actor       as Foo1
+boundary    Boundary    as Foo2
+control     Control     as Foo3
+entity      Entity      as Foo4
+database    Database    as Foo5
+collections Collections as Foo6
+queue       Queue       as Foo7
+Foo -&gt; Foo1 : To actor 
+Foo -&gt; Foo2 : To boundary
+Foo -&gt; Foo3 : To control
+Foo -&gt; Foo4 : To entity
+Foo -&gt; Foo5 : To database
+Foo -&gt; Foo6 : To collections
+Foo -&gt; Foo7: To queue
+@enduml
+</textarea>
+                <div id="out1628a21c319a4c39c4e7c39e610541ec">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="578" height="397" class="scale"
+                            src="/imgw/img-1628a21c319a4c39c4e7c39e610541ec.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            使用<code class="cod">as</code> 关键字重命名参与者。
+            <p></p>
+            你也可以改变
+            演员或参与者的背景<a href="color">颜色</a>。
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+actor Bob #red
+&#39; The only difference between actor
+&#39;and participant is the drawing
+participant Alice
+participant &#34;I have a really\nlong name&#34; as L #99FF99
+/&#39; You can also declare:
+   participant L as &#34;I have a really\nlong name&#34;  #99FF99
+  &#39;/
+
+Alice-&gt;Bob: Authentication Request
+Bob-&gt;Alice: Authentication Response
+Bob-&gt;L: Log transaction
+@enduml
+</textarea>
+                <div id="outc5e7dd7aa625ff92b8da75f85ee04eee">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="332" height="276" class="scale"
+                            src="/imgw/img-c5e7dd7aa625ff92b8da75f85ee04eee.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            您可以使用<code class="cod">order</code> 关键字来定制参与者的显示顺序。
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+participant Last order 30
+participant Middle order 20
+participant First order 10
+@enduml
+</textarea>
+                <div id="out9f84d34d296cb8bb263e1e7d0c3357a6">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="171" height="95" class="scale"
+                            src="/imgw/img-9f84d34d296cb8bb263e1e7d0c3357a6.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <center>
+                <div class="tago">WARNING</div> <b>This translation need to be updated.</b> <div class="tago">WARNING
+                </div>
+            </center>
+            <a style="position:relative;top:-38px;" name="6c2a1c77df70f96d"></a>
+            <!--heading-->
+            <h2 class="chap">多行定义参与者</h2>
+            <p></p>
+            你可以对参与者使用多行定义。
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+participant Participant [
+    =Title
+    ----
+    &#34;&#34;打算&#34;&#34;
+]
+
+participant Bob
+
+Participant -&gt; Bob
+@enduml
+</textarea>
+                <div id="out618cb622b699a5b1d9117d27e62f010a">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="114" height="175" class="scale"
+                            src="/imgw/img-618cb622b699a5b1d9117d27e62f010a.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <em>[Ref. <a href="https://forum.plantuml.net/15232/">QA-15232</a>]</em>
+            <a style="position:relative;top:-38px;" name="2210ebadb5117709"></a>
+            <!--heading-->
+            <h2 class="chap">在参与者中使用非字母</h2>
+            <p></p>
+            <p></p>
+            你可以使用引号来定义参与者。
+            而且你可以使用<code class="cod">as</code> 关键字来给这些参与者一个别名。
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+Alice -&gt; &#34;Bob()&#34; : Hello
+&#34;Bob()&#34; -&gt; &#34;This is very\nlong&#34; as Long
+&#39; You can also declare:
+&#39; &#34;Bob()&#34; -&gt; Long as &#34;This is very\nlong&#34;
+Long --&gt; &#34;Bob()&#34; : ok
+@enduml
+</textarea>
+                <div id="out4b906209cb8a4c69fa751729016277f3">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="212" height="205" class="scale"
+                            src="/imgw/img-4b906209cb8a4c69fa751729016277f3.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="f5050860884ddf31"></a>
+            <!--heading-->
+            <h2 class="chap">给自己发消息</h2>
+            <p></p>
+            参与者可以给自己发信息，
+            <p></p>
+            消息文字可以用<code class="cod">\n</code>来换行。
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+Alice -&gt; Alice: This is a signal to self.\nIt also demonstrates\nmultiline \ntext
+@enduml
+</textarea>
+                <div id="outa5549dd7395509620cb72c1edfc6ebc2">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="174" height="187" class="scale"
+                            src="/imgw/img-a5549dd7395509620cb72c1edfc6ebc2.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+Alice &lt;- Alice: This is a signal to self.\nIt also demonstrates\nmultiline \ntext
+@enduml
+</textarea>
+                <div id="out7a6baef6ae787a71a0b3b866f2584a85">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="174" height="187" class="scale"
+                            src="/imgw/img-7a6baef6ae787a71a0b3b866f2584a85.png" />
+                    </div>
+                </div>
+            </div>
+            *[Ref. [QA-1361](https://forum.plantuml.net/1361)]*
+            <a style="position:relative;top:-38px;" name="bf6bee6d96403148"></a>
+            <!--heading-->
+            <h2 class="chap">文本对齐</h2>
+            <p></p>
+            箭头上的文本对齐可以用<code class="cod">skinparam sequenceMessageAlign</code>，后接参数<code class="cod">left</code>,<code
+                class="cod">right</code>或<code class="cod">center</code>。
+            <p></p>
+            你也可以使用<code class="cod">direction</code>或<code class="cod">reverseDirection</code>来根据箭头的方向对齐文本。更多细节可参考<a
+                href="skinparam">skinparam</a>。
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+skinparam sequenceMessageAlign right
+Bob -&gt; Alice : Request
+Alice -&gt; Bob : Response
+@enduml
+</textarea>
+                <div id="out5b6101c83f3f1783e66b8ea418f7e9c6">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="139" height="155" class="scale"
+                            src="/imgw/img-5b6101c83f3f1783e66b8ea418f7e9c6.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <h3>让响应信息显示在箭头下面</h3>
+            <p></p>
+            你可以使用<code class="cod">skinparam responseMessageBelowArrow true</code>命令，让响应信息显示在箭头下面。
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+skinparam responseMessageBelowArrow true
+Bob -&gt; Alice : hello
+Bob &lt;- Alice : ok
+@enduml
+</textarea>
+                <div id="outc8bc8d58b62766aa321455e2ac5b3e74">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="108" height="155" class="scale"
+                            src="/imgw/img-c8bc8d58b62766aa321455e2ac5b3e74.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="1cc1efff0435a503"></a>
+            <!--heading-->
+            <h2 class="chap">Change Actor style</h2>
+            <p></p>
+            You can change the actor style from stick man <em>(by default)</em> to:
+            <ul>
+                <li>an awesome man with the <code class="cod">skinparam actorStyle awesome</code> command;</li>
+                <li>a hollow man with the <code class="cod">skinparam actorStyle hollow </code> command.</li>
+            </ul>
+            <p></p>
+            <h3>Stick man <em>(by default)</em></h3>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+actor Alice
+actor Bob
+Alice -&gt; Bob : hello
+hide footbox
+@enduml
+</textarea>
+                <div id="oute3f96c6a6266a9382864c6a4f96162ff">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="100" height="128" class="scale"
+                            src="/imgw/img-e3f96c6a6266a9382864c6a4f96162ff.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <h3>Awesome man </h3>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+skinparam actorStyle awesome
+actor Alice
+actor Bob
+Alice -&gt; Bob : hello
+hide footbox
+@enduml
+</textarea>
+                <div id="outd40874c6a3c05812c15845e3bf839ffd">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="135" height="129" class="scale"
+                            src="/imgw/img-d40874c6a3c05812c15845e3bf839ffd.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <em>[Ref. <a
+                    href="https://forum.plantuml.net/10493/how-can-i-customize-the-actor-icon-in-svg-output?show=10513#c10513">QA-10493</a>]</em>
+            <p></p>
+            <h3>Hollow man </h3>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+skinparam actorStyle Hollow
+actor Alice
+actor Bob
+Alice -&gt; Bob : hello
+hide footbox
+@enduml
+</textarea>
+                <div id="out4f0fe1882521b4baed3cb26764ee727f">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="100" height="101" class="scale"
+                            src="/imgw/img-4f0fe1882521b4baed3cb26764ee727f.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <em>[Ref. <a href="https://github.com/plantuml/plantuml/pull/396">PR#396</a>]</em>
+            <a style="position:relative;top:-38px;" name="efeda651e89e596c"></a>
+            <!--heading-->
+            <h2 class="chap">改变箭头样式</h2>
+            <p></p>
+            您可以通过以下几种方式改变箭头样式：
+            <ul>
+                <li>添加最后的<code class="cod">x</code> 表示丢失的信息</li>
+                <li>使用<code class="cod">\</code> 或<code class="cod">/</code> 而不是<code class="cod">&lt;</code> 或<code
+                        class="cod">&gt;</code> 只拥有箭头的底部或顶部部分</li>
+                <li>重复箭头头（例如<code class="cod">&gt;&gt;</code> 或<code class="cod">//</code> ）头，拥有一个薄的图纸</li>
+                <li>使用<code class="cod">--</code> 而不是<code class="cod">-</code> 拥有一个点状箭头</li>
+                <li>在箭头头添加最后的 &#34;o&#34;</li>
+                <li>使用双向的箭头<code class="cod">&lt;-&gt;</code></li>
+            </ul>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+Bob -&gt;x Alice
+Bob -&gt; Alice
+Bob -&gt;&gt; Alice
+Bob -\ Alice
+Bob \\- Alice
+Bob //-- Alice
+
+Bob -&gt;o Alice
+Bob o\\-- Alice
+
+Bob &lt;-&gt; Alice
+Bob &lt;-&gt;o Alice
+@enduml
+</textarea>
+                <div id="out9231d63ce5fdd3b19f8fb67c78673890">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="108" height="235" class="scale"
+                            src="/imgw/img-9231d63ce5fdd3b19f8fb67c78673890.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="0b2e57c3d4eafdda"></a>
+            <!--heading-->
+            <h2 class="chap">修改箭头颜色</h2>
+            <p></p>
+            你可以用以下记号修改箭头的颜色：
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+Bob -[#red]&gt; Alice : hello
+Alice -[#0000FF]-&gt;Bob : ok
+@enduml
+</textarea>
+                <div id="out73de1bdae6081a31bb22a96f351faf68">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="108" height="155" class="scale"
+                            src="/imgw/img-73de1bdae6081a31bb22a96f351faf68.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="ce3f7eb577ad5f4d"></a>
+            <!--heading-->
+            <h2 class="chap">对消息序列编号</h2>
+            <p></p>
+            <p></p>
+            关键字 <code class="cod">autonumber</code> 用于自动对消息编号。
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+autonumber
+Bob -&gt; Alice : Authentication Request
+Bob &lt;- Alice : Authentication Response
+@enduml
+</textarea>
+                <div id="outfeb6a1dd6478a30489726529ea62fe0e">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="236" height="155" class="scale"
+                            src="/imgw/img-feb6a1dd6478a30489726529ea62fe0e.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            语句 <code class="cod">autonumber //start//</code> 用于指定编号的初始值，而 <code
+                class="cod">autonumber //start// //increment//</code> 可以同时指定编号的初始值和每次增加的值。
+            <p></p>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+autonumber
+Bob -&gt; Alice : Authentication Request
+Bob &lt;- Alice : Authentication Response
+
+autonumber 15
+Bob -&gt; Alice : Another authentication Request
+Bob &lt;- Alice : Another authentication Response
+
+autonumber 40 10
+Bob -&gt; Alice : Yet another authentication Request
+Bob &lt;- Alice : Yet another authentication Response
+
+@enduml
+</textarea>
+                <div id="outd7ac7a3f6bfff2e8d691a6f8f6f77151">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="313" height="277" class="scale"
+                            src="/imgw/img-d7ac7a3f6bfff2e8d691a6f8f6f77151.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <p></p>
+            你可以在双引号内指定编号的格式。
+            <p></p>
+            格式是由 Java 的<code class="cod">DecimalFormat</code>类实现的：
+            (<code class="cod">0</code> 表示数字；<code class="cod">#</code> 也表示数字，但默认为0)。
+            <p></p>
+            你也可以用 HTML 标签来制定格式。
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+autonumber &#34;&lt;b&gt;[000]&#34;
+Bob -&gt; Alice : Authentication Request
+Bob &lt;- Alice : Authentication Response
+
+autonumber 15 &#34;&lt;b&gt;(&lt;u&gt;##&lt;/u&gt;)&#34;
+Bob -&gt; Alice : Another authentication Request
+Bob &lt;- Alice : Another authentication Response
+
+autonumber 40 10 &#34;&lt;font color=red&gt;&lt;b&gt;Message 0  &#34;
+Bob -&gt; Alice : Yet another authentication Request
+Bob &lt;- Alice : Yet another authentication Response
+
+@enduml
+</textarea>
+                <div id="outea1cf313f9db990cbe0fae272e8be21d">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="378" height="277" class="scale"
+                            src="/imgw/img-ea1cf313f9db990cbe0fae272e8be21d.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            你还可以用语句 <code class="cod">autonumber stop</code> 和 <code
+                class="cod">autonumber resume //increment// //format//</code> 来表示暂停或继续使用自动编号。
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+autonumber 10 10 &#34;&lt;b&gt;[000]&#34;
+Bob -&gt; Alice : Authentication Request
+Bob &lt;- Alice : Authentication Response
+
+autonumber stop
+Bob -&gt; Alice : dummy
+
+autonumber resume &#34;&lt;font color=red&gt;&lt;b&gt;Message 0  &#34;
+Bob -&gt; Alice : Yet another authentication Request
+Bob &lt;- Alice : Yet another authentication Response
+
+autonumber stop
+Bob -&gt; Alice : dummy
+
+autonumber resume 1 &#34;&lt;font color=blue&gt;&lt;b&gt;Message 0  &#34;
+Bob -&gt; Alice : Yet another authentication Request
+Bob &lt;- Alice : Yet another authentication Response
+@enduml
+</textarea>
+                <div id="outf10f630702c3a9e60ab50a8ebf4749bc">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="378" height="338" class="scale"
+                            src="/imgw/img-f10f630702c3a9e60ab50a8ebf4749bc.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <p></p>
+            你也可以使用一个2或3位的序列，中间采用一种或几种分隔符，如<code class="cod">.</code>,<code class="cod">;</code>,<code
+                class="cod">,</code>,<code class="cod">:</code>。例如：<code class="cod">1.1.1</code> 或<code
+                class="cod">1.1:1</code> 。
+            <p></p>
+            最后一位数字会自动递增。
+            <p></p>
+            要增加第一个数字，请使用：<code class="cod">autonumber inc A</code> 。要增加第二位数字，请使用：<code
+                class="cod">autonumber inc B</code> 。
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+autonumber 1.1.1
+Alice -&gt; Bob: Authentication request
+Bob --&gt; Alice: Response
+
+autonumber inc A
+&#39;Now we have 2.1.1
+Alice -&gt; Bob: Another authentication request
+Bob --&gt; Alice: Response
+
+autonumber inc B
+&#39;Now we have 2.2.1
+Alice -&gt; Bob: Another authentication request
+Bob --&gt; Alice: Response
+
+autonumber inc A
+&#39;Now we have 3.1.1
+Alice -&gt; Bob: Another authentication request
+autonumber inc B
+&#39;Now we have 3.2.1
+Bob --&gt; Alice: Response
+@enduml
+</textarea>
+                <div id="out8be13d74e03f3f5f469b8ea1190c5b6f">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="290" height="338" class="scale"
+                            src="/imgw/img-8be13d74e03f3f5f469b8ea1190c5b6f.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <p></p>
+            你也可以用<code class="cod">autonumber</code> 的值，带有<code class="cod">%autonumber%</code> 变量。
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+autonumber 10
+Alice -&gt; Bob
+note right
+  the &lt;U+0025&gt;autonumber&lt;U+0025&gt; works everywhere.
+  Here, its value is ** %autonumber% **
+end note
+Bob --&gt; Alice: //This is the response %autonumber%//
+@enduml
+</textarea>
+                <div id="out6feb1268d8638f7e5f4898c144f417c7">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="471" height="178" class="scale"
+                            src="/imgw/img-6feb1268d8638f7e5f4898c144f417c7.png" />
+                    </div>
+                </div>
+            </div>
+            <em>[Ref.<a
+                    href="https://forum.plantuml.net/7119/create-links-after-creating-a-diagram?show=7137#a7137">QA-7119</a>]</em>
+            <a style="position:relative;top:-38px;" name="77852febc7dde952"></a>
+            <!--heading-->
+            <h2 class="chap">页面标题、页眉和页脚</h2>
+            <p></p>
+            <code class="cod">title</code> 关键字用于为页面添加标题。
+            <p></p>
+            页面可以使用<code class="cod">header</code> 和<code class="cod">footer</code> 显示页眉和页脚。
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+
+header Page Header
+footer Page %page% of %lastpage%
+
+title Example Title
+
+Alice -&gt; Bob : message 1
+Alice -&gt; Bob : message 2
+
+@enduml
+</textarea>
+                <div id="out09ae840c1ee4e5c4e16cf3e86d279b5a">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="144" height="221" class="scale"
+                            src="/imgw/img-09ae840c1ee4e5c4e16cf3e86d279b5a.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="45d7d5b32d17a0f9"></a>
+            <!--heading-->
+            <h2 class="chap">分割示意图</h2>
+            <p></p>
+            <p></p>
+            关键字 <code class="cod">newpage</code> 用于把一张图分割成多张。
+            <p></p>
+            在 <code class="cod">newpage</code> 之后添加文字，作为新的示意图的标题。
+            <p></p>
+            这样就能很方便地在 <em>Word</em> 中将长图分几页打印。
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+
+Alice -&gt; Bob : message 1
+Alice -&gt; Bob : message 2
+
+newpage
+
+Alice -&gt; Bob : message 3
+Alice -&gt; Bob : message 4
+
+newpage A title for the\nlast page
+
+Alice -&gt; Bob : message 5
+Alice -&gt; Bob : message 6
+@enduml
+</textarea>
+                <div id="out4c35996155b57d2ff2050be9bd9a4c72">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="144" height="156" class="scale"
+                            src="/imgw/img-4c35996155b57d2ff2050be9bd9a4c72.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <p></p>
+            <center>
+                <div class="tago">WARNING</div> <b>This translation need to be updated.</b> <div class="tago">WARNING
+                </div>
+            </center>
+            <a style="position:relative;top:-38px;" name="425ba4350c02142c"></a>
+            <!--heading-->
+            <h2 class="chap">组合消息</h2>
+            <p></p>
+            <p></p>
+            我们可以通过以下关键词来组合消息：
+            <ul>
+                <li><code class="cod">alt/else</code></li>
+                <li><code class="cod">opt</code></li>
+                <li><code class="cod">loop</code></li>
+                <li><code class="cod">par</code></li>
+                <li><code class="cod">break</code></li>
+                <li><code class="cod">critical</code></li>
+                <li><code class="cod">group</code>, 后面紧跟着消息内容</li>
+            </ul>
+            <p></p>
+            <p></p>
+            可以在标头(header)添加需要显示的文字(对于<code class="cod">group</code>关键字，参看下一章节 <em>&#39;次级分组标签&#39;</em>)。
+            <p></p>
+            关键词 <code class="cod">end</code> 用来结束分组。
+            <p></p>
+            注意，分组可以嵌套使用。
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+Alice -&gt; Bob: 认证请求
+
+alt 成功情况
+
+    Bob -&gt; Alice: 认证接受
+
+else 某种失败情况
+
+    Bob -&gt; Alice: 认证失败
+    group 我自己的标签
+    Alice -&gt; Log : 开始记录攻击日志
+        loop 1000次
+            Alice -&gt; Bob: DNS 攻击
+        end
+    Alice -&gt; Log : 结束记录攻击日志
+    end
+
+else 另一种失败
+
+   Bob -&gt; Alice: 请重复
+
+end
+@enduml
+</textarea>
+                <div id="oute51ec3c50da986ea2e8e7ec9fbf2dfc8">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="245" height="436" class="scale"
+                            src="/imgw/img-e51ec3c50da986ea2e8e7ec9fbf2dfc8.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="7aad256d9e87308c"></a>
+            <!--heading-->
+            <h2 class="chap">次级分组标签</h2>
+            <p></p>
+            对于<code class="cod">group</code>而言，在标头处的<code class="cod">[</code>和<code class="cod">]</code>之间可以显示次级文本或标签。
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+Alice -&gt; Bob: 认证请求
+Bob -&gt; Alice: 认证失败
+group 我自己的标签 [我自己的标签2]
+    Alice -&gt; Log : 开始记录攻击日志
+    loop 1000次
+        Alice -&gt; Bob: DNS攻击
+    end
+    Alice -&gt; Log : 结束记录攻击日志
+end
+@enduml
+</textarea>
+                <div id="out28b0e1ff8ea7e5c75c915b66d14bfa1a">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="255" height="311" class="scale"
+                            src="/imgw/img-28b0e1ff8ea7e5c75c915b66d14bfa1a.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <em>[参看 <a href="https://forum.plantuml.net/2503">QA-2503</a>]</em>
+            <a style="position:relative;top:-38px;" name="cda0fcbd86347e43"></a>
+            <!--heading-->
+            <h2 class="chap">Partition across the entire width</h2>
+            <p></p>
+            You can use <code class="cod">partition</code> command to group messages horizontally across the entire
+            width (full-width).
+            <p></p>
+            <h3>Messages are not grouped horizontally across the entire width <em>(by default)</em></h3>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+participant a
+
+partition p1
+b -&gt; c: msg
+c --&gt; b: OK
+note right: Some right note
+end
+
+partition p2
+a -&gt; b: msg
+note left: Some left note
+end
+@enduml
+</textarea>
+                <div id="out297211462fae1368ac8032f16b5fe1e2">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="373" height="262" class="scale"
+                            src="/imgw/img-297211462fae1368ac8032f16b5fe1e2.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <h3>Grouping messages horizontally across the entire width (with <code class="cod">teoz</code> mode)</h3>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+!pragma teoz true
+participant a
+
+partition p1
+b -&gt; c: msg
+c --&gt; b: OK
+note right: Some right note
+end
+
+partition p2
+a -&gt; b: msg
+note left: Some left note
+end
+@enduml
+</textarea>
+                <div id="out898e5823e453134162d3f1adafea0338">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="398" height="282" class="scale"
+                            src="/imgw/img-898e5823e453134162d3f1adafea0338.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <em>[Ref. <a href="https://github.com/plantuml/plantuml/issues/589">GH-589</a>]</em>
+            <a style="position:relative;top:-38px;" name="012d3e8694a98cc1"></a>
+            <!--heading-->
+            <h2 class="chap">注释信息</h2>
+            <p></p>
+            可以使用<code class="cod">note left</code>
+            或<code class="cod">note right</code> 关键字<em>在信息后面</em>加上注释。
+            <p></p>
+            你可以使用<code class="cod">end note</code>
+            关键字有一个多行注释。
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+Alice-&gt;Bob : hello
+note left: this is a first note
+
+Bob-&gt;Alice : ok
+note right: this is another note
+
+Bob-&gt;Bob : I am thinking
+note left
+a note
+can also be defined
+on several lines
+end note
+@enduml
+</textarea>
+                <div id="out13c531f22ede7e010be7886cc2d3186d">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="330" height="236" class="scale"
+                            src="/imgw/img-13c531f22ede7e010be7886cc2d3186d.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="f8c59a77112b60e7"></a>
+            <!--heading-->
+            <h2 class="chap">其他的注释信息方式</h2>
+            <p></p>
+            <p></p>
+            可以使用<code class="cod">note left of</code>，<code class="cod">note right of</code>或<code
+                class="cod">note over</code>在节点(participant)的相对位置放置注释。
+            <p></p>
+            还可以通过修改<a href="color">背景色</a>来高亮显示注释。
+            <p></p>
+            以及使用关键字<code class="cod">end note</code>来添加多行注释。
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+participant Alice
+participant Bob
+note left of Alice #aqua
+This is displayed
+left of Alice.
+end note
+
+note right of Alice: This is displayed right of Alice.
+
+note over Alice: This is displayed over Alice.
+
+note over Alice, Bob #FFAAAA: This is displayed\n over Bob and Alice.
+
+note over Bob, Alice
+This is yet another
+example of
+a long note.
+end note
+@enduml
+</textarea>
+                <div id="out64480cb9a74c73b1e8b1610649948c2d">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="336" height="342" class="scale"
+                            src="/imgw/img-64480cb9a74c73b1e8b1610649948c2d.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="84de38ea1ca38165"></a>
+            <!--heading-->
+            <h2 class="chap">改变备注框的形状 [hnote和rnote]</h2>
+            <p></p>
+            你可以使用 <code class="cod">hnote</code> 和 <code class="cod">rnote</code> 这两个关键字来修改备注框的形状：
+            <ul>
+                <li><code class="cod">hnote</code>代表六边形（hexagonal）的备注框；</li>
+                <li><code class="cod">rnote</code>代表正方形（rectangle）的备注框。</li>
+            </ul>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+caller -&gt; server : conReq
+hnote over caller : 空闲
+caller &lt;- server : conConf
+rnote over server
+ &#34;r&#34;是正方形
+ &#34;h&#34;是六边形
+endrnote
+rnote over server
+ 多
+ 行
+ 文本
+endrnote
+hnote over caller
+ 多
+ 行
+ 文本
+endhnote
+@enduml
+</textarea>
+                <div id="out930ab82204e33f5ca60a47f90db95bd7">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="149" height="375" class="scale"
+                            src="/imgw/img-930ab82204e33f5ca60a47f90db95bd7.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <em>[参见 <a
+                    href="https://forum.plantuml.net/1765/is-it-possible-to-have-different-shapes-for-notes?show=1806#c1806">QA-1765</a>]</em>
+            <a style="position:relative;top:-38px;" name="39755e6414c00844"></a>
+            <!--heading-->
+            <h2 class="chap">在多个参与者添加备注 [across]</h2>
+            <p></p>
+            你可以之直接在所有参与者之间添加备注，格式是：
+            <ul>
+                <li><code class="cod">note across: 备注描述</code></li>
+            </ul>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+Alice-&gt;Bob:m1
+Bob-&gt;Charlie:m2
+note over Alice, Charlie: 创建跨越所有参与者的备注的旧方法：\n &#34;&#34;note over //FirstPart, LastPart//&#34;&#34;.
+note across: 新方法：\n&#34;&#34;note across&#34;&#34;
+Bob-&gt;Alice
+hnote across: 跨越所有参与者的备注。
+@enduml
+</textarea>
+                <div id="outcbd770a015c127111263a75e2e84e2b9">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="269" height="310" class="scale"
+                            src="/imgw/img-cbd770a015c127111263a75e2e84e2b9.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <em>[参见 <a href="https://forum.plantuml.net/9738">QA-9738</a>]</em>
+            <a style="position:relative;top:-38px;" name="7514641e1b91c8ee"></a>
+            <!--heading-->
+            <h2 class="chap">在同一级对齐多个备注 [/]</h2>
+            <p></p>
+            使用<code class="cod">/</code>可以在同一级对齐多个备注：
+            <ul>
+                <li>没有<code class="cod">/</code> <em>（默认情况下，备注不是对齐的。）</em></li>
+            </ul>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+note over Alice : Alice的初始状态
+note over Bob : Bob的初始状态
+Bob -&gt; Alice : hello
+@enduml
+</textarea>
+                <div id="outa4998ead65450d87f366342f76a6ac6e">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="177" height="198" class="scale"
+                            src="/imgw/img-a4998ead65450d87f366342f76a6ac6e.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <ul>
+                <li>with <code class="cod">/</code> <em>(the notes are aligned)</em></li>
+            </ul>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+note over Alice : Alice的初始状态
+/ note over Bob : Bob的初始状态
+Bob -&gt; Alice : hello
+@enduml
+</textarea>
+                <div id="out757ca91c6576725528224d00e30d984e">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="248" height="161" class="scale"
+                            src="/imgw/img-757ca91c6576725528224d00e30d984e.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <em>[参见 <a href="https://forum.plantuml.net/354">QA-354</a>]</em>
+            <a style="position:relative;top:-38px;" name="28881bae78acd047"></a>
+            <!--heading-->
+            <h2 class="chap">Creole和HTML</h2>
+            <p></p>
+            <a href="creole">可以使用creole格式。</a>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+participant Alice
+participant &#34;The **Famous** Bob&#34; as Bob
+
+Alice -&gt; Bob : hello --there--
+... Some ~~long delay~~ ...
+Bob -&gt; Alice : ok
+note left
+  This is **bold**
+  This is //italics//
+  This is &#34;&#34;monospaced&#34;&#34;
+  This is --stroked--
+  This is __underlined__
+  This is ~~waved~~
+end note
+
+Alice -&gt; Bob : A //well formatted// message
+note right of Alice
+ This is &lt;back:cadetblue&gt;&lt;size:18&gt;displayed&lt;/size&gt;&lt;/back&gt;
+ __left of__ Alice.
+end note
+note left of Bob
+ &lt;u:red&gt;This&lt;/u&gt; is &lt;color #118888&gt;displayed&lt;/color&gt;
+ **&lt;color purple&gt;left of&lt;/color&gt; &lt;s:red&gt;Alice&lt;/strike&gt; Bob**.
+end note
+note over Alice, Bob
+ &lt;w:#FF33FF&gt;This is hosted&lt;/w&gt; by &lt;img sourceforge.jpg&gt;
+end note
+@enduml
+</textarea>
+                <div id="outfb6f2a880d853551ef8822e0cb1b9983">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="395" height="466" class="scale"
+                            src="/imgw/img-fb6f2a880d853551ef8822e0cb1b9983.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <p></p>
+            <center>
+                <div class="tago">WARNING</div> <b>This translation need to be updated.</b> <div class="tago">WARNING
+                </div>
+            </center>
+            <a style="position:relative;top:-38px;" name="d4b2df53a72661cc"></a>
+            <!--heading-->
+            <h2 class="chap">分隔符</h2>
+            <p></p>
+            <p></p>
+            你可以通过使用<code class="cod">==</code>关键词来将你的图表分割成多个逻辑步骤。
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+
+== 初始化 ==
+
+Alice -&gt; Bob: 认证请求
+Bob --&gt; Alice: 认证响应
+
+== 重复 ==
+
+Alice -&gt; Bob: 认证请求
+Alice &lt;-- Bob: 认证响应
+
+@enduml
+</textarea>
+                <div id="out7e86ceb5761011dbcd377325c4c6126a">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="132" height="305" class="scale"
+                            src="/imgw/img-7e86ceb5761011dbcd377325c4c6126a.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="63d5049791d9d79d"></a>
+            <!--heading-->
+            <h2 class="chap">引用</h2>
+            <p></p>
+            你可以在图中通过使用<code class="cod">ref over</code>关键词来实现引用
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+participant Alice
+actor Bob
+
+ref over Alice, Bob : init
+
+Alice -&gt; Bob : hello
+
+ref over Bob
+  This can be on
+  several lines
+end ref
+@enduml
+</textarea>
+                <div id="outc521af75024d3cd86a809a2902e0e59a">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="153" height="323" class="scale"
+                            src="/imgw/img-c521af75024d3cd86a809a2902e0e59a.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <a style="position:relative;top:-38px;" name="8f497c1a3d15af9e"></a>
+            <!--heading-->
+            <h2 class="chap">延迟</h2>
+            <p></p>
+            你可以使用<code class="cod">...</code>来表示延迟，并且还可以给延迟添加注释。
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+
+Alice -&gt; Bob: 认证请求
+...
+Bob --&gt; Alice: 认证响应
+...5分钟后...
+Bob --&gt; Alice: 再见！
+
+@enduml
+</textarea>
+                <div id="out1db1a5650cea0a46812fa9a577998424">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="132" height="256" class="scale"
+                            src="/imgw/img-1db1a5650cea0a46812fa9a577998424.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="8659eac9bf4c2629"></a>
+            <!--heading-->
+            <h2 class="chap">文本换行</h2>
+            <p></p>
+            你可以通过手动在文本中添加<code class="cod">\n</code>使长文本换行。
+            <p></p>
+            或者使用<code class="cod">maxMessageSize</code>设置（此方式暂不支持中文换行）：
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+skinparam maxMessageSize 50
+participant a
+participant b
+a -&gt; b :这\n一条\n是\n手动换行
+a -&gt; b :this is a very long message on several words
+@enduml
+</textarea>
+                <div id="out6aea78fcdf19f64c968a0464d207839c">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="113" height="319" class="scale"
+                            src="/imgw/img-6aea78fcdf19f64c968a0464d207839c.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="e660e0a9abbf4837"></a>
+            <!--heading-->
+            <h2 class="chap">Message text spans beyond the involved participants</h2>
+            <p></p>
+            You can use <code class="cod">sequenceMessageSpan</code> command to allow message text to span beyond the
+            involved participants.
+            <p></p>
+            <h3>Without <code class="cod">sequenceMessageSpan</code> <em>(by default)</em></h3>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+ParticipantNumber1 -&gt; ParticipantNumber2 : this is a very long message that is very long
+ParticipantNumber1 -&gt; ParticipantNumber1 : this is a very long message that is very long 
+ParticipantNumber2 -&gt; ParticipantNumber3 : foo2
+@enduml
+</textarea>
+                <div id="out080028ff06a2aea94db095ec35fde3b8">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="575" height="199" class="scale"
+                            src="/imgw/img-080028ff06a2aea94db095ec35fde3b8.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <h3>With <code class="cod">sequenceMessageSpan</code> (on <code class="cod">teoz</code> mode)</h3>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+!pragma teoz true
+!pragma sequenceMessageSpan true
+
+ParticipantNumber1 -&gt; ParticipantNumber2 : this is a very long message that is very long
+ParticipantNumber1 -&gt; ParticipantNumber1 : this is a very long message that is very long 
+ParticipantNumber2 -&gt; ParticipantNumber3 : foo2
+@enduml
+</textarea>
+                <div id="outfeb754e4cda2978adf52944b3b285e92">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="453" height="207" class="scale"
+                            src="/imgw/img-feb754e4cda2978adf52944b3b285e92.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <em>[Ref. <a href="https://github.com/plantuml/plantuml/issues/2386">GH-2386</a>]</em>
+            <a style="position:relative;top:-38px;" name="d511f8439ecde366"></a>
+            <!--heading-->
+            <h2 class="chap">空间</h2>
+            <p></p>
+            <p></p>
+            你可以使用<code class="cod">|||</code>来增加空间。
+            <p></p>
+            还可以使用数字指定增加的像素的数量。
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+
+Alice -&gt; Bob: message 1
+Bob --&gt; Alice: ok
+|||
+Alice -&gt; Bob: message 2
+Bob --&gt; Alice: ok
+||45||
+Alice -&gt; Bob: message 3
+Bob --&gt; Alice: ok
+
+@enduml
+</textarea>
+                <div id="outd10e7b68e0e944a9a55b63388f03674c">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="144" height="347" class="scale"
+                            src="/imgw/img-d10e7b68e0e944a9a55b63388f03674c.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <a style="position:relative;top:-38px;" name="5cc0040514e70f7b"></a>
+            <!--heading-->
+            <h2 class="chap">生命线的激活与撤销</h2>
+            <p></p>
+            关键字<code class="cod">activate</code>和<code class="cod">deactivate</code>用来表示参与者的生命活动。
+            <p></p>
+            一旦参与者被激活，它的生命线就会显示出来。
+            <p></p>
+            <code class="cod">activate</code>和<code class="cod">deactivate</code>适用于以上情形。
+            <p></p>
+            <code class="cod">destroy</code>表示一个参与者的生命线的终结。
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+participant User
+
+User -&gt; A: DoWork
+activate A
+
+A -&gt; B: &lt;&lt; createRequest &gt;&gt;
+activate B
+
+B -&gt; C: DoWork
+activate C
+C --&gt; B: WorkDone
+destroy C
+
+B --&gt; A: RequestCreated
+deactivate B
+
+A -&gt; User: Done
+deactivate A
+
+@enduml
+</textarea>
+                <div id="out76ce6646b3eb28567189f599c630a143">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="343" height="277" class="scale"
+                            src="/imgw/img-76ce6646b3eb28567189f599c630a143.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <p></p>
+            还可以使用嵌套的生命线，并且运行给生命线添加<a href="color">颜色</a>。
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+participant User
+
+User -&gt; A: DoWork
+activate A #FFBBBB
+
+A -&gt; A: Internal call
+activate A #DarkSalmon
+
+A -&gt; B: &lt;&lt; createRequest &gt;&gt;
+activate B
+
+B --&gt; A: RequestCreated
+deactivate B
+deactivate A
+A -&gt; User: Done
+deactivate A
+
+@enduml
+</textarea>
+                <div id="outf4db791af47a6e407a73347b9f1fa754">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="253" height="259" class="scale"
+                            src="/imgw/img-f4db791af47a6e407a73347b9f1fa754.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            也可以使用自动激活关键字（autoactivate），这需要与<code class="cod">return</code>关键字配合：
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+autoactivate on
+alice -&gt; bob : hello
+bob -&gt; bob : self call
+bill -&gt; bob #005500 : hello from thread 2
+bob -&gt; george ** : create
+return done in thread 2
+return rc
+bob -&gt; george !! : delete
+return success
+
+@enduml
+</textarea>
+                <div id="outc814a9b5395ad5ad9e9c40ec2f72bf91">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="337" height="376" class="scale"
+                            src="/imgw/img-c814a9b5395ad5ad9e9c40ec2f72bf91.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="988fd738de9c6d17"></a>
+            <!--heading-->
+            <h2 class="chap">返回</h2>
+            <p></p>
+            新命令<code
+                class="cod">return</code>可以用于生成一个带有可选文本标签的返回信息。返回的点是导致最近一次激活生命线的点。语法是简单的返回标签，其中标签（如果提供）可以是传统信息中可以接受的任何字符串。
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+Bob -&gt; Alice : hello
+activate Alice
+Alice -&gt; Alice : some action
+return bye
+@enduml
+</textarea>
+                <div id="outdc97a3d690c938430578be9f3a951cc9">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="185" height="199" class="scale"
+                            src="/imgw/img-dc97a3d690c938430578be9f3a951cc9.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="b2c1d43bde93c643"></a>
+            <!--heading-->
+            <h2 class="chap">创建参与者</h2>
+            <p></p>
+            <p></p>
+            你可以把关键字<code class="cod">create</code>放在第一次接收到消息之前，以强调本次消息实际上是在<em>创建</em>新的对象。
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+Bob -&gt; Alice : hello
+
+create Other
+Alice -&gt; Other : new
+
+create control String
+Alice -&gt; String
+note right : You can also put notes!
+
+Alice --&gt; Bob : ok
+
+@enduml
+</textarea>
+                <div id="out7f679c697bf2634beafc4746b3720520">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="402" height="292" class="scale"
+                            src="/imgw/img-7f679c697bf2634beafc4746b3720520.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <p></p>
+            <p></p>
+            <a style="position:relative;top:-38px;" name="35480215b426d170"></a>
+            <!--heading-->
+            <h2 class="chap">激活、撤销和创建的快捷语法。</h2>
+            <p></p>
+            <p></p>
+            在指定目标参与者后，可以立即使用以下语法：
+            <p></p>
+            <ul>
+                <li><code class="cod">++</code> 激活目标（可选择在后面加上<a href="color">#color</a>）</li>
+                <li><code class="cod">--</code> 撤销激活源</li>
+                <li><code class="cod">**</code> 创建目标实例</li>
+                <li><code class="cod">!!</code> 摧毁目标实例</li>
+            </ul>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+alice -&gt; bob ++ : hello
+bob -&gt; bob ++ : self call
+bob -&gt; bib ++  #005500 : hello
+bob -&gt; george ** : create
+return done
+return rc
+bob -&gt; george !! : delete
+return success
+@enduml
+</textarea>
+                <div id="outdf3b4b4922c7e98bbf10260c1f903cd0">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="276" height="376" class="scale"
+                            src="/imgw/img-df3b4b4922c7e98bbf10260c1f903cd0.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            然后你就可以在一行上同时激活和撤销：
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+alice   -&gt;  bob     ++   : hello1
+bob     -&gt;  charlie --++ : hello2
+charlie --&gt; alice   --   : ok
+@enduml
+</textarea>
+                <div id="outb2c2fe6b9460faef30ca37b5b4a74930">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="186" height="186" class="scale"
+                            src="/imgw/img-b2c2fe6b9460faef30ca37b5b4a74930.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+@startuml
+alice -&gt; bob   --++ #gold: hello
+bob   -&gt; alice --++ #gold: you too
+alice -&gt; bob   --: step1
+alice -&gt; bob   : step2
+@enduml
+@enduml
+</textarea>
+                <div id="out0e6d7ac70ca405f1dbe1e8d2ad3ea2dd">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="126" height="216" class="scale"
+                            src="/imgw/img-0e6d7ac70ca405f1dbe1e8d2ad3ea2dd.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <em>[参见 <a
+                    href="https://forum.plantuml.net/4834/activation-shorthand-for-sequence-diagrams?show=13054#c13054">QA-4834</a>,
+                <a href="https://forum.plantuml.net/9573">QA-9573</a> 和 <a
+                    href="https://forum.plantuml.net/13234">QA-13234</a>]</em>
+            <a style="position:relative;top:-38px;" name="05984b1743e67542"></a>
+            <!--heading-->
+            <h2 class="chap">进入和发出消息</h2>
+            <p></p>
+            如果只想关注部分图示，你可以使用进入和发出箭头。
+            <p></p>
+            使用方括号<code class="cod">[</code>和<code class="cod">]</code>表示图示的左、右两侧。
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+[-&gt; A: DoWork
+
+activate A
+
+A -&gt; A: Internal call
+activate A
+
+A -&gt;] : &lt;&lt; createRequest &gt;&gt;
+
+A&lt;--] : RequestCreated
+deactivate A
+[&lt;- A: Done
+deactivate A
+@enduml
+</textarea>
+                <div id="out64472ab70ca5d4acfa145ed118d99d42">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="208" height="259" class="scale"
+                            src="/imgw/img-64472ab70ca5d4acfa145ed118d99d42.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <p></p>
+            还可以使用下面的语法:
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+participant Alice
+participant Bob #lightblue
+Alice -&gt; Bob
+Bob -&gt; Carol
+...
+[-&gt; Bob
+[o-&gt; Bob
+[o-&gt;o Bob
+[x-&gt; Bob
+...
+[&lt;- Bob
+[x&lt;- Bob
+...
+Bob -&gt;]
+Bob -&gt;o]
+Bob o-&gt;o]
+Bob -&gt;x]
+...
+Bob &lt;-]
+Bob x&lt;-]
+
+@enduml
+</textarea>
+                <div id="outc049cc9f2d0e4190a3afcbfbec964c17">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="165" height="403" class="scale"
+                            src="/imgw/img-c049cc9f2d0e4190a3afcbfbec964c17.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="098797a007f231ea"></a>
+            <!--heading-->
+            <h2 class="chap">缩短的进入信息与发出信息箭头</h2>
+            <p></p>
+            使用<code class="cod">?</code>来显示<strong>缩短</strong>的箭头。
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+?-&gt; Alice    : &#34;&#34;?-&gt;&#34;&#34;\n**short** to actor1
+[-&gt; Alice    : &#34;&#34;[-&gt;&#34;&#34;\n**from start** to actor1
+[-&gt; Bob      : &#34;&#34;[-&gt;&#34;&#34;\n**from start** to actor2
+?-&gt; Bob      : &#34;&#34;?-&gt;&#34;&#34;\n**short** to actor2
+Alice -&gt;]    : &#34;&#34;-&gt;]&#34;&#34;\nfrom actor1 **to end**
+Alice -&gt;?    : &#34;&#34;-&gt;?&#34;&#34;\n**short** from actor1
+Alice -&gt; Bob : &#34;&#34;-&gt;&#34;&#34; \nfrom actor1 to actor2
+@enduml
+</textarea>
+                <div id="outee7db9dccdc1283188258fff6cf1ccc3">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="312" height="426" class="scale"
+                            src="/imgw/img-ee7db9dccdc1283188258fff6cf1ccc3.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <em>[参见 <a href="https://forum.plantuml.net/310">QA-310</a>]</em>
+            <a style="position:relative;top:-38px;" name="77c3940b98127fb8"></a>
+            <!--heading-->
+            <h2 class="chap">锚点和持续时间</h2>
+            <p></p>
+            <p></p>
+            <p></p>
+            使用<code class="cod">teoz</code>在图表中添加锚点，从而指定持续时间。
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+!pragma teoz true
+
+{start} Alice -&gt; Bob : start doing things during duration
+Bob -&gt; Max : something
+Max -&gt; Bob : something else
+{end} Bob -&gt; Alice : finish
+
+{start} &lt;-&gt; {end} : some time
+
+@enduml
+</textarea>
+                <div id="outac99ec6f223211e6e374708ad48705e8">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="387" height="224" class="scale"
+                            src="/imgw/img-ac99ec6f223211e6e374708ad48705e8.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <p></p>
+            You can use the <code class="cod">-P</code> <a href="command-line">command-line</a> option to specify the
+            pragma:
+            <p>
+                <code></code>
+            </p>
+            <pre class="colo"><code>java -jar plantuml.jar -Pteoz=true
+</code></pre>
+            <p>
+                <em>[Ref. <a href="https://github.com/plantuml/plantuml/issues/582">issue-582</a>]</em>
+            </p>
+            <center>
+                <div class="tago">WARNING</div> <b>This translation need to be updated.</b> <div class="tago">WARNING
+                </div>
+            </center>
+            <a style="position:relative;top:-38px;" name="94190c2f242a5df2"></a>
+            <!--heading-->
+            <h2 class="chap">构造类型和圈点</h2>
+            <p></p>
+            <p></p>
+            <p></p>
+            可以使用<code class="cod">&lt;&lt;</code>和<code class="cod">&gt;&gt;</code>给参与者添加构造类型。
+            <p></p>
+            在构造类型中，你可以使用<code class="cod">(X,color)</code>格式的语法添加一个圆圈圈起来的字符。
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+
+participant &#34;Famous Bob&#34; as Bob &lt;&lt; Generated &gt;&gt;
+participant Alice &lt;&lt; (C,#ADD1B2) Testable &gt;&gt;
+
+Bob-&gt;Alice: First message
+
+@enduml
+</textarea>
+                <div id="out33cdd2761530f0e1144da2116915426c">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="231" height="160" class="scale"
+                            src="/imgw/img-33cdd2761530f0e1144da2116915426c.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            默认使用 <em>guillemet</em> 字符来显示构造类型。
+            你可以使用外观参数 <code class="cod">guillemet</code> 来修改显示行为。
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+
+skinparam guillemet false
+participant &#34;Famous Bob&#34; as Bob &lt;&lt; Generated &gt;&gt;
+participant Alice &lt;&lt; (C,#ADD1B2) Testable &gt;&gt;
+
+Bob-&gt;Alice: First message
+
+@enduml
+</textarea>
+                <div id="out54cb0ef3bfb96fab7499b4d8be788251">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="281" height="160" class="scale"
+                            src="/imgw/img-54cb0ef3bfb96fab7499b4d8be788251.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+
+participant Bob &lt;&lt; (C,#ADD1B2) &gt;&gt;
+participant Alice &lt;&lt; (C,#ADD1B2) &gt;&gt;
+
+Bob-&gt;Alice: First message
+
+@enduml
+</textarea>
+                <div id="outbae5f4b0bfef9523335fe26f6e4d0acf">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="190" height="134" class="scale"
+                            src="/imgw/img-bae5f4b0bfef9523335fe26f6e4d0acf.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <a style="position:relative;top:-38px;" name="c142fb9b4429dca1"></a>
+            <!--heading-->
+            <h2 class="chap">Position of the stereotypes</h2>
+            <p></p>
+            It is possible to define stereotypes position (<code class="cod">top</code> or <code
+                class="cod">bottom</code>) with the command <code class="cod">skinparam stereotypePosition</code>.
+            <p></p>
+            <h3>Top postion <em>(by default)</em></h3>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+skinparam stereotypePosition top
+
+participant A&lt;&lt;st1&gt;&gt;
+participant B&lt;&lt;st2&gt;&gt;
+A --&gt; B : stereo test
+@enduml
+</textarea>
+                <div id="out7a1fe1d9207913ab7e409816dfd849da">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="147" height="160" class="scale"
+                            src="/imgw/img-7a1fe1d9207913ab7e409816dfd849da.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <h3>Bottom postion</h3>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+skinparam stereotypePosition bottom
+
+participant A&lt;&lt;st1&gt;&gt;
+participant B&lt;&lt;st2&gt;&gt;
+A --&gt; B : stereo test
+@enduml
+</textarea>
+                <div id="oute3c4632965d1d863ee69027263d1e634">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="147" height="160" class="scale"
+                            src="/imgw/img-e3c4632965d1d863ee69027263d1e634.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <em>[Ref. <a
+                    href="https://forum.plantuml.net/18650/example-related-stereotypeposition-guide-please-skinparam">QA-18650</a>]</em>
+            <a style="position:relative;top:-38px;" name="a21f56b1869e89e5"></a>
+            <!--heading-->
+            <h2 class="chap">更多标题信息</h2>
+            <p></p>
+            你可以在标题中使用<a href="creole">creole</a>格式。
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+
+title __Simple__ **communication** example
+
+Alice -&gt; Bob: Authentication Request
+Bob -&gt; Alice: Authentication Response
+
+@enduml
+</textarea>
+                <div id="outc64f1cd01cca96920b26204dcf940248">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="239" height="194" class="scale"
+                            src="/imgw/img-c64f1cd01cca96920b26204dcf940248.png" />
+                    </div>
+                </div>
+            </div>
+            在标题描述中使用<code class="cod">\n</code>表示换行。
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+
+title __Simple__ communication example\non several lines
+
+Alice -&gt; Bob: Authentication Request
+Bob -&gt; Alice: Authentication Response
+
+@enduml
+</textarea>
+                <div id="outbfb62afce73f45a7dc54c2112b5dcafc">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="239" height="212" class="scale"
+                            src="/imgw/img-bfb62afce73f45a7dc54c2112b5dcafc.png" />
+                    </div>
+                </div>
+            </div>
+            还可以使用关键字<code class="cod">title</code>和<code class="cod">end title</code>定义多行标题。
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+
+title
+ &lt;u&gt;Simple&lt;/u&gt; communication example
+ on &lt;i&gt;several&lt;/i&gt; lines and using &lt;font color=red&gt;html&lt;/font&gt;
+ This is hosted by &lt;img:sourceforge.jpg&gt;
+end title
+
+Alice -&gt; Bob: Authentication Request
+Bob -&gt; Alice: Authentication Response
+
+@enduml
+</textarea>
+                <div id="out225dc4c21d48f7636d366d9f0436d51c">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="270" height="230" class="scale"
+                            src="/imgw/img-225dc4c21d48f7636d366d9f0436d51c.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <a style="position:relative;top:-38px;" name="f52672a8f74a07df"></a>
+            <!--heading-->
+            <h2 class="chap">包裹参与者</h2>
+            <p></p>
+            <p></p>
+            <p></p>
+            可以使用<code class="cod">box</code>和<code class="cod">end box</code>画一个盒子将参与者包裹起来。
+            <p></p>
+            还可以在<code class="cod">box</code>关键字之后添加标题或者背景颜色。
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+
+box &#34;Internal Service&#34; #LightBlue
+participant Bob
+participant Alice
+end box
+participant Other
+
+Bob -&gt; Alice : hello
+Alice -&gt; Other : hello
+
+@enduml
+</textarea>
+                <div id="out4e8b544779d2543901f6265b9d5ff76a">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="168" height="181" class="scale"
+                            src="/imgw/img-4e8b544779d2543901f6265b9d5ff76a.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <p></p>
+            <center>
+                <div class="tago">WARNING</div> <b>This translation need to be updated.</b> <div class="tago">WARNING
+                </div>
+            </center>
+            <a style="position:relative;top:-38px;" name="21380379ba44081d"></a>
+            <!--heading-->
+            <h2 class="chap">移除脚注</h2>
+            <p></p>
+            使用<code class="cod">hide footbox</code>关键字移除脚注。
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+
+hide footbox
+title Footer removed
+
+Alice -&gt; Bob: Authentication Request
+Bob --&gt; Alice: Authentication Response
+
+@enduml
+</textarea>
+                <div id="out20f376d47615fcbc2736571a6e5f4326">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="225" height="152" class="scale"
+                            src="/imgw/img-20f376d47615fcbc2736571a6e5f4326.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <a style="position:relative;top:-38px;" name="7aa53dbdfc2137bf"></a>
+            <!--heading-->
+            <h2 class="chap">外观参数(skinparam)</h2>
+            <p></p>
+            <p></p>
+            用<a href="skinparam">skinparam</a>改变字体和颜色。
+            <p></p>
+            可以在如下场景中使用：
+            <ul>
+                <li>在图示的定义中，</li>
+                <li><a href="preprocessing">在引入的文件中</a>，</li>
+                <li>在<a href="command-line">命令行</a>或者<a href="ant-task">ANT任务</a>提供的配置文件中。</li>
+            </ul>
+            <p></p>
+            你也可以修改其他渲染元素，如以下示例：
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 20
+skinparam maxmessagesize 60
+skinparam sequenceParticipant underline
+
+actor User
+participant &#34;First Class&#34; as A
+participant &#34;Second Class&#34; as B
+participant &#34;Last Class&#34; as C
+
+User -&gt; A: DoWork
+activate A
+
+A -&gt; B: Create Request
+activate B
+
+B -&gt; C: DoWork
+activate C
+C --&gt; B: WorkDone
+destroy C
+
+B --&gt; A: Request Created
+deactivate B
+
+A --&gt; User: Done
+deactivate A
+
+@enduml
+</textarea>
+                <div id="outeacda43d6ee91cf2150c54798b1240a7">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="343" height="400" class="scale"
+                            src="/imgw/img-eacda43d6ee91cf2150c54798b1240a7.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+skinparam backgroundColor #EEEBDC
+skinparam handwritten true
+
+skinparam sequence {
+ArrowColor DeepSkyBlue
+ActorBorderColor DeepSkyBlue
+LifeLineBorderColor blue
+LifeLineBackgroundColor #A9DCDF
+
+ParticipantBorderColor DeepSkyBlue
+ParticipantBackgroundColor DodgerBlue
+ParticipantFontName Impact
+ParticipantFontSize 17
+ParticipantFontColor #A9DCDF
+
+ActorBackgroundColor aqua
+ActorFontColor DeepSkyBlue
+ActorFontSize 17
+ActorFontName Aapex
+}
+
+actor User
+participant &#34;First Class&#34; as A
+participant &#34;Second Class&#34; as B
+participant &#34;Last Class&#34; as C
+
+User -&gt; A: DoWork
+activate A
+
+A -&gt; B: Create Request
+activate B
+
+B -&gt; C: DoWork
+activate C
+C --&gt; B: WorkDone
+destroy C
+
+B --&gt; A: Request Created
+deactivate B
+
+A --&gt; User: Done
+deactivate A
+
+@enduml
+</textarea>
+                <div id="out07651372a2f91f0a224f9ccd32355876">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="390" height="397" class="scale"
+                            src="/imgw/img-07651372a2f91f0a224f9ccd32355876.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <p></p>
+            <p></p>
+            <center>
+                <div class="tago">WARNING</div> <b>This translation need to be updated.</b> <div class="tago">WARNING
+                </div>
+            </center>
+            <a style="position:relative;top:-38px;" name="33cee7c2521befd3"></a>
+            <!--heading-->
+            <h2 class="chap">填充区设置</h2>
+            <p></p>
+            <p></p>
+            可以设定填充区的参数配置。
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+skinparam ParticipantPadding 20
+skinparam BoxPadding 10
+
+box &#34;Foo1&#34;
+participant Alice1
+participant Alice2
+end box
+box &#34;Foo2&#34;
+participant Bob1
+participant Bob2
+end box
+Alice1 -&gt; Bob1 : hello
+Alice1 -&gt; Out : out
+@enduml
+</textarea>
+                <div id="out0dbcabd829adf630f49a0eede1f5bc4c">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="385" height="204" class="scale"
+                            src="/imgw/img-0dbcabd829adf630f49a0eede1f5bc4c.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <p></p>
+            <p></p>
+            *[Ref. [QA-5493](https://forum.plantuml.net/5493/provide-skinparam-between-participants-sequence-diagrams)]*
+            <a style="position:relative;top:-38px;" name="4764f83f72ed032f"></a>
+            <!--heading-->
+            <h2 class="chap">附录：箭头类型大全</h2>
+            <p></p>
+            <h3>普通箭头</h3>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+participant Alice as a
+participant Bob   as b
+a -&gt;     b : &#34;&#34;-&gt;   &#34;&#34;
+a -&gt;&gt;    b : &#34;&#34;-&gt;&gt;  &#34;&#34;
+a -\     b : &#34;&#34;-\   &#34;&#34;
+a -\\    b : &#34;&#34;-\\\\&#34;&#34;
+a -/     b : &#34;&#34;-/   &#34;&#34;
+a -//    b : &#34;&#34;-//  &#34;&#34;
+a -&gt;x    b : &#34;&#34;-&gt;x  &#34;&#34;
+a x-&gt;    b : &#34;&#34;x-&gt;  &#34;&#34;
+a o-&gt;    b : &#34;&#34;o-&gt;  &#34;&#34;
+a -&gt;o    b : &#34;&#34;-&gt;o  &#34;&#34;
+a o-&gt;o   b : &#34;&#34;o-&gt;o &#34;&#34;
+a &lt;-&gt;    b : &#34;&#34;&lt;-&gt;  &#34;&#34;
+a o&lt;-&gt;o  b : &#34;&#34;o&lt;-&gt;o&#34;&#34;
+a x&lt;-&gt;x  b : &#34;&#34;x&lt;-&gt;x&#34;&#34;
+a -&gt;&gt;o   b : &#34;&#34;-&gt;&gt;o &#34;&#34;
+a -\o    b : &#34;&#34;-\o  &#34;&#34;
+a -\\o   b : &#34;&#34;-\\\\o&#34;&#34;
+a -/o    b : &#34;&#34;-/o  &#34;&#34;
+a -//o   b : &#34;&#34;-//o &#34;&#34;
+a x-&gt;o   b : &#34;&#34;x-&gt;o &#34;&#34;
+@enduml
+</textarea>
+                <div id="outd868c8f010eda1001847d4ec1101c280">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="119" height="714" class="scale"
+                            src="/imgw/img-d868c8f010eda1001847d4ec1101c280.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <h3>进入信息和发出信息（使用&#39;[&#39;, &#39;]&#39;）</h3>
+            <h4>进入信息（使用&#39;[&#39;）</h4>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+participant Alice as a
+participant Bob   as b
+[-&gt;      b : &#34;&#34;[-&gt;   &#34;&#34;
+[-&gt;&gt;     b : &#34;&#34;[-&gt;&gt;  &#34;&#34;
+[-\      b : &#34;&#34;[-\   &#34;&#34;
+[-\\     b : &#34;&#34;[-\\\\&#34;&#34;
+[-/      b : &#34;&#34;[-/   &#34;&#34;
+[-//     b : &#34;&#34;[-//  &#34;&#34;
+[-&gt;x     b : &#34;&#34;[-&gt;x  &#34;&#34;
+[x-&gt;     b : &#34;&#34;[x-&gt;  &#34;&#34;
+[o-&gt;     b : &#34;&#34;[o-&gt;  &#34;&#34;
+[-&gt;o     b : &#34;&#34;[-&gt;o  &#34;&#34;
+[o-&gt;o    b : &#34;&#34;[o-&gt;o &#34;&#34;
+[&lt;-&gt;     b : &#34;&#34;[&lt;-&gt;  &#34;&#34;
+[o&lt;-&gt;o   b : &#34;&#34;[o&lt;-&gt;o&#34;&#34;
+[x&lt;-&gt;x   b : &#34;&#34;[x&lt;-&gt;x&#34;&#34;
+[-&gt;&gt;o    b : &#34;&#34;[-&gt;&gt;o &#34;&#34;
+[-\o     b : &#34;&#34;[-\o  &#34;&#34;
+[-\\o    b : &#34;&#34;[-\\\\o&#34;&#34;
+[-/o     b : &#34;&#34;[-/o  &#34;&#34;
+[-//o    b : &#34;&#34;[-//o &#34;&#34;
+[x-&gt;o    b : &#34;&#34;[x-&gt;o &#34;&#34;
+@enduml
+</textarea>
+                <div id="out6ebffb79e4c8b555ccf79aa5a4282c37">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="108" height="714" class="scale"
+                            src="/imgw/img-6ebffb79e4c8b555ccf79aa5a4282c37.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <h4>发出信息（使用&#39;]&#39;）</h4>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+participant Alice as a
+participant Bob   as b
+a -&gt;]      : &#34;&#34;-&gt;]   &#34;&#34;
+a -&gt;&gt;]     : &#34;&#34;-&gt;&gt;]  &#34;&#34;
+a -\]      : &#34;&#34;-\]   &#34;&#34;
+a -\\]     : &#34;&#34;-\\\\]&#34;&#34;
+a -/]      : &#34;&#34;-/]   &#34;&#34;
+a -//]     : &#34;&#34;-//]  &#34;&#34;
+a -&gt;x]     : &#34;&#34;-&gt;x]  &#34;&#34;
+a x-&gt;]     : &#34;&#34;x-&gt;]  &#34;&#34;
+a o-&gt;]     : &#34;&#34;o-&gt;]  &#34;&#34;
+a -&gt;o]     : &#34;&#34;-&gt;o]  &#34;&#34;
+a o-&gt;o]    : &#34;&#34;o-&gt;o] &#34;&#34;
+a &lt;-&gt;]     : &#34;&#34;&lt;-&gt;]  &#34;&#34;
+a o&lt;-&gt;o]   : &#34;&#34;o&lt;-&gt;o]&#34;&#34;
+a x&lt;-&gt;x]   : &#34;&#34;x&lt;-&gt;x]&#34;&#34;
+a -&gt;&gt;o]    : &#34;&#34;-&gt;&gt;o] &#34;&#34;
+a -\o]     : &#34;&#34;-\o]  &#34;&#34;
+a -\\o]    : &#34;&#34;-\\\\o]&#34;&#34;
+a -/o]     : &#34;&#34;-/o]  &#34;&#34;
+a -//o]    : &#34;&#34;-//o] &#34;&#34;
+a x-&gt;o]    : &#34;&#34;x-&gt;o] &#34;&#34;
+@enduml
+</textarea>
+                <div id="out45239d4c6f331a839cfca9bd5d6a43e0">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="110" height="714" class="scale"
+                            src="/imgw/img-45239d4c6f331a839cfca9bd5d6a43e0.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <h3>短进入信息和短发出信息（使用&#39;?&#39;）</h3>
+            <h4>短进入信息（使用&#39;?&#39;）</h4>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+participant Alice as a
+participant Bob   as b
+a -&gt;     b : //Long long label//
+?-&gt;      b : &#34;&#34;?-&gt;   &#34;&#34;
+?-&gt;&gt;     b : &#34;&#34;?-&gt;&gt;  &#34;&#34;
+?-\      b : &#34;&#34;?-\   &#34;&#34;
+?-\\     b : &#34;&#34;?-\\\\&#34;&#34;
+?-/      b : &#34;&#34;?-/   &#34;&#34;
+?-//     b : &#34;&#34;?-//  &#34;&#34;
+?-&gt;x     b : &#34;&#34;?-&gt;x  &#34;&#34;
+?x-&gt;     b : &#34;&#34;?x-&gt;  &#34;&#34;
+?o-&gt;     b : &#34;&#34;?o-&gt;  &#34;&#34;
+?-&gt;o     b : &#34;&#34;?-&gt;o  &#34;&#34;
+?o-&gt;o    b : &#34;&#34;?o-&gt;o &#34;&#34;
+?&lt;-&gt;     b : &#34;&#34;?&lt;-&gt;  &#34;&#34;
+?o&lt;-&gt;o   b : &#34;&#34;?o&lt;-&gt;o&#34;&#34;
+?x&lt;-&gt;x   b : &#34;&#34;?x&lt;-&gt;x&#34;&#34;
+?-&gt;&gt;o    b : &#34;&#34;?-&gt;&gt;o &#34;&#34;
+?-\o     b : &#34;&#34;?-\o  &#34;&#34;
+?-\\o    b : &#34;&#34;?-\\\\o &#34;&#34;
+?-/o     b : &#34;&#34;?-/o  &#34;&#34;
+?-//o    b : &#34;&#34;?-//o &#34;&#34;
+?x-&gt;o    b : &#34;&#34;?x-&gt;o &#34;&#34;
+@enduml
+</textarea>
+                <div id="out612cbb842f77a04df34b294531fb7e77">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="168" height="745" class="scale"
+                            src="/imgw/img-612cbb842f77a04df34b294531fb7e77.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <h4>短发出信息（使用&#39;?&#39;）</h4>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+participant Alice as a
+participant Bob   as b
+a -&gt;     b : //Long long label//
+a -&gt;?      : &#34;&#34;-&gt;?   &#34;&#34;
+a -&gt;&gt;?     : &#34;&#34;-&gt;&gt;?  &#34;&#34;
+a -\?      : &#34;&#34;-\?   &#34;&#34;
+a -\\?     : &#34;&#34;-\\\\?&#34;&#34;
+a -/?      : &#34;&#34;-/?   &#34;&#34;
+a -//?     : &#34;&#34;-//?  &#34;&#34;
+a -&gt;x?     : &#34;&#34;-&gt;x?  &#34;&#34;
+a x-&gt;?     : &#34;&#34;x-&gt;?  &#34;&#34;
+a o-&gt;?     : &#34;&#34;o-&gt;?  &#34;&#34;
+a -&gt;o?     : &#34;&#34;-&gt;o?  &#34;&#34;
+a o-&gt;o?    : &#34;&#34;o-&gt;o? &#34;&#34;
+a &lt;-&gt;?     : &#34;&#34;&lt;-&gt;?  &#34;&#34;
+a o&lt;-&gt;o?   : &#34;&#34;o&lt;-&gt;o?&#34;&#34;
+a x&lt;-&gt;x?   : &#34;&#34;x&lt;-&gt;x?&#34;&#34;
+a -&gt;&gt;o?    : &#34;&#34;-&gt;&gt;o? &#34;&#34;
+a -\o?     : &#34;&#34;-\o?  &#34;&#34;
+a -\\o?    : &#34;&#34;-\\\\o?&#34;&#34;
+a -/o?     : &#34;&#34;-/o?  &#34;&#34;
+a -//o?    : &#34;&#34;-//o? &#34;&#34;
+a x-&gt;o?    : &#34;&#34;x-&gt;o? &#34;&#34;
+@enduml
+</textarea>
+                <div id="out52ad32e0d022f87e655412c9b57824a0">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="168" height="745" class="scale"
+                            src="/imgw/img-52ad32e0d022f87e655412c9b57824a0.png" />
+                    </div>
+                </div>
+            </div>
+            <center>
+                <div class="tago">WARNING</div> <b>This translation need to be updated.</b> <div class="tago">WARNING
+                </div>
+            </center>
+            <a style="position:relative;top:-38px;" name="75b4984abd04b14f"></a>
+            <!--heading-->
+            <h2 class="chap">特定外观参数</h2>
+            <p></p>
+            <h3>默认情况下</h3>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+Bob -&gt; Alice : hello
+Alice -&gt; Bob : ok
+@enduml
+</textarea>
+                <div id="out449936f596af121e9886c54fa6a89610">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="108" height="155" class="scale"
+                            src="/imgw/img-449936f596af121e9886c54fa6a89610.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <h3>生命线策略 </h3>
+            <p></p>
+            <ul>
+                <li>nosolid 虚线 <em>（默认情况）</em></li>
+            </ul>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+skinparam lifelineStrategy nosolid
+Bob -&gt; Alice : hello
+Alice -&gt; Bob : ok
+@enduml
+</textarea>
+                <div id="out63cecd6ea14a0eca8ca128945cc51b38">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="108" height="155" class="scale"
+                            src="/imgw/img-63cecd6ea14a0eca8ca128945cc51b38.png" />
+                    </div>
+                </div>
+            </div>
+            <em>[参见 <a href="https://forum.plantuml.net/9016/">QA-9016</a>]</em>
+            <p></p>
+            <ul>
+                <li>solid 实线</li>
+            </ul>
+            在时序图中使用实线生命线：<code class="cod">skinparam lifelineStrategy solid</code>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+skinparam lifelineStrategy solid
+Bob -&gt; Alice : hello
+Alice -&gt; Bob : ok
+@enduml
+</textarea>
+                <div id="out08af8568aef4a24f88edf8c948b741bf">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="108" height="155" class="scale"
+                            src="/imgw/img-08af8568aef4a24f88edf8c948b741bf.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <em>[参见 <a href="https://forum.plantuml.net/2794">QA-2794</a>]</em>
+            <p></p>
+            <h3>style strictuml</h3>
+            <p></p>
+            为了符合严格UML的标准（<em>线头的形状必须是三角形，而不能是箭头形</em>），你可以使用：
+            <ul>
+                <li><code class="cod">skinparam style strictuml</code></li>
+            </ul>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+skinparam style strictuml
+Bob -&gt; Alice : hello
+Alice -&gt; Bob : ok
+@enduml
+</textarea>
+                <div id="oute2fabefed6178f3fd95cb10473c1e212">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="108" height="114" class="scale"
+                            src="/imgw/img-e2fabefed6178f3fd95cb10473c1e212.png" />
+                    </div>
+                </div>
+            </div>
+            <em>[参见 <a href="https://forum.plantuml.net/1047">QA-1047</a>]</em>
+            <p></p>
+            <p></p>
+            <em>[Ref. <a href="https://github.com/plantuml/plantuml/pull/2266">GH-2266</a> and <a
+                    href="https://github.com/plantuml/plantuml/issues/2662">GH-2662</a>]</em>
+            <center>
+                <div class="tago">WARNING</div> <b>This translation need to be updated.</b> <div class="tago">WARNING
+                </div>
+            </center>
+            <a style="position:relative;top:-38px;" name="fc006eba0d9dcacc"></a>
+            <!--heading-->
+            <h2 class="chap">隐藏孤立参与者</h2>
+            <p></p>
+            默认情况下会显示所有参与者。
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+participant Alice
+participant Bob
+participant Carol
+
+Alice -&gt; Bob : hello
+@enduml
+</textarea>
+                <div id="outb48f7b138e2593c54a33f4a02b59a25f">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="165" height="125" class="scale"
+                            src="/imgw/img-b48f7b138e2593c54a33f4a02b59a25f.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            可以使用<code class="cod">hide unlinked</code>命令来隐藏未被链接到的参与者。
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+hide unlinked
+participant Alice
+participant Bob
+participant Carol
+
+Alice -&gt; Bob : hello
+@enduml
+</textarea>
+                <div id="out5494b5ec4c795ed58b5dd972fa9cef6a">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="108" height="125" class="scale"
+                            src="/imgw/img-5494b5ec4c795ed58b5dd972fa9cef6a.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <p></p>
+            <em>[Ref. <a href="https://forum.plantuml.net/4247">QA-4247</a>]</em>
+            <a style="position:relative;top:-38px;" name="b40d18fd973705df"></a>
+            <!--heading-->
+            <h2 class="chap">给分组信息着色</h2>
+            <p></p>
+            <p></p>
+            可以给分组信息color[着色]。
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+Alice -&gt; Bob: Authentication Request
+alt#Gold #LightBlue Successful case
+    Bob -&gt; Alice: Authentication Accepted
+else #Pink Failure
+    Bob -&gt; Alice: Authentication Rejected
+end
+@enduml
+</textarea>
+                <div id="outd5ba34ff61f1126116b78fead8e9e3f6">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="250" height="234" class="scale"
+                            src="/imgw/img-d5ba34ff61f1126116b78fead8e9e3f6.png" />
+                    </div>
+                </div>
+            </div>
+            <em>[Ref.<a href="https://forum.plantuml.net/4750">QA-4750</a>and<a
+                    href="https://forum.plantuml.net/6410">QA-6410</a>]</em>
+            <a style="position:relative;top:-38px;" name="5640ee4b2a998e5e"></a>
+            <!--heading-->
+            <h2 class="chap">Mainframe</h2>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+mainframe This is a **mainframe**
+Alice-&gt;Bob : Hello
+@enduml
+</textarea>
+                <div id="out914ee86ab2883465a82b722d33b22103">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="161" height="190" class="scale"
+                            src="/imgw/img-914ee86ab2883465a82b722d33b22103.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <em>[Ref. <a href="https://forum.plantuml.net/4019">QA-4019</a> and <a
+                    href="https://github.com/plantuml/plantuml/issues/148">Issue#148</a>]</em>
+            <a style="position:relative;top:-38px;" name="5bd6712206960fab"></a>
+            <!--heading-->
+            <h2 class="chap">Slanted or odd arrows </h2>
+            <p></p>
+            You can use the <code class="cod">(nn)</code> option (before or after arrow) to make the arrows slanted,
+            where <em>nn</em> is the number of shift pixels.
+            <p></p>
+            <em>[Available only after v1.2022.6beta+]</em>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+A -&gt;(10) B: text 10
+B -&gt;(10) A: text 10
+
+A -&gt;(10) B: text 10
+A (10)&lt;- B: text 10
+@enduml
+</textarea>
+                <div id="outc22ca8b706a8dad6e553359606656c60">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="101" height="276" class="scale"
+                            src="/imgw/img-c22ca8b706a8dad6e553359606656c60.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+A -&gt;(40) B++: Rq
+B --&gt;(20) A--: Rs
+@enduml
+</textarea>
+                <div id="out245c4c6cd5467461e221b4e17495977a">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="83" height="235" class="scale"
+                            src="/imgw/img-245c4c6cd5467461e221b4e17495977a.png" />
+                    </div>
+                </div>
+            </div>
+            <em>[Ref. <a href="https://forum.plantuml.net/14145/plantuml-draw-odd-line">QA-14145</a>]</em>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+!pragma teoz true
+A -&gt;(50) C: Starts\nwhen &#39;B&#39; sends
+&amp; B -&gt;(25) C: \nBut B&#39;s message\n arrives before A&#39;s
+@enduml
+</textarea>
+                <div id="out1688ce60e73c517da2ae433cc5aabccb">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="282" height="216" class="scale"
+                            src="/imgw/img-1688ce60e73c517da2ae433cc5aabccb.png" />
+                    </div>
+                </div>
+            </div>
+            <em>[Ref. <a
+                    href="https://forum.plantuml.net/6684/non-instantaneous-messages-in-sequence-diagram">QA-6684</a>]</em>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+!pragma teoz true
+
+S1 -&gt;(30) S2: msg 1\n
+&amp; S2 -&gt;(30) S1: msg 2
+
+note left S1: msg\nS2 to S1
+&amp; note right S2: msg\nS1 to S2
+@enduml
+</textarea>
+                <div id="outfb1553b293f7217f290ea39658c1ff57">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="241" height="262" class="scale"
+                            src="/imgw/img-fb1553b293f7217f290ea39658c1ff57.png" />
+                    </div>
+                </div>
+            </div>
+            <em>[Ref. <a href="https://forum.plantuml.net/1072/sequence-diagram-crossed-arrows">QA-1072</a>]</em>
+            <a style="position:relative;top:-38px;" name="6a350ce9cb7e7321"></a>
+            <!--heading-->
+            <h2 class="chap">并行信息<em>（使用 teoz）</em></h2>
+            <p></p>
+            您可以使用<code class="cod">&amp;</code> <a href="teoz">teoz</a>命令显示并行信息：
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+!pragma teoz true
+Alice -&gt; Bob : hello
+&amp; Bob -&gt; Charlie : hi
+@enduml
+</textarea>
+                <div id="out9757d8d9f3ae50e899a9bf125fa4ee0d">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="181" height="133" class="scale"
+                            src="/imgw/img-9757d8d9f3ae50e899a9bf125fa4ee0d.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <em>(另请参阅<a href="teoz">Teoz</a>架构）</em>
+            <a style="position:relative;top:-38px;" name="02700f6dcabf3589"></a>
+            <!--heading-->
+            <h2 class="chap">Style for Solid Lifeline</h2>
+            <p></p>
+            <h3>By default</h3>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+Alice -&gt; Bob : hello
+...
+Alice &lt;- Bob : hello
+@enduml
+</textarea>
+                <div id="out9cc59c2d01e6323f34e8757d581b255c">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="108" height="183" class="scale"
+                            src="/imgw/img-9cc59c2d01e6323f34e8757d581b255c.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <h3>Solid Lifeline using style</h3>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+&lt;style&gt;
+lifeLine {
+  LineStyle 0
+}
+delay {
+  LineStyle 1-4
+}
+&lt;/style&gt;
+Alice -&gt; Bob : hello
+...
+Alice &lt;- Bob : hello
+@enduml
+</textarea>
+                <div id="outb05f1891265eb8a685b6d627008df0f1">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="108" height="183" class="scale"
+                            src="/imgw/img-b05f1891265eb8a685b6d627008df0f1.png" />
+                    </div>
+                </div>
+            </div>
+            <em>[Ref. <a href="https://github.com/plantuml/plantuml/pull/2266">GH-2266</a> and <a
+                    href="https://github.com/plantuml/plantuml/issues/2662">GH-2662</a>]</em>
+
+
+        </main>
+
+
+        <aside id="C6">
+            <!--toc-->
+            <div id="toc">
+                <ul>
+                    <li><a href="#7aea6e3ecced51f5">基本示例</a>
+                    </li>
+                    <li><a href="#5d2ed256d73a7298">声明参与者</a>
+                    </li>
+                    <li><a href="#6c2a1c77df70f96d">多行定义参与者</a>
+                    </li>
+                    <li><a href="#2210ebadb5117709">在参与者中使用非字母</a>
+                    </li>
+                    <li><a href="#f5050860884ddf31">给自己发消息</a>
+                    </li>
+                    <li><a href="#bf6bee6d96403148">文本对齐</a>
+                    </li>
+                    <li><a href="#1cc1efff0435a503">Change Actor style</a>
+                    </li>
+                    <li><a href="#efeda651e89e596c">改变箭头样式</a>
+                    </li>
+                    <li><a href="#0b2e57c3d4eafdda">修改箭头颜色</a>
+                    </li>
+                    <li><a href="#ce3f7eb577ad5f4d">对消息序列编号</a>
+                    </li>
+                    <li><a href="#77852febc7dde952">页面标题、页眉和页脚</a>
+                    </li>
+                    <li><a href="#45d7d5b32d17a0f9">分割示意图</a>
+                    </li>
+                    <li><a href="#425ba4350c02142c">组合消息</a>
+                    </li>
+                    <li><a href="#7aad256d9e87308c">次级分组标签</a>
+                    </li>
+                    <li><a href="#cda0fcbd86347e43">Partition across the entire width</a>
+                    </li>
+                    <li><a href="#012d3e8694a98cc1">注释信息</a>
+                    </li>
+                    <li><a href="#f8c59a77112b60e7">其他的注释信息方式</a>
+                    </li>
+                    <li><a href="#84de38ea1ca38165">改变备注框的形状 [hnote和rnote]</a>
+                    </li>
+                    <li><a href="#39755e6414c00844">在多个参与者添加备注 [across]</a>
+                    </li>
+                    <li><a href="#7514641e1b91c8ee">在同一级对齐多个备注 [/]</a>
+                    </li>
+                    <li><a href="#28881bae78acd047">Creole和HTML</a>
+                    </li>
+                    <li><a href="#d4b2df53a72661cc">分隔符</a>
+                    </li>
+                    <li><a href="#63d5049791d9d79d">引用</a>
+                    </li>
+                    <li><a href="#8f497c1a3d15af9e">延迟</a>
+                    </li>
+                    <li><a href="#8659eac9bf4c2629">文本换行</a>
+                    </li>
+                    <li><a href="#e660e0a9abbf4837">Message text spans beyond the involved participants</a>
+                    </li>
+                    <li><a href="#d511f8439ecde366">空间</a>
+                    </li>
+                    <li><a href="#5cc0040514e70f7b">生命线的激活与撤销</a>
+                    </li>
+                    <li><a href="#988fd738de9c6d17">返回</a>
+                    </li>
+                    <li><a href="#b2c1d43bde93c643">创建参与者</a>
+                    </li>
+                    <li><a href="#35480215b426d170">激活、撤销和创建的快捷语法。</a>
+                    </li>
+                    <li><a href="#05984b1743e67542">进入和发出消息</a>
+                    </li>
+                    <li><a href="#098797a007f231ea">缩短的进入信息与发出信息箭头</a>
+                    </li>
+                    <li><a href="#77c3940b98127fb8">锚点和持续时间</a>
+                    </li>
+                    <li><a href="#94190c2f242a5df2">构造类型和圈点</a>
+                    </li>
+                    <li><a href="#c142fb9b4429dca1">Position of the stereotypes</a>
+                    </li>
+                    <li><a href="#a21f56b1869e89e5">更多标题信息</a>
+                    </li>
+                    <li><a href="#f52672a8f74a07df">包裹参与者</a>
+                    </li>
+                    <li><a href="#21380379ba44081d">移除脚注</a>
+                    </li>
+                    <li><a href="#7aa53dbdfc2137bf">外观参数(skinparam)</a>
+                    </li>
+                    <li><a href="#33cee7c2521befd3">填充区设置</a>
+                    </li>
+                    <li><a href="#4764f83f72ed032f">附录：箭头类型大全</a>
+                    </li>
+                    <li><a href="#75b4984abd04b14f">特定外观参数</a>
+                    </li>
+                    <li><a href="#fc006eba0d9dcacc">隐藏孤立参与者</a>
+                    </li>
+                    <li><a href="#b40d18fd973705df">给分组信息着色</a>
+                    </li>
+                    <li><a href="#5640ee4b2a998e5e">Mainframe</a>
+                    </li>
+                    <li><a href="#5bd6712206960fab">Slanted or odd arrows</a>
+                    </li>
+                    <li><a href="#6a350ce9cb7e7321">并行信息__（使用 teoz）__</a>
+                    </li>
+                    <li><a href="#02700f6dcabf3589">Style for Solid Lifeline</a>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+    </div>
+
+
+    <style>
+        #menuside li a#menu-sequence-diagram {
+            color: #0366d6;
+        }
+    </style>
+    <script src="../../viz-global.js"></script>
+    <script src="../../plantuml.js"></script>
+    <script>
+        (function () {
+            const render = window.plantumlRender;
+            if (typeof render !== "function") {
+                console.error("PlantUML renderer is unavailable.");
+                return;
+            }
+
+            const renderOptions = {};
+            let counter = 0;
+
+            document.querySelectorAll(".mycell").forEach((mycell) => {
+                const host = mycell.parentElement;
+                const textarea = host ? host.previousElementSibling : null;
+                if (!textarea || textarea.tagName !== "TEXTAREA") return;
+
+                if (!mycell.id) {
+                    counter += 1;
+                    mycell.id = "mycell-render-" + counter;
+                }
+
+                const draw = () => {
+                    mycell.innerHTML = "";
+                    render(textarea.value.split(/\r\n|\r|\n/), mycell.id, renderOptions);
+                };
+
+                textarea.addEventListener("input", draw);
+                draw();
+            });
+        })();
+    </script>
+</body>
+
+</html>

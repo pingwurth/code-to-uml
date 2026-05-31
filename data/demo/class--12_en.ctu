@@ -1,0 +1,47 @@
+Title: Note on field (field, attribute, member) or method
+Describe: None
+------------------------------------------------------------
+[Example]
+Note on field or method
+
+[Description]
+None
+
+[UML]
+@startuml
+class A {
+{static} int counter
++void {abstract} start(int timeout)
+}
+note right of A::counter
+  This member is annotated
+end note
+note right of A::start
+  This method is now explained in a UML note
+end note
+@enduml
+------------------------------------------------------------
+[Example]
+Note on method with the same name
+
+[Description]
+None
+
+[UML]
+@startuml
+class A {
+{static} int counter
++void {abstract} start(int timeoutms)
++void {abstract} start(Duration timeout)
+}
+note left of A::counter
+  This member is annotated
+end note
+note right of A::"start(int timeoutms)"
+  This method with int
+end note
+note right of A::"start(Duration timeout)"
+  This method with Duration
+end note
+@enduml
+------------------------------------------------------------

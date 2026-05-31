@@ -1,0 +1,1709 @@
+<html lang="en">
+
+<head>
+
+
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Organization",
+  "url": "https://plantuml.com",
+  "name": "PlantUML",
+  "sameAs" : ["https://twitter.com/plantuml","https://en.wikipedia.org/wiki/PlantUML","https://www.wikidata.org/wiki/Q18346546"],
+  "logo": "https://cdn-0.plantuml.com/logo3.png",
+  "contactPoint": [{
+    "@type": "ContactPoint",
+    "email": "plantuml@gmail.com",
+    "url": "https://plantuml.com",
+    "contactType": "customer service"
+  }]
+}
+</script>
+    <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+    "@type": "ListItem",
+    "position": 1,
+    "item": {
+      "@id": "https://plantuml.com",
+      "name": "Home"
+    }
+  },{
+    "@type": "ListItem",
+    "position": 2,
+    "item": {
+      "@id": "https://plantuml.com/sitemap-language-specification",
+      "name": "Language specification"
+    }
+  },{
+    "@type": "ListItem",
+    "position": 3,
+    "item": {
+      "@id": "https://plantuml.com/ebnf",
+      "name": "Extended Backus-Naur Form"
+  }
+  }]
+}
+</script>
+    <link rel="canonical" href="https://plantuml.com/ebnf" />
+    <link rel="alternate" hreflang="x-default" href="https://plantuml.com/ebnf" />
+    <link rel="alternate" hreflang="de" href="https://plantuml.com/de/ebnf" />
+    <link rel="alternate" hreflang="en" href="https://plantuml.com/ebnf" />
+    <link rel="alternate" hreflang="es" href="https://plantuml.com/es/ebnf" />
+    <link rel="alternate" hreflang="fr" href="https://plantuml.com/fr/ebnf" />
+    <link rel="alternate" hreflang="ja" href="https://plantuml.com/ja/ebnf" />
+    <link rel="alternate" hreflang="ko" href="https://plantuml.com/ko/ebnf" />
+    <link rel="alternate" hreflang="zh" href="https://plantuml.com/zh/ebnf" />
+
+    <link rel="shortcut icon" href="/favicon.ico" />
+
+
+    <!-- link rel="preload" as="image" href="https://img.shields.io/liberapay/patrons/plantuml.svg?logo=liberapay" -->
+
+
+    <title>Extended Backus–Naur Form diagram</title>
+    <meta name="description"
+        content="EBNF is a code that expresses the syntax of a formal language. An EBNF consists of terminal symbols and non-terminal production rules." />
+
+    <meta property="og:type" content="article" />
+    <!-- volt:dokuwiki titleog: -->
+    <!-- volt:dokuwiki descriptionog: -->
+
+    <meta property="og:url" content="https://plantuml.com/ebnf" />
+    <meta property="og:site_name" content="PlantUML.com" />
+
+    <!-- meta property="og:image" content="https://plantuml.com/og-ebnf" -->
+    <meta name="twitter:image" content="https://plantuml.com/og-ebnf" />
+    <meta property="og:locale" content="en" />
+
+    <meta name="twitter:card" content="summary" />
+    <!-- volt:dokuwiki titletwitter: -->
+    <!-- volt:dokuwiki descriptiontwitter: -->
+    <meta name="twitter:site" content="@PlantUML" />
+    <meta name="twitter:creator" content="@PlantUML" />
+
+    <script>
+        if (window.location.href.indexOf("/en/") == -1) {
+            var lg = navigator.language.substring(0, 2);
+            if (lg == "de") window.location.href = "/de/ebnf";
+            if (lg == "es") window.location.href = "/es/ebnf";
+            if (lg == "fr") window.location.href = "/fr/ebnf";
+            if (lg == "ja") window.location.href = "/ja/ebnf";
+            if (lg == "ko") window.location.href = "/ko/ebnf";
+            if (lg == "ru") window.location.href = "/ru/ebnf";
+            if (lg == "zh") window.location.href = "/zh/ebnf";
+        }
+    </script>
+
+
+    <!-- https://www.w3schools.com/colors/colors_picker.asp -->
+    <!-- filter css https://codepen.io/sosuke/pen/Pjoqqp -->
+
+
+    <style>
+        .scale {}
+
+        li {
+            margin: 2px;
+        }
+
+        #external li {
+            margin: 13px;
+        }
+
+        @media screen and (max-width: 1190px) {
+        }
+
+
+        .coptable {
+            max-width: 90%;
+        }
+
+        .mytab {
+            display: inline-block;
+            border-radius: 3px;
+            border: 1px solid #e1e4e8;
+        }
+
+        .mytab:hover {
+            border: 1px dashed #0366d6;
+            cursor: pointer;
+            color: #0366d6;
+            background: #f6f8fa;
+        }
+
+        .cop {
+            margin: 25px 10px 0 10px;
+        }
+
+        .cop:hover {
+            cursor: pointer;
+            filter: invert(30%) sepia(75%) saturate(4001%) hue-rotate(201deg) brightness(88%) contrast(98%);
+        }
+
+        .cop2 {
+            margin: 25px 10px 0 10px;
+        }
+
+        .cop2:hover {
+            cursor: pointer;
+        }
+
+        .msg {
+            position: absolute;
+            color: #339966;
+            background-color: #FFF;
+            margin-top: 55px;
+            display: none;
+            border-radius: 3px;
+            border: 1px solid #4dff00;
+        }
+
+        .mycell0 {
+            float: left;
+            vertical-align: top;
+            padding: 10px;
+        }
+
+        .mycell0 code:hover {
+            cursor: default;
+            color: #000;
+        }
+
+        .mycell {
+            float: right;
+            vertical-align: top;
+            padding: 10px;
+            max-width: 55vw;
+            overflow-x: auto;
+        }
+
+        .mycell0 pre {
+            max-width: 55vw;
+            overflow-x: auto;
+        }
+
+        .cod {
+            background: #edeff3;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+
+        .colo {
+            display: inline-block;
+            background: #edeff3;
+            padding: 7px 12px;
+            border-radius: 3px;
+        }
+
+        .tag,
+        .tagg,
+        .tago,
+        .tagr {
+            text-rendering: optimizeLegibility;
+            display: inline-block;
+            padding: 3px 5px 2px 4px;
+            text-decoration: none;
+            white-space: nowrap;
+            border: 1px solid #999;
+            text-transform: uppercase;
+            text-align: center;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: bold;
+            line-height: 90%;
+        }
+
+        .tag {
+            background-color: #EEEEEE;
+        }
+
+        .tagg {
+            background-color: #98FB98;
+        }
+
+        .tago {
+            background-color: #fafa00;
+        }
+
+        .tagr {
+            background-color: #FF4500;
+        }
+
+
+        a {
+            text-decoration: none;
+            color: #0366d6;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .menu1 {
+            display: flex;
+            flex-direction: row;
+            border: 0;
+            font-size: 14px;
+            padding: 0;
+            margin: 0;
+            white-space: nowrap;
+        }
+
+        .menu1 a {
+            white-space: nowrap;
+            padding: 0 8px;
+            text-decoration: none;
+            color: #5e6d7d;
+            line-height: 30px;
+            height: 30px;
+        }
+
+        .menu1 a:hover {
+            background: #fefefe;
+            color: #0366d6;
+        }
+
+        .menuside2 {
+            display: flex;
+            flex-direction: column;
+            border: 0;
+            font-size: 14px;
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
+            justify-content: center;
+        }
+
+        .menuside2 img {
+            vertical-align: top;
+            padding: 0 8px;
+            filter: brightness(0) saturate(100%) invert(42%) sepia(22%) saturate(385%) hue-rotate(170deg) brightness(92%) contrast(84%);
+        }
+
+        .menuside2 a {
+            padding: 6px 0;
+            text-decoration: none;
+            color: #5e6d7d;
+        }
+
+        .menuside2 a:hover {
+            color: #0366d6;
+            background: #fefefe;
+        }
+
+        .menuside2 a:hover img {
+            filter: brightness(0) saturate(100%) invert(23%) sepia(44%) saturate(7029%) hue-rotate(203deg) brightness(94%) contrast(98%);
+        }
+
+        .breadcrumb {
+            z-index: 1;
+            font-size: 14px;
+            text-align: center;
+            display: inline-block;
+            overflow: hidden;
+            border-radius: 5px;
+        }
+
+
+        .breadcrumb a {
+            text-decoration: none;
+            outline: none;
+            display: block;
+            float: left;
+            font-size: 12px;
+            line-height: 24px;
+            color: #373f49;
+            padding: 0 10px 0 35px;
+            background: #f0f1f1;
+            background: linear-gradient(#f0f1f1, #c6d2d2);
+            position: relative;
+        }
+
+        .breadcrumb a:first-child {
+            padding-left: 21px;
+            border-radius: 5px 0 0 5px;
+            /*to match with the parent's radius*/
+        }
+
+        .breadcrumb a:first-child:before {
+            left: 14px;
+        }
+
+        .breadcrumb a:last-child {
+            visibility: hidden;
+        }
+
+        .breadcrumb a.active,
+        .breadcrumb a:hover {
+            color: #0366d6;
+            background: #c6d2d2;
+            background: linear-gradient(#e3e4e4, #b8c7c7);
+        }
+
+        .breadcrumb a.active:after,
+        .breadcrumb a:hover:after {
+            background: #c6d2d2;
+            background: linear-gradient(135deg, #e3e4e4, #b8c7c7);
+        }
+
+        .breadcrumb a:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: -12px;
+            /*half of square's length*/
+            /*same dimension as the line-height of .breadcrumb a */
+            width: 24px;
+            height: 24px;
+            transform: scale(0.707) rotate(45deg);
+            /*we need to prevent the arrows from getting buried under the next link*/
+            z-index: 1;
+            /*background same as links but the gradient will be rotated to compensate with the transform applied*/
+            background: #f0f1f1;
+            background: linear-gradient(135deg, #f0f1f1, #c6d2d2);
+            /*stylish arrow design using box shadow*/
+            box-shadow:
+                2px -2px 0 2px rgba(0, 0, 0, 0.1),
+                3px -3px 0 2px rgba(255, 255, 255, 0.1);
+            /*
+		5px - for rounded arrows and 
+		50px - to prevent hover glitches on the border created using shadows*/
+            border-radius: 0 5px 0 50px;
+        }
+
+        /*we dont need an arrow after the last link*/
+        .breadcrumb a:last-child:after {
+            content: none;
+            visibility: hidden;
+        }
+
+
+        .lga,
+        .lga a,
+        .lgi,
+        .lgi a {
+            font-size: 13px;
+            text-align: center;
+            color: #fff;
+            padding: 0 5px;
+            margin: 0;
+        }
+
+        .lga,
+        .lga a {
+            background-color: #008;
+        }
+
+        .lgi,
+        .lgi a {
+            background-color: #888;
+        }
+
+        .lga:hover,
+        .lga:hover a {
+            text-decoration: none;
+            color: #BBB;
+        }
+
+        .lgi:hover,
+        .lgi:hover a {
+            text-decoration: none;
+            color: #CCC;
+        }
+    </style>
+    <style>
+        body {
+            font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            font-size: 14px;
+            line-height: 1.5;
+            margin: auto;
+            overflow-x: hidden;
+            background: #fefefe;
+        }
+
+        h1.chap {
+            font-size: 1.8em;
+        }
+
+        h2.chap {
+            font-size: 1.35em;
+        }
+
+        h3,
+        h3.chap {
+            font-size: 1.15em;
+        }
+
+        h4 {
+            font-size: 1.05em;
+        }
+
+        table {
+            font-size: inherit;
+        }
+    </style>
+
+
+    <style>
+        .dyn {
+            display: flex;
+            flex-direction: row;
+            gap: 3em;
+            align-items: stretch;
+            flex-wrap: wrap;
+            margin: 10px 0;
+        }
+
+        .dyn textarea {
+            font-family: monospace;
+            font-size: 13px;
+            line-height: 1.4;
+            min-width: 30ch;
+            max-width: 90ch;
+            box-sizing: border-box;
+            resize: both;
+            white-space: pre;
+            overflow: auto;
+            field-sizing: content;
+            align-self: stretch;
+            border: 1px solid #888;
+            border-radius: 3px;
+            margin: 0;
+            padding: 4px 8px;
+            background: #fefefe;
+        }
+
+        .dyn>div {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            display: flex;
+        }
+
+        .dyn>div>div {
+            margin: 0;
+            padding: 0;
+        }
+
+        .dyn img {
+            margin: 0;
+            padding: 0;
+        }
+
+        .scale {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #dde;
+            border-radius: 4px;
+        }
+    </style>
+
+
+    <script>
+        var llg = "en";
+        var az = 0;
+        var amdark = 0;
+        function ljs(n) {
+            if (az) return false;
+            var sc = document.createElement("script");
+            sc.type = "text/javascript";
+            sc.src = "/btn-" + n + ".js";
+            document.body.innerHTML = "<i style='position:absolute;top:30%;width:100%;'><center>Loading in progress...";
+            document.body.appendChild(sc);
+        }
+        function ctc(id) {
+            document.getElementById('img' + id).classList.remove('cop'); document.getElementById('img' + id).classList.add('cop2');
+            document.getElementById('pre' + id).style.backgroundColor = '#4dff00';
+            document.getElementById('msg' + id).style.display = 'inline';
+
+            setTimeout(function () { document.getElementById('img' + id).classList.remove('cop2'); document.getElementById('img' + id).classList.add('cop'); document.getElementById('pre' + id).style.backgroundColor = ''; document.getElementById('msg' + id).style.display = 'none'; }, 800);
+
+
+            text = document.getElementById('pre' + id).innerText;
+            if (window.clipboardData && window.clipboardData.setData)
+                return window.clipboardData.setData("Text", text);
+            else if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
+                var ta = document.createElement("textarea");
+                ta.textContent = text;
+                ta.style.position = "fixed";
+                document.body.appendChild(ta);
+                ta.select();
+                try {
+                    return document.execCommand("copy");
+                }
+                catch (ex) {
+                    return false;
+                }
+                finally {
+                    document.body.removeChild(ta);
+                }
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <style>
+        body,
+        .container,
+        #B3,
+        #C5,
+        #C6,
+        #C7,
+        #D7,
+        #D8 {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            overflow-y: scroll;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr auto auto auto;
+            grid-template-rows: auto 1fr auto;
+            min-height: 100vh;
+        }
+
+        #B3 {
+            grid-column: 1 / 5;
+            grid-row: 1;
+            position: sticky;
+            top: 0;
+            height: 30px;
+            padding: 0;
+            z-index: 10;
+            overflow: hidden;
+            background: #edeff3;
+            border-bottom: 1px solid #d4d8de;
+        }
+
+        #D7 {
+            grid-column: 1;
+            grid-row: 2;
+            margin: 0;
+            padding: 0;
+            padding-left: 30px;
+            line-height: 1.6;
+        }
+
+        #D8 {
+            grid-column: 1;
+            grid-row: 3;
+            position: sticky;
+            bottom: 0;
+            z-index: 5;
+            background: #fefefe;
+        }
+
+        #C5 {
+            grid-column: 2;
+            grid-row: 1 / -1;
+            position: sticky;
+            top: 40px;
+            align-self: start;
+            height: calc(98vh - 60px);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        #C6 {
+            grid-column: 3;
+            grid-row: 1 / -1;
+            position: sticky;
+            top: 40px;
+            align-self: start;
+            height: calc(98vh - 60px);
+            max-width: 200px;
+            overflow: hidden;
+            margin: 0 10px;
+            padding: 8px 5px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        #C7 {
+            grid-column: 4;
+            grid-row: 1 / -1;
+            position: sticky;
+            top: 40px;
+            align-self: start;
+            height: calc(98vh - 60px);
+            margin: 0 20px 0 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        #toc {
+            z-index: 15;
+            overflow-x: hidden;
+            overflow-y: auto;
+            background: #f6f8fa;
+            border-width: 2px;
+            border-style: groove;
+            border-radius: 3px;
+            border-color: #e1e4e8;
+            margin: 0 5px;
+            padding: 0;
+            max-height: 100%;
+        }
+
+        #toc ul {
+            margin: 0;
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #toc li {
+            padding: 0 10px;
+            margin: 0;
+        }
+
+        #toc li a {
+            padding: 5px 0;
+            display: inline-block;
+            text-decoration: none;
+            width: 100%;
+            color: #5e6d7d;
+        }
+
+        #toc li a:hover {
+            color: #0366d6;
+        }
+
+        #toc li:hover {
+            background: #fefefe;
+        }
+
+        #magic {
+            position: absolute;
+            top: 0;
+            right: 50px;
+            width: 30px;
+            height: 30px;
+            overflow: hidden;
+            background: #edeff3;
+            z-index: 14;
+        }
+
+        #magic:hover {
+            width: calc(100% - 50px);
+        }
+
+        #magic .menu1 {
+            position: absolute;
+            top: 0;
+            right: 30px;
+            height: 30px;
+            padding-left: 10px;
+            background: #edeff3;
+            border-left: 1px solid #d4d8de;
+            border-bottom: 1px solid #d4d8de;
+        }
+
+        .menu1-tail {
+            flex-grow: 1;
+            flex-shrink: 0;
+            height: 30px;
+            position: relative;
+            z-index: 15;
+            background: #edeff3;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: auto auto auto;
+            grid-auto-rows: auto;
+            gap: 5px;
+            margin: 0;
+            padding: 0;
+        }
+
+        .merged {
+            grid-column: 1 / -1;
+        }
+
+        #C6 {
+            display: none;
+        }
+
+        @media (min-width: 1401px) {
+            #C6:has(#toc li) {
+                display: flex;
+            }
+        }
+
+        @media (max-width: 1100px) {
+            #C5,
+            #C7 {
+                display: none;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .merged {
+                display: none;
+            }
+        }
+    </style>
+
+    <div class="container">
+
+        <footer id="D8">
+
+            <p>
+            </p>
+            <p>
+
+            </p>
+        </footer>
+
+
+        <header id="B3">
+            <div class="menu1">
+                <a id="titem10" href="sequence-diagram_en.html">Sequence</a>
+                <a id="titem20" href="use-case-diagram_en.html">Use Case</a>
+                <a id="titem30" href="class-diagram_en.html">Class</a>
+                <a id="titem40" href="activity-diagram-beta_en.html">Activity</a>
+                <a id="titem50" href="component-diagram_en.html">Component</a>
+                <a id="titem60" href="state-diagram_en.html">State</a>
+                <a id="titem70" href="object-diagram_en.html">Object</a>
+                <a id="titem80" href="deployment-diagram_en.html">Deployment</a>
+                <a id="titem90" href="timing-diagram_en.html">Timing</a>
+
+                <a id="titem99" href="regex_en.html">Regex</a>
+                <a id="titem100" href="nwdiag_en.html">Network</a>
+                <a id="titem110" href="salt_en.html">Wireframe</a>
+                <a id="titem120" href="archimate-diagram_en.html">Archimate</a>
+                <a id="titem130" href="gantt-diagram_en.html">Gantt</a>
+                <a id="titem140" href="mindmap-diagram_en.html">MindMap</a>
+                <a id="titem150" href="wbs-diagram_en.html">WBS</a>
+                <a id="titem151" href="ebnf_en.html">EBNF</a>
+                <a id="titem160" href="json_en.html">JSON</a>
+                <a id="titem170" href="yaml_en.html">YAML</a>
+
+                <div class="menu1-tail"></div>
+            </div>
+            <div id="magic">
+                <div class="menu1">
+                    <a id="titem10" href="sequence-diagram_en.html">Sequence</a>
+                    <a id="titem20" href="use-case-diagram_en.html">Use Case</a>
+                    <a id="titem30" href="class-diagram_en.html">Class</a>
+                    <a id="titem40" href="activity-diagram-beta_en.html">Activity</a>
+                    <a id="titem50" href="component-diagram_en.html">Component</a>
+                    <a id="titem60" href="state-diagram_en.html">State</a>
+                    <a id="titem70" href="object-diagram_en.html">Object</a>
+                    <a id="titem80" href="deployment-diagram_en.html">Deployment</a>
+                    <a id="titem90" href="timing-diagram_en.html">Timing</a>
+
+                    <a id="titem99" href="regex_en.html">Regex</a>
+                    <a id="titem100" href="nwdiag_en.html">Network</a>
+                    <a id="titem110" href="salt_en.html">Wireframe</a>
+                    <a id="titem120" href="archimate-diagram_en.html">Archimate</a>
+                    <a id="titem130" href="gantt-diagram_en.html">Gantt</a>
+                    <a id="titem140" href="mindmap-diagram_en.html">MindMap</a>
+                    <a id="titem150" href="wbs-diagram_en.html">WBS</a>
+                    <a id="titem151" href="ebnf_en.html">EBNF</a>
+                    <a id="titem160" href="json_en.html">JSON</a>
+                    <a id="titem170" href="yaml_en.html">YAML</a>
+
+                    <div class="menu1-tail"></div>
+                </div>
+            </div><!-- magic -->
+        </header>
+
+        <main id="D7">
+
+            <style>
+                #donate {
+                    padding-top: 10px;
+                    min-height: 30px;
+                }
+            </style>
+
+
+            <p style="clear:both;">
+
+
+                <a style="position:relative;top:-38px;" name="7160f69036b2054e"></a>
+                <!--heading-->
+            </p>
+            <h1 class="chap">Extended Backus–Naur Form (EBNF)</h1>
+            <p></p>
+            <p></p>
+            <a href="https://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_form">Extended Backus–Naur Form
+                (EBNF)</a> is a type of formal syntax used to specify the structure of a programming language or other
+            formal language. It is an extension of Backus-Naur Form (BNF), which was originally developed by John Backus
+            and Peter Naur to describe the syntax of the Algol programming language.
+            <p></p>
+            EBNF adds several additional metasymbols to the original BNF metasymbols, which allows for a more concise
+            and readable specification of a language&#39;s syntax. It is commonly used in the specification of
+            programming languages, and is also sometimes used to describe the syntax of other types of formal languages,
+            such as database query languages or markup languages.
+            <p></p>
+            Basic support for <a href="https://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_form">EBNF</a> has
+            been introduced in PlantUML.
+            <p></p>
+            <em>[Ref. <a href="https://forum.plantuml.net/16529/could-we-add-syntax-diagrams">QA-16529</a>]</em>
+            <a style="position:relative;top:-38px;" name="480f4bc351a60134"></a>
+            <!--heading-->
+            <h2 class="chap">Minimal binary diagram</h2>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startebnf
+binaryDigit = &#34;0&#34; | &#34;1&#34;;
+@endebnf
+</textarea>
+                <div id="out97e3b80dd30f6685f72c1a19212e5ce8">
+                    <div class="mycell">
+                        <img loading="lazy" width="145" height="127" class="scale"
+                            src="/imgw/img-97e3b80dd30f6685f72c1a19212e5ce8.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="735437e6fd32864a"></a>
+            <!--heading-->
+            <h2 class="chap">All EBNF Elements</h2>
+            <p></p>
+            EBNF elements handled by PlantUML are described below.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startebnf
+title All EBNF elements managed by PlantUML
+
+(* Nodes *)
+litteral = &#34;a&#34;;
+special = ? a ?;
+rule = a;
+
+(* Edges *)
+required = a;
+optional = [a];
+
+zero_or_more = {a};
+one_or_more = a, {a};
+one_or_more_ebnf = {a}-;
+
+zero_or_more_with_separator = [a, {&#39;,&#39;, a}];
+one_or_more_with_separator = a, {&#39;,&#39;, a};
+zero_or_more_with_terminator = {a, &#39;,&#39;};
+one_or_more_with_terminator = a, &#39;,&#39;, {a, &#39;,&#39;};
+one_or_more_with_terminator_ebnf = {a, &#39;,&#39;}-;
+
+alternative = a | b;
+group = (a | b) , c;
+without_group = a | b , c;
+@endebnf
+</textarea>
+                <div id="out62ab8a9091ae62ba5bc4f4c1395363e8">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="319" height="1658" class="scale"
+                            src="/imgw/img-62ab8a9091ae62ba5bc4f4c1395363e8.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="85aeb07de49e6db4"></a>
+            <!--heading-->
+            <h2 class="chap">Special sequence management with <code
+                    class="cod">special-sequence-symbol &#34;?&#34;</code></h2>
+            <p></p>
+            You can manage special sequence with <code class="cod">special-sequence-symbol &#34;?&#34;</code>.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startebnf
+(* Example from §8.1 ISO-EBNF *)
+
+h-tab = ? IS0 6429 character Horizontal Tabulation ? ;
+
+new-line = { ? IS0 6429 character Carriage Return ? },
+? IS0 6429 character Line Feed ?,
+{ ? IS0 6429 character Carriage Return ? };
+
+(* Other possible examples: *)
+h-tab = ?Unicode U+0009?;
+empty-special = ??;
+@endebnf
+</textarea>
+                <div id="outba47638216be53e5fef5b9f828094e47">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="957" height="429" class="scale"
+                            src="/imgw/img-ba47638216be53e5fef5b9f828094e47.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <em>[Ref. <a
+                    href="https://forum.plantuml.net/16781/allow-special-sequence-management-special-sequence-symbol">QA-16781</a>]</em>
+            <a style="position:relative;top:-38px;" name="795877454b6aa54b"></a>
+            <!--heading-->
+            <h2 class="chap">Full repetition management with <code class="cod">repetition-symbol &#34;*&#34;</code></h2>
+            <p></p>
+            You can manage repetition with <code class="cod">repetition-symbol &#34;*&#34;</code>.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startebnf
+(* Simplified Fortran example *)
+Fortran_77_continuation_line = 5 * &#34; &#34;,  &#39;[...]&#39;, 66 * [character];
+
+(* Minimal test *)
+test = 4 * &#39;2&#39;;
+
+(* Example of §5.7 Syntactic-factor of ISO EBNF *)
+aa = &#34;A&#34;;
+bb = 3 * aa, &#34;B&#34;;
+cc = 3 * [aa], &#34;C&#34;;
+dd = {aa}, &#34;D&#34;;
+ee = aa, {aa}, &#34;E&#34;;
+ff = 3 * aa, 3 * [aa], &#34;F&#34;;
+gg = 3 * {aa}, &#34;D&#34;;
+@endebnf
+</textarea>
+                <div id="out5c2f5e4634623f5a2e5998a2e115f9c5">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="339" height="1124" class="scale"
+                            src="/imgw/img-5c2f5e4634623f5a2e5998a2e115f9c5.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <em>[Ref. <a
+                    href="https://forum.plantuml.net/16750/ebnf-allow-full-repetition-management-with-repetition-symbol">QA-16750</a>]</em>
+            <a style="position:relative;top:-38px;" name="bd90d595616d1cf2"></a>
+            <!--heading-->
+            <h2 class="chap">Drawing mode</h2>
+            <p></p>
+            Before version V1.2025.1, you can choice the drawing mode, and having a compacted mode by using <code
+                class="cod">!pragma compact</code> command.
+            <p></p>
+            <h3>Expanded mode <em>(by default, and the only one from V1.2025.1)</em></h3>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startebnf
+title Expanded mode
+
+zero_or_more = {a};
+one_or_more = a, {a};
+one_or_more_ebnf = {a}-;
+
+zero_or_more_with_separator = [a, {&#39;,&#39;, a}];
+one_or_more_with_separator = a, {&#39;,&#39;, a};
+zero_or_more_with_terminator = {a, &#39;,&#39;};
+one_or_more_with_terminator = a, &#39;,&#39;, {a, &#39;,&#39;};
+
+@endebnf
+</textarea>
+                <div id="out4dd646195dbf21b8701bb5ba379f4c3d">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="295" height="789" class="scale"
+                            src="/imgw/img-4dd646195dbf21b8701bb5ba379f4c3d.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <h3>Compacted mode <em>(only available before V1.2025.1)</em></h3>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startebnf
+!pragma compact
+title Compacted mode
+
+zero_or_more = {a};
+one_or_more = a, {a};
+one_or_more_ebnf = {a}-;
+
+zero_or_more_with_separator = [a, {&#39;,&#39;, a}];
+one_or_more_with_separator = a, {&#39;,&#39;, a};
+zero_or_more_with_terminator = {a, &#39;,&#39;};
+one_or_more_with_terminator = a, &#39;,&#39;, {a, &#39;,&#39;};
+
+@endebnf
+</textarea>
+                <div id="out38abedac691b18840919436df76b3d10">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="295" height="789" class="scale"
+                            src="/imgw/img-38abedac691b18840919436df76b3d10.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <p></p>
+            <em>[Ref. <a href="https://forum.plantuml.net/16692/ebnf-theo-as-default">QA-16692</a>, <a
+                    href="https://forum.plantuml.net/16529/could-we-add-syntax-diagrams?show=16685#c16685">QA-16529</a>]</em>
+            <p></p>
+            <em>[End of the compacted mode: <a href="https://github.com/plantuml/plantuml/issues/1585">GH-1585</a>]</em>
+            <a style="position:relative;top:-38px;" name="5398a902fa7ed57d"></a>
+            <!--heading-->
+            <h2 class="chap">Notes on Elements</h2>
+            <p></p>
+            Notes may be added to elements of your diagram by using EBNF comment tags.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startebnf
+title Comments
+(* Notes for Rule1 *)
+Rule1 = {&#34;a-z&#34; (* any letter *) };
+(* Notes for Rule2 *)
+Rule2 =;
+(* Additional notes and references *)
+@endebnf
+</textarea>
+                <div id="outaa3da423c122369523aa3249091b860f">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="239" height="388" class="scale"
+                            src="/imgw/img-aa3da423c122369523aa3249091b860f.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="bb2ede32ce6accb8"></a>
+            <!--heading-->
+            <h2 class="chap">Using (global) style</h2>
+            <p></p>
+            <h3>Without style <em>(by default)</em></h3>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startebnf
+title Title
+not_styled_ebnf = {&#34;a&#34;, c , &#34;a&#34; (* Note on a *)}
+| ? special ?
+| &#34;repetition&#34;, 4 * &#39;2&#39;;
+(* Global End Note *)
+@endebnf
+</textarea>
+                <div id="outba8c289bf455adbad0ef2376f1ab4851">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="365" height="355" class="scale"
+                            src="/imgw/img-ba8c289bf455adbad0ef2376f1ab4851.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <p></p>
+            <h3>With style</h3>
+            <p></p>
+            You can use <a href="style-evolution">style</a> to change rendering of elements.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startebnf
+&lt;style&gt;
+element {
+  ebnf {
+    LineColor blue
+    Fontcolor green
+    Backgroundcolor palegreen
+    note {
+      Backgroundcolor pink
+    }
+  }
+}
+&lt;/style&gt;
+title Title
+styled_ebnf = {&#34;a&#34;, c , &#34;a&#34; (* Note on a *)}
+| ? special ?
+| &#34;repetition&#34;, 4 * &#39;2&#39;;
+(* Global End Note *)
+@endebnf
+</textarea>
+                <div id="out9e174a4d5c19db1f07fca03aa59aed57">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="365" height="355" class="scale"
+                            src="/imgw/img-9e174a4d5c19db1f07fca03aa59aed57.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <em>[Ref. <a
+                    href="https://forum.plantuml.net/16529/could-we-add-syntax-diagrams?show=16685#c16685">QA-16529</a>]</em>
+            <a style="position:relative;top:-38px;" name="6ebedcbc408cf830"></a>
+            <!--heading-->
+            <h2 class="chap">Example of LISP Grammar</h2>
+            <p></p>
+            LISP Grammar with PlantUML.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startebnf
+title LISP Grammar
+grammars_expression = atomic_symbol | &#34;(&#34;, s_expression, &#34;.&#34;, s_expression, &#34;)&#34; | list;
+list = &#34;(&#34;, s_expression, { s_expression }, &#34;)&#34;;
+atomic_symbol = letter, atom_part;
+atom_part = empty | letter, atom_part | number, atom_part;
+letter = ? a-z ?;
+number = ? 1-9 ?;
+empty = &#34; &#34;;
+@endebnf
+</textarea>
+                <div id="outa33d5f0776c536cfec3a180901f469d3">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="436" height="736" class="scale"
+                            src="/imgw/img-a33d5f0776c536cfec3a180901f469d3.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            [Ref. ]
+            <a style="position:relative;top:-38px;" name="4fd52eccba095c80"></a>
+            <!--heading-->
+            <h2 class="chap">EBNF of PlantUMLs EBNF Grammar</h2>
+            <p></p>
+            EBNF allows for self description, so here it is!
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startebnf
+grammar = { rule };
+rule = lhs , &#34;=&#34; (* definition *) , rhs , &#34;;&#34; (* termination *);
+lhs = identifier ;
+rhs = identifier
+     | terminal
+     | &#34;[&#34; , rhs (* optional *) , &#34;]&#34;
+     | &#34;{&#34; , rhs (* repetition *), &#34;}&#34;
+     | &#34;(&#34; , rhs (* grouping *) , &#34;)&#34;
+     | &#34;(*&#34; , string (* comment *) , &#34;*)&#34;
+     | &#34;?&#34; , rhs (* special sequence, aka notation *) , &#34;?&#34;
+     | rhs , &#34;|&#34; (* alternation *) , rhs
+     | rhs , &#34;,&#34; (* concatenation *), rhs ;
+identifier = letter , { letter | digit | &#34;_&#34; } ;
+terminal = &#34;&#39;&#34; , character , { character } , &#34;&#39;&#34;
+         | &#39;&#34;&#39; , character , { character } , &#39;&#34;&#39; ;
+character = letter | digit | symbol | &#34;_&#34; ;
+symbol = &#34;[&#34; | &#34;]&#34; | &#34;{&#34; | &#34;}&#34; | &#34;(&#34; | &#34;)&#34; | &#34;&lt;&#34; | &#34;&gt;&#34;
+       | &#34;&#39;&#34; | &#39;&#34;&#39; | &#34;=&#34; | &#34;|&#34; | &#34;.&#34; | &#34;,&#34; | &#34;;&#34; ;
+digit = ? 0-9 ? ;
+letter = ? A-Z or a-z ? ;
+@endebnf
+</textarea>
+                <div id="out3437aa95fe1ae4b09b917d2c38f42ba7">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="432" height="2285" class="scale"
+                            src="/imgw/img-3437aa95fe1ae4b09b917d2c38f42ba7.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="324aba8a3f83acb0"></a>
+            <!--heading-->
+            <h2 class="chap">Java Language Specification</h2>
+            <p></p>
+            A real world example of a detailed programming language.
+            <p></p>
+            <h3>Packages and Modules</h3>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startebnf
+CompilationUnit = OrdinaryCompilationUnit | ModularCompilationUnit;
+OrdinaryCompilationUnit = [PackageDeclaration], {ImportDeclaration}, {TopLevelClassOrInterfaceDeclaration};
+ModularCompilationUnit = {ImportDeclaration}, ModuleDeclaration;
+PackageDeclaration = {PackageModifier}, &#34;package&#34;, Identifier, {Identifier}, &#34;;&#34;;
+PackageModifier = Annotation;
+ImportDeclaration = SingleTypeImportDeclaration | TypeImportOnDemandDeclaration | SingleStaticImportDeclaration | StaticImportOnDemandDeclaration;
+SingleTypeImportDeclaration = &#34;import&#34;, TypeName, &#34;;&#34;;
+TypeImportOnDemandDeclaration = &#34;import&#34;, PackageOrTypeName, &#34;.*&#34;, &#34;;&#34;;
+SingleStaticImportDeclaration = &#34;import&#34;, &#34;static&#34;, TypeName, &#34;.&#34;, Identifier, &#34;;&#34;;
+StaticImportOnDemandDeclaration = &#34;import&#34;, &#34;static&#34;, TypeName, &#34;.*&#34;, &#34;;&#34;;
+TopLevelClassOrInterfaceDeclaration = (ClassDeclaration | InterfaceDeclaration), &#34;;&#34;;
+ModuleDeclaration = {Annotation}, [open], &#34;module&#34;, Identifier, {Identifier}, &#34;{&#34;, {ModuleDirective}, &#34;}&#34;;
+ModuleDirective = (&#34;requires&#34;, {RequiresModifier}, ModuleName, &#34;;&#34;) | (&#34;exports&#34;, PackageName, [&#34;to&#34;, ModuleName, {&#34;,&#34;, ModuleName}], &#34;;&#34;) | (&#34;opens&#34;, PackageName, [&#34;to&#34;, ModuleName, {&#34;,&#34;, ModuleName}], &#34;;&#34;) | (&#34;uses&#34;, TypeName, &#34;;&#34;) | (&#34;provides&#34;, TypeName, &#34;with&#34;, TypeName, {&#34;,&#34;, TypeName}, &#34;;&#34;);
+RequiresModifier = &#34;transitive&#34; | &#34;static&#34;;
+@endebnf
+</textarea>
+                <div id="out8fc0e5639b5d2bbf390e821ad7fed2bb">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="943" height="1709" class="scale"
+                            src="/imgw/img-8fc0e5639b5d2bbf390e821ad7fed2bb.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <h3>Lexical Structure</h3>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startebnf
+Identifier = ?IdentifierChars but not a ReservedKeyword or BooleanLiteral or NullLiteral?;
+IdentifierChars = JavaLetter, {JavaLetterOrDigit};
+JavaLetter = ? any Unicode character that is a &#34;Java letter&#34; ?;
+JavaLetterOrDigit = ? any Unicode character that is a &#34;Java letter-or-digit&#34; ?;
+TypeIdentifier = ? Identifier but not permits, record, sealed, var, or yield ?;
+UnqualifiedMethodIdentifier = ? Identifier but not yield ?;
+Literal = IntegerLiteral | FloatingPointLiteral | BooleanLiteral | CharacterLiteral | StringLiteral | TextBlock | NullLiteral;
+@endebnf
+</textarea>
+                <div id="out72bf257c5d4b828c3a8daac3dfdbc4cd">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="549" height="772" class="scale"
+                            src="/imgw/img-72bf257c5d4b828c3a8daac3dfdbc4cd.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <h3>Types, Values, and Variables</h3>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startebnf
+Type = PrimitiveType | ReferenceType;
+PrimitiveType = [Annotation], (NumericType | boolean );
+NumericType = IntegralType | FloatingPointType;
+IntegralType = &#34;byte&#34; | &#34;short&#34; | &#34;int&#34; | &#34;long&#34; | &#34;char&#34;;
+FloatingPointType = &#34;float&#34; | &#34;double&#34;;
+ReferenceType = ClassOrInterfaceType | TypeVariable | ArrayType;
+ClassOrInterfaceType = ClassType | InterfaceType;
+ClassType = {Annotation}, TypeIdentifier, [TypeArguments];
+PackageName = {Annotation}, TypeIdentifier, [TypeArguments];
+ClassOrInterfaceType = {Annotation}, TypeIdentifier, [TypeArguments];
+InterfaceType = ClassType;
+TypeVariable = {Annotation}, TypeIdentifier;
+ArrayType = (PrimitiveType | ClassOrInterfaceType | TypeVariable), Dims;
+Dims=  {Annotation}, &#34;[&#34;, &#34;]&#34;, {{Annotation}, &#34;[&#34;, &#34;]&#34;};
+TypeParameter = {TypeParameterModifier}, TypeIdentifier, [TypeBound];
+TypeParameterModifier = Annotation;
+TypeBound = (&#34;extends&#34;, TypeVariable) | (&#34;extends&#34;, ClassOrInterfaceType, {AdditionalBound});
+AdditionalBound = &#34;&amp;&#34;, InterfaceType;
+TypeArguments = &#34;&lt;&#34;, TypeArgumentList, &#34;&gt;&#34;;
+TypeArgumentList = TypeArgument, {&#34;,&#34;, TypeArgument};
+TypeArgument = ReferenceType | Wildcard;
+Wildcard = {Annotation}, &#34;?&#34;, [WildcardBounds];
+WildcardBounds = (&#34;extends&#34; | &#34;super&#34;), ReferenceType;
+@endebnf
+</textarea>
+                <div id="out9ba78dcc19efb0ab0ffff8f8ae65265a">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="623" height="2594" class="scale"
+                            src="/imgw/img-9ba78dcc19efb0ab0ffff8f8ae65265a.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <h3>Names</h3>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startebnf
+ModuleName = Identifier | ( ModuleName, &#34;.&#34;, Identifier);
+PackageName = Identifier | (PackageName, &#34;.&#34;, Identifier);
+TypeName = TypeIdentifier | (PackageOrTypeName, &#34;.&#34;, TypeIdentifier);
+ExpressionName = Identifier | ( AmbiguousName, &#34;.&#34;, Identifier);
+MethodName = UnqualifiedMethodIdentifier;
+PackageOrTypeName = Identifier | (PackageOrTypeName, &#34;.&#34;, Identifier);
+AmbiguousName = Identifier | (AmbiguousName, &#34;.&#34;, Identifier);
+@endebnf
+</textarea>
+                <div id="out18f76d58d5cacf02a178a98214d392da">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="425" height="737" class="scale"
+                            src="/imgw/img-18f76d58d5cacf02a178a98214d392da.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <h3>Classes</h3>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startebnf
+ClassDeclaration = NormalClassDeclaration | EnumDeclaration | RecordDeclaration;
+NormalClassDeclaration = {ClassModifier}, &#34;class&#34;, TypeIdentifier, [TypeParameters], [ClassExtends], [ClassImplements], [ClassPermits], ClassBody;
+ClassModifier = Annotation | &#34;public&#34; | &#34;protected&#34; | &#34;private&#34; | &#34;abstract&#34; | &#34;static&#34; | &#34;final&#34; | &#34;sealed&#34; | &#34;non-sealed&#34; | &#34;strictfp&#34;;
+TypeParameters = &#34;&lt;&#34;, TypeParameterList, &#34;&gt;&#34;;
+TypeParameterList = TypeParameter, {&#34;,&#34;, TypeParameter};
+ClassExtends = &#34;extends&#34;, ClassType;
+ClassImplements = &#34;implements&#34;, InterfaceTypeList;
+InterfaceTypeList = InterfaceType, {&#34;,&#34;, InterfaceType};
+ClassPermits = &#34;permits&#34;, TypeName, {&#34;,&#34;, TypeName};
+ClassBody = &#34;{&#34;, {ClassBodyDeclaration}, &#34;}&#34;;
+ClassBodyDeclaration = ClassMemberDeclaration | InstanceInitializer | StaticInitializer | ConstructorDeclaration;
+ClassMemberDeclaration = (FieldDeclaration | MethodDeclaration | ClassDeclaration | InterfaceDeclaration), &#34;;&#34;;
+FieldDeclaration = {FieldModifier}, UnannType, VariableDeclaratorList, &#34;;&#34;;
+FieldModifier = Annotation | &#34;public&#34; | &#34;protected&#34; | &#34;private&#34; | &#34;static&#34; | &#34;final&#34; | &#34;transient&#34; | &#34;volatile&#34;;
+VariableDeclaratorList = VariableDeclarator, {&#34;,&#34;, VariableDeclarator};
+VariableDeclarator = VariableDeclaratorId, [&#34;=&#34;, VariableInitializer];
+VariableDeclaratorId = Identifier, [Dims];
+VariableInitializer = Expression | ArrayInitializer;
+UnannType = UnannPrimitiveType | UnannReferenceType;
+UnannPrimitiveType = NumericType | boolean;
+UnannReferenceType = UnannClassOrInterfaceType | UnannTypeVariable | UnannArrayType;
+UnannClassOrInterfaceType = UnannClassType | UnannInterfaceType;
+UnannClassType = (TypeIdentifier, [TypeArguments]) | (PackageName, &#34;.&#34;, {Annotation}, TypeIdentifier, [TypeArguments]) | (UnannClassOrInterfaceType, &#34;.&#34;, {Annotation}, TypeIdentifier, [TypeArguments]) | (TypeIdentifier, [TypeArguments]) | (TypeIdentifier, [TypeArguments]);
+UnannInterfaceType = UnannClassType;
+UnannTypeVariable = TypeIdentifier;
+UnannArrayType = (UnannPrimitiveType, Dims) | (UnannClassOrInterfaceType, Dims) | (UnannTypeVariable, Dims);
+MethodDeclaration = {MethodModifier}, MethodHeader, MethodBody;
+MethodModifier = Annotation | &#34;public&#34; | &#34;protected&#34; | &#34;private&#34; | &#34;abstract&#34; | &#34;static&#34; | &#34;final&#34; | &#34;synchronized&#34; | &#34;native&#34; | &#34;strictfp&#34;;
+MethodHeader = (Result, MethodDeclarator, [Throws]) | (TypeParameters, {Annotation}, Result, MethodDeclarator, [Throws]);
+Result = UnannType | &#34;void&#34;;
+MethodDeclarator = Identifier, ( [ ReceiverParameter, &#34;,&#34; ], [FormalParameterList] ), [Dims];
+ReceiverParameter = {Annotation}, UnannType, [Identifier, &#34;.&#34;], &#34;this&#34;;
+FormalParameterList = FormalParameter, {&#34;,&#34;, FormalParameter};
+FormalParameter = ({VariableModifier}, UnannType, VariableDeclaratorId) | VariableArityParameter;
+VariableArityParameter = {VariableModifier}, UnannType, {Annotation}, &#34;...&#34;, Identifier;
+VariableModifier = Annotation | &#34;final&#34;;
+Throws = &#34;throws&#34;, ExceptionTypeList;
+ExceptionTypeList = ExceptionType, {&#34;,&#34;, ExceptionType};
+ExceptionType = ClassType | TypeVariable;
+MethodBody = Block | &#34;;&#34;;
+InstanceInitializer = Block;
+StaticInitializer = &#34;static&#34;, Block;
+ConstructorDeclaration = {ConstructorModifier}, ConstructorDeclarator, [Throws], ConstructorBody;
+ConstructorModifier = Annotation | &#34;public&#34; | &#34;protected&#34; | &#34;private&#34;;
+ConstructorDeclarator = [TypeParameters], SimpleTypeName, ( [ReceiverParameter, &#34;,&#34;], [FormalParameterList] );
+SimpleTypeName = TypeIdentifier;
+ConstructorBody = { [ExplicitConstructorInvocation], [BlockStatements] };
+ExplicitConstructorInvocation = ( [TypeArguments], &#34;this&#34;, &#34;(&#34;, [ArgumentList], &#34;)&#34;, &#34;;&#34; ) | ([TypeArguments], &#34;super&#34;, &#34;(&#34;, [ArgumentList], &#34;)&#34;, &#34;;&#34; ) | (ExpressionName, &#34;.&#34;, [TypeArguments], &#34;super&#34;, &#34;(&#34;, [ArgumentList], &#34;)&#34;, &#34;;&#34; ) | (Primary, &#34;.&#34; [TypeArguments], &#34;super&#34;, &#34;(&#34; [ArgumentList], &#34;)&#34;, &#34;;&#34;;
+EnumDeclaration = {ClassModifier}, &#34;enum&#34;, TypeIdentifier, [ClassImplements], EnumBody;
+EnumBody = &#34;{&#34;, [EnumConstantList], [&#34;,&#34;], [EnumBodyDeclarations], &#34;}&#34;;
+EnumConstantList = EnumConstant, {&#34;,&#34;, EnumConstant};
+EnumConstant = {EnumConstantModifier}, Identifier, [&#34;(&#34;, [ArgumentList], &#34;)&#34;], [ClassBody];
+EnumConstantModifier = Annotation;
+EnumBodyDeclarations = &#34;;&#34;, {ClassBodyDeclaration};
+RecordDeclaration = {ClassModifier}, &#34;record&#34;, TypeIdentifier, [TypeParameters], RecordHeader, [ClassImplements], RecordBody;
+RecordHeader = &#34;(&#34;, [RecordComponentList], &#34;)&#34;;
+RecordComponentList = RecordComponent, {&#34;,&#34;, RecordComponent};
+RecordComponent = (RecordComponentModifier}, UnannType, Identifier) | VariableArityRecordComponent;
+VariableArityRecordComponent = {RecordComponentModifier}, UnannType, {Annotation}, &#34;...&#34;, Identifier;
+RecordComponentModifier = Annotation;
+RecordBody = &#34;{&#34;, {RecordBodyDeclaration}, &#34;}&#34;;
+RecordBodyDeclaration = ClassBodyDeclaration | CompactConstructorDeclaration;
+CompactConstructorDeclaration = {ConstructorModifier}, SimpleTypeName, ConstructorBody;
+@endebnf
+</textarea>
+                <div id="oute6fcee86abc4ffab33588bae7401806b">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="1217" height="4096" class="scale"
+                            src="/imgw/img-e6fcee86abc4ffab33588bae7401806b.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <h3>Interfaces</h3>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startebnf
+InterfaceDeclaration = NormalInterfaceDeclaration | AnnotationInterfaceDeclaration;
+NormalInterfaceDeclaration = {InterfaceModifier}, &#34;interface&#34;, TypeIdentifier, [TypeParameters], [InterfaceExtends], [InterfacePermits], InterfaceBody;
+InterfaceModifier = Annotation | &#34;public&#34; | &#34;protected&#34; | &#34;private&#34; | &#34;abstract&#34; | &#34;static&#34; | &#34;sealed&#34; | &#34;non-sealed&#34; | &#34;strictfp&#34;;
+InterfaceExtends = &#34;extends&#34;, InterfaceTypeList;
+InterfacePermits = &#34;permits&#34;, TypeName, {&#34;,&#34;, TypeName};
+InterfaceBody = &#34;{&#34;, {InterfaceMemberDeclaration}, &#34;}&#34;;
+InterfaceMemberDeclaration = ConstantDeclaration | InterfaceMethodDeclaration | ClassDeclaration | InterfaceDeclaration | &#34;;&#34;;
+ConstantDeclaration = {ConstantModifier}, UnannType, VariableDeclaratorList, &#34;;&#34;;
+ConstantModifier = Annotation | &#34;public&#34; | &#34;static&#34; | &#34;final&#34;;
+InterfaceMethodDeclaration = {InterfaceMethodModifier}, MethodHeader, MethodBody;
+InterfaceMethodModifier = Annotation | &#34;public&#34; | &#34;private&#34; | &#34;abstract&#34; | &#34;default&#34; | &#34;static&#34; | &#34;strictfp&#34;;
+AnnotationInterfaceDeclaration = {InterfaceModifier}, &#34;@&#34;, &#34;interface&#34;, TypeIdentifier, AnnotationInterfaceBody;
+AnnotationInterfaceBody = &#34;{&#34;, {AnnotationInterfaceMemberDeclaration}, &#34;}&#34;;
+AnnotationInterfaceMemberDeclaration = AnnotationInterfaceElementDeclaration | ConstantDeclaration | ClassDeclaration | InterfaceDeclaration, &#34;;&#34;;
+AnnotationInterfaceElementDeclaration = {AnnotationInterfaceElementModifier}, UnannType, Identifier, &#34;(&#34;, &#34;)&#34;, [Dims], [DefaultValue], &#34;;&#34;;
+AnnotationInterfaceElementModifier = Annotation | &#34;public&#34; | &#34;abstract&#34;;
+DefaultValue = &#34;default&#34;, ElementValue;
+Annotation = NormalAnnotation | MarkerAnnotation | SingleElementAnnotation;
+NormalAnnotation = &#34;@&#34;, TypeName, &#34;(&#34;, [ElementValuePairList], &#34;)&#34;;
+ElementValuePairList = ElementValuePair, {&#34;,&#34;, ElementValuePair};
+ElementValuePair = Identifier, &#34;=&#34;, ElementValue;
+ElementValue = ConditionalExpression | ElementValueArrayInitializer | Annotation;
+ElementValueArrayInitializer = &#34;{&#34;, [ElementValueList], [&#34;,&#34;], &#34;}&#34;;
+ElementValueList = ElementValue, {&#34;,&#34;, ElementValue};
+MarkerAnnotation = &#34;@&#34;, TypeName;
+SingleElementAnnotation = &#34;@&#34;, TypeName, &#34;(&#34;, ElementValue, &#34;)&#34;;
+@endebnf
+</textarea>
+                <div id="oute48feb4beeab9f7d8aea0c90c6ccb24c">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="1131" height="3417" class="scale"
+                            src="/imgw/img-e48feb4beeab9f7d8aea0c90c6ccb24c.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <h3>Arrays</h3>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startebnf
+ArrayInitializer = &#34;{&#34;, [VariableInitializerList], [&#34;,&#34;], &#34;}&#34;;
+VariableInitializerList = VariableInitializer, {&#34;,&#34;, VariableInitializer};
+@endebnf
+</textarea>
+                <div id="out22c53b1c77e6381e7c8edc630b589ba4">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="445" height="220" class="scale"
+                            src="/imgw/img-22c53b1c77e6381e7c8edc630b589ba4.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <h3>Blocks, Statements, and Patterns</h3>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startebnf
+Block = &#34;{&#34;, [BlockStatements], &#34;}&#34;;
+BlockStatements = BlockStatement, {BlockStatement};
+BlockStatement = LocalClassOrInterfaceDeclaration | LocalVariableDeclarationStatement | Statement;
+LocalClassOrInterfaceDeclaration = ClassDeclaration | NormalInterfaceDeclaration;
+LocalVariableDeclarationStatement = LocalVariableDeclaration, &#34;;&#34;;
+LocalVariableDeclaration = {VariableModifier}, LocalVariableType, VariableDeclaratorList;
+LocalVariableType = UnannType | &#34;var&#34;;
+Statement = StatementWithoutTrailingSubstatement | LabeledStatement | IfThenStatement | IfThenElseStatement | WhileStatement | ForStatement;
+StatementNoShortIf = StatementWithoutTrailingSubstatement | LabeledStatementNoShortIf | IfThenElseStatementNoShortIf | WhileStatementNoShortIf | ForStatementNoShortIf;
+StatementWithoutTrailingSubstatement = Block | EmptyStatement | ExpressionStatement | AssertStatement | SwitchStatement | DoStatement | BreakStatement | ContinueStatement | ReturnStatement | SynchronizedStatement | ThrowStatement | TryStatement | YieldStatement;
+EmptyStatement = &#34;;&#34;;
+LabeledStatement = Identifier, &#34;:&#34;, Statement;
+LabeledStatementNoShortIf = Identifier, &#34;:&#34;, StatementNoShortIf;
+ExpressionStatement = StatementExpression, &#34;;&#34;;
+StatementExpression = Assignment | PreIncrementExpression | PreDecrementExpression | PostIncrementExpression | PostDecrementExpression | MethodInvocation | ClassInstanceCreationExpression;
+IfThenStatement = &#34;if&#34;, &#34;(&#34;, Expression, &#34;)&#34;, Statement;
+IfThenElseStatement = &#34;if&#34;, &#34;(&#34;, Expression, &#34;)&#34;, StatementNoShortIf, &#34;else&#34;, Statement;
+IfThenElseStatementNoShortIf = &#34;if&#34;, &#34;(&#34;, Expression, &#34;)&#34;, StatementNoShortIf, &#34;else&#34;, StatementNoShortIf;
+AssertStatement = (&#34;assert&#34;, Expression, &#34;;&#34;) | (&#34;assert&#34;, Expression, &#34;:&#34;, Expression, &#34;;&#34;);
+SwitchStatement = &#34;switch&#34;, &#34;(&#34;, Expression, &#34;)&#34;, SwitchBlock;
+SwitchBlock = ( &#34;{&#34;, SwitchRule, {SwitchRule}, &#34;}&#34; ) | ( &#34;{&#34;, {SwitchBlockStatementGroup}, {SwitchLabel, &#34;:&#34;}, &#34;}&#34; );
+SwitchRule = (SwitchLabel, &#34;-&gt;&#34;, Expression, &#34;;&#34;) |(SwitchLabel, &#34;-&gt;&#34;, Block) | (SwitchLabel, &#34;-&gt;&#34;, ThrowStatement);
+SwitchBlockStatementGroup = SwitchLabel, &#34;:&#34;, {SwitchLabel, &#34;:&#34;}, BlockStatements;
+SwitchLabel = (&#34;case&#34;, CaseConstant, {&#34;,&#34;, CaseConstant}) | &#34;default&#34;;
+CaseConstant = ConditionalExpression;
+WhileStatement = &#34;while&#34;, &#34;(&#34;, Expression, &#34;)&#34;, Statement;
+WhileStatementNoShortIf = &#34;while&#34;, &#34;(&#34;, Expression, &#34;)&#34;, StatementNoShortIf;
+DoStatement = &#34;do&#34;, Statement, &#34;while&#34;, &#34;(&#34;, Expression, &#34;)&#34;, &#34;;&#34;;
+ForStatement = BasicForStatement | EnhancedForStatement | ForStatementNoShortIf | BasicForStatementNoShortIf | EnhancedForStatementNoShortIf;
+BasicForStatement = &#34;for&#34;, &#34;(&#34;, [ForInit], &#34;;&#34;, [Expression], &#34;;&#34;, [ForUpdate], &#34;)&#34;, Statement;
+BasicForStatementNoShortIf = &#34;for&#34;, &#34;(&#34;, [ForInit], &#34;;&#34;, [Expression], &#34;;&#34;, [ForUpdate], &#34;)&#34;, StatementNoShortIf;
+ForInit = StatementExpressionList | LocalVariableDeclaration;
+ForUpdate = StatementExpressionList;
+StatementExpressionList = StatementExpression, {&#34;,&#34;, StatementExpression};
+EnhancedForStatement = &#34;for&#34;, &#34;(&#34;, LocalVariableDeclaration, &#34;:&#34;, Expression, &#34;)&#34;, Statement;
+EnhancedForStatementNoShortIf = &#34;for&#34;, &#34;(&#34;, LocalVariableDeclaration, &#34;:&#34;, Expression, &#34;)&#34;, StatementNoShortIf;
+BreakStatement = break, [Identifier], &#34;;&#34;;
+YieldStatement = &#34;yield&#34;, Expression, &#34;;&#34;;
+ContinueStatement = &#34;continue&#34;, [Identifier], &#34;;&#34;;
+ReturnStatement = &#34;return&#34; [Expression], &#34;;&#34;;
+ThrowStatement = &#34;throw&#34;, Expression, &#34;;&#34;;
+SynchronizedStatement = &#34;synchronized&#34;, &#34;(&#34;, Expression, &#34;)&#34;, Block;
+TryStatement = (&#34;try&#34;, Block, Catches) | (&#34;try&#34;, Block, [Catches], Finally ) | TryWithResourcesStatement;
+Catches = CatchClause, {CatchClause};
+CatchClause = &#34;catch&#34;, &#34;(&#34;, CatchFormalParameter, &#34;)&#34;, Block;
+CatchFormalParameter = {VariableModifier}, CatchType, VariableDeclaratorId;
+CatchType = UnannClassType, {&#34;|&#34;, ClassType};
+Finally = &#34;finally&#34;, Block;
+TryWithResourcesStatement = &#34;try&#34;, ResourceSpecification, Block, [Catches], [Finally];
+ResourceSpecification = &#34;(&#34;, ResourceList, [&#34;;&#34;], &#34;)&#34;;
+ResourceList = Resource, {&#34;;&#34;, Resource};
+Resource = LocalVariableDeclaration | VariableAccess;
+Pattern = TypePattern;
+TypePattern = LocalVariableDeclaration;
+
+(* Expressions *)
+
+Primary = PrimaryNoNewArray | ArrayCreationExpression;
+PrimaryNoNewArray = Literal | ClassLiteral | &#34;this&#34; | (TypeName, &#34;.&#34;, &#34;this&#34;) | ( &#34;(&#34;, Expression, &#34;)&#34; ) | ClassInstanceCreationExpression | FieldAccess | ArrayAccess | MethodInvocation | MethodReference;
+ClassLiteral = (TypeName, { &#34;[&#34;, &#34;]&#34; }, &#34;.&#34;, &#34;class&#34;) | (NumericType, {&#34;[&#34;, &#34;]&#34;}, &#34;.&#34;, &#34;class&#34;) | (&#34;boolean&#34;, {&#34;[&#34;, &#34;]&#34;}, &#34;.&#34;, &#34;class&#34;) | (&#34;void&#34;, &#34;.&#34;, &#34;class&#34;);
+ClassInstanceCreationExpression = UnqualifiedClassInstanceCreationExpression | (ExpressionName, &#34;.&#34;, UnqualifiedClassInstanceCreationExpression) |(Primary, &#34;.&#34;, UnqualifiedClassInstanceCreationExpression);
+UnqualifiedClassInstanceCreationExpression = &#34;new&#34;, [TypeArguments], ClassOrInterfaceTypeToInstantiate, &#34;(&#34;, [ArgumentList], &#34;)&#34;, [ClassBody];
+ClassOrInterfaceTypeToInstantiate = {Annotation}, Identifier, {&#34;.&#34;, {Annotation}, Identifier}, [TypeArgumentsOrDiamond];
+TypeArgumentsOrDiamond = TypeArguments | (&#34;&lt;&#34;,&#34;&gt;&#34;);
+ArrayCreationExpression = ArrayCreationExpressionWithoutInitializer | ArrayCreationExpressionWithInitializer;
+ArrayCreationExpressionWithoutInitializer = (&#34;new&#34;, PrimitiveType, DimExprs, [Dims]) | (&#34;new&#34;, ClassOrInterfaceType, DimExprs, [Dims]);
+ArrayCreationExpressionWithInitializer = (&#34;new&#34;, PrimitiveType, Dims, ArrayInitializer) | (&#34;new&#34;, ClassOrInterfaceType, Dims, ArrayInitializer);
+DimExprs = DimExpr, {DimExpr};
+DimExpr = ({Annotation}, [ Expression ]) | (ArrayAccess, &#34;=&#34;, ExpressionName, &#34;[&#34;, Expression, &#34;]&#34;) | (PrimaryNoNewArray, &#34;[&#34;, Expression, &#34;]&#34;) | (ArrayCreationExpressionWithInitializer, &#34;[&#34;, Expression, &#34;]&#34;);
+FieldAccess = (Primary, &#34;.&#34;, Identifier), (&#34;super&#34;, &#34;.&#34;, Identifier), (TypeName, &#34;.&#34;, super, &#34;.&#34;, Identifier);
+MethodInvocation = (MethodName, &#34;(&#34;, [ArgumentList], &#34;)&#34;) | (TypeName, &#34;.&#34;, [TypeArguments], Identifier, &#34;(&#34;, [ArgumentList], &#34;)&#34;) | (ExpressionName, &#34;.&#34;, [TypeArguments], Identifier, &#34;(&#34;, [ArgumentList], &#34;)&#34;) | (Primary, &#34;.&#34;, [TypeArguments], Identifier, &#34;(&#34;, [ArgumentList], &#34;)&#34;) | (&#34;super&#34;, &#34;.&#34;, [TypeArguments], Identifier, &#34;(&#34;, [ArgumentList], &#34;)&#34;) | (TypeName, &#34;.&#34;, &#34;super&#34;, &#34;.&#34;, [TypeArguments], Identifier, &#34;(&#34;, [ArgumentList], &#34;)&#34;);
+ArgumentList = Expression, {&#34;,&#34;, Expression};
+MethodReference = (ExpressionName, &#34;::&#34;, [TypeArguments], Identifier) | (Primary, &#34;::&#34;, [TypeArguments], Identifier) | (ReferenceType, &#34;::&#34;, [TypeArguments], Identifier) | (&#34;super&#34;, &#34;::&#34;, [TypeArguments], Identifier) | (TypeName, &#34;.&#34;, super, &#34;::&#34;, [TypeArguments], Identifier) | (ClassType, &#34;::&#34;, [TypeArguments], &#34;new&#34;) | (ArrayType, &#34;::&#34;, &#34;new&#34;);
+Expression = LambdaExpression | AssignmentExpression;
+LambdaExpression = LambdaParameters, &#34;-&gt;&#34;, LambdaBody;
+LambdaParameters = (&#34;(&#34;, [LambdaParameterList], &#34;)&#34;) | Identifier;
+LambdaParameterList = (LambdaParameter, {&#34;,&#34;, LambdaParameter}) | (Identifier, {&#34;,&#34;, Identifier});
+LambdaParameter = ({VariableModifier}, LambdaParameterType, VariableDeclaratorId) | VariableArityParameter;
+LambdaParameterType = UnannType | &#34;var&#34;;
+LambdaBody = Expression | Block;
+AssignmentExpression = ConditionalExpression | Assignment;
+Assignment = LeftHandSide | AssignmentOperator | Expression;
+LeftHandSide = ExpressionName | FieldAccess | ArrayAccess;
+AssignmentOperator = &#34;=&#34; | &#34;*=&#34; | &#34;/=&#34; | &#34;%=&#34; | &#34;+=&#34; | &#34;-=&#34; | &#34;&lt;&lt;=&#34; | &#34;&gt;&gt;=&#34; | &#34;&gt;&gt;&gt;=&#34; | &#34;&amp;=&#34; | &#34;^=&#34; | &#34;|=&#34;;
+ConditionalExpression = ConditionalOrExpression | (ConditionalOrExpression, &#34;?&#34;, Expression, &#34;:&#34;, ConditionalExpression) | (ConditionalOrExpression, &#34;?&#34;, Expression, &#34;:&#34;, LambdaExpression);
+ConditionalOrExpression = ConditionalAndExpression | (ConditionalOrExpression, &#34;||&#34;, ConditionalAndExpression);
+ConditionalAndExpression = InclusiveOrExpression | (ConditionalAndExpression, &#34;&amp;&amp;&#34;, InclusiveOrExpression);
+InclusiveOrExpression = ExclusiveOrExpression | (InclusiveOrExpression, &#34;|&#34;, ExclusiveOrExpression);
+ExclusiveOrExpression = AndExpression | (ExclusiveOrExpression, &#34;^&#34;, AndExpression);
+AndExpression = EqualityExpression, (AndExpression, &#34;&amp;&#34;, EqualityExpression) | (EqualityExpression, &#34;=&#34;, RelationalExpression) | (EqualityExpression, &#34;==&#34;, RelationalExpression) | (EqualityExpression, &#34;!=&#34;, RelationalExpression);
+RelationalExpression = ShiftExpression | (RelationalExpression, &#34;&lt;&#34;, ShiftExpression) | (RelationalExpression, &#34;&gt;&#34;, ShiftExpression) | (RelationalExpression, &#34;&lt;=&#34;, ShiftExpression) | (RelationalExpression, &#34;&gt;=&#34;, ShiftExpression) | (InstanceofExpression);
+InstanceofExpression = (RelationalExpression, &#34;instanceof&#34;, ReferenceType) | (RelationalExpression, &#34;instanceof&#34;, Pattern);
+ShiftExpression = AdditiveExpression | (ShiftExpression, &#34;&lt;&lt;&#34;, AdditiveExpression) | (ShiftExpression, &#34;&gt;&gt;&#34;, AdditiveExpression) | (ShiftExpression, &#34;&gt;&gt;&gt;&#34;, AdditiveExpression);
+AdditiveExpression = MultiplicativeExpression | (AdditiveExpression, &#34;+&#34;, MultiplicativeExpression) | (AdditiveExpression, &#34;-&#34;, MultiplicativeExpression);
+MultiplicativeExpression = UnaryExpression | (MultiplicativeExpression, &#34;*&#34;, UnaryExpression) | (MultiplicativeExpression, &#34;/&#34;, UnaryExpression) | (MultiplicativeExpression, &#34;%&#34;, UnaryExpression);
+UnaryExpression = PreIncrementExpression | PreDecrementExpression | (&#34;+&#34;, UnaryExpression) | (&#34;-&#34;, UnaryExpression) | UnaryExpressionNotPlusMinus;
+PreIncrementExpression = &#34;++&#34;, UnaryExpression;
+PreDecrementExpression = &#34;--&#34;, UnaryExpression;
+UnaryExpressionNotPlusMinus = PostfixExpression | (&#34;~&#34;, UnaryExpression) | (&#34;!&#34;, UnaryExpression) | CastExpression | SwitchExpression;
+PostfixExpression = Primary | ExpressionName | PostIncrementExpression | PostDecrementExpression;
+PostIncrementExpression = PostfixExpression, &#34;++&#34;;
+PostDecrementExpression = PostfixExpression, &#34;--&#34;;
+CastExpression = (&#34;(&#34;, PrimitiveType, &#34;)&#34;, UnaryExpression) | (&#34;(&#34;, ReferenceType, {AdditionalBound}, &#34;)&#34;, UnaryExpressionNotPlusMinus) | (&#34;(&#34;, ReferenceType, {AdditionalBound}, &#34;)&#34;, LambdaExpression);
+SwitchExpression = &#34;switch&#34;, &#34;(&#34;, Expression, &#34;)&#34;, SwitchBlock;
+ConstantExpression = Expression;
+@endebnf
+</textarea>
+                <div id="out646cb52bb5634f5dc692c202f63f5370">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="937" height="4096" class="scale"
+                            src="/imgw/img-646cb52bb5634f5dc692c202f63f5370.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="6007bd14bc7a4d17"></a>
+            <!--heading-->
+            <h2 class="chap">Remaining defects </h2>
+            <p></p>
+            <h3>Could you put &#39;arrow head&#39; on all rerouted lines?</h3>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startebnf
+title Could you put &#39;arrow head&#39; on all rerouted lines?
+test = [1], [12], [123], [1234];
+@endebnf
+</textarea>
+                <div id="outcf0fb87115b7fac4787ba833ba64edb2">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="449" height="148" class="scale"
+                            src="/imgw/img-cf0fb87115b7fac4787ba833ba64edb2.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <em>Fixed by <a
+                    href="https://github.com/plantuml/plantuml/commit/5bbb5a8d27e56db31aec97617edfbda6e3082703">EBNF
+                    more arrow head</a> on <strong>V1.2024.8</strong></em>
+            <p></p>
+            <h3>Order issue</h3>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startebnf
+a = (one, two), three;
+b = (one (* 1 *), two (* 2 *)), three (* 3 *);
+@endebnf
+</textarea>
+                <div id="outee0cb0efa0d6ea1992dd88f36a81fd80">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="232" height="206" class="scale"
+                            src="/imgw/img-ee0cb0efa0d6ea1992dd88f36a81fd80.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <p></p>
+            <em>[Ref. <a href="https://forum.plantuml.net/17090/ebnf-perserve-the-order-of-element">QA-17090</a>, fixed
+                by <a href="https://github.com/plantuml/plantuml/commit/9521f6c06f6fa3af96c3d12ceb897c54fb97541a">EBNF
+                    concatenation order</a> on <strong>V1.2024.8</strong>]</em>
+            <p></p>
+            <h3>Allow accentuated or Unicode char on EBNF meta-identifier or rule name.</h3>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startebnf
+(* Test of accentuated or Unicode char*)
+alt = été | hiver;
+hiver = &#39;froid&#39;;
+été = &#39;chaud&#39;;
+@endebnf
+</textarea>
+                <div id="outf2062a4ec61af7c4a5c51ffb7e8005a7">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="250" height="314" class="scale"
+                            src="/imgw/img-f2062a4ec61af7c4a5c51ffb7e8005a7.png" />
+                    </div>
+                </div>
+            </div>
+            <em>[Ref. <a
+                    href="https://forum.plantuml.net/17145/ebnf-allow-accentuated-unicode-char-ebnf-meta-identifier-rule">QA-17145</a>
+                , fixed by <a
+                    href="https://github.com/plantuml/plantuml/commit/99ea667a0c3b38fea848a208730d6776d668b5a6">EBNF
+                    better unicode support</a> on <strong>V1.2024.8</strong>]</em>
+            <p></p>
+            <h3>Allow full restriction management with <code class="cod">except-symbol &#34;-&#34;</code></h3>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startebnf
+title First [modified] example of §5.8 Syntactic-term of ISO-EBNF
+
+letter = ? &#34;A&#34; - &#34;Z&#34; ?;
+
+vowel = &#34;A&#34; | &#34;E&#34; | &#34;I&#34; | &#34;O&#34; | &#34;U&#34;;
+
+consonant = letter - vowel;
+@endebnf
+</textarea>
+                <div id="out078b455b00238d054aef0bf7b9221f2f">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="440" height="419" class="scale"
+                            src="/imgw/img-078b455b00238d054aef0bf7b9221f2f.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <p></p>
+            <em>[Ref. <a
+                    href="https://forum.plantuml.net/16735/ebnf-allow-full-restriction-management-with-except-symbol">QA-16735</a>]</em>
+
+
+        </main>
+
+
+        <aside id="C6">
+            <!--toc-->
+            <div id="toc">
+                <ul>
+                    <li><a href="#480f4bc351a60134">Minimal binary diagram</a>
+                    </li>
+                    <li><a href="#735437e6fd32864a">All EBNF Elements</a>
+                    </li>
+                    <li><a href="#85aeb07de49e6db4">Special sequence management with `+special-sequence-symbol
+                            &#34;?&#34;+`</a>
+                    </li>
+                    <li><a href="#795877454b6aa54b">Full repetition management with `+repetition-symbol
+                            &#34;*&#34;+`</a>
+                    </li>
+                    <li><a href="#bd90d595616d1cf2">Drawing mode</a>
+                    </li>
+                    <li><a href="#5398a902fa7ed57d">Notes on Elements</a>
+                    </li>
+                    <li><a href="#bb2ede32ce6accb8">Using (global) style</a>
+                    </li>
+                    <li><a href="#6ebedcbc408cf830">Example of LISP Grammar</a>
+                    </li>
+                    <li><a href="#4fd52eccba095c80">EBNF of PlantUMLs EBNF Grammar</a>
+                    </li>
+                    <li><a href="#324aba8a3f83acb0">Java Language Specification</a>
+                    </li>
+                    <li><a href="#6007bd14bc7a4d17">Remaining defects</a>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+    </div>
+    <script src="../../viz-global.js"></script>
+    <script src="../../plantuml.js"></script>
+    <script>
+        (function () {
+            const render = window.plantumlRender;
+            if (typeof render !== "function") {
+                console.error("PlantUML renderer is unavailable.");
+                return;
+            }
+
+            const renderOptions = {};
+            let counter = 0;
+
+            document.querySelectorAll(".mycell").forEach((mycell) => {
+                const host = mycell.parentElement;
+                const textarea = host ? host.previousElementSibling : null;
+                if (!textarea || textarea.tagName !== "TEXTAREA") return;
+
+                if (!mycell.id) {
+                    counter += 1;
+                    mycell.id = "mycell-render-" + counter;
+                }
+
+                const draw = () => {
+                    mycell.innerHTML = "";
+                    render(textarea.value.split(/\r\n|\r|\n/), mycell.id, renderOptions);
+                };
+
+                textarea.addEventListener("input", draw);
+                draw();
+            });
+        })();
+    </script>
+</body>
+
+</html>

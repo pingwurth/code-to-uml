@@ -1,0 +1,2276 @@
+<html lang="en">
+
+<head>
+
+
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Organization",
+  "url": "https://plantuml.com",
+  "name": "PlantUML",
+  "sameAs" : ["https://twitter.com/plantuml","https://en.wikipedia.org/wiki/PlantUML","https://www.wikidata.org/wiki/Q18346546"],
+  "logo": "https://cdn-0.plantuml.com/logo3.png",
+  "contactPoint": [{
+    "@type": "ContactPoint",
+    "email": "plantuml@gmail.com",
+    "url": "https://plantuml.com",
+    "contactType": "customer service"
+  }]
+}
+</script>
+  <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+    "@type": "ListItem",
+    "position": 1,
+    "item": {
+      "@id": "https://plantuml.com",
+      "name": "Home"
+    }
+  },{
+    "@type": "ListItem",
+    "position": 2,
+    "item": {
+      "@id": "https://plantuml.com/sitemap-language-specification",
+      "name": "Language specification"
+    }
+  },{
+    "@type": "ListItem",
+    "position": 3,
+    "item": {
+      "@id": "https://plantuml.com/nwdiag",
+      "name": "nwdiag"
+  }
+  }]
+}
+</script>
+  <link rel="canonical" href="https://plantuml.com/nwdiag" />
+  <link rel="alternate" hreflang="x-default" href="https://plantuml.com/nwdiag" />
+  <link rel="alternate" hreflang="de" href="https://plantuml.com/de/nwdiag" />
+  <link rel="alternate" hreflang="en" href="https://plantuml.com/nwdiag" />
+  <link rel="alternate" hreflang="es" href="https://plantuml.com/es/nwdiag" />
+  <link rel="alternate" hreflang="fr" href="https://plantuml.com/fr/nwdiag" />
+  <link rel="alternate" hreflang="ja" href="https://plantuml.com/ja/nwdiag" />
+  <link rel="alternate" hreflang="ko" href="https://plantuml.com/ko/nwdiag" />
+  <link rel="alternate" hreflang="zh" href="https://plantuml.com/zh/nwdiag" />
+
+  <link rel="shortcut icon" href="/favicon.ico" />
+
+
+  <!-- link rel="preload" as="image" href="https://img.shields.io/liberapay/patrons/plantuml.svg?logo=liberapay" -->
+
+
+  <title>nwdiag</title>
+  <meta name="description" content="nwdiag network diagrams." />
+
+  <meta property="og:type" content="article" />
+  <!-- volt:dokuwiki titleog: -->
+  <!-- volt:dokuwiki descriptionog: -->
+
+  <meta property="og:url" content="https://plantuml.com/nwdiag" />
+  <meta property="og:site_name" content="PlantUML.com" />
+
+  <!-- meta property="og:image" content="https://plantuml.com/og-nwdiag" -->
+  <meta name="twitter:image" content="https://plantuml.com/og-nwdiag" />
+  <meta property="og:locale" content="en" />
+
+  <meta name="twitter:card" content="summary" />
+  <!-- volt:dokuwiki titletwitter: -->
+  <!-- volt:dokuwiki descriptiontwitter: -->
+  <meta name="twitter:site" content="@PlantUML" />
+  <meta name="twitter:creator" content="@PlantUML" />
+
+  <script>
+    if (window.location.href.indexOf("/en/") == -1) {
+      var lg = navigator.language.substring(0, 2);
+      if (lg == "de") window.location.href = "/de/nwdiag";
+      if (lg == "es") window.location.href = "/es/nwdiag";
+      if (lg == "fr") window.location.href = "/fr/nwdiag";
+      if (lg == "ja") window.location.href = "/ja/nwdiag";
+      if (lg == "ko") window.location.href = "/ko/nwdiag";
+      if (lg == "ru") window.location.href = "/ru/nwdiag";
+      if (lg == "zh") window.location.href = "/zh/nwdiag";
+    }
+  </script>
+
+
+  <!-- https://www.w3schools.com/colors/colors_picker.asp -->
+  <!-- filter css https://codepen.io/sosuke/pen/Pjoqqp -->
+
+
+  <style>
+    .scale {}
+
+    li {
+      margin: 2px;
+    }
+
+    #external li {
+      margin: 13px;
+    }
+
+    @media screen and (max-width: 1190px) {
+    }
+
+
+    .coptable {
+      max-width: 90%;
+    }
+
+    .mytab {
+      display: inline-block;
+      border-radius: 3px;
+      border: 1px solid #e1e4e8;
+    }
+
+    .mytab:hover {
+      border: 1px dashed #0366d6;
+      cursor: pointer;
+      color: #0366d6;
+      background: #f6f8fa;
+    }
+
+    .cop {
+      margin: 25px 10px 0 10px;
+    }
+
+    .cop:hover {
+      cursor: pointer;
+      filter: invert(30%) sepia(75%) saturate(4001%) hue-rotate(201deg) brightness(88%) contrast(98%);
+    }
+
+    .cop2 {
+      margin: 25px 10px 0 10px;
+    }
+
+    .cop2:hover {
+      cursor: pointer;
+    }
+
+    .msg {
+      position: absolute;
+      color: #339966;
+      background-color: #FFF;
+      margin-top: 55px;
+      display: none;
+      border-radius: 3px;
+      border: 1px solid #4dff00;
+    }
+
+    .mycell0 {
+      float: left;
+      vertical-align: top;
+      padding: 10px;
+    }
+
+    .mycell0 code:hover {
+      cursor: default;
+      color: #000;
+    }
+
+    .mycell {
+      float: right;
+      vertical-align: top;
+      padding: 10px;
+      max-width: 55vw;
+      overflow-x: auto;
+    }
+
+    .mycell0 pre {
+      max-width: 55vw;
+      overflow-x: auto;
+    }
+
+    .cod {
+      background: #edeff3;
+      padding: 2px 5px;
+      border-radius: 3px;
+    }
+
+    .colo {
+      display: inline-block;
+      background: #edeff3;
+      padding: 7px 12px;
+      border-radius: 3px;
+    }
+
+    .tag,
+    .tagg,
+    .tago,
+    .tagr {
+      text-rendering: optimizeLegibility;
+      display: inline-block;
+      padding: 3px 5px 2px 4px;
+      text-decoration: none;
+      white-space: nowrap;
+      border: 1px solid #999;
+      text-transform: uppercase;
+      text-align: center;
+      border-radius: 3px;
+      font-size: 11px;
+      font-weight: bold;
+      line-height: 90%;
+    }
+
+    .tag {
+      background-color: #EEEEEE;
+    }
+
+    .tagg {
+      background-color: #98FB98;
+    }
+
+    .tago {
+      background-color: #fafa00;
+    }
+
+    .tagr {
+      background-color: #FF4500;
+    }
+
+
+    a {
+      text-decoration: none;
+      color: #0366d6;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .menu1 {
+      display: flex;
+      flex-direction: row;
+      border: 0;
+      font-size: 14px;
+      padding: 0;
+      margin: 0;
+      white-space: nowrap;
+    }
+
+    .menu1 a {
+      white-space: nowrap;
+      padding: 0 8px;
+      text-decoration: none;
+      color: #5e6d7d;
+      line-height: 30px;
+      height: 30px;
+    }
+
+    .menu1 a:hover {
+      background: #fefefe;
+      color: #0366d6;
+    }
+
+    .menuside2 {
+      display: flex;
+      flex-direction: column;
+      border: 0;
+      font-size: 14px;
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+      justify-content: center;
+    }
+
+    .menuside2 img {
+      vertical-align: top;
+      padding: 0 8px;
+      filter: brightness(0) saturate(100%) invert(42%) sepia(22%) saturate(385%) hue-rotate(170deg) brightness(92%) contrast(84%);
+    }
+
+    .menuside2 a {
+      padding: 6px 0;
+      text-decoration: none;
+      color: #5e6d7d;
+    }
+
+    .menuside2 a:hover {
+      color: #0366d6;
+      background: #fefefe;
+    }
+
+    .menuside2 a:hover img {
+      filter: brightness(0) saturate(100%) invert(23%) sepia(44%) saturate(7029%) hue-rotate(203deg) brightness(94%) contrast(98%);
+    }
+
+    .breadcrumb {
+      z-index: 1;
+      font-size: 14px;
+      text-align: center;
+      display: inline-block;
+      overflow: hidden;
+      border-radius: 5px;
+    }
+
+
+    .breadcrumb a {
+      text-decoration: none;
+      outline: none;
+      display: block;
+      float: left;
+      font-size: 12px;
+      line-height: 24px;
+      color: #373f49;
+      padding: 0 10px 0 35px;
+      background: #f0f1f1;
+      background: linear-gradient(#f0f1f1, #c6d2d2);
+      position: relative;
+    }
+
+    .breadcrumb a:first-child {
+      padding-left: 21px;
+      border-radius: 5px 0 0 5px;
+      /*to match with the parent's radius*/
+    }
+
+    .breadcrumb a:first-child:before {
+      left: 14px;
+    }
+
+    .breadcrumb a:last-child {
+      visibility: hidden;
+    }
+
+    .breadcrumb a.active,
+    .breadcrumb a:hover {
+      color: #0366d6;
+      background: #c6d2d2;
+      background: linear-gradient(#e3e4e4, #b8c7c7);
+    }
+
+    .breadcrumb a.active:after,
+    .breadcrumb a:hover:after {
+      background: #c6d2d2;
+      background: linear-gradient(135deg, #e3e4e4, #b8c7c7);
+    }
+
+    .breadcrumb a:after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: -12px;
+      /*half of square's length*/
+      /*same dimension as the line-height of .breadcrumb a */
+      width: 24px;
+      height: 24px;
+      transform: scale(0.707) rotate(45deg);
+      /*we need to prevent the arrows from getting buried under the next link*/
+      z-index: 1;
+      /*background same as links but the gradient will be rotated to compensate with the transform applied*/
+      background: #f0f1f1;
+      background: linear-gradient(135deg, #f0f1f1, #c6d2d2);
+      /*stylish arrow design using box shadow*/
+      box-shadow:
+        2px -2px 0 2px rgba(0, 0, 0, 0.1),
+        3px -3px 0 2px rgba(255, 255, 255, 0.1);
+      /*
+		5px - for rounded arrows and 
+		50px - to prevent hover glitches on the border created using shadows*/
+      border-radius: 0 5px 0 50px;
+    }
+
+    /*we dont need an arrow after the last link*/
+    .breadcrumb a:last-child:after {
+      content: none;
+      visibility: hidden;
+    }
+
+
+    .lga,
+    .lga a,
+    .lgi,
+    .lgi a {
+      font-size: 13px;
+      text-align: center;
+      color: #fff;
+      padding: 0 5px;
+      margin: 0;
+    }
+
+    .lga,
+    .lga a {
+      background-color: #008;
+    }
+
+    .lgi,
+    .lgi a {
+      background-color: #888;
+    }
+
+    .lga:hover,
+    .lga:hover a {
+      text-decoration: none;
+      color: #BBB;
+    }
+
+    .lgi:hover,
+    .lgi:hover a {
+      text-decoration: none;
+      color: #CCC;
+    }
+  </style>
+  <style>
+    body {
+      font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+      font-size: 14px;
+      line-height: 1.5;
+      margin: auto;
+      overflow-x: hidden;
+      background: #fefefe;
+    }
+
+    h1.chap {
+      font-size: 1.8em;
+    }
+
+    h2.chap {
+      font-size: 1.35em;
+    }
+
+    h3,
+    h3.chap {
+      font-size: 1.15em;
+    }
+
+    h4 {
+      font-size: 1.05em;
+    }
+
+    table {
+      font-size: inherit;
+    }
+  </style>
+
+
+  <style>
+    .dyn {
+      display: flex;
+      flex-direction: row;
+      gap: 3em;
+      align-items: stretch;
+      flex-wrap: wrap;
+      margin: 10px 0;
+    }
+
+    .dyn textarea {
+      font-family: monospace;
+      font-size: 13px;
+      line-height: 1.4;
+      min-width: 30ch;
+      max-width: 90ch;
+      box-sizing: border-box;
+      resize: both;
+      white-space: pre;
+      overflow: auto;
+      field-sizing: content;
+      align-self: stretch;
+      border: 1px solid #888;
+      border-radius: 3px;
+      margin: 0;
+      padding: 4px 8px;
+      background: #fefefe;
+    }
+
+    .dyn>div {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      display: flex;
+    }
+
+    .dyn>div>div {
+      margin: 0;
+      padding: 0;
+    }
+
+    .dyn img {
+      margin: 0;
+      padding: 0;
+    }
+
+    .scale {
+      max-width: 100%;
+      height: auto;
+      border: 1px solid #dde;
+      border-radius: 4px;
+    }
+  </style>
+
+
+  <script>
+    var llg = "en";
+    var az = 0;
+    var amdark = 0;
+    function ljs(n) {
+      if (az) return false;
+      var sc = document.createElement("script");
+      sc.type = "text/javascript";
+      sc.src = "/btn-" + n + ".js";
+      document.body.innerHTML = "<i style='position:absolute;top:30%;width:100%;'><center>Loading in progress...";
+      document.body.appendChild(sc);
+    }
+    function ctc(id) {
+      document.getElementById('img' + id).classList.remove('cop'); document.getElementById('img' + id).classList.add('cop2');
+      document.getElementById('pre' + id).style.backgroundColor = '#4dff00';
+      document.getElementById('msg' + id).style.display = 'inline';
+
+      setTimeout(function () { document.getElementById('img' + id).classList.remove('cop2'); document.getElementById('img' + id).classList.add('cop'); document.getElementById('pre' + id).style.backgroundColor = ''; document.getElementById('msg' + id).style.display = 'none'; }, 800);
+
+
+      text = document.getElementById('pre' + id).innerText;
+      if (window.clipboardData && window.clipboardData.setData)
+        return window.clipboardData.setData("Text", text);
+      else if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
+        var ta = document.createElement("textarea");
+        ta.textContent = text;
+        ta.style.position = "fixed";
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          return document.execCommand("copy");
+        }
+        catch (ex) {
+          return false;
+        }
+        finally {
+          document.body.removeChild(ta);
+        }
+      }
+    }
+  </script>
+</head>
+
+<body>
+  <style>
+    body,
+    .container,
+    #B3,
+    #C5,
+    #C6,
+    #C7,
+    #D7,
+    #D8 {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      overflow-y: scroll;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      grid-template-rows: auto 1fr auto;
+      min-height: 100vh;
+    }
+
+    #B3 {
+      grid-column: 1 / 5;
+      grid-row: 1;
+      position: sticky;
+      top: 0;
+      height: 30px;
+      padding: 0;
+      z-index: 10;
+      overflow: hidden;
+      background: #edeff3;
+      border-bottom: 1px solid #d4d8de;
+    }
+
+    #D7 {
+      grid-column: 1;
+      grid-row: 2;
+      margin: 0;
+      padding: 0;
+      padding-left: 30px;
+      line-height: 1.6;
+    }
+
+    #D8 {
+      grid-column: 1;
+      grid-row: 3;
+      position: sticky;
+      bottom: 0;
+      z-index: 5;
+      background: #fefefe;
+    }
+
+    #C5 {
+      grid-column: 2;
+      grid-row: 1 / -1;
+      position: sticky;
+      top: 40px;
+      align-self: start;
+      height: calc(98vh - 60px);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #C6 {
+      grid-column: 3;
+      grid-row: 1 / -1;
+      position: sticky;
+      top: 40px;
+      align-self: start;
+      height: calc(98vh - 60px);
+      max-width: 200px;
+      overflow: hidden;
+      margin: 0 10px;
+      padding: 8px 5px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #C7 {
+      grid-column: 4;
+      grid-row: 1 / -1;
+      position: sticky;
+      top: 40px;
+      align-self: start;
+      height: calc(98vh - 60px);
+      margin: 0 20px 0 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #toc {
+      z-index: 15;
+      overflow-x: hidden;
+      overflow-y: auto;
+      background: #f6f8fa;
+      border-width: 2px;
+      border-style: groove;
+      border-radius: 3px;
+      border-color: #e1e4e8;
+      margin: 0 5px;
+      padding: 0;
+      max-height: 100%;
+    }
+
+    #toc ul {
+      margin: 0;
+      list-style-type: none;
+      padding: 0;
+    }
+
+    #toc li {
+      padding: 0 10px;
+      margin: 0;
+    }
+
+    #toc li a {
+      padding: 5px 0;
+      display: inline-block;
+      text-decoration: none;
+      width: 100%;
+      color: #5e6d7d;
+    }
+
+    #toc li a:hover {
+      color: #0366d6;
+    }
+
+    #toc li:hover {
+      background: #fefefe;
+    }
+
+    #magic {
+      position: absolute;
+      top: 0;
+      right: 50px;
+      width: 30px;
+      height: 30px;
+      overflow: hidden;
+      background: #edeff3;
+      z-index: 14;
+    }
+
+    #magic:hover {
+      width: calc(100% - 50px);
+    }
+
+    #magic .menu1 {
+      position: absolute;
+      top: 0;
+      right: 30px;
+      height: 30px;
+      padding-left: 10px;
+      background: #edeff3;
+      border-left: 1px solid #d4d8de;
+      border-bottom: 1px solid #d4d8de;
+    }
+
+    .menu1-tail {
+      flex-grow: 1;
+      flex-shrink: 0;
+      height: 30px;
+      position: relative;
+      z-index: 15;
+      background: #edeff3;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: auto auto auto;
+      grid-auto-rows: auto;
+      gap: 5px;
+      margin: 0;
+      padding: 0;
+    }
+
+    .merged {
+      grid-column: 1 / -1;
+    }
+
+    #C6 {
+      display: none;
+    }
+
+    @media (min-width: 1401px) {
+      #C6:has(#toc li) {
+        display: flex;
+      }
+    }
+
+    @media (max-width: 1100px) {
+      #C5,
+      #C7 {
+        display: none;
+      }
+    }
+
+    @media (max-width: 1200px) {
+      .merged {
+        display: none;
+      }
+    }
+  </style>
+
+  <div class="container">
+
+    <footer id="D8">
+
+      <p>
+      </p>
+      <p>
+
+      </p>
+    </footer>
+
+
+    <header id="B3">
+      <div class="menu1">
+        <a id="titem10" href="sequence-diagram_en.html">Sequence</a>
+        <a id="titem20" href="use-case-diagram_en.html">Use Case</a>
+        <a id="titem30" href="class-diagram_en.html">Class</a>
+        <a id="titem40" href="activity-diagram-beta_en.html">Activity</a>
+        <a id="titem50" href="component-diagram_en.html">Component</a>
+        <a id="titem60" href="state-diagram_en.html">State</a>
+        <a id="titem70" href="object-diagram_en.html">Object</a>
+        <a id="titem80" href="deployment-diagram_en.html">Deployment</a>
+        <a id="titem90" href="timing-diagram_en.html">Timing</a>
+
+        <a id="titem99" href="regex_en.html">Regex</a>
+        <a id="titem100" href="nwdiag_en.html">Network</a>
+        <a id="titem110" href="salt_en.html">Wireframe</a>
+        <a id="titem120" href="archimate-diagram_en.html">Archimate</a>
+        <a id="titem130" href="gantt-diagram_en.html">Gantt</a>
+        <a id="titem140" href="mindmap-diagram_en.html">MindMap</a>
+        <a id="titem150" href="wbs-diagram_en.html">WBS</a>
+        <a id="titem151" href="ebnf_en.html">EBNF</a>
+        <a id="titem160" href="json_en.html">JSON</a>
+        <a id="titem170" href="yaml_en.html">YAML</a>
+
+        <div class="menu1-tail"></div>
+      </div>
+      <div id="magic">
+        <div class="menu1">
+          <a id="titem10" href="sequence-diagram_en.html">Sequence</a>
+          <a id="titem20" href="use-case-diagram_en.html">Use Case</a>
+          <a id="titem30" href="class-diagram_en.html">Class</a>
+          <a id="titem40" href="activity-diagram-beta_en.html">Activity</a>
+          <a id="titem50" href="component-diagram_en.html">Component</a>
+          <a id="titem60" href="state-diagram_en.html">State</a>
+          <a id="titem70" href="object-diagram_en.html">Object</a>
+          <a id="titem80" href="deployment-diagram_en.html">Deployment</a>
+          <a id="titem90" href="timing-diagram_en.html">Timing</a>
+
+          <a id="titem99" href="regex_en.html">Regex</a>
+          <a id="titem100" href="nwdiag_en.html">Network</a>
+          <a id="titem110" href="salt_en.html">Wireframe</a>
+          <a id="titem120" href="archimate-diagram_en.html">Archimate</a>
+          <a id="titem130" href="gantt-diagram_en.html">Gantt</a>
+          <a id="titem140" href="mindmap-diagram_en.html">MindMap</a>
+          <a id="titem150" href="wbs-diagram_en.html">WBS</a>
+          <a id="titem151" href="ebnf_en.html">EBNF</a>
+          <a id="titem160" href="json_en.html">JSON</a>
+          <a id="titem170" href="yaml_en.html">YAML</a>
+
+          <div class="menu1-tail"></div>
+        </div>
+      </div><!-- magic -->
+    </header>
+
+    <main id="D7">
+
+      <style>
+        #donate {
+          padding-top: 10px;
+          min-height: 30px;
+        }
+      </style>
+
+
+      <p style="clear:both;">
+
+
+        <style>
+          #titem100 {
+            color: #0366d6;
+            background-color: #fefefe;
+          }
+
+          #titem100 img {
+            filter: brightness(0) saturate(100%) invert(23%) sepia(44%) saturate(7029%) hue-rotate(203deg) brightness(94%) contrast(98%);
+          }
+
+          .menu1:hover #titem100 {
+            color: #5e6d7d;
+          }
+
+          .menu1:hover #titem100:hover {
+            color: #0366d6;
+          }
+
+          .menu1:hover #titem100 img {
+            filter: brightness(0) saturate(100%) invert(42%) sepia(22%) saturate(385%) hue-rotate(170deg) brightness(92%) contrast(84%);
+          }
+        </style>
+
+        <a style="position:relative;top:-38px;" name="73a26b4967968217"></a>
+        <!--heading-->
+      </p>
+      <h1 class="chap">Network Diagram with nwdiag</h1>
+      <p></p>
+      A <a href="https://en.wikipedia.org/wiki/Computer_network_diagram">network diagram</a> is a visual representation
+      of a computer or telecommunications network. It illustrates the <strong>arrangement and interconnections</strong>
+      of network components, including servers, routers, switches, hubs, and devices. Network diagrams are invaluable
+      tools for network engineers and administrators to <strong>understand, set up, and troubleshoot networks</strong>.
+      They are also essential for <strong>visualizing the structure and flow of data</strong> in a network, ensuring
+      optimal performance and security.
+      <p></p>
+      <a href="http://blockdiag.com/en/nwdiag/nwdiag-examples.html">nwdiag</a>, developed by <a
+        href="https://twitter.com/tk0miya">Takeshi Komiya</a>, provides a streamlined platform to swiftly sketch
+      <strong>network diagrams</strong>. We extend our gratitude to Takeshi for this <strong>innovative tool</strong>!
+      <p></p>
+      Given its intuitive syntax, <a href="http://blockdiag.com/en/nwdiag/nwdiag-examples.html">nwdiag</a> has been
+      seamlessly integrated into <strong>PlantUML</strong>. The examples showcased here are inspired by the ones
+      documented by <a href="https://twitter.com/tk0miya">Takeshi</a>.
+      <a style="position:relative;top:-38px;" name="a5e72f15f187e8dc"></a>
+      <!--heading-->
+      <h2 class="chap">Simple diagram</h2>
+      <p></p>
+      <h3>Define a network</h3>
+      <p></p>
+      To make the process more efficient, it is now possible to bypass the <code class="cod">nwdiag { ... }</code>
+      wrapper. You can define your network directly within the PlantUML tags.
+      <p></p>
+      <strong>Standard approach:</strong>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startnwdiag
+nwdiag {
+  network dmz {
+    address = &#34;210.x.x.x/24&#34;
+  }
+}
+@endnwdiag
+</textarea>
+        <div id="out81c7775c722ffc6273716e80212323ce">
+          <div class="mycell">
+            <img loading="lazy" width="150" height="73" class="scale"
+              src="/imgw/img-81c7775c722ffc6273716e80212323ce.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <strong>Simplified approach:</strong>
+      We have introduced this to simplify the syntax and reduce boilerplate code:
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startnwdiag
+network dmz {
+  address = &#34;210.x.x.x/24&#34;
+}
+@endnwdiag
+</textarea>
+        <div id="out18bdeb4f1b400ed82e58a644c9e02e70">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="150" height="73" class="scale"
+              src="/imgw/img-18bdeb4f1b400ed82e58a644c9e02e70.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>Define some elements or servers on a network</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startnwdiag
+  network dmz {
+      address = &#34;210.x.x.x/24&#34;
+
+      web01 [address = &#34;210.x.x.1&#34;];
+      web02 [address = &#34;210.x.x.2&#34;];
+  }
+@endnwdiag
+</textarea>
+        <div id="out3c6fabe81fe0bca7763b9a13147ef5c6">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="251" height="142" class="scale"
+              src="/imgw/img-3c6fabe81fe0bca7763b9a13147ef5c6.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>Full example</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startnwdiag
+  network dmz {
+      address = &#34;210.x.x.x/24&#34;
+
+      web01 [address = &#34;210.x.x.1&#34;];
+      web02 [address = &#34;210.x.x.2&#34;];
+  }
+  network internal {
+      address = &#34;172.x.x.x/24&#34;;
+
+      web01 [address = &#34;172.x.x.1&#34;];
+      web02 [address = &#34;172.x.x.2&#34;];
+      db01;
+      db02;
+  }
+@endnwdiag
+</textarea>
+        <div id="out9e68f7d168e419bd771fe3d3f077041b">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="251" height="261" class="scale"
+              src="/imgw/img-9e68f7d168e419bd771fe3d3f077041b.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="2ae160764fd53ec8"></a>
+      <!--heading-->
+      <h2 class="chap">Define multiple addresses</h2>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startnwdiag
+  network dmz {
+      address = &#34;210.x.x.x/24&#34;
+
+      // set multiple addresses (using comma)
+      web01 [address = &#34;210.x.x.1, 210.x.x.20&#34;];
+      web02 [address = &#34;210.x.x.2&#34;];
+  }
+  network internal {
+      address = &#34;172.x.x.x/24&#34;;
+
+      web01 [address = &#34;172.x.x.1&#34;];
+      web02 [address = &#34;172.x.x.2&#34;];
+      db01;
+      db02;
+  }
+@endnwdiag
+</textarea>
+        <div id="out0824d41543e750bf473a622e58533f92">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="251" height="275" class="scale"
+              src="/imgw/img-0824d41543e750bf473a622e58533f92.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="a474d00c7bcfdbc7"></a>
+      <!--heading-->
+      <h2 class="chap">Grouping nodes</h2>
+      <p></p>
+      <h3>Define group inside network definitions</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startnwdiag
+  network Sample_front {
+    address = &#34;192.168.10.0/24&#34;;
+
+    // define group
+    group web {
+      web01 [address = &#34;.1&#34;];
+      web02 [address = &#34;.2&#34;];
+    }
+  }
+  network Sample_back {
+    address = &#34;192.168.20.0/24&#34;;
+    web01 [address = &#34;.1&#34;];
+    web02 [address = &#34;.2&#34;];
+    db01 [address = &#34;.101&#34;];
+    db02 [address = &#34;.102&#34;];
+
+    // define network using defined nodes
+    group db {
+      db01;
+      db02;
+    }
+  }
+@endnwdiag
+</textarea>
+        <div id="outc3a436bd297957e62c53b4a7a2721c45">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="273" height="275" class="scale"
+              src="/imgw/img-c3a436bd297957e62c53b4a7a2721c45.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>Define group outside of network definitions</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startnwdiag
+  // define group outside of network definitions
+  group {
+    color = &#34;#FFAAAA&#34;;
+
+    web01;
+    web02;
+    db01;
+  }
+
+  network dmz {
+    web01;
+    web02;
+  }
+  network internal {
+    web01;
+    web02;
+    db01;
+    db02;
+  }
+@endnwdiag
+</textarea>
+        <div id="outf1c88bb6f4b6cef4e69a0692ef629f82">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="302" height="226" class="scale"
+              src="/imgw/img-f1c88bb6f4b6cef4e69a0692ef629f82.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>Define several groups on same network</h3>
+      <h4>Example with 2 group</h4>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startnwdiag
+  group {
+    color = &#34;#FFaaaa&#34;;
+    web01;
+    db01;
+  }
+  group {
+    color = &#34;#aaaaFF&#34;;
+    web02;
+    db02;
+  }
+  network dmz {
+      address = &#34;210.x.x.x/24&#34;
+
+      web01 [address = &#34;210.x.x.1&#34;];
+      web02 [address = &#34;210.x.x.2&#34;];
+  }
+  network internal {
+      address = &#34;172.x.x.x/24&#34;;
+
+      web01 [address = &#34;172.x.x.1&#34;];
+      web02 [address = &#34;172.x.x.2&#34;];
+      db01 ;
+      db02 ;
+  }
+@endnwdiag
+</textarea>
+        <div id="out8f3e93d108c5bb0d757ff9b2b7124a39">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="251" height="261" class="scale"
+              src="/imgw/img-8f3e93d108c5bb0d757ff9b2b7124a39.png" />
+          </div>
+        </div>
+      </div>
+      <em>[Ref. <a href="https://forum.plantuml.net/12663">QA-12663</a>]</em>
+      <p></p>
+      <h4>Example with 3 groups</h4>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startnwdiag
+  group {
+    color = &#34;#FFaaaa&#34;;
+    web01;
+    db01;
+  }
+  group {
+    color = &#34;#aaFFaa&#34;;
+    web02;
+    db02;
+  }
+  group {
+    color = &#34;#aaaaFF&#34;;
+    web03;
+    db03;
+  }
+
+  network dmz {
+      web01;
+      web02;
+      web03;
+  }
+  network internal {
+      web01;
+      db01 ;
+      web02;
+      db02 ;
+      web03;
+      db03;
+  }
+@endnwdiag
+</textarea>
+        <div id="outbea4c1aa64b685f5fe1759133252117f">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="311" height="226" class="scale"
+              src="/imgw/img-bea4c1aa64b685f5fe1759133252117f.png" />
+          </div>
+        </div>
+      </div>
+      <em>[Ref. <a href="https://forum.plantuml.net/13138">QA-13138</a>]</em>
+      <a style="position:relative;top:-38px;" name="689b04b2da37f214"></a>
+      <!--heading-->
+      <h2 class="chap">Extended Syntax (for network or group)</h2>
+      <p></p>
+      <h3>Network </h3>
+      <p></p>
+      For network or network&#39;s component, you can add or change:
+      <ul>
+        <li>addresses <em>(separated by comma <code class="cod">,</code>)</em>;</li>
+        <li><a href="color">color</a>;</li>
+        <li>description;</li>
+        <li><a href="deployment-diagram#5k3cq00k8n5ek362kjdn">shape</a>.</li>
+      </ul>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startnwdiag
+nwdiag {
+  network Sample_front {
+    address = &#34;192.168.10.0/24&#34;
+    color = &#34;red&#34;
+
+    // define group
+    group web {
+      web01 [address = &#34;.1, .2&#34;, shape = &#34;node&#34;]
+      web02 [address = &#34;.2, .3&#34;]
+    }
+  }
+  network Sample_back {
+    address = &#34;192.168.20.0/24&#34;
+    color = &#34;palegreen&#34;
+    web01 [address = &#34;.1&#34;]
+    web02 [address = &#34;.2&#34;]
+    db01 [address = &#34;.101&#34;, shape = database ]
+    db02 [address = &#34;.102&#34;]
+
+    // define network using defined nodes
+    group db {
+      db01;
+      db02;
+    }
+  }
+}
+@endnwdiag
+</textarea>
+        <div id="out13729d3b6d266eb0888da03712742ec4">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="293" height="308" class="scale"
+              src="/imgw/img-13729d3b6d266eb0888da03712742ec4.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>Group</h3>
+      <p></p>
+      For a group, you can add or change:
+      <ul>
+        <li><a href="color">color</a>;</li>
+        <li>description.</li>
+      </ul>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startnwdiag
+nwdiag {
+  group {
+    color = &#34;#CCFFCC&#34;;
+    description = &#34;Long group description&#34;;
+
+    web01;
+    web02;
+    db01;
+  }
+
+  network dmz {
+    web01;
+    web02;
+  }
+  network internal {
+    web01;
+    web02;
+    db01 [address = &#34;.101&#34;, shape = database];
+  }
+}
+@endnwdiag
+</textarea>
+        <div id="out837da18a8992839d95c2f147e4699490">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="226" height="309" class="scale"
+              src="/imgw/img-837da18a8992839d95c2f147e4699490.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/12056">QA-12056</a>]</em>
+      <a style="position:relative;top:-38px;" name="ef406f4e5b0858a8"></a>
+      <!--heading-->
+      <h2 class="chap">Using Sprites</h2>
+      <p></p>
+      You can use all <a href="sprite">sprites</a> (icons) from the <a href="stdlib">Standard Library</a> or any other
+      library.
+      <p></p>
+      Use the notation <code class="cod">&lt;$sprite&gt;</code> to use a sprite, <code class="cod">\n</code> to make a
+      new line, or any other <a href="creole">Creole</a> syntax.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startnwdiag
+!include &lt;office/Servers/application_server&gt;
+!include &lt;office/Servers/database_server&gt;
+
+nwdiag {
+  network dmz {
+      address = &#34;210.x.x.x/24&#34;
+
+      // set multiple addresses (using comma)
+      web01 [address = &#34;210.x.x.1, 210.x.x.20&#34;,  description = &#34;&lt;$application_server&gt;\n web01&#34;]
+      web02 [address = &#34;210.x.x.2&#34;,  description = &#34;&lt;$application_server&gt;\n web02&#34;];
+  }
+  network internal {
+      address = &#34;172.x.x.x/24&#34;;
+
+      web01 [address = &#34;172.x.x.1&#34;];
+      web02 [address = &#34;172.x.x.2&#34;];
+      db01 [address = &#34;172.x.x.100&#34;,  description = &#34;&lt;$database_server&gt;\n db01&#34;];
+      db02 [address = &#34;172.x.x.101&#34;,  description = &#34;&lt;$database_server&gt;\n db02&#34;];
+  }
+}
+@endnwdiag
+</textarea>
+        <div id="oute19620d835ab7e5b9f63aad94faf03f9">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="258" height="377" class="scale"
+              src="/imgw/img-e19620d835ab7e5b9f63aad94faf03f9.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/11862/nwdiag-beautifier?show=11866#a11866">QA-11862</a>]</em>
+      <a style="position:relative;top:-38px;" name="3a5665cf21923894"></a>
+      <!--heading-->
+      <h2 class="chap">Using OpenIconic</h2>
+      <p></p>
+      You can also use the icons from <a href="openiconic">OpenIconic</a> in network or node descriptions.
+      <p></p>
+      Use the notation <code class="cod">&lt;&amp;icon&gt;</code> to make an icon, <code
+        class="cod">&lt;&amp;icon*n&gt;</code> to multiply the size by a factor <code class="cod">n</code>, and <code
+        class="cod">\n</code> to make a newline:
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startnwdiag
+
+nwdiag {
+  group nightly {
+    color = &#34;#FFAAAA&#34;;
+    description = &#34;&lt;&amp;clock&gt; Restarted nightly &lt;&amp;clock&gt;&#34;;
+    web02;
+    db01;
+  }
+  network dmz {
+      address = &#34;210.x.x.x/24&#34;
+
+      user [description = &#34;&lt;&amp;person*4.5&gt;\n user1&#34;];
+      // set multiple addresses (using comma)
+      web01 [address = &#34;210.x.x.1, 210.x.x.20&#34;,  description = &#34;&lt;&amp;cog*4&gt;\nweb01&#34;]
+      web02 [address = &#34;210.x.x.2&#34;,  description = &#34;&lt;&amp;cog*4&gt;\nweb02&#34;];
+
+  }
+  network internal {
+      address = &#34;172.x.x.x/24&#34;;
+
+      web01 [address = &#34;172.x.x.1&#34;];
+      web02 [address = &#34;172.x.x.2&#34;];
+      db01 [address = &#34;172.x.x.100&#34;,  description = &#34;&lt;&amp;spreadsheet*4&gt;\n db01&#34;];
+      db02 [address = &#34;172.x.x.101&#34;,  description = &#34;&lt;&amp;spreadsheet*4&gt;\n db02&#34;];
+      ptr  [address = &#34;172.x.x.110&#34;,  description = &#34;&lt;&amp;print*4&gt;\n ptr01&#34;];
+  }
+}
+@endnwdiag
+</textarea>
+        <div id="out540ec3a8a720a3f8e363ccec16290f1b">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="379" height="399" class="scale"
+              src="/imgw/img-540ec3a8a720a3f8e363ccec16290f1b.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="c6841ad9e8293811"></a>
+      <!--heading-->
+      <h2 class="chap">Same nodes on more than two networks</h2>
+      <p></p>
+      You can use same nodes on different networks (more than two networks); <em>nwdiag</em> use in this case
+      <em>&#39;jump line&#39;</em> over networks.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startnwdiag
+nwdiag {
+  // define group at outside network definitions
+  group {
+    color = &#34;#7777FF&#34;;
+
+    web01;
+    web02;
+    db01;
+  }
+
+  network dmz {
+    color = &#34;pink&#34;
+
+    web01;
+    web02;
+  }
+
+  network internal {
+    web01;
+    web02;
+    db01 [shape = database ];
+  }
+
+  network internal2 {
+    color = &#34;LightBlue&#34;;
+
+    web01;
+    web02;
+    db01;
+  }
+
+}
+@endnwdiag
+</textarea>
+        <div id="out130bac8811df010d45988f38faba6def">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="309" height="285" class="scale"
+              src="/imgw/img-130bac8811df010d45988f38faba6def.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="5269e00666792dc8"></a>
+      <!--heading-->
+      <h2 class="chap">Peer networks</h2>
+      <p></p>
+      Peer networks are simple connections between two nodes, for which we don&#39;t use a horizontal &#34;busbar&#34;
+      network
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startnwdiag
+nwdiag {
+  inet [shape = cloud];
+  inet -- router;
+
+  network {
+    router;
+    web01;
+    web02;
+  }
+}
+@endnwdiag
+</textarea>
+        <div id="outa8bd2e65d674b3bd515d4fa08400b895">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="190" height="341" class="scale"
+              src="/imgw/img-a8bd2e65d674b3bd515d4fa08400b895.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="54d98c3b820d13ab"></a>
+      <!--heading-->
+      <h2 class="chap">Peer networks and group</h2>
+      <p></p>
+      <h3>Without group</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startnwdiag
+nwdiag {
+    internet [ shape = cloud];
+    internet -- router;
+
+    network proxy {
+        router;
+        app;
+    }
+    network default {
+    	app;
+        db;
+    }
+}
+@endnwdiag
+</textarea>
+        <div id="out70103b237a7f8322e7c9857ad80eeb0a">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="152" height="446" class="scale"
+              src="/imgw/img-70103b237a7f8322e7c9857ad80eeb0a.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>Group on first</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startnwdiag
+nwdiag {
+    internet [ shape = cloud];
+    internet -- router;
+
+    group {
+      color = &#34;pink&#34;;
+      app;
+      db;
+    }
+
+    network proxy {
+        router;
+        app;
+    }
+
+    network default {
+    	app;
+        db;
+    }
+}
+@endnwdiag
+</textarea>
+        <div id="outc9c5e57fd5a8655733869dac72d98485">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="152" height="446" class="scale"
+              src="/imgw/img-c9c5e57fd5a8655733869dac72d98485.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>Group on second</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startnwdiag
+nwdiag {
+    internet [ shape = cloud];
+    internet -- router;
+
+    network proxy {
+        router;
+        app;
+    }
+
+    group {
+      color = &#34;pink&#34;;
+      app;
+      db;
+    }
+
+    network default {
+    	app;
+        db;
+    }
+}
+@endnwdiag
+</textarea>
+        <div id="out561452c171d72ecfa651b9539a1e417f">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="152" height="446" class="scale"
+              src="/imgw/img-561452c171d72ecfa651b9539a1e417f.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>Group on third</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startnwdiag
+nwdiag {
+    internet [ shape = cloud];
+    internet -- router;
+
+    network proxy {
+        router;
+        app;
+    }
+    network default {
+    	app;
+        db;
+    }
+    group {
+      color = &#34;pink&#34;;
+      app;
+      db;
+    }
+}
+@endnwdiag
+</textarea>
+        <div id="out7cbdd8825ac69453a3efadecc08f3a0b">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="152" height="446" class="scale"
+              src="/imgw/img-7cbdd8825ac69453a3efadecc08f3a0b.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://github.com/plantuml/plantuml/issues/408">Issue#408</a> and <a
+          href="https://forum.plantuml.net/12655/nwdiag-overlapp-problem-with-3-newtorks?show=12661#c12661">QA-12655</a>]</em>
+      <a style="position:relative;top:-38px;" name="8ba6f1ec3040c130"></a>
+      <!--heading-->
+      <h2 class="chap">Add title, caption, header, footer or legend on network diagram</h2>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startnwdiag
+
+header some header
+
+footer some footer
+
+title My title
+
+nwdiag {
+  network inet {
+      web01 [shape = cloud]
+  }
+}
+
+legend
+The legend
+end legend
+
+caption This is caption
+@endnwdiag
+</textarea>
+        <div id="out3562a21763c41afd268f874c96a7f814">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="130" height="270" class="scale"
+              src="/imgw/img-3562a21763c41afd268f874c96a7f814.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a
+          href="https://forum.plantuml.net/11303/nwdiag-ignores-on-title-keyword-in-plantuml-1-2020-7">QA-11303</a> and
+        <a href="commons">Common commands</a>]</em>
+      <a style="position:relative;top:-38px;" name="6c877ca10407b478"></a>
+      <!--heading-->
+      <h2 class="chap">With or without shadow</h2>
+      <p></p>
+      <h3>With shadow (by default)</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startnwdiag
+nwdiag {
+  network nw {
+    server;
+    internet;
+  }
+  internet [shape = cloud];
+}
+@endnwdiag
+</textarea>
+        <div id="out21bb2f8d78d20d2fdbb4d72a5ce9118a">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="214" height="131" class="scale"
+              src="/imgw/img-21bb2f8d78d20d2fdbb4d72a5ce9118a.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <h3>Without shadow</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startnwdiag
+&lt;style&gt;
+root {
+ shadowing 0
+}
+&lt;/style&gt;
+nwdiag {
+  network nw {
+    server;
+    internet;
+  }
+  internet [shape = cloud];
+}
+@endnwdiag
+</textarea>
+        <div id="out0cc3a2dd09e0fb712112f5ea96c94340">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="214" height="131" class="scale"
+              src="/imgw/img-0cc3a2dd09e0fb712112f5ea96c94340.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/14516/">QA-14516</a>]</em>
+      <a style="position:relative;top:-38px;" name="18d135f438c5b485"></a>
+      <!--heading-->
+      <h2 class="chap">Change width of the networks</h2>
+      <p></p>
+      You can change the width of the networks, especially in order to have the same full width for only some or all
+      networks.
+      <p></p>
+      Here are some examples, with all the possibilities.
+      <p></p>
+      <h3>First example</h3>
+      <ul>
+        <li>without</li>
+      </ul>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startnwdiag
+nwdiag {
+  network NETWORK_BASE {
+   dev_A [address = &#34;dev_A&#34; ]
+   dev_B [address = &#34;dev_B&#34; ]
+  }
+  network IntNET1 {
+   dev_B [address = &#34;dev_B1&#34; ]
+   dev_M [address = &#34;dev_M1&#34; ]
+  }
+  network IntNET2 {
+   dev_B [address = &#34;dev_B2&#34; ]
+   dev_M [address = &#34;dev_M2&#34; ]
+ }
+}
+@endnwdiag
+</textarea>
+        <div id="outd495e67549ab688eef92db8cae0c33d4">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="286" height="331" class="scale"
+              src="/imgw/img-d495e67549ab688eef92db8cae0c33d4.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <ul>
+        <li>only the first</li>
+      </ul>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startnwdiag
+nwdiag {
+  network NETWORK_BASE {
+   width = full
+   dev_A [address = &#34;dev_A&#34; ]
+   dev_B [address = &#34;dev_B&#34; ]
+  }
+  network IntNET1 {
+   dev_B [address = &#34;dev_B1&#34; ]
+   dev_M [address = &#34;dev_M1&#34; ]
+  }
+  network IntNET2 {
+   dev_B [address = &#34;dev_B2&#34; ]
+   dev_M [address = &#34;dev_M2&#34; ]
+ }
+}
+@endnwdiag
+</textarea>
+        <div id="out5a194e0dea82c3750687429114ea595e">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="286" height="331" class="scale"
+              src="/imgw/img-5a194e0dea82c3750687429114ea595e.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <ul>
+        <li>the first and the second</li>
+      </ul>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startnwdiag
+nwdiag {
+  network NETWORK_BASE {
+   width = full
+   dev_A [address = &#34;dev_A&#34; ]
+   dev_B [address = &#34;dev_B&#34; ]
+  }
+  network IntNET1 {
+   width = full
+   dev_B [address = &#34;dev_B1&#34; ]
+   dev_M [address = &#34;dev_M1&#34; ]
+  }
+  network IntNET2 {
+   dev_B [address = &#34;dev_B2&#34; ]
+   dev_M [address = &#34;dev_M2&#34; ]
+ }
+}
+@endnwdiag
+</textarea>
+        <div id="outba347560906f579d90f39ceac9d79aae">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="286" height="331" class="scale"
+              src="/imgw/img-ba347560906f579d90f39ceac9d79aae.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <ul>
+        <li>all the network (with same full width)</li>
+      </ul>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startnwdiag
+nwdiag {
+  network NETWORK_BASE {
+   width = full
+   dev_A [address = &#34;dev_A&#34; ]
+   dev_B [address = &#34;dev_B&#34; ]
+  }
+  network IntNET1 {
+   width = full
+   dev_B [address = &#34;dev_B1&#34; ]
+   dev_M [address = &#34;dev_M1&#34; ]
+  }
+  network IntNET2 {
+   width = full
+   dev_B [address = &#34;dev_B2&#34; ]
+   dev_M [address = &#34;dev_M2&#34; ]
+ }
+}
+@endnwdiag
+</textarea>
+        <div id="out6f32c315b19329023ec342a306988d72">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="286" height="331" class="scale"
+              src="/imgw/img-6f32c315b19329023ec342a306988d72.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>Second example</h3>
+      <p></p>
+      <ul>
+        <li>without</li>
+      </ul>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startnwdiag
+nwdiag {
+  e1
+  network n1 {
+    e1
+    e2
+    e3
+  }
+
+  network n2 {
+    e3
+    e4
+    e5
+  }
+
+  network n3 {
+    e2
+    e6
+  }
+}
+@endnwdiag
+</textarea>
+        <div id="out4834cb840a2a0e1193a833ca2f1e8f42">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="219" height="436" class="scale"
+              src="/imgw/img-4834cb840a2a0e1193a833ca2f1e8f42.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <ul>
+        <li>only the first</li>
+      </ul>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startnwdiag
+nwdiag {
+  e1
+  network n1 {
+    width = full
+    e1
+    e2
+    e3
+  }
+
+  network n2 {
+    e3
+    e4
+    e5
+  }
+
+  network n3 {
+    e2
+    e6
+  }
+}
+@endnwdiag
+</textarea>
+        <div id="outb235f4e7c13d8c62625d9a2a178cf3ea">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="219" height="436" class="scale"
+              src="/imgw/img-b235f4e7c13d8c62625d9a2a178cf3ea.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <ul>
+        <li>the first and the second</li>
+      </ul>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startnwdiag
+nwdiag {
+  e1
+  network n1 {
+    width = full
+    e1
+    e2
+    e3
+  }
+
+  network n2 {
+    width = full
+    e3
+    e4
+    e5
+  }
+
+  network n3 {
+    e2
+    e6
+  }
+}
+@endnwdiag
+</textarea>
+        <div id="outcf62d51e878e1d68af2328e3c50ec5a2">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="219" height="436" class="scale"
+              src="/imgw/img-cf62d51e878e1d68af2328e3c50ec5a2.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <ul>
+        <li>all the network (with same full width)</li>
+      </ul>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startnwdiag
+nwdiag {
+  e1
+  network n1 {
+    width = full
+    e1
+    e2
+    e3
+  }
+
+  network n2 {
+    width = full
+    e3
+    e4
+    e5
+  }
+
+  network n3 {
+    width = full
+    e2
+    e6
+  }
+}
+@endnwdiag
+</textarea>
+        <div id="out6bb8435d8fa7a7bf98229c5aaf10829a">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="219" height="436" class="scale"
+              src="/imgw/img-6bb8435d8fa7a7bf98229c5aaf10829a.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="32fe42d8ea1f1541"></a>
+      <!--heading-->
+      <h2 class="chap">Other internal networks</h2>
+      <p></p>
+      You can define other internal networks (TCP/IP, USB, SERIAL,...).
+      <p></p>
+      <ul>
+        <li>Without address or type</li>
+      </ul>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startnwdiag
+nwdiag {
+  network LAN1 {
+     a [address = &#34;a1&#34;];
+  }
+  network LAN2 {
+     a [address = &#34;a2&#34;];
+     switch;
+  }
+  switch -- equip;
+  equip -- printer;
+}
+@endnwdiag
+</textarea>
+        <div id="out6f0df24ef353a7d81ad399127d15a172">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="130" height="464" class="scale"
+              src="/imgw/img-6f0df24ef353a7d81ad399127d15a172.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <ul>
+        <li>With address or type</li>
+      </ul>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startnwdiag
+nwdiag {
+  network LAN1 {
+     a [address = &#34;a1&#34;];
+  }
+  network LAN2 {
+     a [address = &#34;a2&#34;];
+     switch [address = &#34;s2&#34;];
+  }
+  switch -- equip;
+  equip [address = &#34;e3&#34;];
+  equip -- printer;
+  printer [address = &#34;USB&#34;];
+}
+@endnwdiag
+</textarea>
+        <div id="out9f34b267c57f7f8191956fecbdf6f05d">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="130" height="505" class="scale"
+              src="/imgw/img-9f34b267c57f7f8191956fecbdf6f05d.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/12824">QA-12824</a>]</em>
+      <a style="position:relative;top:-38px;" name="bb2ede32ce6accb8"></a>
+      <!--heading-->
+      <h2 class="chap">Using (global) style</h2>
+      <p></p>
+      <h3>Without style <em>(by default)</em></h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startnwdiag
+nwdiag {
+  network DMZ {
+      address = &#34;y.x.x.x/24&#34;
+      web01 [address = &#34;y.x.x.1&#34;];
+      web02 [address = &#34;y.x.x.2&#34;];
+  }
+
+   network Internal {
+    web01;
+    web02;
+    db01 [address = &#34;w.w.w.z&#34;, shape = database];
+  } 
+
+    group {
+    description = &#34;long group label&#34;;
+    web01;
+    web02;
+    db01;
+  }
+}
+@endnwdiag
+</textarea>
+        <div id="out0f77f027af62c0ebdb38dee2c28e431b">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="237" height="330" class="scale"
+              src="/imgw/img-0f77f027af62c0ebdb38dee2c28e431b.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <h3>With style</h3>
+      <p></p>
+      You can use <a href="style-evolution">style</a> to change rendering of elements.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startnwdiag
+&lt;style&gt;
+nwdiagDiagram {
+  network {
+    BackGroundColor green
+    LineColor red
+    LineThickness 1.0
+    FontSize 18
+    FontColor navy
+  }
+  server {
+    BackGroundColor pink
+    LineColor yellow
+    LineThickness 1.0
+    &#39; FontXXX only for description or label
+    FontSize 18
+    FontColor #blue
+  }
+  arrow {
+    &#39; FontXXX only for address 
+    FontSize 17
+    FontColor #red
+    FontName Monospaced
+    LineColor black
+  }
+  group {
+    BackGroundColor cadetblue
+    LineColor black
+    LineThickness 2.0
+    FontSize 11
+    FontStyle bold
+    Margin 5
+    Padding 5
+  }
+}
+&lt;/style&gt;
+nwdiag {
+  network DMZ {
+      address = &#34;y.x.x.x/24&#34;
+      web01 [address = &#34;y.x.x.1&#34;];
+      web02 [address = &#34;y.x.x.2&#34;];
+  }
+
+   network Internal {
+    web01;
+    web02;
+    db01 [address = &#34;w.w.w.z&#34;, shape = database];
+  } 
+
+    group {
+    description = &#34;long group label&#34;;
+    web01;
+    web02;
+    db01;
+  }
+}
+@endnwdiag
+</textarea>
+        <div id="out92a9925d0bd424a955493052b25e0ca6">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="298" height="365" class="scale"
+              src="/imgw/img-92a9925d0bd424a955493052b25e0ca6.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/14479">QA-14479</a>]</em>
+      <a style="position:relative;top:-38px;" name="d0459ee530297569"></a>
+      <!--heading-->
+      <h2 class="chap">Appendix: Test of all shapes on Network diagram (nwdiag)</h2>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startnwdiag
+nwdiag {
+  network Network {
+    Actor       [shape = actor]       
+    Agent       [shape = agent]       
+    Artifact    [shape = artifact]    
+    Boundary    [shape = boundary]    
+    Card        [shape = card]        
+    Cloud       [shape = cloud]       
+    Collections [shape = collections] 
+    Component   [shape = component]   
+  }
+}
+@endnwdiag
+</textarea>
+        <div id="out6495966aaf71006383732f6b52dc9fe1">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="766" height="161" class="scale"
+              src="/imgw/img-6495966aaf71006383732f6b52dc9fe1.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startnwdiag
+nwdiag {
+  network Network {
+    Control     [shape = control]     
+    Database    [shape = database]    
+    Entity      [shape = entity]      
+    File        [shape = file]        
+    Folder      [shape = folder]      
+    Frame       [shape = frame]       
+    Hexagon     [shape = hexagon]     
+    Interface   [shape = interface]   
+  }
+}
+@endnwdiag
+</textarea>
+        <div id="out96591fe60b08c6843a5bc912eef3378a">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="768" height="139" class="scale"
+              src="/imgw/img-96591fe60b08c6843a5bc912eef3378a.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startnwdiag
+nwdiag {
+  network Network {
+    Label       [shape = label]       
+    Node        [shape = node]        
+    Package     [shape = package]     
+    Person      [shape = person]      
+    Queue       [shape = queue]       
+    Stack       [shape = stack]       
+    Rectangle   [shape = rectangle]   
+    Storage     [shape = storage]     
+    Usecase     [shape = usecase]     
+  }
+}
+@endnwdiag
+</textarea>
+        <div id="out5d9e99c196dd29cbb31bac22b986031f">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="916" height="140" class="scale"
+              src="/imgw/img-5d9e99c196dd29cbb31bac22b986031f.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <div class="tag" style="background:#FFAAAA;">FIXME</div>
+      <ol>
+        <li>Overlap of label for folder</li>
+        <li>Hexagon shape is missing</li>
+      </ol>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startnwdiag
+nwdiag {
+network Network {
+Folder [shape = folder]
+Hexagon [shape = hexagon]
+}
+}
+@endnwdiag
+</textarea>
+        <div id="out16b92addb157bce586d9ab1bd27381ca">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="286" height="139" class="scale"
+              src="/imgw/img-16b92addb157bce586d9ab1bd27381ca.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startnwdiag
+nwdiag {
+network Network {
+Folder [shape = folder, description = &#34;Test, long long label\nTest, long long label&#34;]
+Hexagon [shape = hexagon, description = &#34;Test, long long label\nTest, long long label&#34;]
+}
+}
+@endnwdiag
+</textarea>
+        <div id="outac4e65fc607d51c78d9d79d479b80294">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="382" height="184" class="scale"
+              src="/imgw/img-ac4e65fc607d51c78d9d79d479b80294.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <div class="tag" style="background:#FFAAAA;">FIXME</div>
+
+
+    </main>
+
+
+    <aside id="C6">
+      <!--toc-->
+      <div id="toc">
+        <ul>
+          <li><a href="#a5e72f15f187e8dc">Simple diagram</a>
+          </li>
+          <li><a href="#2ae160764fd53ec8">Define multiple addresses</a>
+          </li>
+          <li><a href="#a474d00c7bcfdbc7">Grouping nodes</a>
+          </li>
+          <li><a href="#689b04b2da37f214">Extended Syntax (for network or group)</a>
+          </li>
+          <li><a href="#ef406f4e5b0858a8">Using Sprites</a>
+          </li>
+          <li><a href="#3a5665cf21923894">Using OpenIconic</a>
+          </li>
+          <li><a href="#c6841ad9e8293811">Same nodes on more than two networks</a>
+          </li>
+          <li><a href="#5269e00666792dc8">Peer networks</a>
+          </li>
+          <li><a href="#54d98c3b820d13ab">Peer networks and group</a>
+          </li>
+          <li><a href="#8ba6f1ec3040c130">Add title, caption, header, footer or legend on network diagram</a>
+          </li>
+          <li><a href="#6c877ca10407b478">With or without shadow</a>
+          </li>
+          <li><a href="#18d135f438c5b485">Change width of the networks</a>
+          </li>
+          <li><a href="#32fe42d8ea1f1541">Other internal networks</a>
+          </li>
+          <li><a href="#bb2ede32ce6accb8">Using (global) style</a>
+          </li>
+          <li><a href="#d0459ee530297569">Appendix: Test of all shapes on Network diagram (nwdiag)</a>
+          </li>
+        </ul>
+      </div>
+    </aside>
+
+  </div>
+    <script src="../../viz-global.js"></script>
+    <script src="../../plantuml.js"></script>
+    <script>
+        (function () {
+            const render = window.plantumlRender;
+            if (typeof render !== "function") {
+                console.error("PlantUML renderer is unavailable.");
+                return;
+            }
+
+            const renderOptions = {};
+            let counter = 0;
+
+            document.querySelectorAll(".mycell").forEach((mycell) => {
+                const host = mycell.parentElement;
+                const textarea = host ? host.previousElementSibling : null;
+                if (!textarea || textarea.tagName !== "TEXTAREA") return;
+
+                if (!mycell.id) {
+                    counter += 1;
+                    mycell.id = "mycell-render-" + counter;
+                }
+
+                const draw = () => {
+                    mycell.innerHTML = "";
+                    render(textarea.value.split(/\r\n|\r|\n/), mycell.id, renderOptions);
+                };
+
+                textarea.addEventListener("input", draw);
+                draw();
+            });
+        })();
+    </script>
+</body>
+
+</html>

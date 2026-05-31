@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1"/>
+	<title>Code-To-UML Template</title>
+	<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+	<link rel="stylesheet" href="main.css">
+</head>
+<body>
+	<div class="page-shell demo-shell">
+		<main class="content">
+			<section class="intro">
+				<h1>Code-To-UML Template</h1>
+				<p>项目/代码概述</p>
+			</section>
+
+			<nav class="demo-tabs" aria-label="Demo 图类型">
+				<button class="demo-tab is-active" type="button" data-diagram="sequence">Sequence</button>
+				<button class="demo-tab" type="button" data-diagram="use-case">Use Case</button>
+				<button class="demo-tab" type="button" data-diagram="class">Class</button>
+				<button class="demo-tab" type="button" data-diagram="activity">Activity</button>
+				<button class="demo-tab" type="button" data-diagram="component">Component</button>
+				<button class="demo-tab" type="button" data-diagram="state">State</button>
+				<button class="demo-tab" type="button" data-diagram="object">Object</button>
+				<button class="demo-tab" type="button" data-diagram="deployment">Deployment</button>
+				<button class="demo-tab" type="button" data-diagram="timing">Timing</button>
+				<button class="demo-tab" type="button" data-diagram="regex">Regex</button>
+				<button class="demo-tab" type="button" data-diagram="network">Network</button>
+				<button class="demo-tab" type="button" data-diagram="wireframe">Wireframe</button>
+				<button class="demo-tab" type="button" data-diagram="archimate">Archimate</button>
+				<button class="demo-tab" type="button" data-diagram="gantt">Gantt</button>
+				<button class="demo-tab" type="button" data-diagram="mindmap">MindMap</button>
+				<button class="demo-tab" type="button" data-diagram="wbs">WBS</button>
+				<button class="demo-tab" type="button" data-diagram="ebnf">EBNF</button>
+				<button class="demo-tab" type="button" data-diagram="json">JSON</button>
+				<button class="demo-tab" type="button" data-diagram="yaml">YAML</button>
+			</nav>
+
+				<section class="doc-section demo-panel">
+					<h2 id="demo-title">Sequence</h2>
+					<p id="demo-section-overview">章节概述</p>
+					<div class="demo-examples" data-examples></div>
+				</section>
+		</main>
+		<aside data-demo-toc></aside>
+	</div>
+
+	<script src="viz-global.js"></script>
+	<script src="plantuml.js"></script>
+	<script src="docs-page-core.js"></script>
+	<script src="i18n/zh.js"></script>
+	<script src="i18n/en.js"></script>
+	<script src="i18n-config.js"></script>
+	<script src="toc-component.js"></script>
+	<script src="markdown-it.js"></script>
+	<script src="demo-example-component.js"></script>
+	<script src="demo.js"></script>
+</body>
+</html>

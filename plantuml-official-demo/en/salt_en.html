@@ -1,0 +1,2222 @@
+<html lang="en">
+
+<head>
+
+
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Organization",
+  "url": "https://plantuml.com",
+  "name": "PlantUML",
+  "sameAs" : ["https://twitter.com/plantuml","https://en.wikipedia.org/wiki/PlantUML","https://www.wikidata.org/wiki/Q18346546"],
+  "logo": "https://cdn-0.plantuml.com/logo3.png",
+  "contactPoint": [{
+    "@type": "ContactPoint",
+    "email": "plantuml@gmail.com",
+    "url": "https://plantuml.com",
+    "contactType": "customer service"
+  }]
+}
+</script>
+  <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+    "@type": "ListItem",
+    "position": 1,
+    "item": {
+      "@id": "https://plantuml.com",
+      "name": "Home"
+    }
+  },{
+    "@type": "ListItem",
+    "position": 2,
+    "item": {
+      "@id": "https://plantuml.com/sitemap-language-specification",
+      "name": "Language specification"
+    }
+  },{
+    "@type": "ListItem",
+    "position": 3,
+    "item": {
+      "@id": "https://plantuml.com/salt",
+      "name": "Salt"
+  }
+  }]
+}
+</script>
+  <link rel="canonical" href="https://plantuml.com/salt" />
+  <link rel="alternate" hreflang="x-default" href="https://plantuml.com/salt" />
+  <link rel="alternate" hreflang="de" href="https://plantuml.com/de/salt" />
+  <link rel="alternate" hreflang="en" href="https://plantuml.com/salt" />
+  <link rel="alternate" hreflang="es" href="https://plantuml.com/es/salt" />
+  <link rel="alternate" hreflang="fr" href="https://plantuml.com/fr/salt" />
+  <link rel="alternate" hreflang="ja" href="https://plantuml.com/ja/salt" />
+  <link rel="alternate" hreflang="ko" href="https://plantuml.com/ko/salt" />
+  <link rel="alternate" hreflang="zh" href="https://plantuml.com/zh/salt" />
+
+  <link rel="shortcut icon" href="/favicon.ico" />
+
+
+  <!-- link rel="preload" as="image" href="https://img.shields.io/liberapay/patrons/plantuml.svg?logo=liberapay" -->
+
+
+  <title>Draw GUI mockup with Salt</title>
+  <meta name="description"
+    content="Salt is a subproject included in PlantUML that may help you to design graphical interface. You can define button, radio button, checkbox, window, tree, menu, table…" />
+
+  <meta property="og:type" content="article" />
+  <!-- volt:dokuwiki titleog: -->
+  <!-- volt:dokuwiki descriptionog: -->
+
+  <meta property="og:url" content="https://plantuml.com/salt" />
+  <meta property="og:site_name" content="PlantUML.com" />
+
+  <!-- meta property="og:image" content="https://plantuml.com/og-salt" -->
+  <meta name="twitter:image" content="https://plantuml.com/og-salt" />
+  <meta property="og:locale" content="en" />
+
+  <meta name="twitter:card" content="summary" />
+  <!-- volt:dokuwiki titletwitter: -->
+  <!-- volt:dokuwiki descriptiontwitter: -->
+  <meta name="twitter:site" content="@PlantUML" />
+  <meta name="twitter:creator" content="@PlantUML" />
+
+  <script>
+    if (window.location.href.indexOf("/en/") == -1) {
+      var lg = navigator.language.substring(0, 2);
+      if (lg == "de") window.location.href = "/de/salt";
+      if (lg == "es") window.location.href = "/es/salt";
+      if (lg == "fr") window.location.href = "/fr/salt";
+      if (lg == "ja") window.location.href = "/ja/salt";
+      if (lg == "ko") window.location.href = "/ko/salt";
+      if (lg == "ru") window.location.href = "/ru/salt";
+      if (lg == "zh") window.location.href = "/zh/salt";
+    }
+  </script>
+
+
+  <!-- https://www.w3schools.com/colors/colors_picker.asp -->
+  <!-- filter css https://codepen.io/sosuke/pen/Pjoqqp -->
+
+
+  <style>
+    .scale {}
+
+    li {
+      margin: 2px;
+    }
+
+    #external li {
+      margin: 13px;
+    }
+
+    @media screen and (max-width: 1190px) {
+    }
+
+
+    .coptable {
+      max-width: 90%;
+    }
+
+    .mytab {
+      display: inline-block;
+      border-radius: 3px;
+      border: 1px solid #e1e4e8;
+    }
+
+    .mytab:hover {
+      border: 1px dashed #0366d6;
+      cursor: pointer;
+      color: #0366d6;
+      background: #f6f8fa;
+    }
+
+    .cop {
+      margin: 25px 10px 0 10px;
+    }
+
+    .cop:hover {
+      cursor: pointer;
+      filter: invert(30%) sepia(75%) saturate(4001%) hue-rotate(201deg) brightness(88%) contrast(98%);
+    }
+
+    .cop2 {
+      margin: 25px 10px 0 10px;
+    }
+
+    .cop2:hover {
+      cursor: pointer;
+    }
+
+    .msg {
+      position: absolute;
+      color: #339966;
+      background-color: #FFF;
+      margin-top: 55px;
+      display: none;
+      border-radius: 3px;
+      border: 1px solid #4dff00;
+    }
+
+    .mycell0 {
+      float: left;
+      vertical-align: top;
+      padding: 10px;
+    }
+
+    .mycell0 code:hover {
+      cursor: default;
+      color: #000;
+    }
+
+    .mycell {
+      float: right;
+      vertical-align: top;
+      padding: 10px;
+      max-width: 55vw;
+      overflow-x: auto;
+    }
+
+    .mycell0 pre {
+      max-width: 55vw;
+      overflow-x: auto;
+    }
+
+    .cod {
+      background: #edeff3;
+      padding: 2px 5px;
+      border-radius: 3px;
+    }
+
+    .colo {
+      display: inline-block;
+      background: #edeff3;
+      padding: 7px 12px;
+      border-radius: 3px;
+    }
+
+    .tag,
+    .tagg,
+    .tago,
+    .tagr {
+      text-rendering: optimizeLegibility;
+      display: inline-block;
+      padding: 3px 5px 2px 4px;
+      text-decoration: none;
+      white-space: nowrap;
+      border: 1px solid #999;
+      text-transform: uppercase;
+      text-align: center;
+      border-radius: 3px;
+      font-size: 11px;
+      font-weight: bold;
+      line-height: 90%;
+    }
+
+    .tag {
+      background-color: #EEEEEE;
+    }
+
+    .tagg {
+      background-color: #98FB98;
+    }
+
+    .tago {
+      background-color: #fafa00;
+    }
+
+    .tagr {
+      background-color: #FF4500;
+    }
+
+
+    a {
+      text-decoration: none;
+      color: #0366d6;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .menu1 {
+      display: flex;
+      flex-direction: row;
+      border: 0;
+      font-size: 14px;
+      padding: 0;
+      margin: 0;
+      white-space: nowrap;
+    }
+
+    .menu1 a {
+      white-space: nowrap;
+      padding: 0 8px;
+      text-decoration: none;
+      color: #5e6d7d;
+      line-height: 30px;
+      height: 30px;
+    }
+
+    .menu1 a:hover {
+      background: #fefefe;
+      color: #0366d6;
+    }
+
+    .menuside2 {
+      display: flex;
+      flex-direction: column;
+      border: 0;
+      font-size: 14px;
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+      justify-content: center;
+    }
+
+    .menuside2 img {
+      vertical-align: top;
+      padding: 0 8px;
+      filter: brightness(0) saturate(100%) invert(42%) sepia(22%) saturate(385%) hue-rotate(170deg) brightness(92%) contrast(84%);
+    }
+
+    .menuside2 a {
+      padding: 6px 0;
+      text-decoration: none;
+      color: #5e6d7d;
+    }
+
+    .menuside2 a:hover {
+      color: #0366d6;
+      background: #fefefe;
+    }
+
+    .menuside2 a:hover img {
+      filter: brightness(0) saturate(100%) invert(23%) sepia(44%) saturate(7029%) hue-rotate(203deg) brightness(94%) contrast(98%);
+    }
+
+    .breadcrumb {
+      z-index: 1;
+      font-size: 14px;
+      text-align: center;
+      display: inline-block;
+      overflow: hidden;
+      border-radius: 5px;
+    }
+
+
+    .breadcrumb a {
+      text-decoration: none;
+      outline: none;
+      display: block;
+      float: left;
+      font-size: 12px;
+      line-height: 24px;
+      color: #373f49;
+      padding: 0 10px 0 35px;
+      background: #f0f1f1;
+      background: linear-gradient(#f0f1f1, #c6d2d2);
+      position: relative;
+    }
+
+    .breadcrumb a:first-child {
+      padding-left: 21px;
+      border-radius: 5px 0 0 5px;
+      /*to match with the parent's radius*/
+    }
+
+    .breadcrumb a:first-child:before {
+      left: 14px;
+    }
+
+    .breadcrumb a:last-child {
+      visibility: hidden;
+    }
+
+    .breadcrumb a.active,
+    .breadcrumb a:hover {
+      color: #0366d6;
+      background: #c6d2d2;
+      background: linear-gradient(#e3e4e4, #b8c7c7);
+    }
+
+    .breadcrumb a.active:after,
+    .breadcrumb a:hover:after {
+      background: #c6d2d2;
+      background: linear-gradient(135deg, #e3e4e4, #b8c7c7);
+    }
+
+    .breadcrumb a:after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: -12px;
+      /*half of square's length*/
+      /*same dimension as the line-height of .breadcrumb a */
+      width: 24px;
+      height: 24px;
+      transform: scale(0.707) rotate(45deg);
+      /*we need to prevent the arrows from getting buried under the next link*/
+      z-index: 1;
+      /*background same as links but the gradient will be rotated to compensate with the transform applied*/
+      background: #f0f1f1;
+      background: linear-gradient(135deg, #f0f1f1, #c6d2d2);
+      /*stylish arrow design using box shadow*/
+      box-shadow:
+        2px -2px 0 2px rgba(0, 0, 0, 0.1),
+        3px -3px 0 2px rgba(255, 255, 255, 0.1);
+      /*
+		5px - for rounded arrows and 
+		50px - to prevent hover glitches on the border created using shadows*/
+      border-radius: 0 5px 0 50px;
+    }
+
+    /*we dont need an arrow after the last link*/
+    .breadcrumb a:last-child:after {
+      content: none;
+      visibility: hidden;
+    }
+
+
+    .lga,
+    .lga a,
+    .lgi,
+    .lgi a {
+      font-size: 13px;
+      text-align: center;
+      color: #fff;
+      padding: 0 5px;
+      margin: 0;
+    }
+
+    .lga,
+    .lga a {
+      background-color: #008;
+    }
+
+    .lgi,
+    .lgi a {
+      background-color: #888;
+    }
+
+    .lga:hover,
+    .lga:hover a {
+      text-decoration: none;
+      color: #BBB;
+    }
+
+    .lgi:hover,
+    .lgi:hover a {
+      text-decoration: none;
+      color: #CCC;
+    }
+  </style>
+  <style>
+    body {
+      font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+      font-size: 14px;
+      line-height: 1.5;
+      margin: auto;
+      overflow-x: hidden;
+      background: #fefefe;
+    }
+
+    h1.chap {
+      font-size: 1.8em;
+    }
+
+    h2.chap {
+      font-size: 1.35em;
+    }
+
+    h3,
+    h3.chap {
+      font-size: 1.15em;
+    }
+
+    h4 {
+      font-size: 1.05em;
+    }
+
+    table {
+      font-size: inherit;
+    }
+  </style>
+
+
+  <style>
+    .dyn {
+      display: flex;
+      flex-direction: row;
+      gap: 3em;
+      align-items: stretch;
+      flex-wrap: wrap;
+      margin: 10px 0;
+    }
+
+    .dyn textarea {
+      font-family: monospace;
+      font-size: 13px;
+      line-height: 1.4;
+      min-width: 30ch;
+      max-width: 90ch;
+      box-sizing: border-box;
+      resize: both;
+      white-space: pre;
+      overflow: auto;
+      field-sizing: content;
+      align-self: stretch;
+      border: 1px solid #888;
+      border-radius: 3px;
+      margin: 0;
+      padding: 4px 8px;
+      background: #fefefe;
+    }
+
+    .dyn>div {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      display: flex;
+    }
+
+    .dyn>div>div {
+      margin: 0;
+      padding: 0;
+    }
+
+    .dyn img {
+      margin: 0;
+      padding: 0;
+    }
+
+    .scale {
+      max-width: 100%;
+      height: auto;
+      border: 1px solid #dde;
+      border-radius: 4px;
+    }
+  </style>
+
+
+  <script>
+    var llg = "en";
+    var az = 0;
+    var amdark = 0;
+    function ljs(n) {
+      if (az) return false;
+      var sc = document.createElement("script");
+      sc.type = "text/javascript";
+      sc.src = "/btn-" + n + ".js";
+      document.body.innerHTML = "<i style='position:absolute;top:30%;width:100%;'><center>Loading in progress...";
+      document.body.appendChild(sc);
+    }
+    function ctc(id) {
+      document.getElementById('img' + id).classList.remove('cop'); document.getElementById('img' + id).classList.add('cop2');
+      document.getElementById('pre' + id).style.backgroundColor = '#4dff00';
+      document.getElementById('msg' + id).style.display = 'inline';
+
+      setTimeout(function () { document.getElementById('img' + id).classList.remove('cop2'); document.getElementById('img' + id).classList.add('cop'); document.getElementById('pre' + id).style.backgroundColor = ''; document.getElementById('msg' + id).style.display = 'none'; }, 800);
+
+
+      text = document.getElementById('pre' + id).innerText;
+      if (window.clipboardData && window.clipboardData.setData)
+        return window.clipboardData.setData("Text", text);
+      else if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
+        var ta = document.createElement("textarea");
+        ta.textContent = text;
+        ta.style.position = "fixed";
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          return document.execCommand("copy");
+        }
+        catch (ex) {
+          return false;
+        }
+        finally {
+          document.body.removeChild(ta);
+        }
+      }
+    }
+  </script>
+</head>
+
+<body>
+  <style>
+    body,
+    .container,
+    #B3,
+    #C5,
+    #C6,
+    #C7,
+    #D7,
+    #D8 {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      overflow-y: scroll;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      grid-template-rows: auto 1fr auto;
+      min-height: 100vh;
+    }
+
+    #B3 {
+      grid-column: 1 / 5;
+      grid-row: 1;
+      position: sticky;
+      top: 0;
+      height: 30px;
+      padding: 0;
+      z-index: 10;
+      overflow: hidden;
+      background: #edeff3;
+      border-bottom: 1px solid #d4d8de;
+    }
+
+    #D7 {
+      grid-column: 1;
+      grid-row: 2;
+      margin: 0;
+      padding: 0;
+      padding-left: 30px;
+      line-height: 1.6;
+    }
+
+    #D8 {
+      grid-column: 1;
+      grid-row: 3;
+      position: sticky;
+      bottom: 0;
+      z-index: 5;
+      background: #fefefe;
+    }
+
+    #C5 {
+      grid-column: 2;
+      grid-row: 1 / -1;
+      position: sticky;
+      top: 40px;
+      align-self: start;
+      height: calc(98vh - 60px);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #C6 {
+      grid-column: 3;
+      grid-row: 1 / -1;
+      position: sticky;
+      top: 40px;
+      align-self: start;
+      height: calc(98vh - 60px);
+      max-width: 200px;
+      overflow: hidden;
+      margin: 0 10px;
+      padding: 8px 5px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #C7 {
+      grid-column: 4;
+      grid-row: 1 / -1;
+      position: sticky;
+      top: 40px;
+      align-self: start;
+      height: calc(98vh - 60px);
+      margin: 0 20px 0 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #toc {
+      z-index: 15;
+      overflow-x: hidden;
+      overflow-y: auto;
+      background: #f6f8fa;
+      border-width: 2px;
+      border-style: groove;
+      border-radius: 3px;
+      border-color: #e1e4e8;
+      margin: 0 5px;
+      padding: 0;
+      max-height: 100%;
+    }
+
+    #toc ul {
+      margin: 0;
+      list-style-type: none;
+      padding: 0;
+    }
+
+    #toc li {
+      padding: 0 10px;
+      margin: 0;
+    }
+
+    #toc li a {
+      padding: 5px 0;
+      display: inline-block;
+      text-decoration: none;
+      width: 100%;
+      color: #5e6d7d;
+    }
+
+    #toc li a:hover {
+      color: #0366d6;
+    }
+
+    #toc li:hover {
+      background: #fefefe;
+    }
+
+    #magic {
+      position: absolute;
+      top: 0;
+      right: 50px;
+      width: 30px;
+      height: 30px;
+      overflow: hidden;
+      background: #edeff3;
+      z-index: 14;
+    }
+
+    #magic:hover {
+      width: calc(100% - 50px);
+    }
+
+    #magic .menu1 {
+      position: absolute;
+      top: 0;
+      right: 30px;
+      height: 30px;
+      padding-left: 10px;
+      background: #edeff3;
+      border-left: 1px solid #d4d8de;
+      border-bottom: 1px solid #d4d8de;
+    }
+
+    .menu1-tail {
+      flex-grow: 1;
+      flex-shrink: 0;
+      height: 30px;
+      position: relative;
+      z-index: 15;
+      background: #edeff3;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: auto auto auto;
+      grid-auto-rows: auto;
+      gap: 5px;
+      margin: 0;
+      padding: 0;
+    }
+
+    .merged {
+      grid-column: 1 / -1;
+    }
+
+    #C6 {
+      display: none;
+    }
+
+    @media (min-width: 1401px) {
+      #C6:has(#toc li) {
+        display: flex;
+      }
+    }
+
+    @media (max-width: 1100px) {
+      #C5,
+      #C7 {
+        display: none;
+      }
+    }
+
+    @media (max-width: 1200px) {
+      .merged {
+        display: none;
+      }
+    }
+  </style>
+
+  <div class="container">
+
+    <footer id="D8">
+
+      <p>
+      </p>
+      <p>
+
+      </p>
+    </footer>
+
+
+    <header id="B3">
+      <div class="menu1">
+        <a id="titem10" href="sequence-diagram_en.html">Sequence</a>
+        <a id="titem20" href="use-case-diagram_en.html">Use Case</a>
+        <a id="titem30" href="class-diagram_en.html">Class</a>
+        <a id="titem40" href="activity-diagram-beta_en.html">Activity</a>
+        <a id="titem50" href="component-diagram_en.html">Component</a>
+        <a id="titem60" href="state-diagram_en.html">State</a>
+        <a id="titem70" href="object-diagram_en.html">Object</a>
+        <a id="titem80" href="deployment-diagram_en.html">Deployment</a>
+        <a id="titem90" href="timing-diagram_en.html">Timing</a>
+
+        <a id="titem99" href="regex_en.html">Regex</a>
+        <a id="titem100" href="nwdiag_en.html">Network</a>
+        <a id="titem110" href="salt_en.html">Wireframe</a>
+        <a id="titem120" href="archimate-diagram_en.html">Archimate</a>
+        <a id="titem130" href="gantt-diagram_en.html">Gantt</a>
+        <a id="titem140" href="mindmap-diagram_en.html">MindMap</a>
+        <a id="titem150" href="wbs-diagram_en.html">WBS</a>
+        <a id="titem151" href="ebnf_en.html">EBNF</a>
+        <a id="titem160" href="json_en.html">JSON</a>
+        <a id="titem170" href="yaml_en.html">YAML</a>
+
+        <div class="menu1-tail"></div>
+      </div>
+      <div id="magic">
+        <div class="menu1">
+          <a id="titem10" href="sequence-diagram_en.html">Sequence</a>
+          <a id="titem20" href="use-case-diagram_en.html">Use Case</a>
+          <a id="titem30" href="class-diagram_en.html">Class</a>
+          <a id="titem40" href="activity-diagram-beta_en.html">Activity</a>
+          <a id="titem50" href="component-diagram_en.html">Component</a>
+          <a id="titem60" href="state-diagram_en.html">State</a>
+          <a id="titem70" href="object-diagram_en.html">Object</a>
+          <a id="titem80" href="deployment-diagram_en.html">Deployment</a>
+          <a id="titem90" href="timing-diagram_en.html">Timing</a>
+
+          <a id="titem99" href="regex_en.html">Regex</a>
+          <a id="titem100" href="nwdiag_en.html">Network</a>
+          <a id="titem110" href="salt_en.html">Wireframe</a>
+          <a id="titem120" href="archimate-diagram_en.html">Archimate</a>
+          <a id="titem130" href="gantt-diagram_en.html">Gantt</a>
+          <a id="titem140" href="mindmap-diagram_en.html">MindMap</a>
+          <a id="titem150" href="wbs-diagram_en.html">WBS</a>
+          <a id="titem151" href="ebnf_en.html">EBNF</a>
+          <a id="titem160" href="json_en.html">JSON</a>
+          <a id="titem170" href="yaml_en.html">YAML</a>
+
+          <div class="menu1-tail"></div>
+        </div>
+      </div><!-- magic -->
+    </header>
+
+    <main id="D7">
+
+      <style>
+        #donate {
+          padding-top: 10px;
+          min-height: 30px;
+        }
+      </style>
+
+
+      <p style="clear:both;">
+
+
+        <style>
+          #titem110 {
+            color: #0366d6;
+            background-color: #fefefe;
+          }
+
+          #titem110 img {
+            filter: brightness(0) saturate(100%) invert(23%) sepia(44%) saturate(7029%) hue-rotate(203deg) brightness(94%) contrast(98%);
+          }
+
+          .menu1:hover #titem110 {
+            color: #5e6d7d;
+          }
+
+          .menu1:hover #titem110:hover {
+            color: #0366d6;
+          }
+
+          .menu1:hover #titem110 img {
+            filter: brightness(0) saturate(100%) invert(42%) sepia(22%) saturate(385%) hue-rotate(170deg) brightness(92%) contrast(84%);
+          }
+        </style>
+
+        <a style="position:relative;top:-38px;" name="59611760774947cd"></a>
+        <!--heading-->
+      </p>
+      <h1 class="chap">Salt (Wireframe)</h1>
+      <p></p>
+      <strong>Salt</strong> is a subproject of PlantUML that may help you to design graphical interface or <a
+        href="https://en.wikipedia.org/wiki/Website_wireframe"><em>Website Wireframe or Page Schematic or Screen
+          Blueprint</em></a>.
+      <p></p>
+      It is very useful in crafting <strong>graphical interfaces</strong>, schematics, and blueprints. It aids in
+      aligning <strong>conceptual structures</strong> with <strong>visual design</strong>, emphasizing
+      <strong>functionality over aesthetics</strong>. <strong>Wireframes</strong>, central to this process, are used
+      across various disciplines.
+      <p></p>
+      Developers, designers, and user experience professionals employ them to visualize <strong>interface
+        elements</strong>, <strong>navigational systems</strong>, and to facilitate collaboration. They vary in
+      <strong>fidelity</strong>, from low-detail sketches to high-detail representations, crucial for
+      <strong>prototyping</strong> and <strong>iterative design</strong>. This collaborative process integrates
+      different expertise, from <strong>business analysis</strong> to <strong>user research</strong>, ensuring that the
+      end design aligns with both <strong>business</strong> and <strong>user requirements</strong>.
+      <a style="position:relative;top:-38px;" name="8a3c20503dceb878"></a>
+      <!--heading-->
+      <h2 class="chap">Basic widgets</h2>
+      <p></p>
+      You must use <code class="cod">@startsalt</code> keyword.
+      <p></p>
+      A window must start and end with brackets. You can then define:
+      <p></p>
+      <ul>
+        <li>Button using <code class="cod">[</code> and <code class="cod">]</code>.</li>
+        <li>Radio button using <code class="cod">(</code> and <code class="cod">)</code>.</li>
+        <li>Checkbox using <code class="cod">[</code> and <code class="cod">]</code>.</li>
+        <li>User text area using <code class="cod">&#34;</code>.</li>
+        <li>Droplist using <code class="cod">^</code>.</li>
+      </ul>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startsalt
+{
+  Just plain text
+  [This is my button]
+  ()  Unchecked radio
+  (X) Checked radio
+  []  Unchecked box
+  [X] Checked box
+  &#34;Enter text here   &#34;
+  ^This is a droplist^
+}
+@endsalt
+</textarea>
+        <div id="out49fd2ed8587cfba4ea05ce2d1a221082">
+          <div class="mycell">
+            <img loading="lazy" width="172" height="161" class="scale"
+              src="/imgw/img-49fd2ed8587cfba4ea05ce2d1a221082.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="80c9379f5bc0f2b7"></a>
+      <!--heading-->
+      <h2 class="chap">Text area</h2>
+      <p></p>
+      Here is an attempt to create a <a
+        href="https://html.spec.whatwg.org/multipage/form-elements.html#the-textarea-element">text area</a>:
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startsalt
+{+
+   This is a long
+   text in a textarea
+   .
+   &#34;                         &#34;
+}
+@endsalt
+</textarea>
+        <div id="out40e0e0e5aaa7093343971cc3e9128481">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="218" height="80" class="scale"
+              src="/imgw/img-40e0e0e5aaa7093343971cc3e9128481.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      Note:
+      <ul>
+        <li>the dot (<code class="cod">.</code>) to fill up vertical space;</li>
+        <li>the last line of space (<code class="cod">&#34;     &#34;</code>) to make the area wider.</li>
+      </ul>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/14765/">QA-14765</a>]</em>
+      <p></p>
+      <p></p>
+      Then you can add <a href="salt#6b6xvjbaj4gpk362kjkx">scroll bar</a>:
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startsalt
+{SI
+   This is a long
+   text in a textarea
+   .
+   &#34;                         &#34;
+}
+@endsalt
+</textarea>
+        <div id="oute9113c7713c9d616b1ba79e8d463efae">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="248" height="80" class="scale"
+              src="/imgw/img-e9113c7713c9d616b1ba79e8d463efae.png" />
+          </div>
+        </div>
+      </div>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startsalt
+{S-
+   This is a long
+   text in a textarea
+   .
+   &#34;                         &#34;
+}
+@endsalt
+</textarea>
+        <div id="outbe80f0d8fcc9d96e635e79150307d66a">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="218" height="110" class="scale"
+              src="/imgw/img-be80f0d8fcc9d96e635e79150307d66a.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="6b65983f6b2d6e7b"></a>
+      <!--heading-->
+      <h2 class="chap">Open, close droplist </h2>
+      <p></p>
+      You can open a droplist, by adding values enclosed by <code class="cod">^</code>, as:
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startsalt
+{
+  ^This is a closed droplist^ |
+  ^This is an open droplist^^ item 1^^ item 2^ |
+  ^This is another open droplist^ item 1^ item 2^ 
+}
+@endsalt
+</textarea>
+        <div id="out0c655f5a236ab933b0422ca3dcb3726b">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="688" height="31" class="scale"
+              src="/imgw/img-0c655f5a236ab933b0422ca3dcb3726b.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/4184">QA-4184</a>]</em>
+      <a style="position:relative;top:-38px;" name="8770ed5d7126078c"></a>
+      <!--heading-->
+      <h2 class="chap">Using grid [| and #, !, -, +]</h2>
+      <p></p>
+      A table is automatically created when you use an opening bracket <code class="cod">{</code>.
+      And you have to use <code class="cod">|</code> to separate columns.
+      <p></p>
+      For example:
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startsalt
+{
+  Login    | &#34;MyName   &#34;
+  Password | &#34;****     &#34;
+  [Cancel] | [  OK   ]
+}
+@endsalt
+</textarea>
+        <div id="out70e9d02b9d97bcc5f2d3999880a5e029">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="149" height="74" class="scale"
+              src="/imgw/img-70e9d02b9d97bcc5f2d3999880a5e029.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      Just after the opening bracket, you can use a character to define if you want to draw lines or columns of the grid
+      :
+      <p></p>
+      <table border="1" cellspacing="0" cellpadding="5">
+        <tbody>
+          <tr>
+            <td><b>
+                Symbol
+              </b></td>
+            <td><b>
+                Result
+              </b></td>
+          </tr>
+          <tr>
+            <td>
+              <code class="cod">#</code>
+            </td>
+            <td>
+              To display all vertical and horizontal lines
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <code class="cod">!</code>
+            </td>
+            <td>
+              To display all vertical lines
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <code class="cod">-</code>
+            </td>
+            <td>
+              To display all horizontal lines
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <code class="cod">+</code>
+            </td>
+            <td>
+              To display external lines
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startsalt
+{+
+  Login    | &#34;MyName   &#34;
+  Password | &#34;****     &#34;
+  [Cancel] | [  OK   ]
+}
+@endsalt
+</textarea>
+        <div id="out3be78db6c0f51a855eb5a7bd3d5daf65">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="149" height="74" class="scale"
+              src="/imgw/img-3be78db6c0f51a855eb5a7bd3d5daf65.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="8839bd5b129e178e"></a>
+      <!--heading-->
+      <h2 class="chap">Group box [^]</h2>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startsalt
+{^&#34;My group box&#34;
+  Login    | &#34;MyName   &#34;
+  Password | &#34;****     &#34;
+  [Cancel] | [  OK   ]
+}
+@endsalt
+</textarea>
+        <div id="outf60edb4c742ef5a629601bbaaaba2dfa">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="149" height="104" class="scale"
+              src="/imgw/img-f60edb4c742ef5a629601bbaaaba2dfa.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a
+          href="http://forum.plantuml.net/5840/please-allow-to-create-groupboxes-in-salt?show=5840#q5840">QA-5840</a>]</em>
+      <a style="position:relative;top:-38px;" name="42b97f01c4a6ca6c"></a>
+      <!--heading-->
+      <h2 class="chap">Using separator [.., ==, ~~, --]</h2>
+      <p></p>
+      You can use several horizontal lines as separator.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startsalt
+{
+  Text1
+  ..
+  &#34;Some field&#34;
+  ==
+  Note on usage
+  ~~
+  Another text
+  --
+  [Ok]
+}
+@endsalt
+</textarea>
+        <div id="out9e99422af0d02e882b71ce61c1fd57f8">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="98" height="138" class="scale"
+              src="/imgw/img-9e99422af0d02e882b71ce61c1fd57f8.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="759fb83534bc53b0"></a>
+      <!--heading-->
+      <h2 class="chap">Tree widget [T]</h2>
+      <p></p>
+      To have a Tree, you have to start with <code class="cod">{T</code> and to use <code class="cod">+</code> to denote
+      hierarchy.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startsalt
+{
+{T
+ + World
+ ++ America
+ +++ Canada
+ +++ USA
+ ++++ New York
+ ++++ Boston
+ +++ Mexico
+ ++ Europe
+ +++ Italy
+ +++ Germany
+ ++++ Berlin
+ ++ Africa
+}
+}
+@endsalt
+</textarea>
+        <div id="out132cfa5a9ed6fd035882b067116e8cd6">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="106" height="193" class="scale"
+              src="/imgw/img-132cfa5a9ed6fd035882b067116e8cd6.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="6f00692a1e2d5878"></a>
+      <!--heading-->
+      <h2 class="chap">Tree table [T]</h2>
+      <p></p>
+      You can combine trees with tables.
+      <p></p>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startsalt
+{
+{T
++Region        | Population    | Age
++ World        | 7.13 billion  | 30
+++ America     | 964 million   | 30
++++ Canada     | 35 million    | 30
++++ USA        | 319 million   | 30
+++++ NYC       | 8 million     | 30
+++++ Boston    | 617 thousand  | 30
++++ Mexico     | 117 million   | 30
+++ Europe      | 601 million   | 30
++++ Italy      | 61 million    | 30
++++ Germany    | 82 million    | 30
+++++ Berlin    | 3 million     | 30
+++ Africa      | 1 billion     | 30
+}
+}
+@endsalt
+</textarea>
+        <div id="outbd5dcb41c1049cee7ea3b94c31608227">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="207" height="208" class="scale"
+              src="/imgw/img-bd5dcb41c1049cee7ea3b94c31608227.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      And add lines.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startsalt
+{
+..
+== with T!
+{T!
++Region        | Population    | Age
++ World        | 7.13 billion  | 30
+++ America     | 964 million   | 30
+}
+..
+== with T-
+{T-
++Region        | Population    | Age
++ World        | 7.13 billion  | 30
+++ America     | 964 million   | 30
+}
+..
+== with T+
+{T+
++Region        | Population    | Age
++ World        | 7.13 billion  | 30
+++ America     | 964 million   | 30
+}
+..
+== with T#
+{T#
++Region        | Population    | Age
++ World        | 7.13 billion  | 30
+++ America     | 964 million   | 30
+}
+..
+}
+@endsalt
+</textarea>
+        <div id="out48b3cff3c2ad14410be59dbc12404387">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="176" height="317" class="scale"
+              src="/imgw/img-48b3cff3c2ad14410be59dbc12404387.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/1265/feature-request-tree-tables">QA-1265</a>]</em>
+      <a style="position:relative;top:-38px;" name="21d475f2a55ac40a"></a>
+      <!--heading-->
+      <h2 class="chap">Enclosing brackets [{, }]</h2>
+      <p></p>
+      You can define subelements by opening a new opening bracket.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startsalt
+{
+Name         | &#34;                 &#34;
+Modifiers:   | { (X) public | () default | () private | () protected
+                [] abstract | [] final   | [] static }
+Superclass:  | { &#34;java.lang.Object &#34; | [Browse...] }
+}
+@endsalt
+</textarea>
+        <div id="outa63bb1231f6560b8d46bd82c94940655">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="329" height="93" class="scale"
+              src="/imgw/img-a63bb1231f6560b8d46bd82c94940655.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="8c3b5c405669f91a"></a>
+      <!--heading-->
+      <h2 class="chap">Adding tabs [/]</h2>
+      <p></p>
+      You can add tabs using <code class="cod">{/</code> notation. Note that you can use HTML code to have bold text.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startsalt
+{+
+{/ &lt;b&gt;General | Fullscreen | Behavior | Saving }
+{
+{ Open image in: | ^Smart Mode^ }
+[X] Smooth images when zoomed
+[X] Confirm image deletion
+[ ] Show hidden images
+}
+[Close]
+}
+@endsalt
+</textarea>
+        <div id="out010c1c71593d74b4299e2c07902791d6">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="256" height="129" class="scale"
+              src="/imgw/img-010c1c71593d74b4299e2c07902791d6.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      Tab could also be vertically oriented:
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startsalt
+{+
+{/ &lt;b&gt;General
+Fullscreen
+Behavior
+Saving } |
+{
+{ Open image in: | ^Smart Mode^ }
+[X] Smooth images when zoomed
+[X] Confirm image deletion
+[ ] Show hidden images
+[Close]
+}
+}
+@endsalt
+</textarea>
+        <div id="out881206f367fdffc7e8028c3c1dfe6f8d">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="252" height="132" class="scale"
+              src="/imgw/img-881206f367fdffc7e8028c3c1dfe6f8d.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="a676977bd30413a1"></a>
+      <!--heading-->
+      <h2 class="chap">Using menu [*]</h2>
+      <p></p>
+      You can add a menu by using <code class="cod">{*</code> notation.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startsalt
+{+
+{* File | Edit | Source | Refactor }
+{/ General | Fullscreen | Behavior | Saving }
+{
+{ Open image in: | ^Smart Mode^ }
+[X] Smooth images when zoomed
+[X] Confirm image deletion
+[ ] Show hidden images
+}
+[Close]
+}
+@endsalt
+</textarea>
+        <div id="out2f00393cec2dd6a3a5daa5b2fd93451a">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="254" height="146" class="scale"
+              src="/imgw/img-2f00393cec2dd6a3a5daa5b2fd93451a.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      It is also possible to open a menu:
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startsalt
+{+
+{* File | Edit | Source | Refactor
+ Refactor | New | Open File | - | Close | Close All }
+{/ General | Fullscreen | Behavior | Saving }
+{
+{ Open image in: | ^Smart Mode^ }
+[X] Smooth images when zoomed
+[X] Confirm image deletion
+[ ] Show hidden images
+}
+[Close]
+}
+@endsalt
+</textarea>
+        <div id="outa8b82233bbc83dae793f179fd26853d8">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="254" height="146" class="scale"
+              src="/imgw/img-a8b82233bbc83dae793f179fd26853d8.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      Like it is possible to open a droplist:
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startsalt
+{+
+{* File | Edit | Source | Refactor }
+{/ General | Fullscreen | Behavior | Saving }
+{
+{ Open image in: | ^Smart Mode^^Normal Mode^ }
+[X] Smooth images when zoomed
+[X] Confirm image deletion
+[ ] Show hidden images
+}
+[Close]
+}
+@endsalt
+</textarea>
+        <div id="out68d9b67c5ac430d0767de55c66cf145a">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="254" height="146" class="scale"
+              src="/imgw/img-68d9b67c5ac430d0767de55c66cf145a.png" />
+          </div>
+        </div>
+      </div>
+      <em>[Ref. <a href="https://forum.plantuml.net/4184">QA-4184</a>]</em>
+      <a style="position:relative;top:-38px;" name="7dcd8fd8195a1e65"></a>
+      <!--heading-->
+      <h2 class="chap">Advanced table</h2>
+      <p></p>
+      You can use two special notations for table :
+      <ul>
+        <li><code class="cod">*</code> to indicate that a cell with span with left</li>
+        <li><code class="cod">.</code> to denotate an empty cell</li>
+      </ul>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startsalt
+{#
+. | Column 2 | Column 3
+Row header 1 | value 1 | value 2
+Row header 2 | A long cell | *
+}
+@endsalt
+</textarea>
+        <div id="out2d81b8171675f718a673b3503d73c6bf">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="193" height="61" class="scale"
+              src="/imgw/img-2d81b8171675f718a673b3503d73c6bf.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="e7fb84d0c153ca2e"></a>
+      <!--heading-->
+      <h2 class="chap">Scroll Bars [S, SI, S-]</h2>
+      <p></p>
+      You can use <code class="cod">{S</code> notation for <a href="https://en.wikipedia.org/wiki/Scrollbar">scroll
+        bar</a> like in following examples:
+      <p></p>
+      <ul>
+        <li><code class="cod">{S</code>: for horizontal and vertical scrollbars</li>
+      </ul>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startsalt
+{S
+Message
+.
+.
+.
+.
+}
+@endsalt
+</textarea>
+        <div id="outccc3812c281fe928e7bcc75e6316dea9">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="90" height="125" class="scale"
+              src="/imgw/img-ccc3812c281fe928e7bcc75e6316dea9.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <ul>
+        <li><code class="cod">{SI</code> : for vertical scrollbar only</li>
+      </ul>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startsalt
+{SI
+Message
+.
+.
+.
+.
+}
+@endsalt
+</textarea>
+        <div id="out5ec5235147e1888b452c8589264acd1c">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="90" height="95" class="scale"
+              src="/imgw/img-5ec5235147e1888b452c8589264acd1c.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <ul>
+        <li><code class="cod">{S-</code> : for horizontal scrollbar only</li>
+      </ul>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startsalt
+{S-
+Message
+.
+.
+.
+.
+}
+@endsalt
+</textarea>
+        <div id="outb5185187926ed62d53281fa5827bc0f1">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="60" height="125" class="scale"
+              src="/imgw/img-b5185187926ed62d53281fa5827bc0f1.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="5d50889672f6f860"></a>
+      <!--heading-->
+      <h2 class="chap">Colors</h2>
+      <p></p>
+      It is possible to change text <a href="color">color</a> of widget.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startsalt
+{
+  &lt;color:Blue&gt;Just plain text
+  [This is my default button]
+  [&lt;color:green&gt;This is my green button]
+  [&lt;color:#9a9a9a&gt;This is my disabled button]
+  []  &lt;color:red&gt;Unchecked box
+  [X] &lt;color:green&gt;Checked box
+  &#34;Enter text here   &#34;
+  ^This is a droplist^
+  ^&lt;color:#9a9a9a&gt;This is a disabled droplist^
+  ^&lt;color:red&gt;This is a red droplist^
+}
+@endsalt
+</textarea>
+        <div id="out40ea7b2bf7cf067c508314e93af99e24">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="244" height="221" class="scale"
+              src="/imgw/img-40ea7b2bf7cf067c508314e93af99e24.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a
+          href="https://forum.plantuml.net/12177/change-color-of-salt-button-to-represent-disabled-status">QA-12177</a>]</em>
+      <a style="position:relative;top:-38px;" name="196e6ddef819b32c"></a>
+      <!--heading-->
+      <h2 class="chap">Creole on Salt</h2>
+      <p></p>
+      You can use <a href="creole">Creole or HTML Creole</a> on salt:
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startsalt
+{{^==Creole
+  This is **bold**
+  This is //italics//
+  This is &#34;&#34;monospaced&#34;&#34;
+  This is --stricken-out--
+  This is __underlined__
+  This is ~~wave-underlined~~
+  --test Unicode and icons--
+  This is &lt;U+221E&gt; long
+  This is a &lt;&amp;code&gt; icon
+  Use image : &lt;img:https://plantuml.com/logo3.png&gt;
+}|
+{^&lt;b&gt;HTML Creole 
+ This is &lt;b&gt;bold&lt;/b&gt;
+  This is &lt;i&gt;italics&lt;/i&gt;
+  This is &lt;font:monospaced&gt;monospaced&lt;/font&gt;
+  This is &lt;s&gt;stroked&lt;/s&gt;
+  This is &lt;u&gt;underlined&lt;/u&gt;
+  This is &lt;w&gt;waved&lt;/w&gt;
+  This is &lt;s:green&gt;stroked&lt;/s&gt;
+  This is &lt;u:red&gt;underlined&lt;/u&gt;
+  This is &lt;w:#0000FF&gt;waved&lt;/w&gt;
+  -- other examples --
+  This is &lt;color:blue&gt;Blue&lt;/color&gt;
+  This is &lt;back:orange&gt;Orange background&lt;/back&gt;
+  This is &lt;size:20&gt;big&lt;/size&gt;
+}|
+{^Creole line
+You can have horizontal line
+----
+Or double line
+====
+Or strong line
+____
+Or dotted line
+..My title..
+Or dotted title
+//and title... //
+==Title==
+Or double-line title
+--Another title--
+Or single-line title
+Enjoy!
+}|
+{^Creole list item
+**test list 1**
+* Bullet list
+* Second item
+** Sub item
+*** Sub sub item
+* Third item
+----
+**test list 2**
+# Numbered list
+# Second item
+## Sub item
+## Another sub item
+# Third item
+}|
+{^Mix on salt
+  ==&lt;color:Blue&gt;Just plain text
+  [This is my default button]
+  [&lt;b&gt;&lt;color:green&gt;This is my green button]
+  [ ---&lt;color:#9a9a9a&gt;This is my disabled button-- ]
+  []  &lt;size:20&gt;&lt;color:red&gt;Unchecked box
+  [X] &lt;color:green&gt;Checked box
+  &#34;//Enter text here//   &#34;
+  ^This is a droplist^
+  ^&lt;color:#9a9a9a&gt;This is a disabled droplist^
+  ^&lt;b&gt;&lt;color:red&gt;This is a red droplist^
+}}
+@endsalt
+</textarea>
+        <div id="outd97e9c0d3c03538ad150e3ca7a7f8456">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="933" height="345" class="scale"
+              src="/imgw/img-d97e9c0d3c03538ad150e3ca7a7f8456.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="0ca671cd36473fb1"></a>
+      <!--heading-->
+      <h2 class="chap">Pseudo sprite [&lt;&lt;, &gt;&gt;]</h2>
+      <p></p>
+      Using <code class="cod">&lt;&lt;</code> and <code class="cod">&gt;&gt;</code> you can define a pseudo-sprite or
+      sprite-like drawing and reusing it latter.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startsalt
+ {
+ [X] checkbox|[] checkbox
+ () radio | (X) radio
+ This is a text|[This is my button]|This is another text
+ &#34;A field&#34;|&#34;Another long Field&#34;|[A button]
+ &lt;&lt;folder
+ ............
+ .XXXXX......
+ .X...X......
+ .XXXXXXXXXX.
+ .X........X.
+ .X........X.
+ .X........X.
+ .X........X.
+ .XXXXXXXXXX.
+ ............
+ &gt;&gt;|&lt;color:blue&gt;other folder|&lt;&lt;folder&gt;&gt;
+^Droplist^
+}
+@endsalt
+</textarea>
+        <div id="oute5ce9b4c6dc02f21d73247b25040a397">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="347" height="134" class="scale"
+              src="/imgw/img-e5ce9b4c6dc02f21d73247b25040a397.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/5849/support-for-sprites-salt?show=5851#a5851">QA-5849</a>]</em>
+      <a style="position:relative;top:-38px;" name="041a1eb0031c373d"></a>
+      <!--heading-->
+      <h2 class="chap">OpenIconic</h2>
+      <p></p>
+      <a href="https://useiconic.com/open/">OpenIconic</a> is a very nice open source icon set. Those icons have been
+      integrated into the <a href="creole">creole parser</a>, so you can use them out-of-the-box.
+      You can use the following syntax: <code class="cod">&lt;&amp;ICON_NAME&gt;</code>.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startsalt
+{
+  Login&lt;&amp;person&gt; | &#34;MyName   &#34;
+  Password&lt;&amp;key&gt; | &#34;****     &#34;
+  [Cancel &lt;&amp;circle-x&gt;] | [OK &lt;&amp;account-login&gt;]
+}
+@endsalt
+</textarea>
+        <div id="out26f147251bfa04d5b2d0035b05aadd4c">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="173" height="74" class="scale"
+              src="/imgw/img-26f147251bfa04d5b2d0035b05aadd4c.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      The complete list is available on OpenIconic Website, or you can use the following special diagram:
+      <p></p>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+listopeniconic
+@enduml
+</textarea>
+        <div id="outbaca39d650c0c580773350ed40f0b9aa">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="893" height="508" class="scale"
+              src="/imgw/img-baca39d650c0c580773350ed40f0b9aa.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="40f14e0e6698daaf"></a>
+      <!--heading-->
+      <h2 class="chap">Add title, header, footer, caption or legend</h2>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startsalt
+title My title
+header some header
+footer some footer
+caption This is caption
+legend
+The legend
+end legend
+
+{+
+  Login    | &#34;MyName   &#34;
+  Password | &#34;****     &#34;
+  [Cancel] | [  OK   ]
+}
+
+@endsalt
+</textarea>
+        <div id="out2dfb91711de63dc9115da3131466cac4">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="149" height="213" class="scale"
+              src="/imgw/img-2dfb91711de63dc9115da3131466cac4.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>(See also: <a href="commons">Common commands</a>)</em>
+      <a style="position:relative;top:-38px;" name="fee470bd71039c80"></a>
+      <!--heading-->
+      <h2 class="chap">Zoom, DPI</h2>
+      <p></p>
+      <h3>Whitout zoom (by default)</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startsalt
+{
+  &lt;&amp;person&gt; Login  | &#34;MyName   &#34;
+  &lt;&amp;key&gt; Password  | &#34;****     &#34;
+  [&lt;&amp;circle-x&gt; Cancel ] | [ &lt;&amp;account-login&gt; OK   ]
+}
+@endsalt
+</textarea>
+        <div id="out501a81a0b6df6bcd5f69f98d14b47e96">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="184" height="74" class="scale"
+              src="/imgw/img-501a81a0b6df6bcd5f69f98d14b47e96.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>Scale</h3>
+      <p></p>
+      You can use the <code class="cod">scale</code> command to zoom the generated image.
+      <p></p>
+      You can use either a number or a fraction to define the scale factor. You can also specify either width or height
+      (in pixel). And you can also give both width and height: the image is scaled to fit inside the specified
+      dimension.
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startsalt
+scale 2
+{
+  &lt;&amp;person&gt; Login  | &#34;MyName   &#34;
+  &lt;&amp;key&gt; Password  | &#34;****     &#34;
+  [&lt;&amp;circle-x&gt; Cancel ] | [ &lt;&amp;account-login&gt; OK   ]
+}
+@endsalt
+</textarea>
+        <div id="outc3a41c46d94d03f922a08640c255af26">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="368" height="148" class="scale"
+              src="/imgw/img-c3a41c46d94d03f922a08640c255af26.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>(See also: <a href="commons#zw5yrgax40mpk362kjbn">Zoom on Common commands</a>)</em>
+      <p></p>
+      <h3>DPI</h3>
+      You can also use the <code class="cod">skinparam dpi</code>command to zoom the generated image.
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startsalt
+skinparam dpi 200
+{
+  &lt;&amp;person&gt; Login  | &#34;MyName   &#34;
+  &lt;&amp;key&gt; Password  | &#34;****     &#34;
+  [&lt;&amp;circle-x&gt; Cancel ] | [ &lt;&amp;account-login&gt; OK   ]
+}
+@endsalt
+</textarea>
+        <div id="outac6508d913d3421b1a953e11c711a4be">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="383" height="154" class="scale"
+              src="/imgw/img-ac6508d913d3421b1a953e11c711a4be.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="89e5b0978f17879e"></a>
+      <!--heading-->
+      <h2 class="chap">Include Salt &#34;on activity diagram&#34;</h2>
+      <p></p>
+      You can <a href="http://forum.plantuml.net/2427/salt-with-minimum-flowchat-capabilities?show=2427#q2427">read the
+        following explanation</a>.
+      <p></p>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+(*) --&gt; &#34;
+{{salt
+{+
+&lt;b&gt;an example
+choose one option
+()one
+()two
+[ok]
+}
+}}
+&#34; as choose
+
+choose -right-&gt; &#34;
+{{salt
+{+
+&lt;b&gt;please wait
+operation in progress
+&lt;&amp;clock&gt;
+[cancel]
+}
+}}
+&#34; as wait
+wait -right-&gt; &#34;
+{{salt
+{+
+&lt;b&gt;success
+congratulations!
+[ok]
+}
+}}
+&#34; as success
+
+wait -down-&gt; &#34;
+{{salt
+{+
+&lt;b&gt;error
+failed, sorry
+[ok]
+}
+}}
+&#34;
+@enduml
+</textarea>
+        <div id="out8e3324775c8fa5e3119fe90134c7bcd2">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="450" height="333" class="scale"
+              src="/imgw/img-8e3324775c8fa5e3119fe90134c7bcd2.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      It can also be combined with <a href="preprocessing#macro_definition">define macro</a>.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+!unquoted procedure SALT($x)
+&#34;{{salt
+%invoke_procedure(&#34;_&#34;+$x)
+}}&#34; as $x
+!endprocedure
+
+!procedure _choose()
+{+
+&lt;b&gt;an example
+choose one option
+()one
+()two
+[ok]
+}
+!endprocedure
+
+!procedure _wait()
+{+
+&lt;b&gt;please wait
+operation in progress
+&lt;&amp;clock&gt;
+[cancel]
+}
+!endprocedure
+
+!procedure _success()
+{+
+&lt;b&gt;success
+congratulations!
+[ok]
+}
+!endprocedure
+
+!procedure _error()
+{+
+&lt;b&gt;error
+failed, sorry
+[ok]
+}
+!endprocedure
+
+(*) --&gt; SALT(choose)
+-right-&gt; SALT(wait)
+wait -right-&gt; SALT(success)
+wait -down-&gt; SALT(error)
+@enduml
+</textarea>
+        <div id="out5822cf1984e4ecf26ab99a7e7b6e7e2a">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="450" height="333" class="scale"
+              src="/imgw/img-5822cf1984e4ecf26ab99a7e7b6e7e2a.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="abaa7291606b9f59"></a>
+      <!--heading-->
+      <h2 class="chap">Include salt &#34;on while condition of activity diagram&#34;</h2>
+      <p></p>
+      You can include <code class="cod">salt</code> on while condition of activity diagram.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+start
+while (\n{{salt\n{+\nPassword | &#34;****     &#34;\n[Cancel] | [  OK   ]}\n}}\n) is (Incorrect)
+  :log attempt;
+  :attempt_count++;
+  if (attempt_count &gt; 4) then (yes)
+    :increase delay timer;
+    :wait for timer to expire;
+  else (no)
+  endif
+endwhile (correct)
+:log request;
+:disable service;
+@enduml
+</textarea>
+        <div id="oute894d5e986d9627592a72176489f2f17">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="272" height="630" class="scale"
+              src="/imgw/img-e894d5e986d9627592a72176489f2f17.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a
+          href="https://forum.plantuml.net/8547/mixing-wireframes-and-activity-diagrames?show=12221#a12221">QA-8547</a>]</em>
+      <a style="position:relative;top:-38px;" name="ab3b362306046b9d"></a>
+      <!--heading-->
+      <h2 class="chap">Include salt &#34;on repeat while condition of activity diagram&#34;</h2>
+      <p></p>
+      You can include <code class="cod">salt</code> on &#39;repeat while&#39; condition of activity diagram.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+start
+repeat :read data;
+  :generate diagrams;
+repeat while (\n{{salt\n{^&#34;Next step&#34;\n  Do you want to continue? \n[Yes]|[No]\n}\n}}\n)
+stop
+@enduml
+</textarea>
+        <div id="outd775fbb78746445588668d2e950093b8">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="269" height="348" class="scale"
+              src="/imgw/img-d775fbb78746445588668d2e950093b8.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/14287/salt-in-activity-beta-diagrams">QA-14287</a>]</em>
+      <a style="position:relative;top:-38px;" name="7aa53dbdfc2137bf"></a>
+      <!--heading-->
+      <h2 class="chap">Skinparam</h2>
+      <p></p>
+      You can use <strong>[only]</strong> some <a href="skinparam">skinparam</a> command to change the skin of the
+      drawing.
+      <p></p>
+      Some example:
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startsalt
+skinparam Backgroundcolor palegreen
+{+
+  Login    | &#34;MyName   &#34;
+  Password | &#34;****     &#34;
+  [Cancel] | [  OK   ]
+}
+@endsalt
+</textarea>
+        <div id="out310a901e0ed41f0033a21e85dc30799b">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="149" height="74" class="scale"
+              src="/imgw/img-310a901e0ed41f0033a21e85dc30799b.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startsalt
+!option handwritten true
+{+
+  Login    | &#34;MyName   &#34;
+  Password | &#34;****     &#34;
+  [Cancel] | [  OK   ]
+}
+@endsalt
+</textarea>
+        <div id="out04a9518afa4605815f1fd5cc6ffbd9db">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="149" height="74" class="scale"
+              src="/imgw/img-04a9518afa4605815f1fd5cc6ffbd9db.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <div class="tag" style="background:#FFD700;">FIXME</div> 🚩
+      FYI, some other skinparam does not work with salt, as:
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startsalt
+skinparam defaultFontName monospaced
+{+
+  Login    | &#34;MyName   &#34;
+  Password | &#34;****     &#34;
+  [Cancel] | [  OK   ]
+}
+@endsalt
+</textarea>
+        <div id="outc95f31d9ee7006c08e4649e64322cf5b">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="149" height="74" class="scale"
+              src="/imgw/img-c95f31d9ee7006c08e4649e64322cf5b.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="ae284f900f9d6e21"></a>
+      <!--heading-->
+      <h2 class="chap">Style</h2>
+      <p></p>
+      You can use <strong>[only]</strong> some <a href="style-evolution">style</a> command to change the skin of the
+      drawing.
+      <p></p>
+      Some example:
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startsalt
+&lt;style&gt;
+saltDiagram {
+  BackgroundColor palegreen
+}
+&lt;/style&gt;
+{+
+  Login    | &#34;MyName   &#34;
+  Password | &#34;****     &#34;
+  [Cancel] | [  OK   ]
+}
+@endsalt
+</textarea>
+        <div id="outba3fe1cf89fbb876da3b98b7db059539">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="149" height="74" class="scale"
+              src="/imgw/img-ba3fe1cf89fbb876da3b98b7db059539.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <div class="tag" style="background:#FFD700;">FIXME</div> 🚩
+      FYI, some other style does not work with salt, as:
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startsalt
+&lt;style&gt;
+saltDiagram {
+  Fontname Monospaced
+  FontSize 10
+  FontStyle italic
+  LineThickness 0.5
+  LineColor red
+}
+&lt;/style&gt;
+{+
+  Login    | &#34;MyName   &#34;
+  Password | &#34;****     &#34;
+  [Cancel] | [  OK   ]
+}
+@endsalt
+</textarea>
+        <div id="out5390d5b1e3fb6ca0062cbb0fb000c0d9">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="149" height="74" class="scale"
+              src="/imgw/img-5390d5b1e3fb6ca0062cbb0fb000c0d9.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a
+          href="https://forum.plantuml.net/13460/there-skinparam-change-font-used-salt-like-other-diagram-types?show=13461#a13461">QA-13460</a>]</em>
+
+
+    </main>
+
+
+    <aside id="C6">
+      <!--toc-->
+      <div id="toc">
+        <ul>
+          <li><a href="#8a3c20503dceb878">Basic widgets</a>
+          </li>
+          <li><a href="#80c9379f5bc0f2b7">Text area</a>
+          </li>
+          <li><a href="#6b65983f6b2d6e7b">Open, close droplist</a>
+          </li>
+          <li><a href="#8770ed5d7126078c">Using grid [\| and #, !, -, +]</a>
+          </li>
+          <li><a href="#8839bd5b129e178e">Group box [^]</a>
+          </li>
+          <li><a href="#42b97f01c4a6ca6c">Using separator [.., ==, ~~, --]</a>
+          </li>
+          <li><a href="#759fb83534bc53b0">Tree widget [T]</a>
+          </li>
+          <li><a href="#6f00692a1e2d5878">Tree table [T]</a>
+          </li>
+          <li><a href="#21d475f2a55ac40a">Enclosing brackets [{, }]</a>
+          </li>
+          <li><a href="#8c3b5c405669f91a">Adding tabs [/]</a>
+          </li>
+          <li><a href="#a676977bd30413a1">Using menu [\*]</a>
+          </li>
+          <li><a href="#7dcd8fd8195a1e65">Advanced table</a>
+          </li>
+          <li><a href="#e7fb84d0c153ca2e">Scroll Bars [S, SI, S-]</a>
+          </li>
+          <li><a href="#5d50889672f6f860">Colors</a>
+          </li>
+          <li><a href="#196e6ddef819b32c">Creole on Salt</a>
+          </li>
+          <li><a href="#0ca671cd36473fb1">Pseudo sprite [&lt;&lt;, &gt;&gt;]</a>
+          </li>
+          <li><a href="#041a1eb0031c373d">OpenIconic</a>
+          </li>
+          <li><a href="#40f14e0e6698daaf">Add title, header, footer, caption or legend</a>
+          </li>
+          <li><a href="#fee470bd71039c80">Zoom, DPI</a>
+          </li>
+          <li><a href="#89e5b0978f17879e">Include Salt &#34;on activity diagram&#34;</a>
+          </li>
+          <li><a href="#abaa7291606b9f59">Include salt &#34;on while condition of activity diagram&#34;</a>
+          </li>
+          <li><a href="#ab3b362306046b9d">Include salt &#34;on repeat while condition of activity diagram&#34;</a>
+          </li>
+          <li><a href="#7aa53dbdfc2137bf">Skinparam</a>
+          </li>
+          <li><a href="#ae284f900f9d6e21">Style</a>
+          </li>
+        </ul>
+      </div>
+    </aside>
+
+  </div>
+    <script src="../../viz-global.js"></script>
+    <script src="../../plantuml.js"></script>
+    <script>
+        (function () {
+            const render = window.plantumlRender;
+            if (typeof render !== "function") {
+                console.error("PlantUML renderer is unavailable.");
+                return;
+            }
+
+            const renderOptions = {};
+            let counter = 0;
+
+            document.querySelectorAll(".mycell").forEach((mycell) => {
+                const host = mycell.parentElement;
+                const textarea = host ? host.previousElementSibling : null;
+                if (!textarea || textarea.tagName !== "TEXTAREA") return;
+
+                if (!mycell.id) {
+                    counter += 1;
+                    mycell.id = "mycell-render-" + counter;
+                }
+
+                const draw = () => {
+                    mycell.innerHTML = "";
+                    render(textarea.value.split(/\r\n|\r|\n/), mycell.id, renderOptions);
+                };
+
+                textarea.addEventListener("input", draw);
+                draw();
+            });
+        })();
+    </script>
+</body>
+
+</html>

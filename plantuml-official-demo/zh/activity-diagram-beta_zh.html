@@ -1,0 +1,3328 @@
+<html lang="zh">
+
+<head>
+
+
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Organization",
+  "url": "https://plantuml.com",
+  "name": "PlantUML",
+  "sameAs" : ["https://twitter.com/plantuml","https://en.wikipedia.org/wiki/PlantUML","https://www.wikidata.org/wiki/Q18346546"],
+  "logo": "https://cdn-0.plantuml.com/logo3.png",
+  "contactPoint": [{
+    "@type": "ContactPoint",
+    "email": "plantuml@gmail.com",
+    "url": "https://plantuml.com",
+    "contactType": "customer service"
+  }]
+}
+</script>
+  <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+    "@type": "ListItem",
+    "position": 1,
+    "item": {
+      "@id": "https://plantuml.com",
+      "name": "Home"
+    }
+  },{
+    "@type": "ListItem",
+    "position": 2,
+    "item": {
+      "@id": "https://plantuml.com/sitemap-language-specification",
+      "name": "Language specification"
+    }
+  },{
+    "@type": "ListItem",
+    "position": 3,
+    "item": {
+      "@id": "https://plantuml.com/activity-diagram-beta",
+      "name": "Activity Diagram (beta)"
+  }
+  }]
+}
+</script>
+  <link rel="canonical" href="https://plantuml.com/zh/activity-diagram-beta" />
+  <link rel="alternate" hreflang="x-default" href="https://plantuml.com/activity-diagram-beta" />
+  <link rel="alternate" hreflang="de" href="https://plantuml.com/de/activity-diagram-beta" />
+  <link rel="alternate" hreflang="en" href="https://plantuml.com/activity-diagram-beta" />
+  <link rel="alternate" hreflang="es" href="https://plantuml.com/es/activity-diagram-beta" />
+  <link rel="alternate" hreflang="fr" href="https://plantuml.com/fr/activity-diagram-beta" />
+  <link rel="alternate" hreflang="ja" href="https://plantuml.com/ja/activity-diagram-beta" />
+  <link rel="alternate" hreflang="ko" href="https://plantuml.com/ko/activity-diagram-beta" />
+  <link rel="alternate" hreflang="zh" href="https://plantuml.com/zh/activity-diagram-beta" />
+
+  <link rel="shortcut icon" href="/favicon.ico" />
+
+
+  <!-- link rel="preload" as="image" href="https://img.shields.io/liberapay/patrons/plantuml.svg?logo=liberapay" -->
+
+
+  <title>新的活动图测试语法和功能</title>
+  <meta name="description" content="新的语法是更一致的。您可以启动，停止，标签，条件，while循环，重复循环，票据，分区。改变字体和颜色也是可能的。" />
+
+  <meta property="og:type" content="article" />
+  <!-- volt:dokuwiki titleog: -->
+  <!-- volt:dokuwiki descriptionog: -->
+
+  <meta property="og:url" content="https://plantuml.com/zh/activity-diagram-beta" />
+  <meta property="og:site_name" content="PlantUML.com" />
+
+  <!-- meta property="og:image" content="https://plantuml.com/og-activity-diagram-beta" -->
+  <meta name="twitter:image" content="https://plantuml.com/og-activity-diagram-beta" />
+  <meta property="og:locale" content="zh" />
+
+  <meta name="twitter:card" content="summary" />
+  <!-- volt:dokuwiki titletwitter: -->
+  <!-- volt:dokuwiki descriptiontwitter: -->
+  <meta name="twitter:site" content="@PlantUML" />
+  <meta name="twitter:creator" content="@PlantUML" />
+
+
+  <!-- https://www.w3schools.com/colors/colors_picker.asp -->
+  <!-- filter css https://codepen.io/sosuke/pen/Pjoqqp -->
+
+
+  <style>
+    .scale {}
+
+    li {
+      margin: 2px;
+    }
+
+    #external li {
+      margin: 13px;
+    }
+
+    @media screen and (max-width: 1190px) {
+    }
+
+
+    .coptable {
+      max-width: 90%;
+    }
+
+    .mytab {
+      display: inline-block;
+      border-radius: 3px;
+      border: 1px solid #e1e4e8;
+    }
+
+    .mytab:hover {
+      border: 1px dashed #0366d6;
+      cursor: pointer;
+      color: #0366d6;
+      background: #f6f8fa;
+    }
+
+    .cop {
+      margin: 25px 10px 0 10px;
+    }
+
+    .cop:hover {
+      cursor: pointer;
+      filter: invert(30%) sepia(75%) saturate(4001%) hue-rotate(201deg) brightness(88%) contrast(98%);
+    }
+
+    .cop2 {
+      margin: 25px 10px 0 10px;
+    }
+
+    .cop2:hover {
+      cursor: pointer;
+    }
+
+    .msg {
+      position: absolute;
+      color: #339966;
+      background-color: #FFF;
+      margin-top: 55px;
+      display: none;
+      border-radius: 3px;
+      border: 1px solid #4dff00;
+    }
+
+    .mycell0 {
+      float: left;
+      vertical-align: top;
+      padding: 10px;
+    }
+
+    .mycell0 code:hover {
+      cursor: default;
+      color: #000;
+    }
+
+    .mycell {
+      float: right;
+      vertical-align: top;
+      padding: 10px;
+      max-width: 55vw;
+      overflow-x: auto;
+    }
+
+    .mycell0 pre {
+      max-width: 55vw;
+      overflow-x: auto;
+    }
+
+    .cod {
+      background: #edeff3;
+      padding: 2px 5px;
+      border-radius: 3px;
+    }
+
+    .colo {
+      display: inline-block;
+      background: #edeff3;
+      padding: 7px 12px;
+      border-radius: 3px;
+    }
+
+    .tag,
+    .tagg,
+    .tago,
+    .tagr {
+      text-rendering: optimizeLegibility;
+      display: inline-block;
+      padding: 3px 5px 2px 4px;
+      text-decoration: none;
+      white-space: nowrap;
+      border: 1px solid #999;
+      text-transform: uppercase;
+      text-align: center;
+      border-radius: 3px;
+      font-size: 11px;
+      font-weight: bold;
+      line-height: 90%;
+    }
+
+    .tag {
+      background-color: #EEEEEE;
+    }
+
+    .tagg {
+      background-color: #98FB98;
+    }
+
+    .tago {
+      background-color: #fafa00;
+    }
+
+    .tagr {
+      background-color: #FF4500;
+    }
+
+
+    a {
+      text-decoration: none;
+      color: #0366d6;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .menu1 {
+      display: flex;
+      flex-direction: row;
+      border: 0;
+      font-size: 14px;
+      padding: 0;
+      margin: 0;
+      white-space: nowrap;
+    }
+
+    .menu1 a {
+      white-space: nowrap;
+      padding: 0 8px;
+      text-decoration: none;
+      color: #5e6d7d;
+      line-height: 30px;
+      height: 30px;
+    }
+
+    .menu1 a:hover {
+      background: #fefefe;
+      color: #0366d6;
+    }
+
+    .menuside2 {
+      display: flex;
+      flex-direction: column;
+      border: 0;
+      font-size: 14px;
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+      justify-content: center;
+    }
+
+    .menuside2 img {
+      vertical-align: top;
+      padding: 0 8px;
+      filter: brightness(0) saturate(100%) invert(42%) sepia(22%) saturate(385%) hue-rotate(170deg) brightness(92%) contrast(84%);
+    }
+
+    .menuside2 a {
+      padding: 6px 0;
+      text-decoration: none;
+      color: #5e6d7d;
+    }
+
+    .menuside2 a:hover {
+      color: #0366d6;
+      background: #fefefe;
+    }
+
+    .menuside2 a:hover img {
+      filter: brightness(0) saturate(100%) invert(23%) sepia(44%) saturate(7029%) hue-rotate(203deg) brightness(94%) contrast(98%);
+    }
+
+    .breadcrumb {
+      z-index: 1;
+      font-size: 14px;
+      text-align: center;
+      display: inline-block;
+      overflow: hidden;
+      border-radius: 5px;
+    }
+
+
+    .breadcrumb a {
+      text-decoration: none;
+      outline: none;
+      display: block;
+      float: left;
+      font-size: 12px;
+      line-height: 24px;
+      color: #373f49;
+      padding: 0 10px 0 35px;
+      background: #f0f1f1;
+      background: linear-gradient(#f0f1f1, #c6d2d2);
+      position: relative;
+    }
+
+    .breadcrumb a:first-child {
+      padding-left: 21px;
+      border-radius: 5px 0 0 5px;
+      /*to match with the parent's radius*/
+    }
+
+    .breadcrumb a:first-child:before {
+      left: 14px;
+    }
+
+    .breadcrumb a:last-child {
+      visibility: hidden;
+    }
+
+    .breadcrumb a.active,
+    .breadcrumb a:hover {
+      color: #0366d6;
+      background: #c6d2d2;
+      background: linear-gradient(#e3e4e4, #b8c7c7);
+    }
+
+    .breadcrumb a.active:after,
+    .breadcrumb a:hover:after {
+      background: #c6d2d2;
+      background: linear-gradient(135deg, #e3e4e4, #b8c7c7);
+    }
+
+    .breadcrumb a:after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: -12px;
+      /*half of square's length*/
+      /*same dimension as the line-height of .breadcrumb a */
+      width: 24px;
+      height: 24px;
+      transform: scale(0.707) rotate(45deg);
+      /*we need to prevent the arrows from getting buried under the next link*/
+      z-index: 1;
+      /*background same as links but the gradient will be rotated to compensate with the transform applied*/
+      background: #f0f1f1;
+      background: linear-gradient(135deg, #f0f1f1, #c6d2d2);
+      /*stylish arrow design using box shadow*/
+      box-shadow:
+        2px -2px 0 2px rgba(0, 0, 0, 0.1),
+        3px -3px 0 2px rgba(255, 255, 255, 0.1);
+      /*
+		5px - for rounded arrows and 
+		50px - to prevent hover glitches on the border created using shadows*/
+      border-radius: 0 5px 0 50px;
+    }
+
+    /*we dont need an arrow after the last link*/
+    .breadcrumb a:last-child:after {
+      content: none;
+      visibility: hidden;
+    }
+
+
+    .lga,
+    .lga a,
+    .lgi,
+    .lgi a {
+      font-size: 13px;
+      text-align: center;
+      color: #fff;
+      padding: 0 5px;
+      margin: 0;
+    }
+
+    .lga,
+    .lga a {
+      background-color: #008;
+    }
+
+    .lgi,
+    .lgi a {
+      background-color: #888;
+    }
+
+    .lga:hover,
+    .lga:hover a {
+      text-decoration: none;
+      color: #BBB;
+    }
+
+    .lgi:hover,
+    .lgi:hover a {
+      text-decoration: none;
+      color: #CCC;
+    }
+  </style>
+  <style>
+    body {
+      font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+      font-size: 14px;
+      line-height: 1.5;
+      margin: auto;
+      overflow-x: hidden;
+      background: #fefefe;
+    }
+
+    h1.chap {
+      font-size: 1.8em;
+    }
+
+    h2.chap {
+      font-size: 1.35em;
+    }
+
+    h3,
+    h3.chap {
+      font-size: 1.15em;
+    }
+
+    h4 {
+      font-size: 1.05em;
+    }
+
+    table {
+      font-size: inherit;
+    }
+  </style>
+
+
+  <style>
+    .dyn {
+      display: flex;
+      flex-direction: row;
+      gap: 3em;
+      align-items: stretch;
+      flex-wrap: wrap;
+      margin: 10px 0;
+    }
+
+    .dyn textarea {
+      font-family: monospace;
+      font-size: 13px;
+      line-height: 1.4;
+      min-width: 30ch;
+      max-width: 90ch;
+      box-sizing: border-box;
+      resize: both;
+      white-space: pre;
+      overflow: auto;
+      field-sizing: content;
+      align-self: stretch;
+      border: 1px solid #888;
+      border-radius: 3px;
+      margin: 0;
+      padding: 4px 8px;
+      background: #fefefe;
+    }
+
+    .dyn>div {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      display: flex;
+    }
+
+    .dyn>div>div {
+      margin: 0;
+      padding: 0;
+    }
+
+    .dyn img {
+      margin: 0;
+      padding: 0;
+    }
+
+    .scale {
+      max-width: 100%;
+      height: auto;
+      border: 1px solid #dde;
+      border-radius: 4px;
+    }
+  </style>
+
+
+  <script>
+    var llg = "zh";
+    var az = 0;
+    var amdark = 0;
+    function ljs(n) {
+      if (az) return false;
+      var sc = document.createElement("script");
+      sc.type = "text/javascript";
+      sc.src = "/btn-" + n + ".js";
+      document.body.innerHTML = "<i style='position:absolute;top:30%;width:100%;'><center>Loading in progress...";
+      document.body.appendChild(sc);
+    }
+    function ctc(id) {
+      document.getElementById('img' + id).classList.remove('cop'); document.getElementById('img' + id).classList.add('cop2');
+      document.getElementById('pre' + id).style.backgroundColor = '#4dff00';
+      document.getElementById('msg' + id).style.display = 'inline';
+
+      setTimeout(function () { document.getElementById('img' + id).classList.remove('cop2'); document.getElementById('img' + id).classList.add('cop'); document.getElementById('pre' + id).style.backgroundColor = ''; document.getElementById('msg' + id).style.display = 'none'; }, 800);
+
+
+      text = document.getElementById('pre' + id).innerText;
+      if (window.clipboardData && window.clipboardData.setData)
+        return window.clipboardData.setData("Text", text);
+      else if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
+        var ta = document.createElement("textarea");
+        ta.textContent = text;
+        ta.style.position = "fixed";
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          return document.execCommand("copy");
+        }
+        catch (ex) {
+          return false;
+        }
+        finally {
+          document.body.removeChild(ta);
+        }
+      }
+    }
+  </script>
+</head>
+
+<body>
+  <style>
+    body,
+    .container,
+    #B3,
+    #C5,
+    #C6,
+    #C7,
+    #D7,
+    #D8 {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      overflow-y: scroll;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      grid-template-rows: auto 1fr auto;
+      min-height: 100vh;
+    }
+
+    #B3 {
+      grid-column: 1 / 5;
+      grid-row: 1;
+      position: sticky;
+      top: 0;
+      height: 30px;
+      padding: 0;
+      z-index: 10;
+      overflow: hidden;
+      background: #edeff3;
+      border-bottom: 1px solid #d4d8de;
+    }
+
+    #D7 {
+      grid-column: 1;
+      grid-row: 2;
+      margin: 0;
+      padding: 0;
+      padding-left: 30px;
+      line-height: 1.6;
+    }
+
+    #D8 {
+      grid-column: 1;
+      grid-row: 3;
+      position: sticky;
+      bottom: 0;
+      z-index: 5;
+      background: #fefefe;
+    }
+
+    #C5 {
+      grid-column: 2;
+      grid-row: 1 / -1;
+      position: sticky;
+      top: 40px;
+      align-self: start;
+      height: calc(98vh - 60px);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #C6 {
+      grid-column: 3;
+      grid-row: 1 / -1;
+      position: sticky;
+      top: 40px;
+      align-self: start;
+      height: calc(98vh - 60px);
+      max-width: 200px;
+      overflow: hidden;
+      margin: 0 10px;
+      padding: 8px 5px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #C7 {
+      grid-column: 4;
+      grid-row: 1 / -1;
+      position: sticky;
+      top: 40px;
+      align-self: start;
+      height: calc(98vh - 60px);
+      margin: 0 20px 0 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #toc {
+      z-index: 15;
+      overflow-x: hidden;
+      overflow-y: auto;
+      background: #f6f8fa;
+      border-width: 2px;
+      border-style: groove;
+      border-radius: 3px;
+      border-color: #e1e4e8;
+      margin: 0 5px;
+      padding: 0;
+      max-height: 100%;
+    }
+
+    #toc ul {
+      margin: 0;
+      list-style-type: none;
+      padding: 0;
+    }
+
+    #toc li {
+      padding: 0 10px;
+      margin: 0;
+    }
+
+    #toc li a {
+      padding: 5px 0;
+      display: inline-block;
+      text-decoration: none;
+      width: 100%;
+      color: #5e6d7d;
+    }
+
+    #toc li a:hover {
+      color: #0366d6;
+    }
+
+    #toc li:hover {
+      background: #fefefe;
+    }
+
+    #magic {
+      position: absolute;
+      top: 0;
+      right: 50px;
+      width: 30px;
+      height: 30px;
+      overflow: hidden;
+      background: #edeff3;
+      z-index: 14;
+    }
+
+    #magic:hover {
+      width: calc(100% - 50px);
+    }
+
+    #magic .menu1 {
+      position: absolute;
+      top: 0;
+      right: 30px;
+      height: 30px;
+      padding-left: 10px;
+      background: #edeff3;
+      border-left: 1px solid #d4d8de;
+      border-bottom: 1px solid #d4d8de;
+    }
+
+    .menu1-tail {
+      flex-grow: 1;
+      flex-shrink: 0;
+      height: 30px;
+      position: relative;
+      z-index: 15;
+      background: #edeff3;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: auto auto auto;
+      grid-auto-rows: auto;
+      gap: 5px;
+      margin: 0;
+      padding: 0;
+    }
+
+    .merged {
+      grid-column: 1 / -1;
+    }
+
+    #C6 {
+      display: none;
+    }
+
+    @media (min-width: 1401px) {
+      #C6:has(#toc li) {
+        display: flex;
+      }
+    }
+
+    @media (max-width: 1100px) {
+      #C5,
+      #C7 {
+        display: none;
+      }
+    }
+
+    @media (max-width: 1200px) {
+      .merged {
+        display: none;
+      }
+    }
+  </style>
+
+  <div class="container">
+
+    <footer id="D8">
+
+      <p>
+      </p>
+      <p>
+
+      </p>
+    </footer>
+
+
+    <header id="B3">
+      <div class="menu1">
+        <a id="titem10" href="sequence-diagram_zh.html">时序图</a>
+        <a id="titem20" href="use-case-diagram_zh.html">用例图</a>
+        <a id="titem30" href="class-diagram_zh.html">类图</a>
+        <a id="titem40" href="activity-diagram-beta_zh.html">活动图</a>
+        <a id="titem50" href="component-diagram_zh.html">组件图</a>
+        <a id="titem60" href="state-diagram_zh.html">状态图</a>
+        <a id="titem70" href="object-diagram_zh.html">对象图</a>
+        <a id="titem80" href="deployment-diagram_zh.html">部署图</a>
+        <a id="titem90" href="timing-diagram_zh.html">定时图</a>
+
+        <a id="titem99" href="regex_zh.html">Regex</a>
+        <a id="titem100" href="nwdiag_zh.html">Network</a>
+        <a id="titem110" href="salt_zh.html">Wireframe</a>
+        <a id="titem120" href="archimate-diagram_zh.html">Archimate</a>
+        <a id="titem130" href="gantt-diagram_zh.html">Gantt</a>
+        <a id="titem140" href="mindmap-diagram_zh.html">MindMap</a>
+        <a id="titem150" href="wbs-diagram_zh.html">WBS</a>
+        <a id="titem151" href="ebnf_zh.html">EBNF</a>
+        <a id="titem160" href="json_zh.html">JSON</a>
+        <a id="titem170" href="yaml_zh.html">YAML</a>
+
+        <div class="menu1-tail"></div>
+      </div>
+      <div id="magic">
+        <div class="menu1">
+          <a id="titem10" href="sequence-diagram_zh.html">时序图</a>
+          <a id="titem20" href="use-case-diagram_zh.html">用例图</a>
+          <a id="titem30" href="class-diagram_zh.html">类图</a>
+          <a id="titem40" href="activity-diagram-beta_zh.html">活动图</a>
+          <a id="titem50" href="component-diagram_zh.html">组件图</a>
+          <a id="titem60" href="state-diagram_zh.html">状态图</a>
+          <a id="titem70" href="object-diagram_zh.html">对象图</a>
+          <a id="titem80" href="deployment-diagram_zh.html">部署图</a>
+          <a id="titem90" href="timing-diagram_zh.html">定时图</a>
+
+          <a id="titem99" href="regex_zh.html">Regex</a>
+          <a id="titem100" href="nwdiag_zh.html">Network</a>
+          <a id="titem110" href="salt_zh.html">Wireframe</a>
+          <a id="titem120" href="archimate-diagram_zh.html">Archimate</a>
+          <a id="titem130" href="gantt-diagram_zh.html">Gantt</a>
+          <a id="titem140" href="mindmap-diagram_zh.html">MindMap</a>
+          <a id="titem150" href="wbs-diagram_zh.html">WBS</a>
+          <a id="titem151" href="ebnf_zh.html">EBNF</a>
+          <a id="titem160" href="json_zh.html">JSON</a>
+          <a id="titem170" href="yaml_zh.html">YAML</a>
+
+          <div class="menu1-tail"></div>
+        </div>
+      </div><!-- magic -->
+    </header>
+
+    <main id="D7">
+
+      <style>
+        #donate {
+          padding-top: 10px;
+          min-height: 30px;
+        }
+      </style>
+
+
+      <p style="clear:both;">
+
+
+        <style>
+          #titem40 {
+            color: #0366d6;
+            background-color: #fefefe;
+          }
+
+          #titem40 img {
+            filter: brightness(0) saturate(100%) invert(23%) sepia(44%) saturate(7029%) hue-rotate(203deg) brightness(94%) contrast(98%);
+          }
+
+          .menu1:hover #titem40 {
+            color: #5e6d7d;
+          }
+
+          .menu1:hover #titem40:hover {
+            color: #0366d6;
+          }
+
+          .menu1:hover #titem40 img {
+            filter: brightness(0) saturate(100%) invert(42%) sepia(22%) saturate(385%) hue-rotate(170deg) brightness(92%) contrast(84%);
+          }
+        </style>
+
+        <a style="position:relative;top:-38px;" name="ad4b8d843025229d"></a>
+        <!--heading-->
+      </p>
+      <h1 class="chap">活动图</h1>
+      <p></p>
+      活动图描述工作流或流程：各个步骤、它们的顺序，以及分支和并行路径。它适合用于业务流程、算法，以及任何从起点流向终点的过程。
+      <p></p>
+      在 PlantUML 中，每个活动写成一行，使用箭头和 <code class="cod">if</code>、<code class="cod">repeat</code>、<code
+        class="cod">fork</code> 等关键字来表达控制流。图形会自动生成。
+      <p></p>
+      <ul>
+        <li><strong>文本输入，图形输出。</strong> 自上而下描述流程，包括分支和循环。</li>
+        <li><strong>自上而下阅读。</strong> 文本中的顺序就是图中的顺序。</li>
+        <li><strong>易于重组。</strong> 调整步骤顺序或添加分支，只需编辑文本，无需重画。</li>
+      </ul>
+      <p></p>
+      如果您在维护旧图，<a href="activity-diagram-legacy">旧版语法</a>仍受支持，但不再推荐用于新图。
+      <p></p>
+      所有图类型通用的功能，请参阅<a href="commons">通用命令</a>。
+      <a style="position:relative;top:-38px;" name="301241875e1def42"></a>
+      <!--heading-->
+      <h2 class="chap">简单的行动</h2>
+      活动标签以<code class="cod">:</code> 开始，以<code class="cod">;</code> 结束。
+      <p></p>
+      文本格式可以使用<a href="creole">克里奥尔语的维基语法</a>。
+      <p></p>
+      它们的定义顺序是隐性链接的。
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+:Hello world;
+:This is defined on
+several **lines**;
+@enduml
+</textarea>
+        <div id="out744ae44af32e8f4f3d69b5e69c9d068b">
+          <div class="mycell">
+            <img loading="lazy" width="149" height="140" class="scale"
+              src="/imgw/img-744ae44af32e8f4f3d69b5e69c9d068b.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="b9d5c6b286284d2d"></a>
+      <!--heading-->
+      <h2 class="chap">Other simple action <em>(defined as a list)</em></h2>
+      <p></p>
+      <h3>Simple action list separated by <code class="cod">-</code></h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+- Action 1
+- Action 2
+- Action 3
+@enduml
+</textarea>
+        <div id="out3d7f65d250bc947331bdd68f57037b6e">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="98" height="180" class="scale"
+              src="/imgw/img-3d7f65d250bc947331bdd68f57037b6e.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <h3>Simple action list separated by <code class="cod">*</code></h3>
+      <p></p>
+      <h4>With one level</h4>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+* Action 1
+* Action 2
+* Action 3
+@enduml
+</textarea>
+        <div id="outf8fb15403e8e046605afa0d7afd406d7">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="98" height="180" class="scale"
+              src="/imgw/img-f8fb15403e8e046605afa0d7afd406d7.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h4>With several levels</h4>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+&lt;style&gt;
+element {MinimumWidth 150}
+&lt;/style&gt;
+* Action 1
+** Sub-Action 1.1
+** Sub-Action 1.2
+*** Sub-Action 1.2.1
+*** Sub-Action 1.2.2
+* Action 2
+@enduml
+</textarea>
+        <div id="out0258a5d315038620c5bafed31c9d284d">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="185" height="345" class="scale"
+              src="/imgw/img-0258a5d315038620c5bafed31c9d284d.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://github.com/plantuml/plantuml/pull/2376">GH-2376</a>]</em>
+      <a style="position:relative;top:-38px;" name="45e7ad1c1b3c39e2"></a>
+      <!--heading-->
+      <h2 class="chap">开始/停止/结束</h2>
+      <p></p>
+      你可以使用<code class="cod">start</code> 和<code class="cod">stop</code> 关键字来表示一个图的开始和结束
+      。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+start
+:Hello world;
+:This is defined on
+several **lines**;
+stop
+@enduml
+</textarea>
+        <div id="outa1a81294bbd3175327b6b3d2e9e58414">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="149" height="221" class="scale"
+              src="/imgw/img-a1a81294bbd3175327b6b3d2e9e58414.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      你也可以使用<code class="cod">end</code> 关键字。
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+start
+:Hello world;
+:This is defined on
+several **lines**;
+end
+@enduml
+</textarea>
+        <div id="out6be94c4f18fea5e38def9170dd50995d">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="149" height="219" class="scale"
+              src="/imgw/img-6be94c4f18fea5e38def9170dd50995d.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="306ae00197babd1f"></a>
+      <!--heading-->
+      <h2 class="chap">条件</h2>
+      <p></p>
+      你可以使用<code class="cod">if</code>,<code class="cod">then</code>, <code class="cod">break</code>和<code
+        class="cod">else</code> 关键词来在你的图表中放入测试。
+      标签可以用圆括号提供。
+      <p></p>
+      有3种语法可供选择。
+      <ul>
+        <li><code class="cod">if (...) then (...)</code></li>
+      </ul>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+start
+
+if (Graphviz installed?) then (yes)
+  :process all\ndiagrams;
+else (no)
+  :process only
+  __sequence__ and __activity__ diagrams;
+endif
+
+stop
+
+@enduml
+</textarea>
+        <div id="outac14d4dc1bdb21cc7b2a979b0b867145">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="320" height="230" class="scale"
+              src="/imgw/img-ac14d4dc1bdb21cc7b2a979b0b867145.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <ul>
+        <li><code class="cod">if (...) is (...) then</code></li>
+      </ul>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+if (color?) is (&lt;color:red&gt;red) then
+:print red;
+else 
+:print not red;
+@enduml
+</textarea>
+        <div id="out22c7fb14588a73a445d52810ba6c9bbd">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="203" height="136" class="scale"
+              src="/imgw/img-22c7fb14588a73a445d52810ba6c9bbd.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <ul>
+        <li><code class="cod">if (...) equals (...) then</code></li>
+      </ul>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+if (counter?) equals (5) then
+:print 5;
+else 
+:print not 5;
+@enduml
+</textarea>
+        <div id="out5c72a40b47c8160aa408a69463a09b02">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="185" height="136" class="scale"
+              src="/imgw/img-5c72a40b47c8160aa408a69463a09b02.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref.<a href="https://forum.plantuml.net/301/activity-diagram-beta?show=302#a302">QA-301</a>]</em>
+      <p></p>
+      <h3>几个测试（水平模式）</h3>
+      <p></p>
+      你可以使用<code class="cod">elseif</code> 关键字来拥有几个测试<em>（默认是水平模式）</em>。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+start
+if (condition A) then (yes)
+  :Text 1;
+elseif (condition B) then (yes)
+  :Text 2;
+  stop
+(no) elseif (condition C) then (yes)
+  :Text 3;
+(no) elseif (condition D) then (yes)
+  :Text 4;
+else (nothing)
+  :Text else;
+endif
+stop
+@enduml
+</textarea>
+        <div id="out6bb2ecf1a2ca0e2cb883d6b6284a44d6">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="512" height="285" class="scale"
+              src="/imgw/img-6bb2ecf1a2ca0e2cb883d6b6284a44d6.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>几个测试（垂直模式）</h3>
+      <p></p>
+      你可以使用<code class="cod">!pragma useVerticalIf on</code> 命令，让测试处于垂直模式。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+!pragma useVerticalIf on
+start
+if (condition A) then (yes)
+  :Text 1;
+elseif (condition B) then (yes)
+  :Text 2;
+  stop
+elseif (condition C) then (yes)
+  :Text 3;
+elseif (condition D) then (yes)
+  :Text 4;
+else (nothing)
+  :Text else;
+endif
+stop
+@enduml
+</textarea>
+        <div id="outb60d22bc895ae7150e79e0460efce50e">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="197" height="553" class="scale"
+              src="/imgw/img-b60d22bc895ae7150e79e0460efce50e.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      你可以使用<code class="cod">-P</code> command-line[命令行]选项来指定pragma。
+      <p></p>
+      <p>
+        <code></code>
+      </p>
+      <pre class="colo"><code>java -jar plantuml.jar -PuseVerticalIf=on
+</code></pre>
+      <p>
+      </p>
+      <p></p>
+      <em>[参考文献：<a
+          href="https://forum.plantuml.net/3931/please-provide-elseif-structure-vertically-activity-diagrams">QA-3931</a>,<a
+          href="https://github.com/plantuml/plantuml/issues/582">issue-582</a></em>] 。
+      <p></p>
+      <p></p>
+      *[Refs. [QA-3931](https:<em>forum.plantuml.net/3931/please-provide-elseif-structure-vertically-activity-diagrams),
+        [GH-582](https:</em>github.com/plantuml/plantuml/issues/582)]*
+      <p></p>
+      <center>
+        <div class="tago">WARNING</div> <b>This translation need to be updated.</b> <div class="tago">WARNING</div>
+      </center>
+      <a style="position:relative;top:-38px;" name="537b5a761669087b"></a>
+      <!--heading-->
+      <h2 class="chap">Switch判断 [switch, case, endswitch]</h2>
+      <p></p>
+      你可以使用 <code class="cod">switch</code>, <code class="cod">case</code> 和 <code class="cod">endswitch</code>
+      关键词在图表中绘制Switch判断.
+      <p></p>
+      使用括号表示标注.
+      <p></p>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+start
+switch (测试?)
+case ( 条件 A )
+  :Text 1;
+case ( 条件 B ) 
+  :Text 2;
+case ( 条件 C )
+  :Text 3;
+case ( 条件 D )
+  :Text 4;
+case ( 条件 E )
+  :Text 5;
+endswitch
+stop
+@enduml
+</textarea>
+        <div id="outb98d2f03a41fd3ae279cfb7b4f2daa57">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="403" height="256" class="scale"
+              src="/imgw/img-b98d2f03a41fd3ae279cfb7b4f2daa57.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="d7b1027a512b4d7b"></a>
+      <!--heading-->
+      <h2 class="chap">条件判断和终止 [kill, detach]</h2>
+      <p></p>
+      你可以在if判断中终止一个行为.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+if (条件?) then
+  :错误;
+  stop
+endif
+#palegreen:行为;
+@enduml
+</textarea>
+        <div id="out2a97c2b2974f7f7711f681c9f72d7b8b">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="592" height="263" class="scale"
+              src="/imgw/img-2a97c2b2974f7f7711f681c9f72d7b8b.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      但如果你想在特定行为上停止，你可以使用<code class="cod">kill</code> 或 <code class="cod">detach</code>关键字:
+      <p></p>
+      <ul>
+        <li><code class="cod">kill</code></li>
+      </ul>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+if (条件?) then
+  #pink:错误;
+  kill
+endif
+#palegreen:行为;
+@enduml
+</textarea>
+        <div id="outd4466e57dd5beeac5a43fd75f3c5a5be">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="592" height="236" class="scale"
+              src="/imgw/img-d4466e57dd5beeac5a43fd75f3c5a5be.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[参考. <a
+          href="https://forum.plantuml.net/265/new-activity-diagram-syntax-direction-of-links?show=306#a306">QA-265</a>]</em>
+      <p></p>
+      <ul>
+        <li><code class="cod">detach</code></li>
+      </ul>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+if (条件?) then
+  #pink:错误;
+  detach
+endif
+#palegreen:行为;
+@enduml
+</textarea>
+        <div id="out768b1a03fe4f828f93c3517e78a7116b">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="592" height="236" class="scale"
+              src="/imgw/img-768b1a03fe4f828f93c3517e78a7116b.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <center>
+        <div class="tago">WARNING</div> <b>This translation need to be updated.</b> <div class="tago">WARNING</div>
+      </center>
+      <a style="position:relative;top:-38px;" name="219cebcef334f265"></a>
+      <!--heading-->
+      <h2 class="chap">重复循环</h2>
+      <p></p>
+      你可以使用关键字<code class="cod">repeat</code>和<code class="cod">repeatwhile</code>进行重复循环。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+start
+
+repeat
+  :读取数据;
+  :生成图片;
+repeat while (更多数据?)
+
+stop
+
+@enduml
+</textarea>
+        <div id="out4718e2c3e9bb4fa11ab9ceb4dcdb635b">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="145" height="301" class="scale"
+              src="/imgw/img-4718e2c3e9bb4fa11ab9ceb4dcdb635b.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      你同样可以使用一个全局行为作为<code class="cod">repeat</code>目标， 在返回循环开始时使用<code class="cod">backward</code>关键字插入一个全局行为。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+start
+
+repeat :foo作为开始标注;
+  :读取数据;
+  :生成图片;
+backward:这是一个后撤行为;
+repeat while (更多数据?)
+
+stop
+
+@enduml
+</textarea>
+        <div id="out16eaf1b6030e89cb0ea3318378223256">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="279" height="320" class="scale"
+              src="/imgw/img-16eaf1b6030e89cb0ea3318378223256.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <em>[Ref. <a
+          href="https://forum.plantuml.net/5826/please-provide-action-repeat-loop-start-instead-condition?show=5831#a5831">QA-5826</a>]</em>
+      <p></p>
+      <center>
+        <div class="tago">WARNING</div> <b>This translation need to be updated.</b> <div class="tago">WARNING</div>
+      </center>
+      <a style="position:relative;top:-38px;" name="76b6256d62540b9f"></a>
+      <!--heading-->
+      <h2 class="chap">打断循环 [break]</h2>
+      <p></p>
+      你可以使用 <code class="cod">break</code> 关键字跟在循环中的某个行为后面打断循环.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+start
+repeat
+  :测试某事;
+    if (发生错误?) then (没有)
+      #palegreen:好的;
+      break
+    endif
+    -&gt;not ok;
+    :弹窗 &#34;文本过长错误&#34;;
+repeat while (某事发生文本过长错误?) is (是的) not (不是)
+-&gt;//合并步骤//;
+:弹窗 &#34;成功！&#34;;
+stop
+@enduml
+</textarea>
+        <div id="outf1ad8224315e228dc86c7cfd8169e525">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="592" height="607" class="scale"
+              src="/imgw/img-f1ad8224315e228dc86c7cfd8169e525.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <em>[参考： <a
+          href="https://forum.plantuml.net/6105/possible-to-draw-a-line-to-another-box-via-id-or-label?show=6107#a6107">QA-6105</a>]</em>
+      <p></p>
+      <center>
+        <div class="tago">WARNING</div> <b>This translation need to be updated.</b> <div class="tago">WARNING</div>
+      </center>
+      <a style="position:relative;top:-38px;" name="2f8a92e645aba14f"></a>
+      <!--heading-->
+      <h2 class="chap">Goto和标签处理 [label, goto]</h2>
+      <p></p>
+      ⚠ 目前只是实验性的 🚧
+      <p></p>
+      你可以使用<code class="cod">label</code> 和<code class="cod">goto</code> 关键词来表示Goto处理，其中：
+      <ul>
+        <li><code class="cod">label &lt;label_name&gt;</code></li>
+        <li><code class="cod">goto &lt;label_name&gt;</code></li>
+      </ul>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+title Point two queries to same activity\nwith `goto`
+start
+if (Test Question?) then (yes)
+&#39;space label only for alignment
+label sp_lab0
+label sp_lab1
+&#39;real label
+label lab
+:shared;
+else (no)
+if (Second Test Question?) then (yes)
+label sp_lab2
+goto sp_lab1
+else
+:nonShared;
+endif
+endif
+:merge;
+@enduml
+</textarea>
+        <div id="out3a626e9a4738e5150163deb0566c302a">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="335" height="373" class="scale"
+              src="/imgw/img-3a626e9a4738e5150163deb0566c302a.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref.<a href="https://forum.plantuml.net/15026/">QA-15026</a>,<a
+          href="https://forum.plantuml.net/12526/">QA-12526</a>and initially<a
+          href="https://forum.plantuml.net/1626">QA-1626</a>] 。</em>
+      <a style="position:relative;top:-38px;" name="04a96ae1910f3c8a"></a>
+      <!--heading-->
+      <h2 class="chap">while循环</h2>
+      <p></p>
+      可以使用关键字<code class="cod">while</code>和<code class="cod">end while</code>进行while循环。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+start
+
+while (data available?)
+  :read data;
+  :generate diagrams;
+endwhile
+
+stop
+
+@enduml
+</textarea>
+        <div id="out399718c93c1ee166b67dcf0575ae52ce">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="216" height="246" class="scale"
+              src="/imgw/img-399718c93c1ee166b67dcf0575ae52ce.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      还可以在关键字<code class="cod">endwhile</code>后添加标注，还有一种方式是使用关键字<code class="cod">is</code>。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+while (check filesize ?) is (not empty)
+  :read file;
+endwhile (empty)
+:close file;
+@enduml
+</textarea>
+        <div id="outd374a26171a5310b4dec8b8014878b28">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="189" height="205" class="scale"
+              src="/imgw/img-d374a26171a5310b4dec8b8014878b28.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      如果你使用 <code class="cod">+detach+</code> 来形成一个无限循环, 那么你可能需要使用 <code class="cod">+-[hidden]-&gt;+</code>
+      来隐藏一些不完整的箭头。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+:Step 1;
+if (condition1) then
+  while (loop forever)
+   :Step 2;
+  endwhile
+  -[hidden]-&gt;
+  detach
+else
+  :end normally;
+  stop
+endif
+@enduml
+</textarea>
+        <div id="out72ab37617c52e73e0534dd96d56f2bbc">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="246" height="232" class="scale"
+              src="/imgw/img-72ab37617c52e73e0534dd96d56f2bbc.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <center>
+        <div class="tago">WARNING</div> <b>This translation need to be updated.</b> <div class="tago">WARNING</div>
+      </center>
+      <a style="position:relative;top:-38px;" name="7452578bfebedd2d"></a>
+      <!--heading-->
+      <h2 class="chap">并行处理 [fork, fork again, end fork, end merge]</h2>
+      <p></p>
+      你可以使用<code class="cod">fork</code>，<code class="cod">fork again</code>和<code class="cod">end fork</code> 或者 <code
+        class="cod">end merge</code> 等关键字表示并行处理。
+      <p></p>
+      <h3><code class="cod">fork</code> 示例</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+start
+fork
+  :行为 1;
+fork again
+  :行为 2;
+end fork
+stop
+@enduml
+</textarea>
+        <div id="out8500733125b59e6b258d293d1b24f52c">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="195" height="203" class="scale"
+              src="/imgw/img-8500733125b59e6b258d293d1b24f52c.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3><code class="cod">fork</code> 和合并示例</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+start
+fork
+  :行为 1;
+fork again
+  :行为 2;
+end merge
+stop
+@enduml
+</textarea>
+        <div id="out31b95c160b54f996747a41cda6c3bd05">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="195" height="211" class="scale"
+              src="/imgw/img-31b95c160b54f996747a41cda6c3bd05.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[参考: <a
+          href="https://forum.plantuml.net/5320/please-provide-fork-without-join-with-merge-activity-diagrams?show=5321#a5321">QA-5320</a>]</em>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+start
+fork
+  :行为 1;
+fork again
+  :行为 2;
+fork again
+  :行为 3;
+fork again
+  :行为 4;
+end merge
+stop
+@enduml
+</textarea>
+        <div id="out3257233b649001ef8c8ff96d1d048b29">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="323" height="211" class="scale"
+              src="/imgw/img-3257233b649001ef8c8ff96d1d048b29.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+start
+fork
+  :行为 1;
+fork again
+  :行为 2;
+  end
+end merge
+stop
+@enduml
+</textarea>
+        <div id="out120a3b7375277434a4eebed7454f9007">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="195" height="266" class="scale"
+              src="/imgw/img-120a3b7375277434a4eebed7454f9007.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[参考: <a href="https://forum.plantuml.net/13731">QA-13731</a>]</em>
+      <p></p>
+      <h3><code class="cod">end fork</code> 标注 (或 UML 连接规范):</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+start
+fork
+  :行为 A;
+fork again
+  :行为 B;
+end fork {或}
+stop
+@enduml
+</textarea>
+        <div id="outa04a46780fcc195cfe6081df6eaa79e2">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="222" height="203" class="scale"
+              src="/imgw/img-a04a46780fcc195cfe6081df6eaa79e2.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+start
+fork
+  :行为 A;
+fork again
+  :行为 B;
+end fork {和}
+stop
+@enduml
+</textarea>
+        <div id="out875e377dce3357ed06a9434071c1bd9b">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="222" height="203" class="scale"
+              src="/imgw/img-875e377dce3357ed06a9434071c1bd9b.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[参考: <a
+          href="https://forum.plantuml.net/5346/please-inplement-joinspec-for-join-nodes?show=5348#a5348">QA-5346</a>]</em>
+      <p></p>
+      <h3>其他示例</h3>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+start
+
+if (多进程处理?) then (是)
+  fork
+    :进程 1;
+  fork again
+    :进程 2;
+  end fork
+else (否)
+  :逻辑 1;
+  :逻辑 2;
+endif
+
+@enduml
+</textarea>
+        <div id="out8c7249b5e8ec985a8cd3887b837598e0">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="271" height="244" class="scale"
+              src="/imgw/img-8c7249b5e8ec985a8cd3887b837598e0.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="39d488a91ed5c8d2"></a>
+      <!--heading-->
+      <h2 class="chap">分割处理</h2>
+      <p></p>
+      <h3>分割</h3>
+      <p></p>
+      你可以使用 <code class="cod">split</code>, <code class="cod">split again</code> 和 <code class="cod">end split</code>
+      关键字去表达分割处理
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+start
+split
+   :A;
+split again
+   :B;
+split again
+   :C;
+split again
+   :a;
+   :b;
+end split
+:D;
+end
+@enduml
+</textarea>
+        <div id="out255155ec5d597229e01c43a85ebb54f1">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="196" height="314" class="scale"
+              src="/imgw/img-255155ec5d597229e01c43a85ebb54f1.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>输入分割 (多个入口)</h3>
+      <p></p>
+      你可以使用包含 <code class="cod">hidden</code> 指令的箭头去制造一个输入分割 (多入口):
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+split
+   -[hidden]-&gt;
+   :A;
+split again
+   -[hidden]-&gt;
+   :B;
+split again
+   -[hidden]-&gt;
+   :C;
+end split
+:D;
+@enduml
+</textarea>
+        <div id="outb0dece56a13b33b0e8664c024b8c4ff4">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="141" height="165" class="scale"
+              src="/imgw/img-b0dece56a13b33b0e8664c024b8c4ff4.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+split
+   -[hidden]-&gt;
+   :A;
+split again
+   -[hidden]-&gt;
+   :a;
+   :b;
+split again
+   -[hidden]-&gt;
+   (Z)
+end split
+:D;
+@enduml
+</textarea>
+        <div id="outfe0e76eea619526c5e84f5f95326248a">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="139" height="235" class="scale"
+              src="/imgw/img-fe0e76eea619526c5e84f5f95326248a.png" />
+          </div>
+        </div>
+      </div>
+      <em>[参考： <a href="https://forum.plantuml.net/8662">QA-8662</a>]</em>
+      <p></p>
+      <h3>输出分割 (多个结束点)</h3>
+      <p></p>
+      你可以使用 <code class="cod">kill</code> 或 <code class="cod">detach</code> 去制造一个输出分割 (多个结束点):
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+start
+split
+   :A;
+   kill
+split again
+   :B;
+   detach
+split again
+   :C;
+   kill
+end split
+@enduml
+</textarea>
+        <div id="outc9b84be59d4a7c7a2acb64d2bcdd7d6a">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="140" height="129" class="scale"
+              src="/imgw/img-c9b84be59d4a7c7a2acb64d2bcdd7d6a.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+start
+split
+   :A;
+   kill
+split again
+   :b;
+   :c;
+   detach
+split again
+   (Z)
+   detach
+split again
+   end
+split again
+   stop
+end split
+@enduml
+</textarea>
+        <div id="outc729c49d0ebdb2061ca93c6288855a3f">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="202" height="199" class="scale"
+              src="/imgw/img-c729c49d0ebdb2061ca93c6288855a3f.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="f4c6f851b00d5518"></a>
+      <!--heading-->
+      <h2 class="chap">注释</h2>
+      <p></p>
+      文本格式可以使用<a href="creole">克里奥尔维基语法</a>。
+      <p></p>
+      可以使用<code class="cod">floating</code> 关键字浮动注释。
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+start
+:foo1;
+floating note left: This is a note
+:foo2;
+note right
+  This note is on several
+  //lines// and can
+  contain &lt;b&gt;HTML&lt;/b&gt;
+  ====
+  * Calling the method &#34;&#34;foo()&#34;&#34; is prohibited
+end note
+stop
+
+@enduml
+</textarea>
+        <div id="out53f481573c343174d3474282d26f359f">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="464" height="247" class="scale"
+              src="/imgw/img-53f481573c343174d3474282d26f359f.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      您可以为后向活动添加注释：
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+start
+repeat :Enter data;
+:Submit;
+backward :Warning;
+note right: Note
+repeat while (Valid?) is (No) not (Yes)
+stop
+@enduml
+</textarea>
+        <div id="out7a34249a583573d5a53950194ab901ef">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="264" height="267" class="scale"
+              src="/imgw/img-7a34249a583573d5a53950194ab901ef.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref.<a
+          href="https://forum.plantuml.net/11788/is-it-possible-to-add-a-note-to-backward-activity?show=11802#a11802">QA-11788</a>]</em>
+      <p></p>
+      <p></p>
+      可以添加分区活动注释：
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+start
+partition &#34;**process** HelloWorld&#34; {
+    note
+        This is my note
+        ----
+        //Creole test//
+    end note
+    :Ready;
+    :HelloWorld(i)&gt;
+    :Hello-Sent;
+}
+@enduml
+</textarea>
+        <div id="outd52ee30dd06306b15d01ee8086911ace">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="279" height="233" class="scale"
+              src="/imgw/img-d52ee30dd06306b15d01ee8086911ace.png" />
+          </div>
+        </div>
+      </div>
+      <em>[参考<a
+          href="https://forum.plantuml.net/2398/is-it-possible-to-add-a-comment-on-top-of-a-activity-partition?show=2403#a2403">QA-2398］</a></em>
+      <p></p>
+      <center>
+        <div class="tago">WARNING</div> <b>This translation need to be updated.</b> <div class="tago">WARNING</div>
+      </center>
+      <a style="position:relative;top:-38px;" name="5d50889672f6f860"></a>
+      <!--heading-->
+      <h2 class="chap">改变颜色</h2>
+      <p></p>
+      你可以为一些活动指定<a href="color">颜色</a>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+start
+:开始处理;
+#HotPink:读取配置文件
+这些文件应该在此处编辑;
+#AAAAAA:结束处理;
+
+@enduml
+</textarea>
+        <div id="out04e66dd213e9b3265e46e95547ec7cfd">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="580" height="280" class="scale"
+              src="/imgw/img-04e66dd213e9b3265e46e95547ec7cfd.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      你通用可以使用 <a href="color">渐变色</a>.
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+start
+partition #red/white test分片 {
+        #blue\green:test活动;
+}
+@enduml
+</textarea>
+        <div id="out6cbb35c241d483d1d62ec97defa5a7a8">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="598" height="171" class="scale"
+              src="/imgw/img-6cbb35c241d483d1d62ec97defa5a7a8.png" />
+          </div>
+        </div>
+      </div>
+      <em>[参考: <a
+          href="https://forum.plantuml.net/4906/setting-ad-hoc-gradient-backgrounds-in-activity?show=4917#a4917">QA-4906</a>]</em>
+      <p></p>
+      <center>
+        <div class="tago">WARNING</div> <b>This translation need to be updated.</b> <div class="tago">WARNING</div>
+      </center>
+      <a style="position:relative;top:-38px;" name="6299b1bc9965f62f"></a>
+      <!--heading-->
+      <h2 class="chap">无箭头连接线</h2>
+      <p></p>
+      您可以使用 <code class="cod">skinparam ArrowHeadColor none</code> 参数来表示仅使用线条连接活动，而不带箭头。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+skinparam ArrowHeadColor none
+start
+:Hello world;
+:This is on defined on
+several **lines**;
+stop
+@enduml
+</textarea>
+        <div id="outf28fd1759a075c1d1aaf8e1e200f87e8">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="165" height="221" class="scale"
+              src="/imgw/img-f28fd1759a075c1d1aaf8e1e200f87e8.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+skinparam ArrowHeadColor none
+start
+repeat :Enter data;
+:Submit;
+backward :Warning;
+repeat while (Valid?) is (No) not (Yes)
+stop
+@enduml
+</textarea>
+        <div id="outb8fbc924852866817b2c649def620063">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="195" height="267" class="scale"
+              src="/imgw/img-b8fbc924852866817b2c649def620063.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="4e05974b02cc4aa9"></a>
+      <!--heading-->
+      <h2 class="chap">箭头</h2>
+      <p></p>
+      使用<code class="cod">-&gt;</code>标记，你可以给箭头添加文字或者修改箭头<a href="color">颜色</a>。
+      <p></p>
+      同时，你也可以选择点状 (dotted)，条状(dashed)，加粗或者是隐式箭头
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+:foo1;
+-&gt; You can put text on arrows;
+if (test) then
+  -[#blue]-&gt;
+  :foo2;
+  -[#green,dashed]-&gt; The text can
+  also be on several lines
+  and **very** long...;
+  :foo3;
+else
+  -[#black,dotted]-&gt;
+  :foo4;
+endif
+-[#gray,bold]-&gt;
+:foo5;
+@enduml
+</textarea>
+        <div id="oute7960e51a8ce9b733d48a3eb39bda87e">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="272" height="371" class="scale"
+              src="/imgw/img-e7960e51a8ce9b733d48a3eb39bda87e.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <a style="position:relative;top:-38px;" name="bb3756eadac20341"></a>
+      <!--heading-->
+      <h2 class="chap">Simple colored arrow [link]</h2>
+      <p></p>
+      You can use simple colored arrow with the <code class="cod">link</code> keyword.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+:a;
+link #blue
+:b;
+@enduml
+</textarea>
+        <div id="outa66c10b1b7445e3f5363746c6ae41860">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="63" height="125" class="scale"
+              src="/imgw/img-a66c10b1b7445e3f5363746c6ae41860.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="67fe7700c16c08bf"></a>
+      <!--heading-->
+      <h2 class="chap">Multiple colored arrow</h2>
+      <p></p>
+      You can use multiple colored arrow.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+skinparam colorArrowSeparationSpace 1
+start
+-[#red;#green;#orange;#blue]-&gt;
+if(a?)then(yes)
+-[#red]-&gt;
+:activity;
+-[#red]-&gt;
+if(c?)then(yes)
+-[#maroon,dashed]-&gt;
+else(no)
+-[#red]-&gt;
+if(b?)then(yes)
+-[#maroon,dashed]-&gt;
+else(no)
+-[#blue,dashed;dotted]-&gt;
+:do a;
+-[#red]-&gt;
+:do b;
+-[#red]-&gt;
+endif
+-[#red;#maroon,dashed]-&gt;
+endif
+-[#red;#maroon,dashed]-&gt;
+elseif(e?)then(yes)
+-[#green]-&gt;
+if(c?)then(yes)
+-[#maroon,dashed]-&gt;
+else(no)
+-[#green]-&gt;
+if(d?)then(yes)
+-[#maroon,dashed]-&gt;
+else(no)
+-[#green]-&gt;
+:do something; &lt;&lt;continuous&gt;&gt;
+-[#green]-&gt;
+endif
+-[#green;#maroon,dashed]-&gt;
+partition dummy {
+:some function;
+}
+-[#green;#maroon,dashed]-&gt;
+endif
+-[#green;#maroon,dashed]-&gt;
+
+elseif(f?)then(yes)
+-[#orange]-&gt;
+:activity; &lt;&lt;continuous&gt;&gt;
+-[#orange]-&gt;
+else(no)
+-[#blue,dashed;dotted]-&gt;
+endif
+stop
+@enduml
+</textarea>
+        <div id="outdd54b0541334411f6a7371802c54193d">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="383" height="563" class="scale"
+              src="/imgw/img-dd54b0541334411f6a7371802c54193d.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/4411">QA-4411</a>]</em>
+      <a style="position:relative;top:-38px;" name="f058a88644c5632e"></a>
+      <!--heading-->
+      <h2 class="chap">连接器(Connector)</h2>
+      <p></p>
+      你可以使用括号定义连接器。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+start
+:Some activity;
+(A)
+detach
+(A)
+:Other activity;
+@enduml
+</textarea>
+        <div id="out74761fc6074f45aae53dd208ed4f4551">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="126" height="234" class="scale"
+              src="/imgw/img-74761fc6074f45aae53dd208ed4f4551.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <center>
+        <div class="tago">WARNING</div> <b>This translation need to be updated.</b> <div class="tago">WARNING</div>
+      </center>
+      <a style="position:relative;top:-38px;" name="2f8c97b04c4fc1f5"></a>
+      <!--heading-->
+      <h2 class="chap">连接器颜色</h2>
+      <p></p>
+      你可以在连接器上增加 <a href="color">颜色</a>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+start
+:下面的连接器
+应该是蓝色;
+#blue:(B)
+:下一个连接器应该
+看起来应该是
+深绿色;
+#green:(G)
+stop
+@enduml
+</textarea>
+        <div id="oute812f4e09651b99e46c9458354919067">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="151" height="331" class="scale"
+              src="/imgw/img-e812f4e09651b99e46c9458354919067.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[参考. <a
+          href="https://forum.plantuml.net/10077/assigning-color-to-connectors?show=10080#c10080">QA-10077</a>]</em>
+      <p></p>
+      <p></p>
+      <em>[Ref. <a
+          href="https://forum.plantuml.net/19975/please-provide-change-background-connectors-activity-diagrams?show=19976#a19976">QA-19975</a>]</em>
+      <center>
+        <div class="tago">WARNING</div> <b>This translation need to be updated.</b> <div class="tago">WARNING</div>
+      </center>
+      <a style="position:relative;top:-38px;" name="772273da3919bcd1"></a>
+      <!--heading-->
+      <h2 class="chap">组合(grouping)</h2>
+      <p></p>
+      通过定义分组(group)，你可以把多个活动分组。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+start
+group 初始化分组 
+    :read config file;
+    :init internal variable;
+end group
+group 运行分组
+    :wait for user interaction;
+    :print information;
+end group
+
+stop
+@enduml
+</textarea>
+        <div id="out8ca7b3d137163263642b788ed67111e4">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="486" height="464" class="scale"
+              src="/imgw/img-8ca7b3d137163263642b788ed67111e4.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>分区</h3>
+      <p></p>
+      通过定义分区(partition)，你可以把多个活动组合(group)在一起:
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+start
+partition 初始化分区 {
+    :read config file;
+    :init internal variable;
+}
+partition 运行分区 {
+    :wait for user interaction;
+    :print information;
+}
+
+stop
+@enduml
+</textarea>
+        <div id="out086f89ff4f1d60b101aa55b3ffbe5946">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="199" height="395" class="scale"
+              src="/imgw/img-086f89ff4f1d60b101aa55b3ffbe5946.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      这里同样可以改变分区颜色 <a href="color">color</a>:
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+start
+partition #lightGreen &#34;Input Interface&#34; {
+    :read config file;
+    :init internal variable;
+}
+partition Running {
+    :wait for user interaction;
+    :print information;
+}
+stop
+@enduml
+</textarea>
+        <div id="out840be9ce48e93c1994af6e3d49b56c7b">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="199" height="395" class="scale"
+              src="/imgw/img-840be9ce48e93c1994af6e3d49b56c7b.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[参考: <a
+          href="https://forum.plantuml.net/2793/activity-beta-partition-name-more-than-one-word-does-not-work?show=2798#a2798">QA-2793</a>]</em>
+      <p></p>
+      同样可以添加一个 <a href="link">链接</a> 到分区:
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+start
+partition &#34;[[http://plantuml.com partition_name]]&#34; {
+    :read doc. on [[http://plantuml.com plantuml_website]];
+    :test diagram;
+}
+end
+@enduml
+</textarea>
+        <div id="out839430a230565b5527254ecc061d5363">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="237" height="243" class="scale"
+              src="/imgw/img-839430a230565b5527254ecc061d5363.png" />
+          </div>
+        </div>
+      </div>
+      <em>[参考: <a
+          href="https://forum.plantuml.net/542/ability-to-define-hyperlink-on-diagram-elements?show=14003#c14003">QA-542</a>]</em>
+      <p></p>
+      <h3>分组, 分区, 包, 矩形 或 卡片式</h3>
+      <p></p>
+      你可以分组活动通过定义:
+      <ul>
+        <li>group;</li>
+        <li>partition;</li>
+        <li>package;</li>
+        <li>rectangle;</li>
+        <li>card.</li>
+      </ul>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+start
+group 分组
+  :Activity;
+end group
+floating note: 分组备注
+
+partition 分区 {
+  :Activity;
+}
+floating note: 分区备注
+
+package 包 {
+  :Activity;
+}
+floating note: 包备注
+
+rectangle 矩形 {
+  :Activity;
+}
+floating note: 矩形备注
+
+card 卡片式 {
+  :Activity;
+}
+floating note: 卡片式备注
+end
+@enduml
+</textarea>
+        <div id="out7a1323f551b5c37be64854d25fd348d6">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="456" height="637" class="scale"
+              src="/imgw/img-7a1323f551b5c37be64854d25fd348d6.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <center>
+        <div class="tago">WARNING</div> <b>This translation need to be updated.</b> <div class="tago">WARNING</div>
+      </center>
+      <a style="position:relative;top:-38px;" name="dadd115c61036c7a"></a>
+      <!--heading-->
+      <h2 class="chap">泳道(Swimlanes)</h2>
+      <p></p>
+      你可以使用管道符<code class="cod">|</code>来定义泳道。
+      <p></p>
+      还可以改变泳道的<a href="color">颜色</a>。
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+|Swimlane1|
+start
+:foo1;
+|#AntiqueWhite|Swimlane2|
+:foo2;
+:foo3;
+|Swimlane1|
+:foo4;
+|Swimlane2|
+:foo5;
+stop
+@enduml
+</textarea>
+        <div id="out70d053dd402f038ca01b2bf1bbade278">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="243" height="402" class="scale"
+              src="/imgw/img-70d053dd402f038ca01b2bf1bbade278.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      你可以在泳道中增加 <code class="cod">if</code> 判断或 <code class="cod">repeat</code> 或 <code class="cod">while</code> 循环.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+|#pink|Actor_For_red|
+start
+if (color?) is (red) then
+#pink:**action red**;
+:foo1;
+else (not red)
+|#lightgray|Actor_For_no_red|
+#lightgray:**action not red**;
+:foo2;
+endif
+|Next_Actor|
+#lightblue:foo3;
+:foo4;
+|Final_Actor|
+#palegreen:foo5;
+stop
+@enduml
+</textarea>
+        <div id="outb2e7b35e0ae5e1a17a63b1af59e43e54">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="592" height="572" class="scale"
+              src="/imgw/img-b2e7b35e0ae5e1a17a63b1af59e43e54.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      你同样可以在泳道中增加别名，使用 <code class="cod">alias</code> 语法:
+      <p></p>
+      <ul>
+        <li><code class="cod">|[#&lt;color&gt;|]&lt;swimlane_alias&gt;| &lt;swimlane_title&gt;</code></li>
+      </ul>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+|#palegreen|f| fisherman
+|c| cook
+|#gold|e| eater
+|f|
+start
+:go fish;
+|c|
+:fry fish;
+|e|
+:eat fish;
+stop
+@enduml
+</textarea>
+        <div id="out417de18104d768c7fdb5298ac50ebf69">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="275" height="292" class="scale"
+              src="/imgw/img-417de18104d768c7fdb5298ac50ebf69.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[参考: <a
+          href="https://forum.plantuml.net/2681/possible-define-alias-swimlane-place-alias-everywhere-else?show=2685#a2685">QA-2681</a>]</em>
+      <p></p>
+      <center>
+        <div class="tago">WARNING</div> <b>This translation need to be updated.</b> <div class="tago">WARNING</div>
+      </center>
+      <a style="position:relative;top:-38px;" name="d02f7ddcfafa91da"></a>
+      <!--heading-->
+      <h2 class="chap">分离(detach)</h2>
+      <p></p>
+      可以使用关键字<code class="cod">detach</code> 或 <code class="cod">kill</code>移除箭头。
+      <p></p>
+      <ul>
+        <li><code class="cod">detach</code></li>
+      </ul>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+ :start;
+ fork
+   :foo1;
+   :foo2;
+ fork again
+   :foo3;
+   detach
+ endfork
+ if (foo4) then
+   :foo5;
+   detach
+ endif
+ :foo6;
+ detach
+ :foo7;
+ stop
+@enduml
+</textarea>
+        <div id="out315f62134e2b4650e0806e575a8b3663">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="173" height="510" class="scale"
+              src="/imgw/img-315f62134e2b4650e0806e575a8b3663.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <ul>
+        <li><code class="cod">kill</code></li>
+      </ul>
+      <p></p>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+ :start;
+ fork
+   :foo1;
+   :foo2;
+ fork again
+   :foo3;
+   kill
+ endfork
+ if (foo4) then
+   :foo5;
+   kill
+ endif
+ :foo6;
+ kill
+ :foo7;
+ stop
+@enduml
+</textarea>
+        <div id="outadbf998d00d707aacb006ddc93e7f374">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="173" height="510" class="scale"
+              src="/imgw/img-adbf998d00d707aacb006ddc93e7f374.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="83ee8020396e7512"></a>
+      <!--heading-->
+      <h2 class="chap">Emoji as action (with <code class="cod">icon</code> stereotype)</h2>
+      <p></p>
+      You can use <a href="https://plantuml.com/creole#68305e25f5788db0">emoji</a> as action, with the stereotype <code
+        class="cod">&lt;&lt;icon&gt;&gt;</code>:
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+while (&lt;:cloud_with_rain:&gt;)
+  :&lt;:umbrella:&gt;; &lt;&lt;icon&gt;&gt;
+endwhile
+-&lt;&lt;icon&gt;&gt;&lt;:closed_umbrella:&gt;
+@enduml
+</textarea>
+        <div id="outf50b851e39fe9983e9b895821ac3dc63">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="137" height="192" class="scale"
+              src="/imgw/img-f50b851e39fe9983e9b895821ac3dc63.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://github.com/plantuml/plantuml/issues/2436">GH-2436</a>]</em>
+      <a style="position:relative;top:-38px;" name="bdd3477f7d5f24c6"></a>
+      <!--heading-->
+      <h2 class="chap">SDL（规范和描述语言）</h2>
+      <p></p>
+      <h3>SDL 形状名称表</h3>
+      <p></p>
+      <table border="1" cellspacing="0" cellpadding="5">
+        <tbody>
+          <tr>
+            <td><b>
+                名称
+              </b></td>
+            <td><b>
+                旧语法
+              </b></td>
+            <td><b>
+                定型语法
+              </b></td>
+          </tr>
+          <tr>
+            <td>
+              输入
+            </td>
+            <td>
+              <code class="cod">&lt;</code>
+            </td>
+            <td>
+              <code class="cod">&lt;&lt;input&gt;&gt;</code>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              输出
+            </td>
+            <td>
+              <code class="cod">&gt;</code>
+            </td>
+            <td>
+              <code class="cod">&lt;&lt;output&gt;&gt;</code>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              程序
+            </td>
+            <td>
+              <code class="cod">|</code>
+            </td>
+            <td>
+              <code class="cod">&lt;&lt;procedure&gt;&gt;</code>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              加载
+            </td>
+            <td>
+              <code class="cod">\</code>
+            </td>
+            <td>
+              <code class="cod">&lt;&lt;load&gt;&gt;</code>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              保存
+            </td>
+            <td>
+              <code class="cod">/</code>
+            </td>
+            <td>
+              <code class="cod">&lt;&lt;save&gt;&gt;</code>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              连续
+            </td>
+            <td>
+              <code class="cod">}</code>
+            </td>
+            <td>
+              <code class="cod">&lt;&lt;continuous&gt;&gt;</code>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              任务
+            </td>
+            <td>
+              <code class="cod">]</code>
+            </td>
+            <td>
+              <code class="cod">&lt;&lt;task&gt;&gt;</code>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p></p>
+      <em>[Ref.<a
+          href="https://forum.plantuml.net/11518/issues-with-final-separator-latex-math-expression-activity?show=17268#a17268">QA-11518</a>,<a
+          href="https://github.com/plantuml/plantuml/discussions/1270">GH-1270</a>]</em>
+      <p></p>
+      <h3>SDL using final separator (Deprecated form)</h3>
+      通过更改最终<code class="cod">;</code> separator，可以为活动设置不同的渲染：
+      <ul>
+        <li><code class="cod">|</code></li>
+        <li><code class="cod">&lt;</code></li>
+        <li><code class="cod">&gt;</code></li>
+        <li><code class="cod">/</code></li>
+        <li><code class="cod">\\</code></li>
+        <li><code class="cod">]</code></li>
+        <li><code class="cod">}</code></li>
+      </ul>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+:Ready;
+:next(o)|
+:Receiving;
+split
+ :nak(i)&lt;
+ :ack(o)&gt;
+split again
+ :ack(i)&lt;
+ :next(o)
+ on several lines|
+ :i := i + 1]
+ :ack(o)&gt;
+split again
+ :err(i)&lt;
+ :nak(o)&gt;
+split again
+ :foo/
+split again
+ :bar\\
+split again
+ :i &gt; 5}
+stop
+end split
+:finish;
+@enduml
+</textarea>
+        <div id="outbab87252dc12df8e76089663c8726be1">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="144" height="523" class="scale"
+              src="/imgw/img-bab87252dc12df8e76089663c8726be1.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>使用正态分隔符和立体原型的 SDL（当前正式形式）</h3>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+start
+:SDL Shape;
+:input; &lt;&lt;input&gt;&gt;
+:output; &lt;&lt;output&gt;&gt;
+:procedure; &lt;&lt;procedure&gt;&gt;
+:load; &lt;&lt;load&gt;&gt;
+:save; &lt;&lt;save&gt;&gt;
+:continuous; &lt;&lt;continuous&gt;&gt;
+:task; &lt;&lt;task&gt;&gt;
+end
+@enduml
+</textarea>
+        <div id="outa99a32da8aa448bc5f4ea7dd68c9a9a4">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="123" height="534" class="scale"
+              src="/imgw/img-a99a32da8aa448bc5f4ea7dd68c9a9a4.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+:Ready;
+:next(o); &lt;&lt;procedure&gt;&gt;
+:Receiving;
+split
+ :nak(i); &lt;&lt;input&gt;&gt;
+ :ack(o); &lt;&lt;output&gt;&gt;
+split again
+ :ack(i); &lt;&lt;input&gt;&gt;
+ :next(o)
+ on several lines; &lt;&lt;procedure&gt;&gt;
+ :i := i + 1; &lt;&lt;task&gt;&gt;
+ :ack(o); &lt;&lt;output&gt;&gt;
+split again
+ :err(i); &lt;&lt;input&gt;&gt;
+ :nak(o); &lt;&lt;output&gt;&gt;
+split again
+ :foo; &lt;&lt;save&gt;&gt;
+split again
+ :bar; &lt;&lt;load&gt;&gt;
+split again
+ :i &gt; 5; &lt;&lt;continuous&gt;&gt;
+stop
+end split
+:finish;
+@enduml
+</textarea>
+        <div id="out0991bb31958b05e5ad41d1e4f8ce675c">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="457" height="525" class="scale"
+              src="/imgw/img-0991bb31958b05e5ad41d1e4f8ce675c.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <p></p>
+      <center>
+        <div class="tago">WARNING</div> <b>This translation need to be updated.</b> <div class="tago">WARNING</div>
+      </center>
+      <a style="position:relative;top:-38px;" name="72b61284e9743f76"></a>
+      <!--heading-->
+      <h2 class="chap">UML (Unified Modeling Language) Shape (with UML stereotype)</h2>
+      <p></p>
+      <h3>Table of UML Shape Name</h3>
+      <p></p>
+      <table border="1" cellspacing="0" cellpadding="5">
+        <tbody>
+          <tr>
+            <td><b>
+                Name
+              </b></td>
+            <td><b>
+                Stereotype syntax
+              </b></td>
+          </tr>
+          <tr>
+            <td>
+              ObjectNode
+            </td>
+            <td>
+              <code class="cod">&lt;&lt;object&gt;&gt;</code>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              ObjectNode<br />typed by signal
+            </td>
+            <td>
+              <code class="cod">&lt;&lt;objectSignal&gt;&gt;</code> or <code
+                class="cod">&lt;&lt;object-signal&gt;&gt;</code>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              AcceptEventAction<br />without TimeEvent trigger
+            </td>
+            <td>
+              <code class="cod">&lt;&lt;acceptEvent&gt;&gt;</code> or <code
+                class="cod">&lt;&lt;accept-event&gt;&gt;</code>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              AcceptEventAction<br />with TimeEvent trigger
+            </td>
+            <td>
+              <code class="cod">&lt;&lt;timeEvent&gt;&gt;</code> or <code class="cod">&lt;&lt;time-event&gt;&gt;</code>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              SendSignalAction<br /><br />SendObjectAction<br />with signal type
+            </td>
+            <td>
+              <code class="cod">&lt;&lt;sendSignal&gt;&gt;</code> or <code
+                class="cod">&lt;&lt;send-signal&gt;&gt;</code>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              Trigger
+            </td>
+            <td>
+              <code class="cod">&lt;&lt;trigger&gt;&gt;</code>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p></p>
+      <em>[Ref. <a href="https://github.com/plantuml/plantuml/pull/2185">GH-2185</a>]</em>
+      <p></p>
+      <h3>UML Shape Example using Stereotype</h3>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+:action;
+:object; &lt;&lt;object&gt;&gt;
+
+:ObjectNode
+typed by signal; &lt;&lt;objectSignal&gt;&gt;
+
+:AcceptEventAction
+without TimeEvent trigger; &lt;&lt;acceptEvent&gt;&gt;
+
+:SendSignalAction; &lt;&lt;sendSignal&gt;&gt;
+
+:SendObjectAction
+with signal type; &lt;&lt;sendSignal&gt;&gt;
+
+:Trigger; &lt;&lt;trigger&gt;&gt;
+
+:\t\t\t\t\t\tAcceptEventAction
+\t\t\t\t\t\twith TimeEvent trigger; &lt;&lt;timeEvent&gt;&gt;
+:an action;
+@enduml
+</textarea>
+        <div id="out498fce746ee6396d5f9cf39c9d358701">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="272" height="571" class="scale"
+              src="/imgw/img-498fce746ee6396d5f9cf39c9d358701.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://github.com/plantuml/plantuml/pull/2185">GH-2185</a>, <a
+          href="https://forum.plantuml.net/16558">QA-16558</a>, <a
+          href="https://github.com/plantuml/plantuml/issues/1659">GH-1659</a>]</em>
+      <a style="position:relative;top:-38px;" name="d23dee2d0707a741"></a>
+      <!--heading-->
+      <h2 class="chap">一个完整的例子</h2>
+      <p></p>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+start
+:ClickServlet.handleRequest();
+:new page;
+if (Page.onSecurityCheck) then (true)
+  :Page.onInit();
+  if (isForward?) then (no)
+    :Process controls;
+    if (continue processing?) then (no)
+      stop
+    endif
+
+    if (isPost?) then (yes)
+      :Page.onPost();
+    else (no)
+      :Page.onGet();
+    endif
+    :Page.onRender();
+  endif
+else (false)
+endif
+
+if (do redirect?) then (yes)
+  :redirect process;
+else
+  if (do forward?) then (yes)
+    :Forward request;
+  else (no)
+    :Render page template;
+  endif
+endif
+
+stop
+
+@enduml
+</textarea>
+        <div id="out2cdde63888137814c5ec59a1424f4b69">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="436" height="927" class="scale"
+              src="/imgw/img-2cdde63888137814c5ec59a1424f4b69.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="d6bf58f32e2a3e02"></a>
+      <!--heading-->
+      <h2 class="chap">判断的样式</h2>
+      <p></p>
+      <h3>inside 样式 (默认)</h3>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+skinparam conditionStyle inside
+start
+repeat
+  :act1;
+  :act2;
+repeatwhile (&lt;b&gt;end)
+:act3;
+@enduml
+</textarea>
+        <div id="out33c25970c754f9ea9ded8c344a67c41e">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="119" height="314" class="scale"
+              src="/imgw/img-33c25970c754f9ea9ded8c344a67c41e.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+start
+repeat
+  :act1;
+  :act2;
+repeatwhile (&lt;b&gt;end)
+:act3;
+@enduml
+</textarea>
+        <div id="out80d7ac4fefb09811299b211d95248c46">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="119" height="314" class="scale"
+              src="/imgw/img-80d7ac4fefb09811299b211d95248c46.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>Diamond 样式 </h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+skinparam conditionStyle diamond
+start
+repeat
+  :act1;
+  :act2;
+repeatwhile (&lt;b&gt;end)
+:act3;
+@enduml
+</textarea>
+        <div id="outa91cd0ecff50dbb7269d69813c0d0434">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="105" height="314" class="scale"
+              src="/imgw/img-a91cd0ecff50dbb7269d69813c0d0434.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <p></p>
+      <h3>InsideDiamond (或 <em>Foo1</em>) 样式 </h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+skinparam conditionStyle InsideDiamond
+start
+repeat
+  :act1;
+  :act2;
+repeatwhile (&lt;b&gt;end)
+:act3;
+@enduml
+</textarea>
+        <div id="out26d1fa439b95a122f8919ab5e39802d6">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="114" height="325" class="scale"
+              src="/imgw/img-26d1fa439b95a122f8919ab5e39802d6.png" />
+          </div>
+        </div>
+      </div>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+skinparam conditionStyle foo1
+start
+repeat
+  :act1;
+  :act2;
+repeatwhile (&lt;b&gt;end)
+:act3;
+@enduml
+</textarea>
+        <div id="out3158099af255e552a014401f8be76e6b">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="114" height="325" class="scale"
+              src="/imgw/img-3158099af255e552a014401f8be76e6b.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <em>[参考: <a href="https://forum.plantuml.net/1290/plantuml-condition-rendering">QA-1290</a> and <a
+          href="https://github.com/plantuml/plantuml/issues/400#issuecomment-721287124">#400</a>]</em>
+      <a style="position:relative;top:-38px;" name="27fee13230d4c6de"></a>
+      <!--heading-->
+      <h2 class="chap">判断的结束样式 </h2>
+      <p></p>
+      <h3>Diamond 样式 (默认)</h3>
+      <p></p>
+      <ul>
+        <li>With one branch</li>
+      </ul>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+skinparam ConditionEndStyle diamond
+:A;
+if (decision) then (yes)
+    :B1;
+else (no)
+endif
+:C;
+@enduml
+</textarea>
+        <div id="out2d099e650a48be332a9726acb91bf6f7">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="135" height="273" class="scale"
+              src="/imgw/img-2d099e650a48be332a9726acb91bf6f7.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <ul>
+        <li>两个分支 (<code class="cod">B1</code>, <code class="cod">B2</code>)</li>
+      </ul>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+skinparam ConditionEndStyle diamond
+:A;
+if (decision) then (yes)
+    :B1;
+else (no)
+    :B2;
+endif
+:C;
+@enduml
+@enduml
+</textarea>
+        <div id="oute81bbc266e7e85fcce5ebb203f18a3e9">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="154" height="244" class="scale"
+              src="/imgw/img-e81bbc266e7e85fcce5ebb203f18a3e9.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>水平线 (hline) 样式</h3>
+      <ul>
+        <li>一个分</li>
+      </ul>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+skinparam ConditionEndStyle hline
+:A;
+if (decision) then (yes)
+    :B1;
+else (no)
+endif
+:C;
+@enduml
+</textarea>
+        <div id="out519d08d7cb2dd405a951eb770357f7c4">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="135" height="251" class="scale"
+              src="/imgw/img-519d08d7cb2dd405a951eb770357f7c4.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <ul>
+        <li>两个分支 (<code class="cod">B1</code>, <code class="cod">B2</code>)</li>
+      </ul>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+skinparam ConditionEndStyle hline
+:A;
+if (decision) then (yes)
+    :B1;
+else (no)
+    :B2;
+endif
+:C;
+@enduml
+@enduml
+</textarea>
+        <div id="out8b2a6742c29c3968860f251d8021765a">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="154" height="232" class="scale"
+              src="/imgw/img-8b2a6742c29c3968860f251d8021765a.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <em>[Ref. <a
+          href="https://forum.plantuml.net/4015/its-possible-to-draw-if-else-endif-without-merge-symbol">QA-4015</a>]</em>
+      <a style="position:relative;top:-38px;" name="bb2ede32ce6accb8"></a>
+      <!--heading-->
+      <h2 class="chap">使用 sytle 定义 (全局) 样式</h2>
+      <p></p>
+      <h3>无样式 <em>(默认)</em></h3>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+start
+:init;
+-&gt; test of color;
+if (color?) is (&lt;color:red&gt;red) then
+:print red;
+else 
+:print not red;
+note right: no color
+endif
+partition End {
+:end;
+}
+-&gt; this is the end;
+end
+@enduml
+</textarea>
+        <div id="out9fe333346af1dca8e23b1258865e462e">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="291" height="405" class="scale"
+              src="/imgw/img-9fe333346af1dca8e23b1258865e462e.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <h3>有样式</h3>
+      <p></p>
+      你可以使用 <a href="style-evolution">style</a> 节点去定义样式然后改变渲染。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+&lt;style&gt;
+activityDiagram {
+  BackgroundColor #33668E
+  BorderColor #33668E
+  FontColor #888
+  FontName arial
+
+  diamond {
+    BackgroundColor #ccf
+    LineColor #00FF00
+    FontColor green
+    FontName arial
+    FontSize 15
+  }
+  arrow {
+    FontColor gold
+    FontName arial
+    FontSize 15
+  }
+  partition {
+    LineColor red
+    FontColor green
+    RoundCorner 10
+    BackgroundColor PeachPuff
+  }
+  note {
+    FontColor Blue
+    LineColor Navy
+    BackgroundColor #ccf
+  }
+}
+document {
+   BackgroundColor transparent
+}
+&lt;/style&gt;
+start
+:init;
+-&gt; test of color;
+if (color?) is (&lt;color:red&gt;red) then
+:print red;
+else 
+:print not red;
+note right: no color
+endif
+partition End {
+:end;
+}
+-&gt; this is the end;
+end
+@enduml
+</textarea>
+        <div id="outfc40f217c7ffa2e14e095c1e4371bb88">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="291" height="406" class="scale"
+              src="/imgw/img-fc40f217c7ffa2e14e095c1e4371bb88.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="67deba136675cf58"></a>
+      <!--heading-->
+      <h2 class="chap">Creole on Activity</h2>
+      <p></p>
+      You can use <a href="creole">Creole or HTML Creole</a> on Activity diagram:
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+:Creole:
+  wave: ~~wave~~
+  bold: **bold**
+  italics: //italics//
+  monospaced: &#34;&#34;monospaced&#34;&#34;
+  stricken-out: --stricken-out--
+  underlined: __underlined__
+  not-underlined: ~__not underlined__
+  wave-underlined: ~~wave-underlined~~;
+:HTML Creole:
+  bold: &lt;b&gt;bold
+  italics: &lt;i&gt;italics
+  monospaced: &lt;font:monospaced&gt;monospaced
+  stroked: &lt;s&gt;stroked
+  underlined: &lt;u&gt;underlined
+  waved: &lt;w&gt;waved
+  green-stroked: &lt;s:green&gt;stroked
+  red-underlined: &lt;u:red&gt;underlined
+  blue-waved: &lt;w:#0000FF&gt;waved
+  Blue: &lt;color:blue&gt;Blue
+  Orange: &lt;back:orange&gt;Orange background
+  big: &lt;size:20&gt;big;
+:Graphic:
+  OpenIconic: account-login &lt;&amp;account-login&gt; 
+  Unicode: This is &lt;U+221E&gt; long
+  Emoji: &lt;:calendar:&gt; Calendar
+  Image:
+  &lt;img:https://plantuml.com/logo3.png&gt;;
+@enduml
+</textarea>
+        <div id="outf742bdc9223d2557d12ce2d54dae7db7">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="247" height="709" class="scale"
+              src="/imgw/img-f742bdc9223d2557d12ce2d54dae7db7.png" />
+          </div>
+        </div>
+      </div>
+
+
+    </main>
+
+
+    <aside id="C6">
+      <!--toc-->
+      <div id="toc">
+        <ul>
+          <li><a href="#301241875e1def42">简单的行动</a>
+          </li>
+          <li><a href="#b9d5c6b286284d2d">Other simple action __(defined as a list)__</a>
+          </li>
+          <li><a href="#45e7ad1c1b3c39e2">开始/停止/结束</a>
+          </li>
+          <li><a href="#306ae00197babd1f">条件</a>
+          </li>
+          <li><a href="#537b5a761669087b">Switch判断 [switch, case, endswitch]</a>
+          </li>
+          <li><a href="#d7b1027a512b4d7b">条件判断和终止 [kill, detach]</a>
+          </li>
+          <li><a href="#219cebcef334f265">重复循环</a>
+          </li>
+          <li><a href="#76b6256d62540b9f">打断循环 [break]</a>
+          </li>
+          <li><a href="#2f8a92e645aba14f">Goto和标签处理 [label, goto]</a>
+          </li>
+          <li><a href="#04a96ae1910f3c8a">while循环</a>
+          </li>
+          <li><a href="#7452578bfebedd2d">并行处理 [fork, fork again, end fork, end merge]</a>
+          </li>
+          <li><a href="#39d488a91ed5c8d2">分割处理</a>
+          </li>
+          <li><a href="#f4c6f851b00d5518">注释</a>
+          </li>
+          <li><a href="#5d50889672f6f860">改变颜色</a>
+          </li>
+          <li><a href="#6299b1bc9965f62f">无箭头连接线</a>
+          </li>
+          <li><a href="#4e05974b02cc4aa9">箭头</a>
+          </li>
+          <li><a href="#bb3756eadac20341">Simple colored arrow [link]</a>
+          </li>
+          <li><a href="#67fe7700c16c08bf">Multiple colored arrow</a>
+          </li>
+          <li><a href="#f058a88644c5632e">连接器(Connector)</a>
+          </li>
+          <li><a href="#2f8c97b04c4fc1f5">连接器颜色</a>
+          </li>
+          <li><a href="#772273da3919bcd1">组合(grouping)</a>
+          </li>
+          <li><a href="#dadd115c61036c7a">泳道(Swimlanes)</a>
+          </li>
+          <li><a href="#d02f7ddcfafa91da">分离(detach)</a>
+          </li>
+          <li><a href="#83ee8020396e7512">Emoji as action (with `+icon+` stereotype)</a>
+          </li>
+          <li><a href="#bdd3477f7d5f24c6">SDL（规范和描述语言）</a>
+          </li>
+          <li><a href="#72b61284e9743f76">UML (Unified Modeling Language) Shape (with UML stereotype)</a>
+          </li>
+          <li><a href="#d23dee2d0707a741">一个完整的例子</a>
+          </li>
+          <li><a href="#d6bf58f32e2a3e02">判断的样式</a>
+          </li>
+          <li><a href="#27fee13230d4c6de">判断的结束样式</a>
+          </li>
+          <li><a href="#bb2ede32ce6accb8">使用 sytle 定义 (全局) 样式</a>
+          </li>
+          <li><a href="#67deba136675cf58">Creole on Activity</a>
+          </li>
+        </ul>
+      </div>
+    </aside>
+
+  </div>
+    <script src="../../viz-global.js"></script>
+    <script src="../../plantuml.js"></script>
+    <script>
+        (function () {
+            const render = window.plantumlRender;
+            if (typeof render !== "function") {
+                console.error("PlantUML renderer is unavailable.");
+                return;
+            }
+
+            const renderOptions = {};
+            let counter = 0;
+
+            document.querySelectorAll(".mycell").forEach((mycell) => {
+                const host = mycell.parentElement;
+                const textarea = host ? host.previousElementSibling : null;
+                if (!textarea || textarea.tagName !== "TEXTAREA") return;
+
+                if (!mycell.id) {
+                    counter += 1;
+                    mycell.id = "mycell-render-" + counter;
+                }
+
+                const draw = () => {
+                    mycell.innerHTML = "";
+                    render(textarea.value.split(/\r\n|\r|\n/), mycell.id, renderOptions);
+                };
+
+                textarea.addEventListener("input", draw);
+                draw();
+            });
+        })();
+    </script>
+</body>
+
+</html>

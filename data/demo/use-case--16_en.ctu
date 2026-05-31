@@ -1,0 +1,19 @@
+Title: Change arrow color and style (inline style)
+Describe: None
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+You can change the color or style of individual arrows using the inline following notation: 
+ - `#color;line.[bold|dashed|dotted];text:color`
+
+[UML]
+@startuml
+actor foo
+foo --> (bar) : normal
+foo --> (bar1) #line:red;line.bold;text:red  : red bold
+foo --> (bar2) #green;line.dashed;text:green : green dashed 
+foo --> (bar3) #blue;line.dotted;text:blue   : blue dotted
+@enduml
+------------------------------------------------------------

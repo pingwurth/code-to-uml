@@ -1,0 +1,35 @@
+Title: Business Use Case
+Describe: You can add `/` to make Business Use Case.
+------------------------------------------------------------
+[Example]
+Business Usecase
+
+[Description]
+None
+
+[UML]
+@startuml
+
+(First usecase)/
+(Another usecase)/ as (UC2)
+usecase/ UC3
+usecase/ (Last\nusecase) as UC4
+
+@enduml
+------------------------------------------------------------
+[Example]
+Business Actor
+
+[Description]
+None
+
+[UML]
+@startuml
+
+:First Actor:/
+:Another\nactor:/ as Man2
+actor/ Woman3
+actor/ :Last actor: as Person1
+
+@enduml
+------------------------------------------------------------

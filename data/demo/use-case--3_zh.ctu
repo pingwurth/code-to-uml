@@ -1,0 +1,47 @@
+Title: 改变角色的样式
+Describe: None
+------------------------------------------------------------
+[Example]
+火柴人 默认
+
+[Description]
+None
+
+[UML]
+@startuml
+:User: --> (Use)
+"Main Admin" as Admin
+"Use the application" as (Use)
+Admin --> (Admin the application)
+@enduml
+------------------------------------------------------------
+[Example]
+用户头像
+
+[Description]
+None
+
+[UML]
+@startuml
+skinparam actorStyle awesome
+:User: --> (Use)
+"Main Admin" as Admin
+"Use the application" as (Use)
+Admin --> (Admin the application)
+@enduml
+------------------------------------------------------------
+[Example]
+透明人
+
+[Description]
+None
+
+[UML]
+@startuml
+skinparam actorStyle Hollow 
+:User: --> (Use)
+"Main Admin" as Admin
+"Use the application" as (Use)
+Admin --> (Admin the application)
+@enduml
+------------------------------------------------------------

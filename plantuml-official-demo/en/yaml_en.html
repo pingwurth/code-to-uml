@@ -1,0 +1,1263 @@
+<html lang="en">
+
+<head>
+
+
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Organization",
+  "url": "https://plantuml.com",
+  "name": "PlantUML",
+  "sameAs" : ["https://twitter.com/plantuml","https://en.wikipedia.org/wiki/PlantUML","https://www.wikidata.org/wiki/Q18346546"],
+  "logo": "https://cdn-0.plantuml.com/logo3.png",
+  "contactPoint": [{
+    "@type": "ContactPoint",
+    "email": "plantuml@gmail.com",
+    "url": "https://plantuml.com",
+    "contactType": "customer service"
+  }]
+}
+</script>
+  <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+    "@type": "ListItem",
+    "position": 1,
+    "item": {
+      "@id": "https://plantuml.com",
+      "name": "Home"
+    }
+  },{
+    "@type": "ListItem",
+    "position": 2,
+    "item": {
+      "@id": "https://plantuml.com/sitemap-language-specification",
+      "name": "Language specification"
+    }
+  },{
+    "@type": "ListItem",
+    "position": 3,
+    "item": {
+      "@id": "https://plantuml.com/yaml",
+      "name": "Yaml Diagram"
+  }
+  }]
+}
+</script>
+  <link rel="canonical" href="https://plantuml.com/yaml" />
+  <link rel="alternate" hreflang="x-default" href="https://plantuml.com/yaml" />
+  <link rel="alternate" hreflang="de" href="https://plantuml.com/de/yaml" />
+  <link rel="alternate" hreflang="en" href="https://plantuml.com/yaml" />
+  <link rel="alternate" hreflang="es" href="https://plantuml.com/es/yaml" />
+  <link rel="alternate" hreflang="fr" href="https://plantuml.com/fr/yaml" />
+  <link rel="alternate" hreflang="ja" href="https://plantuml.com/ja/yaml" />
+  <link rel="alternate" hreflang="ko" href="https://plantuml.com/ko/yaml" />
+  <link rel="alternate" hreflang="zh" href="https://plantuml.com/zh/yaml" />
+
+  <link rel="shortcut icon" href="/favicon.ico" />
+
+
+  <!-- link rel="preload" as="image" href="https://img.shields.io/liberapay/patrons/plantuml.svg?logo=liberapay" -->
+
+
+  <meta property="og:type" content="article" />
+  <!-- volt:dokuwiki titleog: -->
+  <!-- volt:dokuwiki descriptionog: -->
+
+  <meta property="og:url" content="https://plantuml.com/yaml" />
+  <meta property="og:site_name" content="PlantUML.com" />
+
+  <!-- meta property="og:image" content="https://plantuml.com/og-yaml" -->
+  <meta name="twitter:image" content="https://plantuml.com/og-yaml" />
+  <meta property="og:locale" content="en" />
+
+  <meta name="twitter:card" content="summary" />
+  <!-- volt:dokuwiki titletwitter: -->
+  <!-- volt:dokuwiki descriptiontwitter: -->
+  <meta name="twitter:site" content="@PlantUML" />
+  <meta name="twitter:creator" content="@PlantUML" />
+
+  <script>
+    if (window.location.href.indexOf("/en/") == -1) {
+      var lg = navigator.language.substring(0, 2);
+      if (lg == "de") window.location.href = "/de/yaml";
+      if (lg == "es") window.location.href = "/es/yaml";
+      if (lg == "fr") window.location.href = "/fr/yaml";
+      if (lg == "ja") window.location.href = "/ja/yaml";
+      if (lg == "ko") window.location.href = "/ko/yaml";
+      if (lg == "ru") window.location.href = "/ru/yaml";
+      if (lg == "zh") window.location.href = "/zh/yaml";
+    }
+  </script>
+
+
+  <!-- https://www.w3schools.com/colors/colors_picker.asp -->
+  <!-- filter css https://codepen.io/sosuke/pen/Pjoqqp -->
+
+
+  <style>
+    .scale {}
+
+    li {
+      margin: 2px;
+    }
+
+    #external li {
+      margin: 13px;
+    }
+
+    @media screen and (max-width: 1190px) {
+    }
+
+
+    .coptable {
+      max-width: 90%;
+    }
+
+    .mytab {
+      display: inline-block;
+      border-radius: 3px;
+      border: 1px solid #e1e4e8;
+    }
+
+    .mytab:hover {
+      border: 1px dashed #0366d6;
+      cursor: pointer;
+      color: #0366d6;
+      background: #f6f8fa;
+    }
+
+    .cop {
+      margin: 25px 10px 0 10px;
+    }
+
+    .cop:hover {
+      cursor: pointer;
+      filter: invert(30%) sepia(75%) saturate(4001%) hue-rotate(201deg) brightness(88%) contrast(98%);
+    }
+
+    .cop2 {
+      margin: 25px 10px 0 10px;
+    }
+
+    .cop2:hover {
+      cursor: pointer;
+    }
+
+    .msg {
+      position: absolute;
+      color: #339966;
+      background-color: #FFF;
+      margin-top: 55px;
+      display: none;
+      border-radius: 3px;
+      border: 1px solid #4dff00;
+    }
+
+    .mycell0 {
+      float: left;
+      vertical-align: top;
+      padding: 10px;
+    }
+
+    .mycell0 code:hover {
+      cursor: default;
+      color: #000;
+    }
+
+    .mycell {
+      float: right;
+      vertical-align: top;
+      padding: 10px;
+      max-width: 55vw;
+      overflow-x: auto;
+    }
+
+    .mycell0 pre {
+      max-width: 55vw;
+      overflow-x: auto;
+    }
+
+    .cod {
+      background: #edeff3;
+      padding: 2px 5px;
+      border-radius: 3px;
+    }
+
+    .colo {
+      display: inline-block;
+      background: #edeff3;
+      padding: 7px 12px;
+      border-radius: 3px;
+    }
+
+    .tag,
+    .tagg,
+    .tago,
+    .tagr {
+      text-rendering: optimizeLegibility;
+      display: inline-block;
+      padding: 3px 5px 2px 4px;
+      text-decoration: none;
+      white-space: nowrap;
+      border: 1px solid #999;
+      text-transform: uppercase;
+      text-align: center;
+      border-radius: 3px;
+      font-size: 11px;
+      font-weight: bold;
+      line-height: 90%;
+    }
+
+    .tag {
+      background-color: #EEEEEE;
+    }
+
+    .tagg {
+      background-color: #98FB98;
+    }
+
+    .tago {
+      background-color: #fafa00;
+    }
+
+    .tagr {
+      background-color: #FF4500;
+    }
+
+
+    a {
+      text-decoration: none;
+      color: #0366d6;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .menu1 {
+      display: flex;
+      flex-direction: row;
+      border: 0;
+      font-size: 14px;
+      padding: 0;
+      margin: 0;
+      white-space: nowrap;
+    }
+
+    .menu1 a {
+      white-space: nowrap;
+      padding: 0 8px;
+      text-decoration: none;
+      color: #5e6d7d;
+      line-height: 30px;
+      height: 30px;
+    }
+
+    .menu1 a:hover {
+      background: #fefefe;
+      color: #0366d6;
+    }
+
+    .menuside2 {
+      display: flex;
+      flex-direction: column;
+      border: 0;
+      font-size: 14px;
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+      justify-content: center;
+    }
+
+    .menuside2 img {
+      vertical-align: top;
+      padding: 0 8px;
+      filter: brightness(0) saturate(100%) invert(42%) sepia(22%) saturate(385%) hue-rotate(170deg) brightness(92%) contrast(84%);
+    }
+
+    .menuside2 a {
+      padding: 6px 0;
+      text-decoration: none;
+      color: #5e6d7d;
+    }
+
+    .menuside2 a:hover {
+      color: #0366d6;
+      background: #fefefe;
+    }
+
+    .menuside2 a:hover img {
+      filter: brightness(0) saturate(100%) invert(23%) sepia(44%) saturate(7029%) hue-rotate(203deg) brightness(94%) contrast(98%);
+    }
+
+    .breadcrumb {
+      z-index: 1;
+      font-size: 14px;
+      text-align: center;
+      display: inline-block;
+      overflow: hidden;
+      border-radius: 5px;
+    }
+
+
+    .breadcrumb a {
+      text-decoration: none;
+      outline: none;
+      display: block;
+      float: left;
+      font-size: 12px;
+      line-height: 24px;
+      color: #373f49;
+      padding: 0 10px 0 35px;
+      background: #f0f1f1;
+      background: linear-gradient(#f0f1f1, #c6d2d2);
+      position: relative;
+    }
+
+    .breadcrumb a:first-child {
+      padding-left: 21px;
+      border-radius: 5px 0 0 5px;
+      /*to match with the parent's radius*/
+    }
+
+    .breadcrumb a:first-child:before {
+      left: 14px;
+    }
+
+    .breadcrumb a:last-child {
+      visibility: hidden;
+    }
+
+    .breadcrumb a.active,
+    .breadcrumb a:hover {
+      color: #0366d6;
+      background: #c6d2d2;
+      background: linear-gradient(#e3e4e4, #b8c7c7);
+    }
+
+    .breadcrumb a.active:after,
+    .breadcrumb a:hover:after {
+      background: #c6d2d2;
+      background: linear-gradient(135deg, #e3e4e4, #b8c7c7);
+    }
+
+    .breadcrumb a:after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: -12px;
+      /*half of square's length*/
+      /*same dimension as the line-height of .breadcrumb a */
+      width: 24px;
+      height: 24px;
+      transform: scale(0.707) rotate(45deg);
+      /*we need to prevent the arrows from getting buried under the next link*/
+      z-index: 1;
+      /*background same as links but the gradient will be rotated to compensate with the transform applied*/
+      background: #f0f1f1;
+      background: linear-gradient(135deg, #f0f1f1, #c6d2d2);
+      /*stylish arrow design using box shadow*/
+      box-shadow:
+        2px -2px 0 2px rgba(0, 0, 0, 0.1),
+        3px -3px 0 2px rgba(255, 255, 255, 0.1);
+      /*
+		5px - for rounded arrows and 
+		50px - to prevent hover glitches on the border created using shadows*/
+      border-radius: 0 5px 0 50px;
+    }
+
+    /*we dont need an arrow after the last link*/
+    .breadcrumb a:last-child:after {
+      content: none;
+      visibility: hidden;
+    }
+
+
+    .lga,
+    .lga a,
+    .lgi,
+    .lgi a {
+      font-size: 13px;
+      text-align: center;
+      color: #fff;
+      padding: 0 5px;
+      margin: 0;
+    }
+
+    .lga,
+    .lga a {
+      background-color: #008;
+    }
+
+    .lgi,
+    .lgi a {
+      background-color: #888;
+    }
+
+    .lga:hover,
+    .lga:hover a {
+      text-decoration: none;
+      color: #BBB;
+    }
+
+    .lgi:hover,
+    .lgi:hover a {
+      text-decoration: none;
+      color: #CCC;
+    }
+  </style>
+  <style>
+    body {
+      font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+      font-size: 14px;
+      line-height: 1.5;
+      margin: auto;
+      overflow-x: hidden;
+      background: #fefefe;
+    }
+
+    h1.chap {
+      font-size: 1.8em;
+    }
+
+    h2.chap {
+      font-size: 1.35em;
+    }
+
+    h3,
+    h3.chap {
+      font-size: 1.15em;
+    }
+
+    h4 {
+      font-size: 1.05em;
+    }
+
+    table {
+      font-size: inherit;
+    }
+  </style>
+
+
+  <style>
+    .dyn {
+      display: flex;
+      flex-direction: row;
+      gap: 3em;
+      align-items: stretch;
+      flex-wrap: wrap;
+      margin: 10px 0;
+    }
+
+    .dyn textarea {
+      font-family: monospace;
+      font-size: 13px;
+      line-height: 1.4;
+      min-width: 30ch;
+      max-width: 90ch;
+      box-sizing: border-box;
+      resize: both;
+      white-space: pre;
+      overflow: auto;
+      field-sizing: content;
+      align-self: stretch;
+      border: 1px solid #888;
+      border-radius: 3px;
+      margin: 0;
+      padding: 4px 8px;
+      background: #fefefe;
+    }
+
+    .dyn>div {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      display: flex;
+    }
+
+    .dyn>div>div {
+      margin: 0;
+      padding: 0;
+    }
+
+    .dyn img {
+      margin: 0;
+      padding: 0;
+    }
+
+    .scale {
+      max-width: 100%;
+      height: auto;
+      border: 1px solid #dde;
+      border-radius: 4px;
+    }
+  </style>
+
+
+  <script>
+    var llg = "en";
+    var az = 0;
+    var amdark = 0;
+    function ljs(n) {
+      if (az) return false;
+      var sc = document.createElement("script");
+      sc.type = "text/javascript";
+      sc.src = "/btn-" + n + ".js";
+      document.body.innerHTML = "<i style='position:absolute;top:30%;width:100%;'><center>Loading in progress...";
+      document.body.appendChild(sc);
+    }
+    function ctc(id) {
+      document.getElementById('img' + id).classList.remove('cop'); document.getElementById('img' + id).classList.add('cop2');
+      document.getElementById('pre' + id).style.backgroundColor = '#4dff00';
+      document.getElementById('msg' + id).style.display = 'inline';
+
+      setTimeout(function () { document.getElementById('img' + id).classList.remove('cop2'); document.getElementById('img' + id).classList.add('cop'); document.getElementById('pre' + id).style.backgroundColor = ''; document.getElementById('msg' + id).style.display = 'none'; }, 800);
+
+
+      text = document.getElementById('pre' + id).innerText;
+      if (window.clipboardData && window.clipboardData.setData)
+        return window.clipboardData.setData("Text", text);
+      else if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
+        var ta = document.createElement("textarea");
+        ta.textContent = text;
+        ta.style.position = "fixed";
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          return document.execCommand("copy");
+        }
+        catch (ex) {
+          return false;
+        }
+        finally {
+          document.body.removeChild(ta);
+        }
+      }
+    }
+  </script>
+</head>
+
+<body>
+  <style>
+    body,
+    .container,
+    #B3,
+    #C5,
+    #C6,
+    #C7,
+    #D7,
+    #D8 {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      overflow-y: scroll;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      grid-template-rows: auto 1fr auto;
+      min-height: 100vh;
+    }
+
+    #B3 {
+      grid-column: 1 / 5;
+      grid-row: 1;
+      position: sticky;
+      top: 0;
+      height: 30px;
+      padding: 0;
+      z-index: 10;
+      overflow: hidden;
+      background: #edeff3;
+      border-bottom: 1px solid #d4d8de;
+    }
+
+    #D7 {
+      grid-column: 1;
+      grid-row: 2;
+      margin: 0;
+      padding: 0;
+      padding-left: 30px;
+      line-height: 1.6;
+    }
+
+    #D8 {
+      grid-column: 1;
+      grid-row: 3;
+      position: sticky;
+      bottom: 0;
+      z-index: 5;
+      background: #fefefe;
+    }
+
+    #C5 {
+      grid-column: 2;
+      grid-row: 1 / -1;
+      position: sticky;
+      top: 40px;
+      align-self: start;
+      height: calc(98vh - 60px);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #C6 {
+      grid-column: 3;
+      grid-row: 1 / -1;
+      position: sticky;
+      top: 40px;
+      align-self: start;
+      height: calc(98vh - 60px);
+      max-width: 200px;
+      overflow: hidden;
+      margin: 0 10px;
+      padding: 8px 5px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #C7 {
+      grid-column: 4;
+      grid-row: 1 / -1;
+      position: sticky;
+      top: 40px;
+      align-self: start;
+      height: calc(98vh - 60px);
+      margin: 0 20px 0 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #toc {
+      z-index: 15;
+      overflow-x: hidden;
+      overflow-y: auto;
+      background: #f6f8fa;
+      border-width: 2px;
+      border-style: groove;
+      border-radius: 3px;
+      border-color: #e1e4e8;
+      margin: 0 5px;
+      padding: 0;
+      max-height: 100%;
+    }
+
+    #toc ul {
+      margin: 0;
+      list-style-type: none;
+      padding: 0;
+    }
+
+    #toc li {
+      padding: 0 10px;
+      margin: 0;
+    }
+
+    #toc li a {
+      padding: 5px 0;
+      display: inline-block;
+      text-decoration: none;
+      width: 100%;
+      color: #5e6d7d;
+    }
+
+    #toc li a:hover {
+      color: #0366d6;
+    }
+
+    #toc li:hover {
+      background: #fefefe;
+    }
+
+    #magic {
+      position: absolute;
+      top: 0;
+      right: 50px;
+      width: 30px;
+      height: 30px;
+      overflow: hidden;
+      background: #edeff3;
+      z-index: 14;
+    }
+
+    #magic:hover {
+      width: calc(100% - 50px);
+    }
+
+    #magic .menu1 {
+      position: absolute;
+      top: 0;
+      right: 30px;
+      height: 30px;
+      padding-left: 10px;
+      background: #edeff3;
+      border-left: 1px solid #d4d8de;
+      border-bottom: 1px solid #d4d8de;
+    }
+
+    .menu1-tail {
+      flex-grow: 1;
+      flex-shrink: 0;
+      height: 30px;
+      position: relative;
+      z-index: 15;
+      background: #edeff3;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: auto auto auto;
+      grid-auto-rows: auto;
+      gap: 5px;
+      margin: 0;
+      padding: 0;
+    }
+
+    .merged {
+      grid-column: 1 / -1;
+    }
+
+    #C6 {
+      display: none;
+    }
+
+    @media (min-width: 1401px) {
+      #C6:has(#toc li) {
+        display: flex;
+      }
+    }
+
+    @media (max-width: 1100px) {
+      #C5,
+      #C7 {
+        display: none;
+      }
+    }
+
+    @media (max-width: 1200px) {
+      .merged {
+        display: none;
+      }
+    }
+  </style>
+
+  <div class="container">
+
+    <footer id="D8">
+
+      <p>
+      </p>
+      <p>
+
+      </p>
+    </footer>
+
+
+    <header id="B3">
+      <div class="menu1">
+        <a id="titem10" href="sequence-diagram_en.html">Sequence</a>
+        <a id="titem20" href="use-case-diagram_en.html">Use Case</a>
+        <a id="titem30" href="class-diagram_en.html">Class</a>
+        <a id="titem40" href="activity-diagram-beta_en.html">Activity</a>
+        <a id="titem50" href="component-diagram_en.html">Component</a>
+        <a id="titem60" href="state-diagram_en.html">State</a>
+        <a id="titem70" href="object-diagram_en.html">Object</a>
+        <a id="titem80" href="deployment-diagram_en.html">Deployment</a>
+        <a id="titem90" href="timing-diagram_en.html">Timing</a>
+
+        <a id="titem99" href="regex_en.html">Regex</a>
+        <a id="titem100" href="nwdiag_en.html">Network</a>
+        <a id="titem110" href="salt_en.html">Wireframe</a>
+        <a id="titem120" href="archimate-diagram_en.html">Archimate</a>
+        <a id="titem130" href="gantt-diagram_en.html">Gantt</a>
+        <a id="titem140" href="mindmap-diagram_en.html">MindMap</a>
+        <a id="titem150" href="wbs-diagram_en.html">WBS</a>
+        <a id="titem151" href="ebnf_en.html">EBNF</a>
+        <a id="titem160" href="json_en.html">JSON</a>
+        <a id="titem170" href="yaml_en.html">YAML</a>
+
+        <div class="menu1-tail"></div>
+      </div>
+      <div id="magic">
+        <div class="menu1">
+          <a id="titem10" href="sequence-diagram_en.html">Sequence</a>
+          <a id="titem20" href="use-case-diagram_en.html">Use Case</a>
+          <a id="titem30" href="class-diagram_en.html">Class</a>
+          <a id="titem40" href="activity-diagram-beta_en.html">Activity</a>
+          <a id="titem50" href="component-diagram_en.html">Component</a>
+          <a id="titem60" href="state-diagram_en.html">State</a>
+          <a id="titem70" href="object-diagram_en.html">Object</a>
+          <a id="titem80" href="deployment-diagram_en.html">Deployment</a>
+          <a id="titem90" href="timing-diagram_en.html">Timing</a>
+
+          <a id="titem99" href="regex_en.html">Regex</a>
+          <a id="titem100" href="nwdiag_en.html">Network</a>
+          <a id="titem110" href="salt_en.html">Wireframe</a>
+          <a id="titem120" href="archimate-diagram_en.html">Archimate</a>
+          <a id="titem130" href="gantt-diagram_en.html">Gantt</a>
+          <a id="titem140" href="mindmap-diagram_en.html">MindMap</a>
+          <a id="titem150" href="wbs-diagram_en.html">WBS</a>
+          <a id="titem151" href="ebnf_en.html">EBNF</a>
+          <a id="titem160" href="json_en.html">JSON</a>
+          <a id="titem170" href="yaml_en.html">YAML</a>
+
+          <div class="menu1-tail"></div>
+        </div>
+      </div><!-- magic -->
+    </header>
+
+    <main id="D7">
+
+      <style>
+        #donate {
+          padding-top: 10px;
+          min-height: 30px;
+        }
+      </style>
+
+
+      <p style="clear:both;">
+
+
+        <style>
+          #titem10 {
+            color: #0366d6;
+            background-color: #fefefe;
+          }
+
+          #titem170 img {
+            filter: brightness(0) saturate(100%) invert(23%) sepia(44%) saturate(7029%) hue-rotate(203deg) brightness(94%) contrast(98%);
+          }
+
+          .menu1:hover #titem170 {
+            color: #5e6d7d;
+          }
+
+          .menu1:hover #titem170:hover {
+            color: #0366d6;
+          }
+
+          .menu1:hover #titem170 img {
+            filter: brightness(0) saturate(100%) invert(42%) sepia(22%) saturate(385%) hue-rotate(170deg) brightness(92%) contrast(84%);
+          }
+        </style>
+
+
+        <a style="position:relative;top:-38px;" name="8bbbf3d93cd21c52"></a>
+        <!--heading-->
+      </p>
+      <h1 class="chap">Display YAML Data</h1>
+      <p></p>
+      <a href="https://en.wikipedia.org/wiki/YAML">YAML</a> format is widely used in software.
+      <p></p>
+      You can use PlantUML to visualize your data.
+      <p></p>
+      To activate this feature, the diagram must:
+      <ul>
+        <li>begin with <code class="cod">@startyaml</code> keyword</li>
+        <li>end with <code class="cod">@endyaml</code> keyword. </li>
+      </ul>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startyaml
+fruit: Apple
+size: Large
+color: 
+  - Red
+  - Green
+@endyaml
+</textarea>
+        <div id="out32e8057a2d45640a15ed5b69012c12c4">
+          <div class="mycell">
+            <img loading="lazy" width="196" height="97" class="scale"
+              src="/imgw/img-32e8057a2d45640a15ed5b69012c12c4.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="9b905dab753004a4"></a>
+      <!--heading-->
+      <h2 class="chap">Complex example</h2>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startyaml
+doe: &#34;a deer, a female deer&#34;
+ray: &#34;a drop of golden sun&#34;
+pi: 3.14159
+xmas: true
+french-hens: 3
+calling-birds: 
+	- huey
+	- dewey
+	- louie
+	- fred
+xmas-fifth-day: 
+	calling-birds: four
+	french-hens: 3
+	golden-rings: 5
+	partridges: 
+		count: 1
+		location: &#34;a pear tree&#34;
+	turtle-doves: two
+@endyaml
+</textarea>
+        <div id="out27791836766c2377754e26ca8d548e76">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="614" height="262" class="scale"
+              src="/imgw/img-27791836766c2377754e26ca8d548e76.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="4fbdb3a9f3427a6d"></a>
+      <!--heading-->
+      <h2 class="chap">Specific key (with symbols or unicode)</h2>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startyaml
+@fruit: Apple
+$size: Large
+&amp;color: Red
+❤: Heart
+‰: Per mille
+@endyaml
+</textarea>
+        <div id="outf99a0b96cd9fe2dba7860b663be0bf7f">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="139" height="129" class="scale"
+              src="/imgw/img-f99a0b96cd9fe2dba7860b663be0bf7f.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/13376/">QA-13376</a>]</em>
+      <a style="position:relative;top:-38px;" name="1b6b8d6c715c3de9"></a>
+      <!--heading-->
+      <h2 class="chap">Highlight parts</h2>
+      <p></p>
+      <h3>Normal style</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startyaml
+#highlight &#34;french-hens&#34;
+#highlight &#34;xmas-fifth-day&#34; / &#34;partridges&#34;
+
+doe: &#34;a deer, a female deer&#34;
+ray: &#34;a drop of golden sun&#34;
+pi: 3.14159
+xmas: true
+french-hens: 3
+calling-birds: 
+	- huey
+	- dewey
+	- louie
+	- fred
+xmas-fifth-day: 
+	calling-birds: four
+	french-hens: 3
+	golden-rings: 5
+	partridges: 
+		count: 1
+		location: &#34;a pear tree&#34;
+	turtle-doves: two
+@endyaml
+</textarea>
+        <div id="outca4d3746384aa16f34abb04845b3139a">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="614" height="262" class="scale"
+              src="/imgw/img-ca4d3746384aa16f34abb04845b3139a.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <h3>Customised style </h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startyaml
+&lt;style&gt;
+yamlDiagram {
+    highlight {
+      BackGroundColor red
+      FontColor white
+      FontStyle italic
+    }
+}
+&lt;/style&gt;
+#highlight &#34;french-hens&#34;
+#highlight &#34;xmas-fifth-day&#34; / &#34;partridges&#34;
+
+doe: &#34;a deer, a female deer&#34;
+ray: &#34;a drop of golden sun&#34;
+pi: 3.14159
+xmas: true
+french-hens: 3
+calling-birds: 
+	- huey
+	- dewey
+	- louie
+	- fred
+xmas-fifth-day: 
+	calling-birds: four
+	french-hens: 3
+	golden-rings: 5
+	partridges: 
+		count: 1
+		location: &#34;a pear tree&#34;
+	turtle-doves: two
+@endyaml
+</textarea>
+        <div id="out50ea41a826d724ecfe529a47075f283b">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="614" height="262" class="scale"
+              src="/imgw/img-50ea41a826d724ecfe529a47075f283b.png" />
+          </div>
+        </div>
+      </div>
+      <em>[Ref. <a
+          href="https://forum.plantuml.net/13288/the-ability-to-customise-the-highlight-for-json-yaml?show=13378#c13378">QA-13288</a>]</em>
+      <a style="position:relative;top:-38px;" name="d8ffd91ff7cbc8d8"></a>
+      <!--heading-->
+      <h2 class="chap">Using different styles for highlight </h2>
+      <p></p>
+      It is possible to have different styles for different highlights.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startyaml
+&lt;style&gt;
+    .h1 {
+      BackGroundColor green
+      FontColor white
+      FontStyle italic
+    }
+    .h2 {
+      BackGroundColor red
+      FontColor white
+      FontStyle italic
+    }
+&lt;/style&gt;
+#highlight &#34;french-hens&#34; &lt;&lt;h1&gt;&gt;
+#highlight &#34;xmas-fifth-day&#34; / &#34;partridges&#34; &lt;&lt;h2&gt;&gt;
+
+doe: &#34;a deer, a female deer&#34;
+ray: &#34;a drop of golden sun&#34;
+pi: 3.14159
+xmas: true
+french-hens: 3
+calling-birds: 
+	- huey
+	- dewey
+	- louie
+	- fred
+xmas-fifth-day: 
+	calling-birds: four
+	french-hens: 3
+	golden-rings: 5
+	partridges: 
+		count: 1
+		location: &#34;a pear tree&#34;
+	turtle-doves: two
+@endyaml
+</textarea>
+        <div id="out29648a0ec9ad3482ab8fb8182468f194">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="614" height="262" class="scale"
+              src="/imgw/img-29648a0ec9ad3482ab8fb8182468f194.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/15756/yaml-multiple-highlight-defs">QA-15756</a>, <a
+          href="https://github.com/plantuml/plantuml/issues/1393">GH-1393</a>]</em>
+      <a style="position:relative;top:-38px;" name="bb2ede32ce6accb8"></a>
+      <!--heading-->
+      <h2 class="chap">Using (global) style</h2>
+      <p></p>
+      <h3>Without style <em>(by default)</em></h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startyaml
+  -
+    name: Mark McGwire
+    hr:   65
+    avg:  0.278
+  -
+    name: Sammy Sosa
+    hr:   63
+    avg:  0.288
+@endyaml
+</textarea>
+        <div id="out3f1bfa24b23a704706230449a20c9380">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="226" height="168" class="scale"
+              src="/imgw/img-3f1bfa24b23a704706230449a20c9380.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <h3>With style</h3>
+      <p></p>
+      You can use <a href="style-evolution">style</a> to change rendering of elements.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startyaml
+&lt;style&gt;
+yamlDiagram {
+  node {
+    BackGroundColor lightblue
+    LineColor lightblue
+    FontName Helvetica
+    FontColor red
+    FontSize 18
+    FontStyle bold
+    BackGroundColor Khaki
+    RoundCorner 0
+    LineThickness 2
+    LineStyle 10-5
+    separator {
+      LineThickness 0.5
+      LineColor black
+      LineStyle 1-5
+    }
+  }
+  arrow {
+    BackGroundColor lightblue
+    LineColor green
+    LineThickness 2
+    LineStyle 2-5
+  }
+}
+&lt;/style&gt;
+  -
+    name: Mark McGwire
+    hr:   65
+    avg:  0.278
+  -
+    name: Sammy Sosa
+    hr:   63
+    avg:  0.288
+@endyaml
+</textarea>
+        <div id="out4804711eda9b6c44e6772d9c19d9d67d">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="272" height="198" class="scale"
+              src="/imgw/img-4804711eda9b6c44e6772d9c19d9d67d.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/13123">QA-13123</a>]</em>
+      <a style="position:relative;top:-38px;" name="75cf189854b05543"></a>
+      <!--heading-->
+      <h2 class="chap">Creole on YAML</h2>
+      <p></p>
+      You can use <a href="creole">Creole or HTML Creole</a> on YAML diagram:
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startyaml
+Creole:
+  wave: ~~wave~~
+  bold: **bold**
+  italics: //italics//
+  monospaced: &#34;&#34;monospaced&#34;&#34;
+  stricken-out: --stricken-out--
+  underlined: __underlined__
+  not-underlined: ~__not underlined__
+  wave-underlined: ~~wave-underlined~~
+HTML Creole:
+  bold: &lt;b&gt;bold
+  italics: &lt;i&gt;italics
+  monospaced: &lt;font:monospaced&gt;monospaced
+  stroked: &lt;s&gt;stroked
+  underlined: &lt;u&gt;underlined
+  waved: &lt;w&gt;waved
+  green-stroked: &lt;s:green&gt;stroked
+  red-underlined: &lt;u:red&gt;underlined
+  blue-waved: &lt;w:#0000FF&gt;waved
+  Blue: &lt;color:blue&gt;Blue
+  Orange: &lt;back:orange&gt;Orange background
+  big: &lt;size:20&gt;big
+Graphic:
+  OpenIconic: account-login &lt;&amp;account-login&gt; 
+  Unicode: This is &lt;U+221E&gt; long
+  Emoji: &lt;:calendar:&gt; Calendar
+  Image: &lt;img:https://plantuml.com/logo3.png&gt;
+@endyaml
+</textarea>
+        <div id="out340660b4d331e453d4c73a2407448561">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="426" height="723" class="scale"
+              src="/imgw/img-340660b4d331e453d4c73a2407448561.png" />
+          </div>
+        </div>
+      </div>
+
+
+    </main>
+
+
+    <aside id="C6">
+      <!--toc-->
+      <div id="toc">
+        <ul>
+          <li><a href="#9b905dab753004a4">Complex example</a>
+          </li>
+          <li><a href="#4fbdb3a9f3427a6d">Specific key (with symbols or unicode)</a>
+          </li>
+          <li><a href="#1b6b8d6c715c3de9">Highlight parts</a>
+          </li>
+          <li><a href="#d8ffd91ff7cbc8d8">Using different styles for highlight</a>
+          </li>
+          <li><a href="#bb2ede32ce6accb8">Using (global) style</a>
+          </li>
+          <li><a href="#75cf189854b05543">Creole on YAML</a>
+          </li>
+        </ul>
+      </div>
+    </aside>
+
+  </div>
+    <script src="../../viz-global.js"></script>
+    <script src="../../plantuml.js"></script>
+    <script>
+        (function () {
+            const render = window.plantumlRender;
+            if (typeof render !== "function") {
+                console.error("PlantUML renderer is unavailable.");
+                return;
+            }
+
+            const renderOptions = {};
+            let counter = 0;
+
+            document.querySelectorAll(".mycell").forEach((mycell) => {
+                const host = mycell.parentElement;
+                const textarea = host ? host.previousElementSibling : null;
+                if (!textarea || textarea.tagName !== "TEXTAREA") return;
+
+                if (!mycell.id) {
+                    counter += 1;
+                    mycell.id = "mycell-render-" + counter;
+                }
+
+                const draw = () => {
+                    mycell.innerHTML = "";
+                    render(textarea.value.split(/\r\n|\r|\n/), mycell.id, renderOptions);
+                };
+
+                textarea.addEventListener("input", draw);
+                draw();
+            });
+        })();
+    </script>
+</body>
+
+</html>

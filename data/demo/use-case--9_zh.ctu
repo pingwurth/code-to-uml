@@ -1,0 +1,23 @@
+Title: 构造类型
+Describe: None
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+用 `<<` 和 `>>` 来定义角色或者用例的构造类型。
+
+[UML]
+@startuml
+User << Human >>
+:Main Database: as MySql << Application >>
+(Start) << One Shot >>
+(Use the application) as (Use) << Main >>
+
+User -> (Start)
+User --> (Use)
+
+MySql --> (Use)
+
+@enduml
+------------------------------------------------------------

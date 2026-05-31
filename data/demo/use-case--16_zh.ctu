@@ -1,0 +1,19 @@
+Title: 改变箭头的颜色和样式（内联样式）
+Describe: None
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+你可以使用以下的内联式符号改变单个箭头的 颜色 或样式。 
+ - `#color;line.[bold|dashed|dotted];text:color`
+
+[UML]
+@startuml
+actor foo
+foo --> (bar) : normal
+foo --> (bar1) #line:red;line.bold;text:red  : red bold
+foo --> (bar2) #green;line.dashed;text:green : green dashed 
+foo --> (bar3) #blue;line.dotted;text:blue   : blue dotted
+@enduml
+------------------------------------------------------------

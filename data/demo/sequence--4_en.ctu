@@ -1,0 +1,15 @@
+Title: Message to Self
+Describe: None
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+A participant can send a message to itself.
+It is also possible to have multi-line using `\n`.
+
+[UML]
+@startuml
+Alice -> Alice: This is a signal to self.\nIt also demonstrates\nmultiline \ntext
+@enduml
+------------------------------------------------------------

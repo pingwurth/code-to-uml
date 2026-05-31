@@ -1,0 +1,18 @@
+Title: Change element color and style (inline style)
+Describe: None
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+You can change the color or style of individual element using the following notation: 
+ - `#[color|back:color];line:color;line.[bold|dashed|dotted];text:color`
+
+[UML]
+@startuml
+actor a
+actor b #pink;line:red;line.bold;text:red
+usecase c #palegreen;line:green;line.dashed;text:green
+usecase d #aliceblue;line:blue;line.dotted;text:blue
+@enduml
+------------------------------------------------------------

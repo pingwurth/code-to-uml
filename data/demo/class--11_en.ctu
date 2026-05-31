@@ -1,0 +1,40 @@
+Title: More on notes
+Describe: None
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+It is also possible to use few HTML tags (See ) like :
+- `<b>`
+- `<u>`
+- `<i>`
+- `<s>`, `<del>`, `<strike>`
+- `<font color="#AAAAAA">` or `<font color="colorName">`
+- `<color:#AAAAAA>` or `<color:colorName>`
+- `<size:nn>` to change font size
+- `<img src="file">` or `<img:file>`: the file must be accessible by the filesystem
+You can also have a note on several lines.
+You can also define a note on the last defined element using `note left` , `note right` , `note top` , `note bottom` .
+
+[UML]
+@startuml
+
+class Foo
+note left: On last defined class
+
+note top of Foo
+  In java, <size:18>every</size> <u>class</u>
+  <b>extends</b>
+  <i>this</i> one.
+end note
+
+note as N1
+  This note is <u>also</u>
+  <b><color:royalBlue>on several</color>
+  <s>words</s> lines
+  And this is hosted by <img:https://plantuml.com/sourceforge.jpg>
+end note
+
+@enduml
+------------------------------------------------------------

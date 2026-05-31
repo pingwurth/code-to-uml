@@ -1,0 +1,49 @@
+Title: Change Actor style
+Describe: You can change the actor style from stick man (by default) to:
+  - an awesome man with the `skinparam actorStyle awesome` command;
+  - a hollow man with the `skinparam actorStyle hollow` command.
+------------------------------------------------------------
+[Example]
+Stick man (by default)
+
+[Description]
+None
+
+[UML]
+@startuml
+actor Alice
+actor Bob
+Alice -> Bob : hello
+hide footbox
+@enduml
+------------------------------------------------------------
+[Example]
+Awesome man
+
+[Description]
+None
+
+[UML]
+@startuml
+skinparam actorStyle awesome
+actor Alice
+actor Bob
+Alice -> Bob : hello
+hide footbox
+@enduml
+------------------------------------------------------------
+[Example]
+Hollow man
+
+[Description]
+None
+
+[UML]
+@startuml
+skinparam actorStyle Hollow
+actor Alice
+actor Bob
+Alice -> Bob : hello
+hide footbox
+@enduml
+------------------------------------------------------------

@@ -1,0 +1,35 @@
+Title: 业务用例
+Describe: 你可以添加 `/` 来制作业务用例。
+------------------------------------------------------------
+[Example]
+业务用例
+
+[Description]
+None
+
+[UML]
+@startuml
+
+(First usecase)/
+(Another usecase)/ as (UC2)
+usecase/ UC3
+usecase/ (Last\nusecase) as UC4
+
+@enduml
+------------------------------------------------------------
+[Example]
+商业行为者
+
+[Description]
+None
+
+[UML]
+@startuml
+
+:First Actor:/
+:Another\nactor:/ as Man2
+actor/ Woman3
+actor/ :Last actor: as Person1
+
+@enduml
+------------------------------------------------------------

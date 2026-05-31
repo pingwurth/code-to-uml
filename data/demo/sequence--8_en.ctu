@@ -1,0 +1,138 @@
+Title: Message sequence numbering
+Describe: None
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+The keyword `autonumber` is used to automatically add an incrementing number to messages.
+
+[UML]
+@startuml
+autonumber
+Bob -> Alice : Authentication Request
+Bob <- Alice : Authentication Response
+@enduml
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+You can specify a startnumber with `autonumber <start>`, and also an increment with `autonumber <start> <increment>`.
+
+[UML]
+@startuml
+autonumber
+Bob -> Alice : Authentication Request
+Bob <- Alice : Authentication Response
+
+autonumber 15
+Bob -> Alice : Another authentication Request
+Bob <- Alice : Another authentication Response
+
+autonumber 40 10
+Bob -> Alice : Yet another authentication Request
+Bob <- Alice : Yet another authentication Response
+
+@enduml
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+You can specify a format for your number by using between double-quote.
+The formatting is done with the Java class `DecimalFormat` (`0` means digit, `#` means digit and zero if absent).
+You can use some html tag in the format.
+
+[UML]
+@startuml
+autonumber "<b>[000]"
+Bob -> Alice : Authentication Request
+Bob <- Alice : Authentication Response
+
+autonumber 15 "<b>(<u>##</u>)"
+Bob -> Alice : Another authentication Request
+Bob <- Alice : Another authentication Response
+
+autonumber 40 10 "<font color=red><b>Message 0  "
+Bob -> Alice : Yet another authentication Request
+Bob <- Alice : Yet another authentication Response
+
+@enduml
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+You can also use `autonumber stop` and `autonumber resume <increment> <format>` to respectively pause and resume automatic numbering.
+
+[UML]
+@startuml
+autonumber 10 10 "<b>[000]"
+Bob -> Alice : Authentication Request
+Bob <- Alice : Authentication Response
+
+autonumber stop
+Bob -> Alice : dummy
+
+autonumber resume "<font color=red><b>Message 0  "
+Bob -> Alice : Yet another authentication Request
+Bob <- Alice : Yet another authentication Response
+
+autonumber stop
+Bob -> Alice : dummy
+
+autonumber resume 1 "<font color=blue><b>Message 0  "
+Bob -> Alice : Yet another authentication Request
+Bob <- Alice : Yet another authentication Response
+@enduml
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+Your startnumber can also be a 2 or 3 digit sequence using a field delimiter such as `.`, `;`, `,`, `:` or a mix of these. For example: `1.1.1` or `1.1:1`.
+Automatically the last digit will increment.
+To increment the first digit, use: `autonumber inc A`. To increment the second digit, use: `autonumber inc B`.
+
+[UML]
+@startuml
+autonumber 1.1.1
+Alice -> Bob: Authentication request
+Bob --> Alice: Response
+
+autonumber inc A
+'Now we have 2.1.1
+Alice -> Bob: Another authentication request
+Bob --> Alice: Response
+
+autonumber inc B
+'Now we have 2.2.1
+Alice -> Bob: Another authentication request
+Bob --> Alice: Response
+
+autonumber inc A
+'Now we have 3.1.1
+Alice -> Bob: Another authentication request
+autonumber inc B
+'Now we have 3.2.1
+Bob --> Alice: Response
+@enduml
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+You can also use the value of `autonumber` with the `%autonumber%` variable:
+
+[UML]
+@startuml
+autonumber 10
+Alice -> Bob
+note right
+  the <U+0025>autonumber<U+0025> works everywhere.
+  Here, its value is ** %autonumber% **
+end note
+Bob --> Alice: //This is the response %autonumber%//
+@enduml
+------------------------------------------------------------

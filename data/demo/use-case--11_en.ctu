@@ -1,0 +1,16 @@
+Title: Splitting diagrams
+Describe: None
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+The `newpage` keywords to split your diagram into several pages or images.
+
+[UML]
+@startuml
+:actor1: --> (Usecase1)
+newpage
+:actor2: --> (Usecase2)
+@enduml
+------------------------------------------------------------

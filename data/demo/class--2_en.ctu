@@ -1,0 +1,59 @@
+Title: Relations between classes
+Describe: None
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+Relations between classes are defined using the following symbols :
+| **Type** | **Symbol** | **Purpose** |
+| --- | --- | --- |
+| Extension | `<|--` | Specialization of a class in a hierarchy |
+| Implementation | `<|..` | Realization of an interface by a class |
+| Composition | `*--` | The part cannot exist without the whole |
+| Aggregation | `o--` | The part can exist independently of the whole |
+| Dependency | `-->` | The object uses another object |
+| Dependency | `..>` | A weaker form of dependency |
+It is possible to replace `--` by `..` to have a dotted
+line.
+Knowing those rules, it is possible to draw the following drawings:
+
+[UML]
+@startuml
+Class01 <|-- Class02
+Class03 *-- Class04
+Class05 o-- Class06
+Class07 .. Class08
+Class09 -- Class10
+@enduml
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+None
+
+[UML]
+@startuml
+Class11 <|.. Class12
+Class13 --> Class14
+Class15 ..> Class16
+Class17 ..|> Class18
+Class19 <--* Class20
+@enduml
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+None
+
+[UML]
+@startuml
+Class21 #-- Class22
+Class23 x-- Class24
+Class25 }-- Class26
+Class27 +-- Class28
+Class29 ^-- Class30
+@enduml
+------------------------------------------------------------

@@ -1,0 +1,21 @@
+Title: 基础示例
+Describe: None
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+在 PlantUML 序列图中，`->` 序列表示两个参与者之间发送的消息，它是自动识别的，不需要事先声明。
+通过使用 `-->` 序列，利用虚线箭头，在您的图中提供独特的可视化。
+为了提高可读性而不影响可视化表示，可使用反向箭头，如 `<-` 或 `<--`。但要注意，这是专门针对序列图的，其他图类型的规则有所不同。
+
+[UML]
+@startuml
+Alice -> Bob: Authentication Request
+Bob --> Alice: Authentication Response
+
+Alice -> Bob: Another authentication Request
+Alice <-- Bob: Another authentication Response
+@enduml
+
+------------------------------------------------------------

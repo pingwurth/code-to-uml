@@ -1,0 +1,20 @@
+Title: Display JSON Data on Class or Object diagram
+Describe: None
+------------------------------------------------------------
+[Example]
+Simple example
+
+[Description]
+None
+
+[UML]
+@startuml
+class Class
+object Object
+json JSON {
+   "fruit":"Apple",
+   "size":"Large",
+   "color": ["Red", "Green"]
+}
+@enduml
+------------------------------------------------------------

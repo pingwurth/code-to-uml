@@ -1,0 +1,27 @@
+Title: Extends and implements
+Describe: None
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+It is also possible to use `extends` and `implements` keywords.
+
+[UML]
+@startuml
+class ArrayList implements List
+class ArrayList extends AbstractList
+@enduml
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+None
+
+[UML]
+@startuml
+class A extends B, C {
+}
+@enduml
+------------------------------------------------------------

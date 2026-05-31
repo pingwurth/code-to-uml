@@ -1,0 +1,21 @@
+Title: Actors
+Describe: None
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+The name defining an actor is enclosed between colons. 
+You can also use the `actor` keyword to define an actor. An alias can be assigned using the `as` keyword and can be used later instead of the actor's name, e. g. when defining relations. 
+You can see from the following examples, that the actor definitions are optional.
+
+[UML]
+@startuml
+
+:First Actor:
+:Another\nactor: as Man2
+actor Woman3
+actor :Last actor: as Person1
+
+@enduml
+------------------------------------------------------------

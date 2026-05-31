@@ -1,0 +1,19 @@
+Title: Extension
+Describe: None
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+If one actor/use case extends another one, you can use the symbol `<|--`.
+
+[UML]
+@startuml
+:Main Admin: as Admin
+(Use the application) as (Use)
+
+User <|-- Admin
+(Start) <|-- (Use)
+
+@enduml
+------------------------------------------------------------

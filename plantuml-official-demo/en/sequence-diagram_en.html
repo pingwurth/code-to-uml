@@ -1,0 +1,3588 @@
+<html lang="en">
+
+<head>
+
+
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Organization",
+  "url": "https://plantuml.com",
+  "name": "PlantUML",
+  "sameAs" : ["https://twitter.com/plantuml","https://en.wikipedia.org/wiki/PlantUML","https://www.wikidata.org/wiki/Q18346546"],
+  "logo": "https://cdn-0.plantuml.com/logo3.png",
+  "contactPoint": [{
+    "@type": "ContactPoint",
+    "email": "plantuml@gmail.com",
+    "url": "https://plantuml.com",
+    "contactType": "customer service"
+  }]
+}
+</script>
+    <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+    "@type": "ListItem",
+    "position": 1,
+    "item": {
+      "@id": "https://plantuml.com",
+      "name": "Home"
+    }
+  },{
+    "@type": "ListItem",
+    "position": 2,
+    "item": {
+      "@id": "https://plantuml.com/sitemap-language-specification",
+      "name": "Language specification"
+    }
+  },{
+    "@type": "ListItem",
+    "position": 3,
+    "item": {
+      "@id": "https://plantuml.com/sequence-diagram",
+      "name": "Sequence Diagram"
+  }
+  }]
+}
+</script>
+    <link rel="canonical" href="https://plantuml.com/sequence-diagram" />
+    <link rel="alternate" hreflang="x-default" href="https://plantuml.com/sequence-diagram" />
+    <link rel="alternate" hreflang="de" href="https://plantuml.com/de/sequence-diagram" />
+    <link rel="alternate" hreflang="en" href="https://plantuml.com/sequence-diagram" />
+    <link rel="alternate" hreflang="es" href="https://plantuml.com/es/sequence-diagram" />
+    <link rel="alternate" hreflang="fr" href="https://plantuml.com/fr/sequence-diagram" />
+    <link rel="alternate" hreflang="ja" href="https://plantuml.com/ja/sequence-diagram" />
+    <link rel="alternate" hreflang="ko" href="https://plantuml.com/ko/sequence-diagram" />
+    <link rel="alternate" hreflang="zh" href="https://plantuml.com/zh/sequence-diagram" />
+
+    <link rel="shortcut icon" href="/favicon.ico" />
+
+
+    <!-- link rel="preload" as="image" href="https://img.shields.io/liberapay/patrons/plantuml.svg?logo=liberapay" -->
+
+
+    <title>Sequence Diagram syntax and features</title>
+    <meta name="description"
+        content="PlantUML sequence diagram syntax: You can have several kinds of participants (actors and others), arrows, notes, groups... Changing fonts and colors is also possible." />
+
+    <meta property="og:type" content="article" />
+    <!-- volt:dokuwiki titleog: -->
+    <!-- volt:dokuwiki descriptionog: -->
+
+    <meta property="og:url" content="https://plantuml.com/sequence-diagram" />
+    <meta property="og:site_name" content="PlantUML.com" />
+
+    <!-- meta property="og:image" content="https://plantuml.com/og-sequence-diagram" -->
+    <meta name="twitter:image" content="https://plantuml.com/og-sequence-diagram" />
+    <meta property="og:locale" content="en" />
+
+    <meta name="twitter:card" content="summary" />
+    <!-- volt:dokuwiki titletwitter: -->
+    <!-- volt:dokuwiki descriptiontwitter: -->
+    <meta name="twitter:site" content="@PlantUML" />
+    <meta name="twitter:creator" content="@PlantUML" />
+
+    <script>
+        if (window.location.href.indexOf("/en/") == -1) {
+            var lg = navigator.language.substring(0, 2);
+            if (lg == "de") window.location.href = "/de/sequence-diagram";
+            if (lg == "es") window.location.href = "/es/sequence-diagram";
+            if (lg == "fr") window.location.href = "/fr/sequence-diagram";
+            if (lg == "ja") window.location.href = "/ja/sequence-diagram";
+            if (lg == "ko") window.location.href = "/ko/sequence-diagram";
+            if (lg == "ru") window.location.href = "/ru/sequence-diagram";
+            if (lg == "zh") window.location.href = "/zh/sequence-diagram";
+        }
+    </script>
+
+
+    <!-- https://www.w3schools.com/colors/colors_picker.asp -->
+    <!-- filter css https://codepen.io/sosuke/pen/Pjoqqp -->
+
+
+    <style>
+        .scale {}
+
+        li {
+            margin: 2px;
+        }
+
+        #external li {
+            margin: 13px;
+        }
+
+        @media screen and (max-width: 1190px) {
+        }
+
+
+        .coptable {
+            max-width: 90%;
+        }
+
+        .mytab {
+            display: inline-block;
+            border-radius: 3px;
+            border: 1px solid #e1e4e8;
+        }
+
+        .mytab:hover {
+            border: 1px dashed #0366d6;
+            cursor: pointer;
+            color: #0366d6;
+            background: #f6f8fa;
+        }
+
+        .cop {
+            margin: 25px 10px 0 10px;
+        }
+
+        .cop:hover {
+            cursor: pointer;
+            filter: invert(30%) sepia(75%) saturate(4001%) hue-rotate(201deg) brightness(88%) contrast(98%);
+        }
+
+        .cop2 {
+            margin: 25px 10px 0 10px;
+        }
+
+        .cop2:hover {
+            cursor: pointer;
+        }
+
+        .msg {
+            position: absolute;
+            color: #339966;
+            background-color: #FFF;
+            margin-top: 55px;
+            display: none;
+            border-radius: 3px;
+            border: 1px solid #4dff00;
+        }
+
+        .mycell0 {
+            float: left;
+            vertical-align: top;
+            padding: 10px;
+        }
+
+        .mycell0 code:hover {
+            cursor: default;
+            color: #000;
+        }
+
+        .mycell {
+            float: right;
+            vertical-align: top;
+            padding: 10px;
+            max-width: 55vw;
+            overflow-x: auto;
+        }
+
+        .mycell0 pre {
+            max-width: 55vw;
+            overflow-x: auto;
+        }
+
+        .cod {
+            background: #edeff3;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+
+        .colo {
+            display: inline-block;
+            background: #edeff3;
+            padding: 7px 12px;
+            border-radius: 3px;
+        }
+
+        .tag,
+        .tagg,
+        .tago,
+        .tagr {
+            text-rendering: optimizeLegibility;
+            display: inline-block;
+            padding: 3px 5px 2px 4px;
+            text-decoration: none;
+            white-space: nowrap;
+            border: 1px solid #999;
+            text-transform: uppercase;
+            text-align: center;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: bold;
+            line-height: 90%;
+        }
+
+        .tag {
+            background-color: #EEEEEE;
+        }
+
+        .tagg {
+            background-color: #98FB98;
+        }
+
+        .tago {
+            background-color: #fafa00;
+        }
+
+        .tagr {
+            background-color: #FF4500;
+        }
+
+
+        a {
+            text-decoration: none;
+            color: #0366d6;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .menu1 {
+            display: flex;
+            flex-direction: row;
+            border: 0;
+            font-size: 14px;
+            padding: 0;
+            margin: 0;
+            white-space: nowrap;
+        }
+
+        .menu1 a {
+            white-space: nowrap;
+            padding: 0 8px;
+            text-decoration: none;
+            color: #5e6d7d;
+            line-height: 30px;
+            height: 30px;
+        }
+
+        .menu1 a:hover {
+            background: #fefefe;
+            color: #0366d6;
+        }
+
+        .menuside2 {
+            display: flex;
+            flex-direction: column;
+            border: 0;
+            font-size: 14px;
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
+            justify-content: center;
+        }
+
+        .menuside2 img {
+            vertical-align: top;
+            padding: 0 8px;
+            filter: brightness(0) saturate(100%) invert(42%) sepia(22%) saturate(385%) hue-rotate(170deg) brightness(92%) contrast(84%);
+        }
+
+        .menuside2 a {
+            padding: 6px 0;
+            text-decoration: none;
+            color: #5e6d7d;
+        }
+
+        .menuside2 a:hover {
+            color: #0366d6;
+            background: #fefefe;
+        }
+
+        .menuside2 a:hover img {
+            filter: brightness(0) saturate(100%) invert(23%) sepia(44%) saturate(7029%) hue-rotate(203deg) brightness(94%) contrast(98%);
+        }
+
+        .breadcrumb {
+            z-index: 1;
+            font-size: 14px;
+            text-align: center;
+            display: inline-block;
+            overflow: hidden;
+            border-radius: 5px;
+        }
+
+
+        .breadcrumb a {
+            text-decoration: none;
+            outline: none;
+            display: block;
+            float: left;
+            font-size: 12px;
+            line-height: 24px;
+            color: #373f49;
+            padding: 0 10px 0 35px;
+            background: #f0f1f1;
+            background: linear-gradient(#f0f1f1, #c6d2d2);
+            position: relative;
+        }
+
+        .breadcrumb a:first-child {
+            padding-left: 21px;
+            border-radius: 5px 0 0 5px;
+            /*to match with the parent's radius*/
+        }
+
+        .breadcrumb a:first-child:before {
+            left: 14px;
+        }
+
+        .breadcrumb a:last-child {
+            visibility: hidden;
+        }
+
+        .breadcrumb a.active,
+        .breadcrumb a:hover {
+            color: #0366d6;
+            background: #c6d2d2;
+            background: linear-gradient(#e3e4e4, #b8c7c7);
+        }
+
+        .breadcrumb a.active:after,
+        .breadcrumb a:hover:after {
+            background: #c6d2d2;
+            background: linear-gradient(135deg, #e3e4e4, #b8c7c7);
+        }
+
+        .breadcrumb a:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: -12px;
+            /*half of square's length*/
+            /*same dimension as the line-height of .breadcrumb a */
+            width: 24px;
+            height: 24px;
+            transform: scale(0.707) rotate(45deg);
+            /*we need to prevent the arrows from getting buried under the next link*/
+            z-index: 1;
+            /*background same as links but the gradient will be rotated to compensate with the transform applied*/
+            background: #f0f1f1;
+            background: linear-gradient(135deg, #f0f1f1, #c6d2d2);
+            /*stylish arrow design using box shadow*/
+            box-shadow:
+                2px -2px 0 2px rgba(0, 0, 0, 0.1),
+                3px -3px 0 2px rgba(255, 255, 255, 0.1);
+            /*
+		5px - for rounded arrows and 
+		50px - to prevent hover glitches on the border created using shadows*/
+            border-radius: 0 5px 0 50px;
+        }
+
+        /*we dont need an arrow after the last link*/
+        .breadcrumb a:last-child:after {
+            content: none;
+            visibility: hidden;
+        }
+
+
+        .lga,
+        .lga a,
+        .lgi,
+        .lgi a {
+            font-size: 13px;
+            text-align: center;
+            color: #fff;
+            padding: 0 5px;
+            margin: 0;
+        }
+
+        .lga,
+        .lga a {
+            background-color: #008;
+        }
+
+        .lgi,
+        .lgi a {
+            background-color: #888;
+        }
+
+        .lga:hover,
+        .lga:hover a {
+            text-decoration: none;
+            color: #BBB;
+        }
+
+        .lgi:hover,
+        .lgi:hover a {
+            text-decoration: none;
+            color: #CCC;
+        }
+    </style>
+    <style>
+        body {
+            font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            font-size: 14px;
+            line-height: 1.5;
+            margin: auto;
+            overflow-x: hidden;
+            background: #fefefe;
+        }
+
+        h1.chap {
+            font-size: 1.8em;
+        }
+
+        h2.chap {
+            font-size: 1.35em;
+        }
+
+        h3,
+        h3.chap {
+            font-size: 1.15em;
+        }
+
+        h4 {
+            font-size: 1.05em;
+        }
+
+        table {
+            font-size: inherit;
+        }
+    </style>
+
+
+    <style>
+        .dyn {
+            display: flex;
+            flex-direction: row;
+            gap: 3em;
+            align-items: stretch;
+            flex-wrap: wrap;
+            margin: 10px 0;
+        }
+
+        .dyn textarea {
+            font-family: monospace;
+            font-size: 13px;
+            line-height: 1.4;
+            min-width: 30ch;
+            max-width: 90ch;
+            box-sizing: border-box;
+            resize: both;
+            white-space: pre;
+            overflow: auto;
+            field-sizing: content;
+            align-self: stretch;
+            border: 1px solid #888;
+            border-radius: 3px;
+            margin: 0;
+            padding: 4px 8px;
+            background: #fefefe;
+        }
+
+        .dyn>div {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            display: flex;
+        }
+
+        .dyn>div>div {
+            margin: 0;
+            padding: 0;
+        }
+
+        .dyn img {
+            margin: 0;
+            padding: 0;
+        }
+
+        .scale {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #dde;
+            border-radius: 4px;
+        }
+    </style>
+
+
+    <script>
+        var llg = "en";
+        var az = 0;
+        var amdark = 0;
+        function ljs(n) {
+            if (az) return false;
+            var sc = document.createElement("script");
+            sc.type = "text/javascript";
+            sc.src = "/btn-" + n + ".js";
+            document.body.innerHTML = "<i style='position:absolute;top:30%;width:100%;'><center>Loading in progress...";
+            document.body.appendChild(sc);
+        }
+        function ctc(id) {
+            document.getElementById('img' + id).classList.remove('cop'); document.getElementById('img' + id).classList.add('cop2');
+            document.getElementById('pre' + id).style.backgroundColor = '#4dff00';
+            document.getElementById('msg' + id).style.display = 'inline';
+
+            setTimeout(function () { document.getElementById('img' + id).classList.remove('cop2'); document.getElementById('img' + id).classList.add('cop'); document.getElementById('pre' + id).style.backgroundColor = ''; document.getElementById('msg' + id).style.display = 'none'; }, 800);
+
+
+            text = document.getElementById('pre' + id).innerText;
+            if (window.clipboardData && window.clipboardData.setData)
+                return window.clipboardData.setData("Text", text);
+            else if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
+                var ta = document.createElement("textarea");
+                ta.textContent = text;
+                ta.style.position = "fixed";
+                document.body.appendChild(ta);
+                ta.select();
+                try {
+                    return document.execCommand("copy");
+                }
+                catch (ex) {
+                    return false;
+                }
+                finally {
+                    document.body.removeChild(ta);
+                }
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <style>
+        body,
+        .container,
+        #B3,
+        #C5,
+        #C6,
+        #C7,
+        #D7,
+        #D8 {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            overflow-y: scroll;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr auto auto auto;
+            grid-template-rows: auto 1fr auto;
+            min-height: 100vh;
+        }
+
+        #B3 {
+            grid-column: 1 / 5;
+            grid-row: 1;
+            position: sticky;
+            top: 0;
+            height: 30px;
+            padding: 0;
+            z-index: 10;
+            overflow: hidden;
+            background: #edeff3;
+            border-bottom: 1px solid #d4d8de;
+        }
+
+        #D7 {
+            grid-column: 1;
+            grid-row: 2;
+            margin: 0;
+            padding: 0;
+            padding-left: 30px;
+            line-height: 1.6;
+        }
+
+        #D8 {
+            grid-column: 1;
+            grid-row: 3;
+            position: sticky;
+            bottom: 0;
+            z-index: 5;
+            background: #fefefe;
+        }
+
+        #C5 {
+            grid-column: 2;
+            grid-row: 1 / -1;
+            position: sticky;
+            top: 40px;
+            align-self: start;
+            height: calc(98vh - 60px);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        #C6 {
+            grid-column: 3;
+            grid-row: 1 / -1;
+            position: sticky;
+            top: 40px;
+            align-self: start;
+            height: calc(98vh - 60px);
+            max-width: 200px;
+            overflow: hidden;
+            margin: 0 10px;
+            padding: 8px 5px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        #C7 {
+            grid-column: 4;
+            grid-row: 1 / -1;
+            position: sticky;
+            top: 40px;
+            align-self: start;
+            height: calc(98vh - 60px);
+            margin: 0 20px 0 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        #toc {
+            z-index: 15;
+            overflow-x: hidden;
+            overflow-y: auto;
+            background: #f6f8fa;
+            border-width: 2px;
+            border-style: groove;
+            border-radius: 3px;
+            border-color: #e1e4e8;
+            margin: 0 5px;
+            padding: 0;
+            max-height: 100%;
+        }
+
+        #toc ul {
+            margin: 0;
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #toc li {
+            padding: 0 10px;
+            margin: 0;
+        }
+
+        #toc li a {
+            padding: 5px 0;
+            display: inline-block;
+            text-decoration: none;
+            width: 100%;
+            color: #5e6d7d;
+        }
+
+        #toc li a:hover {
+            color: #0366d6;
+        }
+
+        #toc li:hover {
+            background: #fefefe;
+        }
+
+        #magic {
+            position: absolute;
+            top: 0;
+            right: 50px;
+            width: 30px;
+            height: 30px;
+            overflow: hidden;
+            background: #edeff3;
+            z-index: 14;
+        }
+
+        #magic:hover {
+            width: calc(100% - 50px);
+        }
+
+        #magic .menu1 {
+            position: absolute;
+            top: 0;
+            right: 30px;
+            height: 30px;
+            padding-left: 10px;
+            background: #edeff3;
+            border-left: 1px solid #d4d8de;
+            border-bottom: 1px solid #d4d8de;
+        }
+
+        .menu1-tail {
+            flex-grow: 1;
+            flex-shrink: 0;
+            height: 30px;
+            position: relative;
+            z-index: 15;
+            background: #edeff3;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: auto auto auto;
+            grid-auto-rows: auto;
+            gap: 5px;
+            margin: 0;
+            padding: 0;
+        }
+
+        .merged {
+            grid-column: 1 / -1;
+        }
+
+        #C6 {
+            display: none;
+        }
+
+        @media (min-width: 1401px) {
+            #C6:has(#toc li) {
+                display: flex;
+            }
+        }
+
+        @media (max-width: 1100px) {
+            #C5,
+            #C7 {
+                display: none;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .merged {
+                display: none;
+            }
+        }
+    </style>
+
+    <div class="container">
+
+        <footer id="D8">
+
+            <p>
+            </p>
+            <p>
+
+            </p>
+        </footer>
+
+
+        <header id="B3">
+            <div class="menu1">
+                <a id="titem10" href="sequence-diagram_en.html">Sequence</a>
+                <a id="titem20" href="use-case-diagram_en.html">Use Case</a>
+                <a id="titem30" href="class-diagram_en.html">Class</a>
+                <a id="titem40" href="activity-diagram-beta_en.html">Activity</a>
+                <a id="titem50" href="component-diagram_en.html">Component</a>
+                <a id="titem60" href="state-diagram_en.html">State</a>
+                <a id="titem70" href="object-diagram_en.html">Object</a>
+                <a id="titem80" href="deployment-diagram_en.html">Deployment</a>
+                <a id="titem90" href="timing-diagram_en.html">Timing</a>
+
+                <a id="titem99" href="regex_en.html">Regex</a>
+                <a id="titem100" href="nwdiag_en.html">Network</a>
+                <a id="titem110" href="salt_en.html">Wireframe</a>
+                <a id="titem120" href="archimate-diagram_en.html">Archimate</a>
+                <a id="titem130" href="gantt-diagram_en.html">Gantt</a>
+                <a id="titem140" href="mindmap-diagram_en.html">MindMap</a>
+                <a id="titem150" href="wbs-diagram_en.html">WBS</a>
+                <a id="titem151" href="ebnf_en.html">EBNF</a>
+                <a id="titem160" href="json_en.html">JSON</a>
+                <a id="titem170" href="yaml_en.html">YAML</a>
+
+                <div class="menu1-tail"></div>
+            </div>
+            <div id="magic">
+                <div class="menu1">
+                    <a id="titem10" href="sequence-diagram_en.html">Sequence</a>
+                    <a id="titem20" href="use-case-diagram_en.html">Use Case</a>
+                    <a id="titem30" href="class-diagram_en.html">Class</a>
+                    <a id="titem40" href="activity-diagram-beta_en.html">Activity</a>
+                    <a id="titem50" href="component-diagram_en.html">Component</a>
+                    <a id="titem60" href="state-diagram_en.html">State</a>
+                    <a id="titem70" href="object-diagram_en.html">Object</a>
+                    <a id="titem80" href="deployment-diagram_en.html">Deployment</a>
+                    <a id="titem90" href="timing-diagram_en.html">Timing</a>
+
+                    <a id="titem99" href="regex_en.html">Regex</a>
+                    <a id="titem100" href="nwdiag_en.html">Network</a>
+                    <a id="titem110" href="salt_en.html">Wireframe</a>
+                    <a id="titem120" href="archimate-diagram_en.html">Archimate</a>
+                    <a id="titem130" href="gantt-diagram_en.html">Gantt</a>
+                    <a id="titem140" href="mindmap-diagram_en.html">MindMap</a>
+                    <a id="titem150" href="wbs-diagram_en.html">WBS</a>
+                    <a id="titem151" href="ebnf_en.html">EBNF</a>
+                    <a id="titem160" href="json_en.html">JSON</a>
+                    <a id="titem170" href="yaml_en.html">YAML</a>
+
+                    <div class="menu1-tail"></div>
+                </div>
+            </div><!-- magic -->
+        </header>
+
+        <main id="D7">
+
+            <style>
+                #donate {
+                    padding-top: 10px;
+                    min-height: 30px;
+                }
+            </style>
+
+
+            <p style="clear:both;">
+
+
+                <style>
+                    #titem10 {
+                        color: #0366d6;
+                        background-color: #fefefe;
+                    }
+
+                    #titem10 img {
+                        filter: brightness(0) saturate(100%) invert(23%) sepia(44%) saturate(7029%) hue-rotate(203deg) brightness(94%) contrast(98%);
+                    }
+
+                    .menu1:hover #titem10 {
+                        color: #5e6d7d;
+                    }
+
+                    .menu1:hover #titem10:hover {
+                        color: #0366d6;
+                    }
+
+                    .menu1:hover #titem10 img {
+                        filter: brightness(0) saturate(100%) invert(42%) sepia(22%) saturate(385%) hue-rotate(170deg) brightness(92%) contrast(84%);
+                    }
+                </style>
+
+                <a style="position:relative;top:-38px;" name="8e3daff4198af880"></a>
+                <!--heading-->
+            </p>
+            <h1 class="chap">Sequence diagram</h1>
+            <p></p>
+            Sequence diagrams in PlantUML are defined entirely in text. You write the participants and the messages they
+            exchange; the layout, spacing, and arrows are handled for you.
+            <p></p>
+            <ul>
+                <li><strong>Text in, diagram out.</strong> The source is the single point of truth, what you read is
+                    what gets rendered.</li>
+                <li><strong>Easy to edit.</strong> Adjust a line of text instead of dragging boxes around.</li>
+                <li><strong>Quick to iterate.</strong> Live preview tools render as you type, so you catch mistakes
+                    early.</li>
+            </ul>
+            <p></p>
+            See <a href="commons">common commands</a> for features available across all diagram types.
+            <a style="position:relative;top:-38px;" name="7aea6e3ecced51f5"></a>
+            <!--heading-->
+            <h2 class="chap">Basic Examples</h2>
+            <p></p>
+            In PlantUML sequence diagrams, the <code class="cod">-&gt;</code> sequence denotes a message sent between
+            two participants, which are automatically recognized and do not need to be declared beforehand.
+            <p></p>
+            Utilize dotted arrows by employing the <code class="cod">--&gt;</code> sequence, offering a distinct
+            visualization in your diagrams.
+            <p></p>
+            To improve readability without affecting the visual representation, use reverse arrows like <code
+                class="cod">&lt;-</code> or <code class="cod">&lt;--</code>. However, be aware that this is specifically
+            for sequence diagrams and the rules differ for other diagram types.
+            <p></p>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+Alice -&gt; Bob: Authentication Request
+Bob --&gt; Alice: Authentication Response
+
+Alice -&gt; Bob: Another authentication Request
+Alice &lt;-- Bob: Another authentication Response
+@enduml
+</textarea>
+                <div id="outa6fef298c0425dd173d72186d03a6d89">
+                    <div class="mycell">
+                        <img loading="lazy" width="272" height="216" class="scale"
+                            src="/imgw/img-a6fef298c0425dd173d72186d03a6d89.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="5d2ed256d73a7298"></a>
+            <!--heading-->
+            <h2 class="chap">Declaring participant</h2>
+            <p></p>
+            If the keyword <code class="cod">participant</code> is used to declare a participant, more control on that
+            participant is possible.
+            <p></p>
+            The order of declaration will be the (default) <strong>order of display</strong>.
+            <p></p>
+            Using these other keywords to declare participants will <strong>change the shape</strong> of the participant
+            representation:
+            <ul>
+                <li><code class="cod">actor</code></li>
+                <li><code class="cod">boundary</code></li>
+                <li><code class="cod">control</code></li>
+                <li><code class="cod">entity</code></li>
+                <li><code class="cod">database</code></li>
+                <li><code class="cod">collections</code></li>
+                <li><code class="cod">queue</code></li>
+            </ul>
+            <p></p>
+            Syntax:
+            <p></p>
+            <code class="cod">&lt;participant_type&gt; &lt;label&gt; as &lt;alias&gt;</code>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+participant Participant as Foo
+actor       Actor       as Foo1
+boundary    Boundary    as Foo2
+control     Control     as Foo3
+entity      Entity      as Foo4
+database    Database    as Foo5
+collections Collections as Foo6
+queue       Queue       as Foo7
+Foo -&gt; Foo1 : To actor 
+Foo -&gt; Foo2 : To boundary
+Foo -&gt; Foo3 : To control
+Foo -&gt; Foo4 : To entity
+Foo -&gt; Foo5 : To database
+Foo -&gt; Foo6 : To collections
+Foo -&gt; Foo7: To queue
+@enduml
+</textarea>
+                <div id="out1628a21c319a4c39c4e7c39e610541ec">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="578" height="397" class="scale"
+                            src="/imgw/img-1628a21c319a4c39c4e7c39e610541ec.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            Rename a participant using the <code class="cod">as</code> keyword.
+            <p></p>
+            You can also change the background <a href="color">color</a> of
+            actor or participant.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+actor Bob #red
+&#39; The only difference between actor
+&#39;and participant is the drawing
+participant Alice
+participant &#34;I have a really\nlong name&#34; as L #99FF99
+/&#39; You can also declare:
+   participant L as &#34;I have a really\nlong name&#34;  #99FF99
+  &#39;/
+
+Alice-&gt;Bob: Authentication Request
+Bob-&gt;Alice: Authentication Response
+Bob-&gt;L: Log transaction
+@enduml
+</textarea>
+                <div id="outc5e7dd7aa625ff92b8da75f85ee04eee">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="332" height="276" class="scale"
+                            src="/imgw/img-c5e7dd7aa625ff92b8da75f85ee04eee.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            You can use the <code class="cod">order</code> keyword to customize the display order of participants.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+participant Last order 30
+participant Middle order 20
+participant First order 10
+@enduml
+</textarea>
+                <div id="out9f84d34d296cb8bb263e1e7d0c3357a6">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="171" height="95" class="scale"
+                            src="/imgw/img-9f84d34d296cb8bb263e1e7d0c3357a6.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="6c2a1c77df70f96d"></a>
+            <!--heading-->
+            <h2 class="chap">Declaring participant on multiline</h2>
+            <p></p>
+            You can declare participant on multi-line.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+participant Participant [
+    =Title
+    ----
+    &#34;&#34;SubTitle&#34;&#34;
+]
+
+participant Bob
+
+Participant -&gt; Bob
+@enduml
+</textarea>
+                <div id="out9d2be45435d67fd9b5c79caef6d3ff56">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="145" height="175" class="scale"
+                            src="/imgw/img-9d2be45435d67fd9b5c79caef6d3ff56.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <em>[Ref. <a href="https://forum.plantuml.net/15232/">QA-15232</a>]</em>
+            <a style="position:relative;top:-38px;" name="2210ebadb5117709"></a>
+            <!--heading-->
+            <h2 class="chap">Use non-letters in participants</h2>
+            <p></p>
+            <p></p>
+            You can use quotes to define participants.
+            And you can use the <code class="cod">as</code> keyword to give an alias to those participants.
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+Alice -&gt; &#34;Bob()&#34; : Hello
+&#34;Bob()&#34; -&gt; &#34;This is very\nlong&#34; as Long
+&#39; You can also declare:
+&#39; &#34;Bob()&#34; -&gt; Long as &#34;This is very\nlong&#34;
+Long --&gt; &#34;Bob()&#34; : ok
+@enduml
+</textarea>
+                <div id="out4b906209cb8a4c69fa751729016277f3">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="212" height="205" class="scale"
+                            src="/imgw/img-4b906209cb8a4c69fa751729016277f3.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <a style="position:relative;top:-38px;" name="f5050860884ddf31"></a>
+            <!--heading-->
+            <h2 class="chap">Message to Self</h2>
+            <p></p>
+            A participant can send a message to itself.
+            <p></p>
+            It is also possible to have multi-line using <code class="cod">\n</code>.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+Alice -&gt; Alice: This is a signal to self.\nIt also demonstrates\nmultiline \ntext
+@enduml
+</textarea>
+                <div id="outa5549dd7395509620cb72c1edfc6ebc2">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="174" height="187" class="scale"
+                            src="/imgw/img-a5549dd7395509620cb72c1edfc6ebc2.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+Alice &lt;- Alice: This is a signal to self.\nIt also demonstrates\nmultiline \ntext
+@enduml
+</textarea>
+                <div id="out7a6baef6ae787a71a0b3b866f2584a85">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="174" height="187" class="scale"
+                            src="/imgw/img-7a6baef6ae787a71a0b3b866f2584a85.png" />
+                    </div>
+                </div>
+            </div>
+            <em>[Ref. <a href="https://forum.plantuml.net/1361">QA-1361</a>]</em>
+            <a style="position:relative;top:-38px;" name="bf6bee6d96403148"></a>
+            <!--heading-->
+            <h2 class="chap">Text alignment</h2>
+            <p></p>
+            Text alignment on arrows can be set to <code class="cod">left</code>, <code class="cod">right</code> or
+            <code class="cod">center</code> using <code class="cod">skinparam sequenceMessageAlign</code>.
+            <p></p>
+            You can also use <code class="cod">direction</code> or <code class="cod">reverseDirection</code> to align
+            text depending on arrow direction. Further details and examples of this are available on the <a
+                href="skinparam">skinparam</a> page.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+skinparam sequenceMessageAlign right
+Bob -&gt; Alice : Request
+Alice -&gt; Bob : Response
+@enduml
+</textarea>
+                <div id="out5b6101c83f3f1783e66b8ea418f7e9c6">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="139" height="155" class="scale"
+                            src="/imgw/img-5b6101c83f3f1783e66b8ea418f7e9c6.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <h3>Text of response message below the arrow</h3>
+            <p></p>
+            You can put the text of the response message below the arrow, with the <code
+                class="cod">skinparam responseMessageBelowArrow true</code> command.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+skinparam responseMessageBelowArrow true
+Bob -&gt; Alice : hello
+Bob &lt;- Alice : ok
+@enduml
+</textarea>
+                <div id="outc8bc8d58b62766aa321455e2ac5b3e74">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="108" height="155" class="scale"
+                            src="/imgw/img-c8bc8d58b62766aa321455e2ac5b3e74.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="1cc1efff0435a503"></a>
+            <!--heading-->
+            <h2 class="chap">Change Actor style</h2>
+            <p></p>
+            You can change the actor style from stick man <em>(by default)</em> to:
+            <ul>
+                <li>an awesome man with the <code class="cod">skinparam actorStyle awesome</code> command;</li>
+                <li>a hollow man with the <code class="cod">skinparam actorStyle hollow </code> command.</li>
+            </ul>
+            <p></p>
+            <h3>Stick man <em>(by default)</em></h3>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+actor Alice
+actor Bob
+Alice -&gt; Bob : hello
+hide footbox
+@enduml
+</textarea>
+                <div id="oute3f96c6a6266a9382864c6a4f96162ff">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="100" height="128" class="scale"
+                            src="/imgw/img-e3f96c6a6266a9382864c6a4f96162ff.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <h3>Awesome man </h3>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+skinparam actorStyle awesome
+actor Alice
+actor Bob
+Alice -&gt; Bob : hello
+hide footbox
+@enduml
+</textarea>
+                <div id="outd40874c6a3c05812c15845e3bf839ffd">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="135" height="129" class="scale"
+                            src="/imgw/img-d40874c6a3c05812c15845e3bf839ffd.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <em>[Ref. <a
+                    href="https://forum.plantuml.net/10493/how-can-i-customize-the-actor-icon-in-svg-output?show=10513#c10513">QA-10493</a>]</em>
+            <p></p>
+            <h3>Hollow man </h3>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+skinparam actorStyle Hollow
+actor Alice
+actor Bob
+Alice -&gt; Bob : hello
+hide footbox
+@enduml
+</textarea>
+                <div id="out4f0fe1882521b4baed3cb26764ee727f">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="100" height="101" class="scale"
+                            src="/imgw/img-4f0fe1882521b4baed3cb26764ee727f.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <em>[Ref. <a href="https://github.com/plantuml/plantuml/pull/396">PR#396</a>]</em>
+            <a style="position:relative;top:-38px;" name="efeda651e89e596c"></a>
+            <!--heading-->
+            <h2 class="chap">Change arrow style</h2>
+            <p></p>
+            You can change arrow style by several ways:
+            <ul>
+                <li>add a final <code class="cod">x</code> to denote a lost message</li>
+                <li>use <code class="cod">\</code> or <code class="cod">/</code> instead of <code
+                        class="cod">&lt;</code> or <code class="cod">&gt;</code> to have only the bottom or top part of
+                    the arrow</li>
+                <li>repeat the arrow head (for example, <code class="cod">&gt;&gt;</code> or <code
+                        class="cod">//</code>) head to have a thin drawing</li>
+                <li>use <code class="cod">--</code> instead of <code class="cod">-</code> to have a dotted arrow</li>
+                <li>add a final &#34;o&#34; at arrow head</li>
+                <li>use bidirectional arrow <code class="cod">&lt;-&gt;</code></li>
+            </ul>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+Bob -&gt;x Alice
+Bob -&gt; Alice
+Bob -&gt;&gt; Alice
+Bob -\ Alice
+Bob \\- Alice
+Bob //-- Alice
+
+Bob -&gt;o Alice
+Bob o\\-- Alice
+
+Bob &lt;-&gt; Alice
+Bob &lt;-&gt;o Alice
+@enduml
+</textarea>
+                <div id="out9231d63ce5fdd3b19f8fb67c78673890">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="108" height="235" class="scale"
+                            src="/imgw/img-9231d63ce5fdd3b19f8fb67c78673890.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <a style="position:relative;top:-38px;" name="0b2e57c3d4eafdda"></a>
+            <!--heading-->
+            <h2 class="chap">Change arrow color</h2>
+            <p></p>
+            You can change the color of individual arrows using the following notation:
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+Bob -[#red]&gt; Alice : hello
+Alice -[#0000FF]-&gt;Bob : ok
+@enduml
+</textarea>
+                <div id="out73de1bdae6081a31bb22a96f351faf68">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="108" height="155" class="scale"
+                            src="/imgw/img-73de1bdae6081a31bb22a96f351faf68.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <a style="position:relative;top:-38px;" name="ce3f7eb577ad5f4d"></a>
+            <!--heading-->
+            <h2 class="chap">Message sequence numbering</h2>
+            <p></p>
+            <p></p>
+            The keyword <code class="cod">autonumber</code> is used to
+            automatically add an incrementing number to messages.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+autonumber
+Bob -&gt; Alice : Authentication Request
+Bob &lt;- Alice : Authentication Response
+@enduml
+</textarea>
+                <div id="outfeb6a1dd6478a30489726529ea62fe0e">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="236" height="155" class="scale"
+                            src="/imgw/img-feb6a1dd6478a30489726529ea62fe0e.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            You can specify a startnumber with <code class="cod">autonumber &lt;start&gt;</code> , and
+            also an increment with <code class="cod">autonumber &lt;start&gt; &lt;increment&gt;</code>.
+            <p></p>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+autonumber
+Bob -&gt; Alice : Authentication Request
+Bob &lt;- Alice : Authentication Response
+
+autonumber 15
+Bob -&gt; Alice : Another authentication Request
+Bob &lt;- Alice : Another authentication Response
+
+autonumber 40 10
+Bob -&gt; Alice : Yet another authentication Request
+Bob &lt;- Alice : Yet another authentication Response
+
+@enduml
+</textarea>
+                <div id="outd7ac7a3f6bfff2e8d691a6f8f6f77151">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="313" height="277" class="scale"
+                            src="/imgw/img-d7ac7a3f6bfff2e8d691a6f8f6f77151.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <p></p>
+            You can specify a format for your number by using between double-quote.
+            <p></p>
+            The formatting is done with the Java class <code class="cod">DecimalFormat</code>
+            (<code class="cod">0</code> means digit, <code class="cod">#</code> means digit and zero if absent).
+            <p></p>
+            You can use some html tag in the format.
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+autonumber &#34;&lt;b&gt;[000]&#34;
+Bob -&gt; Alice : Authentication Request
+Bob &lt;- Alice : Authentication Response
+
+autonumber 15 &#34;&lt;b&gt;(&lt;u&gt;##&lt;/u&gt;)&#34;
+Bob -&gt; Alice : Another authentication Request
+Bob &lt;- Alice : Another authentication Response
+
+autonumber 40 10 &#34;&lt;font color=red&gt;&lt;b&gt;Message 0  &#34;
+Bob -&gt; Alice : Yet another authentication Request
+Bob &lt;- Alice : Yet another authentication Response
+
+@enduml
+</textarea>
+                <div id="outea1cf313f9db990cbe0fae272e8be21d">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="378" height="277" class="scale"
+                            src="/imgw/img-ea1cf313f9db990cbe0fae272e8be21d.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            You can also use <code class="cod">autonumber stop</code> and
+            <code class="cod">autonumber resume &lt;increment&gt; &lt;format&gt;</code> to respectively pause and resume
+            automatic numbering.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+autonumber 10 10 &#34;&lt;b&gt;[000]&#34;
+Bob -&gt; Alice : Authentication Request
+Bob &lt;- Alice : Authentication Response
+
+autonumber stop
+Bob -&gt; Alice : dummy
+
+autonumber resume &#34;&lt;font color=red&gt;&lt;b&gt;Message 0  &#34;
+Bob -&gt; Alice : Yet another authentication Request
+Bob &lt;- Alice : Yet another authentication Response
+
+autonumber stop
+Bob -&gt; Alice : dummy
+
+autonumber resume 1 &#34;&lt;font color=blue&gt;&lt;b&gt;Message 0  &#34;
+Bob -&gt; Alice : Yet another authentication Request
+Bob &lt;- Alice : Yet another authentication Response
+@enduml
+</textarea>
+                <div id="outf10f630702c3a9e60ab50a8ebf4749bc">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="378" height="338" class="scale"
+                            src="/imgw/img-f10f630702c3a9e60ab50a8ebf4749bc.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            Your startnumber can also be a 2 or 3 digit sequence using a field delimiter such as <code
+                class="cod">.</code>, <code class="cod">;</code>, <code class="cod">,</code>, <code class="cod">:</code>
+            or a mix of these. For example: <code class="cod">1.1.1</code> or <code class="cod">1.1:1</code>.
+            <p></p>
+            Automatically the last digit will increment.
+            <p></p>
+            To increment the first digit, use: <code class="cod">autonumber inc A</code>. To increment the second digit,
+            use: <code class="cod">autonumber inc B</code>.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+autonumber 1.1.1
+Alice -&gt; Bob: Authentication request
+Bob --&gt; Alice: Response
+
+autonumber inc A
+&#39;Now we have 2.1.1
+Alice -&gt; Bob: Another authentication request
+Bob --&gt; Alice: Response
+
+autonumber inc B
+&#39;Now we have 2.2.1
+Alice -&gt; Bob: Another authentication request
+Bob --&gt; Alice: Response
+
+autonumber inc A
+&#39;Now we have 3.1.1
+Alice -&gt; Bob: Another authentication request
+autonumber inc B
+&#39;Now we have 3.2.1
+Bob --&gt; Alice: Response
+@enduml
+</textarea>
+                <div id="out8be13d74e03f3f5f469b8ea1190c5b6f">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="290" height="338" class="scale"
+                            src="/imgw/img-8be13d74e03f3f5f469b8ea1190c5b6f.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <p></p>
+            You can also use the value of <code class="cod">autonumber</code> with the <code
+                class="cod">%autonumber%</code> variable:
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+autonumber 10
+Alice -&gt; Bob
+note right
+  the &lt;U+0025&gt;autonumber&lt;U+0025&gt; works everywhere.
+  Here, its value is ** %autonumber% **
+end note
+Bob --&gt; Alice: //This is the response %autonumber%//
+@enduml
+</textarea>
+                <div id="out6feb1268d8638f7e5f4898c144f417c7">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="471" height="178" class="scale"
+                            src="/imgw/img-6feb1268d8638f7e5f4898c144f417c7.png" />
+                    </div>
+                </div>
+            </div>
+            <em>[Ref. <a
+                    href="https://forum.plantuml.net/7119/create-links-after-creating-a-diagram?show=7137#a7137">QA-7119</a>]</em>
+            <a style="position:relative;top:-38px;" name="77852febc7dde952"></a>
+            <!--heading-->
+            <h2 class="chap">Page Title, Header and Footer</h2>
+            <p></p>
+            The <code class="cod">title</code> keyword is used to add a title to the page.
+            <p></p>
+            Pages can display headers and footers using <code class="cod">header</code> and <code
+                class="cod">footer</code>.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+
+header Page Header
+footer Page %page% of %lastpage%
+
+title Example Title
+
+Alice -&gt; Bob : message 1
+Alice -&gt; Bob : message 2
+
+@enduml
+</textarea>
+                <div id="out09ae840c1ee4e5c4e16cf3e86d279b5a">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="144" height="221" class="scale"
+                            src="/imgw/img-09ae840c1ee4e5c4e16cf3e86d279b5a.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <p></p>
+            <a style="position:relative;top:-38px;" name="45d7d5b32d17a0f9"></a>
+            <!--heading-->
+            <h2 class="chap">Splitting diagrams</h2>
+            <p></p>
+            <h3>With <code class="cod">newpage</code></h3>
+            <p></p>
+            The <code class="cod">newpage</code> keyword is used to split a diagram into several images.
+            <p></p>
+            You can put a title for the new page just after the <code class="cod">newpage</code>
+            keyword. This title overrides the previously specified title if any.
+            <p></p>
+            This is very handy with <em>Word</em> to print long diagram on
+            several pages.
+            <p></p>
+            (Note: this really does work. Only the first page is shown below, but it is a display artifact.)
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+
+Alice -&gt; Bob : message 1
+Alice -&gt; Bob : message 2
+
+newpage
+
+Alice -&gt; Bob : message 3
+Alice -&gt; Bob : message 4
+
+newpage A title for the\nlast page
+
+Alice -&gt; Bob : message 5
+Alice -&gt; Bob : message 6
+@enduml
+</textarea>
+                <div id="out4c35996155b57d2ff2050be9bd9a4c72">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="144" height="156" class="scale"
+                            src="/imgw/img-4c35996155b57d2ff2050be9bd9a4c72.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <h3><code class="cod">%page%</code> and <code class="cod">%lastpage%</code> variables</h3>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+footer This is %page% of %lastpage%
+Alice --&gt; Bob : A1
+newpage
+Alice --&gt; Bob : A2
+newpage
+Alice --&gt; Bob : A3
+newpage
+Alice --&gt; Bob : A4
+@enduml
+</textarea>
+                <div id="out1547b3a8bde2d67c10e8530b61bdb18c">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="147" height="140" class="scale"
+                            src="/imgw/img-1547b3a8bde2d67c10e8530b61bdb18c.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <em>[Ref. <a
+                    href="https://forum.plantuml.net/6699/please-provide-macros-insert-current-number-total-number-pages">QA-6699</a>]</em>
+            <p></p>
+            <h3>Ignore newpage</h3>
+            <p></p>
+            You can use the <code class="cod">ignore newpage</code> command to show all the pages, as if there was no
+            newpage.
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+
+ignore newpage
+
+Alice -&gt; Bob : message 1
+Alice -&gt; Bob : message 2
+
+newpage
+
+Alice -&gt; Bob : message 3
+Alice -&gt; Bob : message 4
+
+newpage A title for the\nlast page
+
+Alice -&gt; Bob : message 5
+Alice -&gt; Bob : message 6
+@enduml
+</textarea>
+                <div id="out4f48374ecd6815d206e0ed7bcdf8140f">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="144" height="277" class="scale"
+                            src="/imgw/img-4f48374ecd6815d206e0ed7bcdf8140f.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="425ba4350c02142c"></a>
+            <!--heading-->
+            <h2 class="chap">Grouping message</h2>
+            <p></p>
+            <p></p>
+            It is possible to group messages together using the following
+            keywords:
+            <ul>
+                <li><code class="cod">alt/else</code></li>
+                <li><code class="cod">opt</code></li>
+                <li><code class="cod">loop</code></li>
+                <li><code class="cod">par</code></li>
+                <li><code class="cod">break</code></li>
+                <li><code class="cod">critical</code></li>
+                <li><code class="cod">group</code>, followed by a text to be displayed</li>
+            </ul>
+            <p></p>
+            <p></p>
+            It is possible to add a text that will be displayed into the
+            header (for <code class="cod">group</code>, see next paragraph <em>&#39;Secondary group label&#39;</em>).
+            <p></p>
+            The <code class="cod">end</code> keyword is used to close the group.
+            <p></p>
+            Note that it is possible to nest groups.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+Alice -&gt; Bob: Authentication Request
+
+alt successful case
+
+    Bob -&gt; Alice: Authentication Accepted
+
+else some kind of failure
+
+    Bob -&gt; Alice: Authentication Failure
+    group My own label
+    Alice -&gt; Log : Log attack start
+        loop 1000 times
+            Alice -&gt; Bob: DNS Attack
+        end
+    Alice -&gt; Log : Log attack end
+    end
+
+else Another type of failure
+
+   Bob -&gt; Alice: Please repeat
+
+end
+@enduml
+</textarea>
+                <div id="out5f55d97f6b4627b88e3191f527101682">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="328" height="436" class="scale"
+                            src="/imgw/img-5f55d97f6b4627b88e3191f527101682.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="7aad256d9e87308c"></a>
+            <!--heading-->
+            <h2 class="chap">Secondary group label</h2>
+            <p></p>
+            For <code class="cod">group</code>, it is possible to add, between<code class="cod">[</code> and <code
+                class="cod">]</code>, a secondary text or label that will be displayed into the header.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+Alice -&gt; Bob: Authentication Request
+Bob -&gt; Alice: Authentication Failure
+group My own label [My own label 2]
+    Alice -&gt; Log : Log attack start
+    loop 1000 times
+        Alice -&gt; Bob: DNS Attack
+    end
+    Alice -&gt; Log : Log attack end
+end
+@enduml
+</textarea>
+                <div id="out104ae42f7e22c6f4cbdc7e3ca2fa7d12">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="302" height="311" class="scale"
+                            src="/imgw/img-104ae42f7e22c6f4cbdc7e3ca2fa7d12.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <em>[Ref. <a href="https://forum.plantuml.net/2503">QA-2503</a>]</em>
+            <a style="position:relative;top:-38px;" name="cda0fcbd86347e43"></a>
+            <!--heading-->
+            <h2 class="chap">Partition across the entire width</h2>
+            <p></p>
+            You can use <code class="cod">partition</code> command to group messages horizontally across the entire
+            width (full-width).
+            <p></p>
+            <h3>Messages are not grouped horizontally across the entire width <em>(by default)</em></h3>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+participant a
+
+partition p1
+b -&gt; c: msg
+c --&gt; b: OK
+note right: Some right note
+end
+
+partition p2
+a -&gt; b: msg
+note left: Some left note
+end
+@enduml
+</textarea>
+                <div id="out297211462fae1368ac8032f16b5fe1e2">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="373" height="262" class="scale"
+                            src="/imgw/img-297211462fae1368ac8032f16b5fe1e2.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <h3>Grouping messages horizontally across the entire width (with <code class="cod">teoz</code> mode)</h3>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+!pragma teoz true
+participant a
+
+partition p1
+b -&gt; c: msg
+c --&gt; b: OK
+note right: Some right note
+end
+
+partition p2
+a -&gt; b: msg
+note left: Some left note
+end
+@enduml
+</textarea>
+                <div id="out898e5823e453134162d3f1adafea0338">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="398" height="282" class="scale"
+                            src="/imgw/img-898e5823e453134162d3f1adafea0338.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <em>[Ref. <a href="https://github.com/plantuml/plantuml/issues/589">GH-589</a>]</em>
+            <a style="position:relative;top:-38px;" name="012d3e8694a98cc1"></a>
+            <!--heading-->
+            <h2 class="chap">Notes on messages</h2>
+            <p></p>
+            It is possible to put notes on message using the <code class="cod">note left</code>
+            or <code class="cod">note right</code> keywords <em>just after the message</em>.
+            <p></p>
+            You can have a multi-line note using the <code class="cod">end note</code>
+            keywords.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+Alice-&gt;Bob : hello
+note left: this is a first note
+
+Bob-&gt;Alice : ok
+note right: this is another note
+
+Bob-&gt;Bob : I am thinking
+note left
+a note
+can also be defined
+on several lines
+end note
+@enduml
+</textarea>
+                <div id="out13c531f22ede7e010be7886cc2d3186d">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="330" height="236" class="scale"
+                            src="/imgw/img-13c531f22ede7e010be7886cc2d3186d.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <a style="position:relative;top:-38px;" name="f8c59a77112b60e7"></a>
+            <!--heading-->
+            <h2 class="chap">Some other notes</h2>
+            <p></p>
+            <p></p>
+            It is also possible to place notes relative to participant with <code class="cod">note left of</code> ,
+            <code class="cod">note right of</code> or <code class="cod">note over</code> keywords.
+            <p></p>
+            It is possible to highlight a note by changing its background <a href="color">color</a>.
+            <p></p>
+            You can also have a multi-line note using the <code class="cod">end note</code> keywords.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+participant Alice
+participant Bob
+note left of Alice #aqua
+This is displayed
+left of Alice.
+end note
+
+note right of Alice: This is displayed right of Alice.
+
+note over Alice: This is displayed over Alice.
+
+note over Alice, Bob #FFAAAA: This is displayed\n over Bob and Alice.
+
+note over Bob, Alice
+This is yet another
+example of
+a long note.
+end note
+@enduml
+</textarea>
+                <div id="out64480cb9a74c73b1e8b1610649948c2d">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="336" height="342" class="scale"
+                            src="/imgw/img-64480cb9a74c73b1e8b1610649948c2d.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="84de38ea1ca38165"></a>
+            <!--heading-->
+            <h2 class="chap">Changing notes shape [hnote, rnote]</h2>
+            <p></p>
+            You can use <code class="cod">hnote</code> and <code class="cod">rnote</code> keywords
+            to change note shapes :
+            <ul>
+                <li><code class="cod">hnote</code> for hexagonal note;</li>
+                <li><code class="cod">rnote</code> for rectangle note.</li>
+            </ul>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+caller -&gt; server : conReq
+hnote over caller : idle
+caller &lt;- server : conConf
+rnote over server
+ &#34;r&#34; as rectangle
+ &#34;h&#34; as hexagon
+endrnote
+rnote over server
+ this is
+ on several
+ lines
+endrnote
+hnote over caller
+ this is
+ on several
+ lines
+endhnote
+@enduml
+</textarea>
+                <div id="out0528f2e04e9488af22bd3c1e5e9dd37f">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="176" height="375" class="scale"
+                            src="/imgw/img-0528f2e04e9488af22bd3c1e5e9dd37f.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <em>[Ref. <a
+                    href="https://forum.plantuml.net/1765/is-it-possible-to-have-different-shapes-for-notes?show=1806#c1806">QA-1765</a>]</em>
+            <a style="position:relative;top:-38px;" name="39755e6414c00844"></a>
+            <!--heading-->
+            <h2 class="chap">Note over all participants [across]</h2>
+            <p></p>
+            You can directly make a note over all participants, with the syntax:
+            <ul>
+                <li><code class="cod">note across: note_description</code></li>
+            </ul>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+Alice-&gt;Bob:m1
+Bob-&gt;Charlie:m2
+note over Alice, Charlie: Old method for note over all part. with:\n &#34;&#34;note over //FirstPart, LastPart//&#34;&#34;.
+note across: New method with:\n&#34;&#34;note across&#34;&#34;
+Bob-&gt;Alice
+hnote across:Note across all part.
+@enduml
+</textarea>
+                <div id="out278291c9d75ea322110ec39474d2e9a6">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="269" height="310" class="scale"
+                            src="/imgw/img-278291c9d75ea322110ec39474d2e9a6.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <em>[Ref. <a href="https://forum.plantuml.net/9738">QA-9738</a>]</em>
+            <a style="position:relative;top:-38px;" name="7514641e1b91c8ee"></a>
+            <!--heading-->
+            <h2 class="chap">Several notes aligned at the same level [/]</h2>
+            <p></p>
+            You can make several notes aligned at the same level, with the syntax <code class="cod">/</code>:
+            <ul>
+                <li>without <code class="cod">/</code> <em>(by default, the notes are not aligned)</em></li>
+            </ul>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+note over Alice : initial state of Alice
+note over Bob : initial state of Bob
+Bob -&gt; Alice : hello
+@enduml
+</textarea>
+                <div id="out835b010e78df7f22c073388c10c7809b">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="191" height="198" class="scale"
+                            src="/imgw/img-835b010e78df7f22c073388c10c7809b.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <ul>
+                <li>with <code class="cod">/</code> <em>(the notes are aligned)</em></li>
+            </ul>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+note over Alice : initial state of Alice
+/ note over Bob : initial state of Bob
+Bob -&gt; Alice : hello
+@enduml
+</textarea>
+                <div id="outa887b9f3be9fea85bdbd7a6e1cc762c4">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="277" height="161" class="scale"
+                            src="/imgw/img-a887b9f3be9fea85bdbd7a6e1cc762c4.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <em>[Ref. <a href="https://forum.plantuml.net/354">QA-354</a>]</em>
+            <a style="position:relative;top:-38px;" name="28881bae78acd047"></a>
+            <!--heading-->
+            <h2 class="chap">Creole and HTML</h2>
+            <p></p>
+            <a href="creole">It is also possible to use creole formatting:</a>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+participant Alice
+participant &#34;The **Famous** Bob&#34; as Bob
+
+Alice -&gt; Bob : hello --there--
+... Some ~~long delay~~ ...
+Bob -&gt; Alice : ok
+note left
+  This is **bold**
+  This is //italics//
+  This is &#34;&#34;monospaced&#34;&#34;
+  This is --stroked--
+  This is __underlined__
+  This is ~~waved~~
+end note
+
+Alice -&gt; Bob : A //well formatted// message
+note right of Alice
+ This is &lt;back:cadetblue&gt;&lt;size:18&gt;displayed&lt;/size&gt;&lt;/back&gt;
+ __left of__ Alice.
+end note
+note left of Bob
+ &lt;u:red&gt;This&lt;/u&gt; is &lt;color #118888&gt;displayed&lt;/color&gt;
+ **&lt;color purple&gt;left of&lt;/color&gt; &lt;s:red&gt;Alice&lt;/strike&gt; Bob**.
+end note
+note over Alice, Bob
+ &lt;w:#FF33FF&gt;This is hosted&lt;/w&gt; by &lt;img:https://plantuml.com/sourceforge.jpg&gt;
+end note
+@enduml
+</textarea>
+                <div id="out8c29452e6dd2da6089dd6d3bd467bc35">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="395" height="479" class="scale"
+                            src="/imgw/img-8c29452e6dd2da6089dd6d3bd467bc35.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="d4b2df53a72661cc"></a>
+            <!--heading-->
+            <h2 class="chap">Divider or separator</h2>
+            <p></p>
+            <p></p>
+            If you want, you can split a diagram using <code class="cod">==</code> separator to
+            divide your diagram into logical steps.
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+
+== Initialization ==
+
+Alice -&gt; Bob: Authentication Request
+Bob --&gt; Alice: Authentication Response
+
+== Repetition ==
+
+Alice -&gt; Bob: Another authentication Request
+Alice &lt;-- Bob: another authentication Response
+
+@enduml
+</textarea>
+                <div id="outba95111154efd3ec8b74063d7deedc36">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="271" height="305" class="scale"
+                            src="/imgw/img-ba95111154efd3ec8b74063d7deedc36.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="63d5049791d9d79d"></a>
+            <!--heading-->
+            <h2 class="chap">Reference</h2>
+            <p></p>
+            You can use reference in a diagram, using the keyword <code class="cod">ref over</code>.
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+participant Alice
+actor Bob
+
+ref over Alice, Bob : init
+
+Alice -&gt; Bob : hello
+
+ref over Bob
+  This can be on
+  several lines
+end ref
+@enduml
+</textarea>
+                <div id="outc521af75024d3cd86a809a2902e0e59a">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="153" height="323" class="scale"
+                            src="/imgw/img-c521af75024d3cd86a809a2902e0e59a.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <a style="position:relative;top:-38px;" name="8f497c1a3d15af9e"></a>
+            <!--heading-->
+            <h2 class="chap">Delay</h2>
+            <p></p>
+            You can use <code class="cod">...</code> to indicate a delay in the diagram.
+            And it is also possible to put a message with this delay.
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+
+Alice -&gt; Bob: Authentication Request
+...
+Bob --&gt; Alice: Authentication Response
+...5 minutes later...
+Bob --&gt; Alice: Good Bye !
+
+@enduml
+</textarea>
+                <div id="out1af9ad988294413bf22723b990e60fab">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="225" height="256" class="scale"
+                            src="/imgw/img-1af9ad988294413bf22723b990e60fab.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="8659eac9bf4c2629"></a>
+            <!--heading-->
+            <h2 class="chap">Text wrapping</h2>
+            <p></p>
+            To break long messages, you can manually add <code class="cod">\n</code> in your text.
+            <p></p>
+            Another option is to use <code class="cod">maxMessageSize</code> setting:
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+skinparam maxMessageSize 50
+participant a
+participant b
+a -&gt; b :this\nis\nmanually\ndone
+a -&gt; b :this is a very long message on several words
+@enduml
+</textarea>
+                <div id="out20e1aa67336ca81461251c973f079bd6">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="113" height="303" class="scale"
+                            src="/imgw/img-20e1aa67336ca81461251c973f079bd6.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="e660e0a9abbf4837"></a>
+            <!--heading-->
+            <h2 class="chap">Message text spans beyond the involved participants</h2>
+            <p></p>
+            You can use <code class="cod">sequenceMessageSpan</code> command to allow message text to span beyond the
+            involved participants.
+            <p></p>
+            <h3>Without <code class="cod">sequenceMessageSpan</code> <em>(by default)</em></h3>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+ParticipantNumber1 -&gt; ParticipantNumber2 : this is a very long message that is very long
+ParticipantNumber1 -&gt; ParticipantNumber1 : this is a very long message that is very long 
+ParticipantNumber2 -&gt; ParticipantNumber3 : foo2
+@enduml
+</textarea>
+                <div id="out080028ff06a2aea94db095ec35fde3b8">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="575" height="199" class="scale"
+                            src="/imgw/img-080028ff06a2aea94db095ec35fde3b8.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <h3>With <code class="cod">sequenceMessageSpan</code> (on <code class="cod">teoz</code> mode)</h3>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+!pragma teoz true
+!pragma sequenceMessageSpan true
+
+ParticipantNumber1 -&gt; ParticipantNumber2 : this is a very long message that is very long
+ParticipantNumber1 -&gt; ParticipantNumber1 : this is a very long message that is very long 
+ParticipantNumber2 -&gt; ParticipantNumber3 : foo2
+@enduml
+</textarea>
+                <div id="outfeb754e4cda2978adf52944b3b285e92">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="453" height="207" class="scale"
+                            src="/imgw/img-feb754e4cda2978adf52944b3b285e92.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <em>[Ref. <a href="https://github.com/plantuml/plantuml/issues/2386">GH-2386</a>]</em>
+            <a style="position:relative;top:-38px;" name="d511f8439ecde366"></a>
+            <!--heading-->
+            <h2 class="chap">Space</h2>
+            <p></p>
+            <p></p>
+            You can use <code class="cod">|||</code> to indicate some spacing in the diagram.
+            <p></p>
+            It is also possible to specify a number of pixel to be used.
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+
+Alice -&gt; Bob: message 1
+Bob --&gt; Alice: ok
+|||
+Alice -&gt; Bob: message 2
+Bob --&gt; Alice: ok
+||45||
+Alice -&gt; Bob: message 3
+Bob --&gt; Alice: ok
+
+@enduml
+</textarea>
+                <div id="outd10e7b68e0e944a9a55b63388f03674c">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="144" height="347" class="scale"
+                            src="/imgw/img-d10e7b68e0e944a9a55b63388f03674c.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <a style="position:relative;top:-38px;" name="5cc0040514e70f7b"></a>
+            <!--heading-->
+            <h2 class="chap">Lifeline Activation and Destruction</h2>
+            <p></p>
+            The <code class="cod">activate</code> and <code class="cod">deactivate</code> are used to denote
+            participant activation.
+            <p></p>
+            Once a participant is activated, its lifeline appears.
+            <p></p>
+            The <code class="cod">activate</code> and <code class="cod">deactivate</code> apply on
+            the previous message.
+            <p></p>
+            The <code class="cod">destroy</code> denote the end of the lifeline of a
+            participant.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+participant User
+
+User -&gt; A: DoWork
+activate A
+
+A -&gt; B: &lt;&lt; createRequest &gt;&gt;
+activate B
+
+B -&gt; C: DoWork
+activate C
+C --&gt; B: WorkDone
+destroy C
+
+B --&gt; A: RequestCreated
+deactivate B
+
+A -&gt; User: Done
+deactivate A
+
+@enduml
+</textarea>
+                <div id="out76ce6646b3eb28567189f599c630a143">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="343" height="277" class="scale"
+                            src="/imgw/img-76ce6646b3eb28567189f599c630a143.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <p></p>
+            Nested lifeline can be used, and it is possible to add a <a href="color">color</a> on the lifeline.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+participant User
+
+User -&gt; A: DoWork
+activate A #FFBBBB
+
+A -&gt; A: Internal call
+activate A #DarkSalmon
+
+A -&gt; B: &lt;&lt; createRequest &gt;&gt;
+activate B
+
+B --&gt; A: RequestCreated
+deactivate B
+deactivate A
+A -&gt; User: Done
+deactivate A
+
+@enduml
+</textarea>
+                <div id="outf4db791af47a6e407a73347b9f1fa754">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="253" height="259" class="scale"
+                            src="/imgw/img-f4db791af47a6e407a73347b9f1fa754.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            Autoactivation is possible and works with the return keywords:
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+autoactivate on
+alice -&gt; bob : hello
+bob -&gt; bob : self call
+bill -&gt; bob #005500 : hello from thread 2
+bob -&gt; george ** : create
+return done in thread 2
+return rc
+bob -&gt; george !! : delete
+return success
+
+@enduml
+</textarea>
+                <div id="outc814a9b5395ad5ad9e9c40ec2f72bf91">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="337" height="376" class="scale"
+                            src="/imgw/img-c814a9b5395ad5ad9e9c40ec2f72bf91.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="988fd738de9c6d17"></a>
+            <!--heading-->
+            <h2 class="chap">Return</h2>
+            <p></p>
+            Command <code class="cod">return</code> generates a return message with optional text label.
+            <p></p>
+            The return point is that which caused the most recent life-line activation.
+            <p></p>
+            The syntax is <code class="cod">return label</code> where <code class="cod">label</code> if provided is any
+            string acceptable for conventional messages.
+            <p></p>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+Bob -&gt; Alice : hello
+activate Alice
+Alice -&gt; Alice : some action
+return bye
+@enduml
+</textarea>
+                <div id="outdc97a3d690c938430578be9f3a951cc9">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="185" height="199" class="scale"
+                            src="/imgw/img-dc97a3d690c938430578be9f3a951cc9.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <a style="position:relative;top:-38px;" name="b2c1d43bde93c643"></a>
+            <!--heading-->
+            <h2 class="chap">Participant creation</h2>
+            <p></p>
+            <p></p>
+            You can use the <code class="cod">create</code> keyword just before the first
+            reception of a message to emphasize the fact that this message is
+            actually <em>creating</em> this new object.
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+Bob -&gt; Alice : hello
+
+create Other
+Alice -&gt; Other : new
+
+create control String
+Alice -&gt; String
+note right : You can also put notes!
+
+Alice --&gt; Bob : ok
+
+@enduml
+</textarea>
+                <div id="out7f679c697bf2634beafc4746b3720520">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="402" height="292" class="scale"
+                            src="/imgw/img-7f679c697bf2634beafc4746b3720520.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <a style="position:relative;top:-38px;" name="35480215b426d170"></a>
+            <!--heading-->
+            <h2 class="chap">Shortcut syntax for activation, deactivation, creation</h2>
+            <p></p>
+            <p></p>
+            Immediately after specifying the target participant, the following syntax can be used:
+            <p></p>
+            <ul>
+                <li><code class="cod">++</code> Activate the target (optionally a <a href="color">color</a> may follow
+                    this)</li>
+                <li><code class="cod">--</code> Deactivate the source</li>
+                <li><code class="cod">**</code> Create an instance of the target</li>
+                <li><code class="cod">!!</code> Destroy an instance of the target</li>
+            </ul>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+alice -&gt; bob ++ : hello
+bob -&gt; bob ++ : self call
+bob -&gt; bib ++  #005500 : hello
+bob -&gt; george ** : create
+return done
+return rc
+bob -&gt; george !! : delete
+return success
+@enduml
+</textarea>
+                <div id="outdf3b4b4922c7e98bbf10260c1f903cd0">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="276" height="376" class="scale"
+                            src="/imgw/img-df3b4b4922c7e98bbf10260c1f903cd0.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            Then you can mix activation and deactivation, on same line:
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+alice   -&gt;  bob     ++   : hello1
+bob     -&gt;  charlie --++ : hello2
+charlie --&gt; alice   --   : ok
+@enduml
+</textarea>
+                <div id="outb2c2fe6b9460faef30ca37b5b4a74930">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="186" height="186" class="scale"
+                            src="/imgw/img-b2c2fe6b9460faef30ca37b5b4a74930.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+alice -&gt; bob   --++ #gold: hello
+bob   -&gt; alice --++ #gold: you too
+alice -&gt; bob   --: step1
+alice -&gt; bob   : step2
+@enduml
+</textarea>
+                <div id="outf4292db939c70fc6c21455d5797deb59">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="126" height="216" class="scale"
+                            src="/imgw/img-f4292db939c70fc6c21455d5797deb59.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <em>[Ref. <a
+                    href="https://forum.plantuml.net/4834/activation-shorthand-for-sequence-diagrams?show=13054#c13054">QA-4834</a>,
+                <a href="https://forum.plantuml.net/9573">QA-9573</a> and <a
+                    href="https://forum.plantuml.net/13234">QA-13234</a>]</em>
+            <a style="position:relative;top:-38px;" name="05984b1743e67542"></a>
+            <!--heading-->
+            <h2 class="chap">Incoming and outgoing messages</h2>
+            <p></p>
+            You can use incoming or outgoing arrows if you want to focus on a part
+            of the diagram.
+            <p></p>
+            Use square brackets to denote the left &#34;<code class="cod">[</code>&#34; or the
+            right &#34;<code class="cod">]</code>&#34; side of the diagram.
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+[-&gt; A: DoWork
+
+activate A
+
+A -&gt; A: Internal call
+activate A
+
+A -&gt;] : &lt;&lt; createRequest &gt;&gt;
+
+A&lt;--] : RequestCreated
+deactivate A
+[&lt;- A: Done
+deactivate A
+@enduml
+</textarea>
+                <div id="out64472ab70ca5d4acfa145ed118d99d42">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="208" height="259" class="scale"
+                            src="/imgw/img-64472ab70ca5d4acfa145ed118d99d42.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <p></p>
+            You can also have the following syntax:
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+participant Alice
+participant Bob #lightblue
+Alice -&gt; Bob
+Bob -&gt; Carol
+...
+[-&gt; Bob
+[o-&gt; Bob
+[o-&gt;o Bob
+[x-&gt; Bob
+...
+[&lt;- Bob
+[x&lt;- Bob
+...
+Bob -&gt;]
+Bob -&gt;o]
+Bob o-&gt;o]
+Bob -&gt;x]
+...
+Bob &lt;-]
+Bob x&lt;-]
+
+@enduml
+</textarea>
+                <div id="outc049cc9f2d0e4190a3afcbfbec964c17">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="165" height="403" class="scale"
+                            src="/imgw/img-c049cc9f2d0e4190a3afcbfbec964c17.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="098797a007f231ea"></a>
+            <!--heading-->
+            <h2 class="chap">Short arrows for incoming and outgoing messages</h2>
+            <p></p>
+            You can have <strong>short</strong> arrows with using <code class="cod">?</code>.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+?-&gt; Alice    : &#34;&#34;?-&gt;&#34;&#34;\n**short** to actor1
+[-&gt; Alice    : &#34;&#34;[-&gt;&#34;&#34;\n**from start** to actor1
+[-&gt; Bob      : &#34;&#34;[-&gt;&#34;&#34;\n**from start** to actor2
+?-&gt; Bob      : &#34;&#34;?-&gt;&#34;&#34;\n**short** to actor2
+Alice -&gt;]    : &#34;&#34;-&gt;]&#34;&#34;\nfrom actor1 **to end**
+Alice -&gt;?    : &#34;&#34;-&gt;?&#34;&#34;\n**short** from actor1
+Alice -&gt; Bob : &#34;&#34;-&gt;&#34;&#34; \nfrom actor1 to actor2
+@enduml
+</textarea>
+                <div id="outee7db9dccdc1283188258fff6cf1ccc3">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="312" height="426" class="scale"
+                            src="/imgw/img-ee7db9dccdc1283188258fff6cf1ccc3.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <em>[Ref. <a href="https://forum.plantuml.net/310">QA-310</a>]</em>
+            <a style="position:relative;top:-38px;" name="77c3940b98127fb8"></a>
+            <!--heading-->
+            <h2 class="chap">Anchors and Duration</h2>
+            <p></p>
+            <p></p>
+            <p></p>
+            With <code class="cod">teoz</code> it is possible to add anchors to the diagram and use the anchors to
+            specify duration time.
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+!pragma teoz true
+
+{start} Alice -&gt; Bob : start doing things during duration
+Bob -&gt; Max : something
+Max -&gt; Bob : something else
+{end} Bob -&gt; Alice : finish
+
+{start} &lt;-&gt; {end} : some time
+
+@enduml
+</textarea>
+                <div id="outac99ec6f223211e6e374708ad48705e8">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="387" height="224" class="scale"
+                            src="/imgw/img-ac99ec6f223211e6e374708ad48705e8.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            You can use the <code class="cod">-P</code> <a href="command-line">command-line</a> option to specify the
+            pragma:
+            <p>
+                <code></code>
+            </p>
+            <pre class="colo"><code>java -jar plantuml.jar -Pteoz=true
+</code></pre>
+            <p>
+                <em>[Ref. <a href="https://github.com/plantuml/plantuml/issues/582">issue-582</a>]</em>
+                <a style="position:relative;top:-38px;" name="94190c2f242a5df2"></a>
+                <!--heading-->
+            </p>
+            <h2 class="chap">Stereotypes and Spots</h2>
+            <p></p>
+            <p></p>
+            <p></p>
+            It is possible to add stereotypes to participants using <code class="cod">&lt;&lt;</code>
+            and <code class="cod">&gt;&gt;</code>.
+            <p></p>
+            In the stereotype, you can add a spotted character
+            in a colored circle using the syntax <code class="cod">(X,color)</code>.
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+
+participant &#34;Famous Bob&#34; as Bob &lt;&lt; Generated &gt;&gt;
+participant Alice &lt;&lt; (C,#ADD1B2) Testable &gt;&gt;
+
+Bob-&gt;Alice: First message
+
+@enduml
+</textarea>
+                <div id="out33cdd2761530f0e1144da2116915426c">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="231" height="160" class="scale"
+                            src="/imgw/img-33cdd2761530f0e1144da2116915426c.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            By default, the <em>guillemet</em> character is used to display the stereotype.
+            You can change this behavious using the skinparam <code class="cod">guillemet</code>:
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+
+skinparam guillemet false
+participant &#34;Famous Bob&#34; as Bob &lt;&lt; Generated &gt;&gt;
+participant Alice &lt;&lt; (C,#ADD1B2) Testable &gt;&gt;
+
+Bob-&gt;Alice: First message
+
+@enduml
+</textarea>
+                <div id="out54cb0ef3bfb96fab7499b4d8be788251">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="281" height="160" class="scale"
+                            src="/imgw/img-54cb0ef3bfb96fab7499b4d8be788251.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+
+participant Bob &lt;&lt; (C,#ADD1B2) &gt;&gt;
+participant Alice &lt;&lt; (C,#ADD1B2) &gt;&gt;
+
+Bob-&gt;Alice: First message
+
+@enduml
+</textarea>
+                <div id="outbae5f4b0bfef9523335fe26f6e4d0acf">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="190" height="134" class="scale"
+                            src="/imgw/img-bae5f4b0bfef9523335fe26f6e4d0acf.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <a style="position:relative;top:-38px;" name="c142fb9b4429dca1"></a>
+            <!--heading-->
+            <h2 class="chap">Position of the stereotypes</h2>
+            <p></p>
+            It is possible to define stereotypes position (<code class="cod">top</code> or <code
+                class="cod">bottom</code>) with the command <code class="cod">skinparam stereotypePosition</code>.
+            <p></p>
+            <h3>Top postion <em>(by default)</em></h3>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+skinparam stereotypePosition top
+
+participant A&lt;&lt;st1&gt;&gt;
+participant B&lt;&lt;st2&gt;&gt;
+A --&gt; B : stereo test
+@enduml
+</textarea>
+                <div id="out7a1fe1d9207913ab7e409816dfd849da">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="147" height="160" class="scale"
+                            src="/imgw/img-7a1fe1d9207913ab7e409816dfd849da.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <h3>Bottom postion</h3>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+skinparam stereotypePosition bottom
+
+participant A&lt;&lt;st1&gt;&gt;
+participant B&lt;&lt;st2&gt;&gt;
+A --&gt; B : stereo test
+@enduml
+</textarea>
+                <div id="oute3c4632965d1d863ee69027263d1e634">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="147" height="160" class="scale"
+                            src="/imgw/img-e3c4632965d1d863ee69027263d1e634.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <em>[Ref. <a
+                    href="https://forum.plantuml.net/18650/example-related-stereotypeposition-guide-please-skinparam">QA-18650</a>]</em>
+            <a style="position:relative;top:-38px;" name="a21f56b1869e89e5"></a>
+            <!--heading-->
+            <h2 class="chap">More information on titles</h2>
+            <p></p>
+            You can use <a href="creole">creole formatting</a> in the title.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+
+title __Simple__ **communication** example
+
+Alice -&gt; Bob: Authentication Request
+Bob -&gt; Alice: Authentication Response
+
+@enduml
+</textarea>
+                <div id="outc64f1cd01cca96920b26204dcf940248">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="239" height="194" class="scale"
+                            src="/imgw/img-c64f1cd01cca96920b26204dcf940248.png" />
+                    </div>
+                </div>
+            </div>
+            You can add newline using <code class="cod">\n</code> in the title description.
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+
+title __Simple__ communication example\non several lines
+
+Alice -&gt; Bob: Authentication Request
+Bob -&gt; Alice: Authentication Response
+
+@enduml
+</textarea>
+                <div id="outbfb62afce73f45a7dc54c2112b5dcafc">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="239" height="212" class="scale"
+                            src="/imgw/img-bfb62afce73f45a7dc54c2112b5dcafc.png" />
+                    </div>
+                </div>
+            </div>
+            You can also define title on several lines using <code class="cod">title</code>
+            and <code class="cod">end title</code> keywords.
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+
+title
+ &lt;u&gt;Simple&lt;/u&gt; communication example
+ on &lt;i&gt;several&lt;/i&gt; lines and using &lt;font color=red&gt;html&lt;/font&gt;
+ This is hosted by &lt;img:sourceforge.jpg&gt;
+end title
+
+Alice -&gt; Bob: Authentication Request
+Bob -&gt; Alice: Authentication Response
+
+@enduml
+</textarea>
+                <div id="out225dc4c21d48f7636d366d9f0436d51c">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="270" height="230" class="scale"
+                            src="/imgw/img-225dc4c21d48f7636d366d9f0436d51c.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <a style="position:relative;top:-38px;" name="f52672a8f74a07df"></a>
+            <!--heading-->
+            <h2 class="chap">Participants encompass</h2>
+            <p></p>
+            <p></p>
+            <p></p>
+            It is possible to draw a box around some participants, using <code class="cod">box</code>
+            and <code class="cod">end box</code> commands.
+            <p></p>
+            You can add an optional title or a
+            optional background color, after the <code class="cod">box</code> keyword.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+
+box &#34;Internal Service&#34; #LightBlue
+participant Bob
+participant Alice
+end box
+participant Other
+
+Bob -&gt; Alice : hello
+Alice -&gt; Other : hello
+
+@enduml
+</textarea>
+                <div id="out4e8b544779d2543901f6265b9d5ff76a">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="168" height="181" class="scale"
+                            src="/imgw/img-4e8b544779d2543901f6265b9d5ff76a.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <p></p>
+            It is also possible to nest boxes - to draw a box within a box - when using the teoz rendering engine, for
+            example:
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+
+!pragma teoz true
+box &#34;Internal Service&#34; #LightBlue
+participant Bob
+box &#34;Subteam&#34;
+participant Alice
+participant John
+end box
+
+end box
+participant Other
+
+Bob -&gt; Alice : hello
+Alice -&gt; John : hello
+John -&gt; Other: Hello
+
+@enduml
+</textarea>
+                <div id="outbf2d575dd9c895bc17fa1529bbe52335">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="246" height="246" class="scale"
+                            src="/imgw/img-bf2d575dd9c895bc17fa1529bbe52335.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="21380379ba44081d"></a>
+            <!--heading-->
+            <h2 class="chap">Removing Foot Boxes</h2>
+            <p></p>
+            You can use the <code class="cod">hide footbox</code> keywords to remove the foot boxes
+            of the diagram.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+
+hide footbox
+title Foot Box removed
+
+Alice -&gt; Bob: Authentication Request
+Bob --&gt; Alice: Authentication Response
+
+@enduml
+</textarea>
+                <div id="out6f284d02ae7378d504c3cae77a30de9c">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="225" height="152" class="scale"
+                            src="/imgw/img-6f284d02ae7378d504c3cae77a30de9c.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <a style="position:relative;top:-38px;" name="7aa53dbdfc2137bf"></a>
+            <!--heading-->
+            <h2 class="chap">Skinparam</h2>
+            <p></p>
+            <p></p>
+            You can use the <a href="skinparam">skinparam</a>
+            command to change colors and fonts for the drawing.
+            <p></p>
+            <p></p>
+            You can use this command:
+            <ul>
+                <li>In the diagram definition, like any other commands,</li>
+                <li>In an <a href="preprocessing">included file</a>,</li>
+                <li>In a configuration file, provided in the <a href="command-line">command line</a> or the <a
+                        href="ant-task">ANT task</a>.</li>
+            </ul>
+            <p></p>
+            You can also change other rendering parameter, as seen in the following examples:
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 20
+skinparam maxmessagesize 60
+skinparam sequenceParticipant underline
+
+actor User
+participant &#34;First Class&#34; as A
+participant &#34;Second Class&#34; as B
+participant &#34;Last Class&#34; as C
+
+User -&gt; A: DoWork
+activate A
+
+A -&gt; B: Create Request
+activate B
+
+B -&gt; C: DoWork
+activate C
+C --&gt; B: WorkDone
+destroy C
+
+B --&gt; A: Request Created
+deactivate B
+
+A --&gt; User: Done
+deactivate A
+
+@enduml
+</textarea>
+                <div id="outeacda43d6ee91cf2150c54798b1240a7">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="343" height="400" class="scale"
+                            src="/imgw/img-eacda43d6ee91cf2150c54798b1240a7.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+skinparam backgroundColor #EEEBDC
+!option handwritten true
+
+skinparam sequence {
+ArrowColor DeepSkyBlue
+ActorBorderColor DeepSkyBlue
+LifeLineBorderColor blue
+LifeLineBackgroundColor #A9DCDF
+
+ParticipantBorderColor DeepSkyBlue
+ParticipantBackgroundColor DodgerBlue
+ParticipantFontName Impact
+ParticipantFontSize 17
+ParticipantFontColor #A9DCDF
+
+ActorBackgroundColor aqua
+ActorFontColor DeepSkyBlue
+ActorFontSize 17
+ActorFontName Aapex
+}
+
+actor User
+participant &#34;First Class&#34; as A
+participant &#34;Second Class&#34; as B
+participant &#34;Last Class&#34; as C
+
+User -&gt; A: DoWork
+activate A
+
+A -&gt; B: Create Request
+activate B
+
+B -&gt; C: DoWork
+activate C
+C --&gt; B: WorkDone
+destroy C
+
+B --&gt; A: Request Created
+deactivate B
+
+A --&gt; User: Done
+deactivate A
+
+@enduml
+</textarea>
+                <div id="outa25730245922a9b2ff83a084437e0e3a">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="390" height="374" class="scale"
+                            src="/imgw/img-a25730245922a9b2ff83a084437e0e3a.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="33cee7c2521befd3"></a>
+            <!--heading-->
+            <h2 class="chap">Changing padding</h2>
+            <p></p>
+            <p></p>
+            It is possible to tune some padding settings.
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+skinparam ParticipantPadding 20
+skinparam BoxPadding 10
+
+box &#34;Foo1&#34;
+participant Alice1
+participant Alice2
+end box
+box &#34;Foo2&#34;
+participant Bob1
+participant Bob2
+end box
+Alice1 -&gt; Bob1 : hello
+Alice1 -&gt; Out : out
+@enduml
+</textarea>
+                <div id="out0dbcabd829adf630f49a0eede1f5bc4c">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="385" height="204" class="scale"
+                            src="/imgw/img-0dbcabd829adf630f49a0eede1f5bc4c.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <p></p>
+            <em>[Ref. <a
+                    href="https://forum.plantuml.net/5493/provide-skinparam-between-participants-sequence-diagrams">QA-5493</a>]</em>
+            <a style="position:relative;top:-38px;" name="4764f83f72ed032f"></a>
+            <!--heading-->
+            <h2 class="chap">Appendix: Examples of all arrow type</h2>
+            <p></p>
+            <h3>Normal arrow</h3>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+participant Alice as a
+participant Bob   as b
+a -&gt;     b : &#34;&#34;-&gt;   &#34;&#34;
+a -&gt;&gt;    b : &#34;&#34;-&gt;&gt;  &#34;&#34;
+a -\     b : &#34;&#34;-\   &#34;&#34;
+a -\\    b : &#34;&#34;-\\\\&#34;&#34;
+a -/     b : &#34;&#34;-/   &#34;&#34;
+a -//    b : &#34;&#34;-//  &#34;&#34;
+a -&gt;x    b : &#34;&#34;-&gt;x  &#34;&#34;
+a x-&gt;    b : &#34;&#34;x-&gt;  &#34;&#34;
+a o-&gt;    b : &#34;&#34;o-&gt;  &#34;&#34;
+a -&gt;o    b : &#34;&#34;-&gt;o  &#34;&#34;
+a o-&gt;o   b : &#34;&#34;o-&gt;o &#34;&#34;
+a &lt;-&gt;    b : &#34;&#34;&lt;-&gt;  &#34;&#34;
+a o&lt;-&gt;o  b : &#34;&#34;o&lt;-&gt;o&#34;&#34;
+a x&lt;-&gt;x  b : &#34;&#34;x&lt;-&gt;x&#34;&#34;
+a -&gt;&gt;o   b : &#34;&#34;-&gt;&gt;o &#34;&#34;
+a -\o    b : &#34;&#34;-\o  &#34;&#34;
+a -\\o   b : &#34;&#34;-\\\\o&#34;&#34;
+a -/o    b : &#34;&#34;-/o  &#34;&#34;
+a -//o   b : &#34;&#34;-//o &#34;&#34;
+a x-&gt;o   b : &#34;&#34;x-&gt;o &#34;&#34;
+@enduml
+</textarea>
+                <div id="outd868c8f010eda1001847d4ec1101c280">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="119" height="714" class="scale"
+                            src="/imgw/img-d868c8f010eda1001847d4ec1101c280.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <h3>Itself arrow</h3>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+participant Alice as a
+participant Bob   as b
+a -&gt;     a : &#34;&#34;-&gt;   &#34;&#34;
+a -&gt;&gt;    a : &#34;&#34;-&gt;&gt;  &#34;&#34;
+a -\     a : &#34;&#34;-\   &#34;&#34;
+a -\\    a : &#34;&#34;-\\\\&#34;&#34;
+a -/     a : &#34;&#34;-/   &#34;&#34;
+a -//    a : &#34;&#34;-//  &#34;&#34;
+a -&gt;x    a : &#34;&#34;-&gt;x  &#34;&#34;
+a x-&gt;    a : &#34;&#34;x-&gt;  &#34;&#34;
+a o-&gt;    a : &#34;&#34;o-&gt;  &#34;&#34;
+a -&gt;o    a : &#34;&#34;-&gt;o  &#34;&#34;
+a o-&gt;o   a : &#34;&#34;o-&gt;o &#34;&#34;
+a &lt;-&gt;    a : &#34;&#34;&lt;-&gt;  &#34;&#34;
+a o&lt;-&gt;o  a : &#34;&#34;o&lt;-&gt;o&#34;&#34;
+a x&lt;-&gt;x  a : &#34;&#34;x&lt;-&gt;x&#34;&#34;
+a -&gt;&gt;o   a : &#34;&#34;-&gt;&gt;o &#34;&#34;
+a -\o    a : &#34;&#34;-\o  &#34;&#34;
+a -\\o   a : &#34;&#34;-\\\\o&#34;&#34;
+a -/o    a : &#34;&#34;-/o  &#34;&#34;
+a -//o   a : &#34;&#34;-//o &#34;&#34;
+a x-&gt;o   a : &#34;&#34;x-&gt;o &#34;&#34;
+@enduml
+</textarea>
+                <div id="out48bde175a3b96078d0c9667b476b7306">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="109" height="974" class="scale"
+                            src="/imgw/img-48bde175a3b96078d0c9667b476b7306.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <h3>Incoming and outgoing messages (with &#39;[&#39;, &#39;]&#39;)</h3>
+            <h4>Incoming messages (with &#39;[&#39;)</h4>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+participant Alice as a
+participant Bob   as b
+[-&gt;      b : &#34;&#34;[-&gt;   &#34;&#34;
+[-&gt;&gt;     b : &#34;&#34;[-&gt;&gt;  &#34;&#34;
+[-\      b : &#34;&#34;[-\   &#34;&#34;
+[-\\     b : &#34;&#34;[-\\\\&#34;&#34;
+[-/      b : &#34;&#34;[-/   &#34;&#34;
+[-//     b : &#34;&#34;[-//  &#34;&#34;
+[-&gt;x     b : &#34;&#34;[-&gt;x  &#34;&#34;
+[x-&gt;     b : &#34;&#34;[x-&gt;  &#34;&#34;
+[o-&gt;     b : &#34;&#34;[o-&gt;  &#34;&#34;
+[-&gt;o     b : &#34;&#34;[-&gt;o  &#34;&#34;
+[o-&gt;o    b : &#34;&#34;[o-&gt;o &#34;&#34;
+[&lt;-&gt;     b : &#34;&#34;[&lt;-&gt;  &#34;&#34;
+[o&lt;-&gt;o   b : &#34;&#34;[o&lt;-&gt;o&#34;&#34;
+[x&lt;-&gt;x   b : &#34;&#34;[x&lt;-&gt;x&#34;&#34;
+[-&gt;&gt;o    b : &#34;&#34;[-&gt;&gt;o &#34;&#34;
+[-\o     b : &#34;&#34;[-\o  &#34;&#34;
+[-\\o    b : &#34;&#34;[-\\\\o&#34;&#34;
+[-/o     b : &#34;&#34;[-/o  &#34;&#34;
+[-//o    b : &#34;&#34;[-//o &#34;&#34;
+[x-&gt;o    b : &#34;&#34;[x-&gt;o &#34;&#34;
+@enduml
+</textarea>
+                <div id="out6ebffb79e4c8b555ccf79aa5a4282c37">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="108" height="714" class="scale"
+                            src="/imgw/img-6ebffb79e4c8b555ccf79aa5a4282c37.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <h4>Outgoing messages (with &#39;]&#39;)</h4>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+participant Alice as a
+participant Bob   as b
+a -&gt;]      : &#34;&#34;-&gt;]   &#34;&#34;
+a -&gt;&gt;]     : &#34;&#34;-&gt;&gt;]  &#34;&#34;
+a -\]      : &#34;&#34;-\]   &#34;&#34;
+a -\\]     : &#34;&#34;-\\\\]&#34;&#34;
+a -/]      : &#34;&#34;-/]   &#34;&#34;
+a -//]     : &#34;&#34;-//]  &#34;&#34;
+a -&gt;x]     : &#34;&#34;-&gt;x]  &#34;&#34;
+a x-&gt;]     : &#34;&#34;x-&gt;]  &#34;&#34;
+a o-&gt;]     : &#34;&#34;o-&gt;]  &#34;&#34;
+a -&gt;o]     : &#34;&#34;-&gt;o]  &#34;&#34;
+a o-&gt;o]    : &#34;&#34;o-&gt;o] &#34;&#34;
+a &lt;-&gt;]     : &#34;&#34;&lt;-&gt;]  &#34;&#34;
+a o&lt;-&gt;o]   : &#34;&#34;o&lt;-&gt;o]&#34;&#34;
+a x&lt;-&gt;x]   : &#34;&#34;x&lt;-&gt;x]&#34;&#34;
+a -&gt;&gt;o]    : &#34;&#34;-&gt;&gt;o] &#34;&#34;
+a -\o]     : &#34;&#34;-\o]  &#34;&#34;
+a -\\o]    : &#34;&#34;-\\\\o]&#34;&#34;
+a -/o]     : &#34;&#34;-/o]  &#34;&#34;
+a -//o]    : &#34;&#34;-//o] &#34;&#34;
+a x-&gt;o]    : &#34;&#34;x-&gt;o] &#34;&#34;
+@enduml
+</textarea>
+                <div id="out45239d4c6f331a839cfca9bd5d6a43e0">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="110" height="714" class="scale"
+                            src="/imgw/img-45239d4c6f331a839cfca9bd5d6a43e0.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <h3>Short incoming and outgoing messages (with &#39;?&#39;)</h3>
+            <h4>Short incoming (with &#39;?&#39;)</h4>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+participant Alice as a
+participant Bob   as b
+a -&gt;     b : //Long long label//
+?-&gt;      b : &#34;&#34;?-&gt;   &#34;&#34;
+?-&gt;&gt;     b : &#34;&#34;?-&gt;&gt;  &#34;&#34;
+?-\      b : &#34;&#34;?-\   &#34;&#34;
+?-\\     b : &#34;&#34;?-\\\\&#34;&#34;
+?-/      b : &#34;&#34;?-/   &#34;&#34;
+?-//     b : &#34;&#34;?-//  &#34;&#34;
+?-&gt;x     b : &#34;&#34;?-&gt;x  &#34;&#34;
+?x-&gt;     b : &#34;&#34;?x-&gt;  &#34;&#34;
+?o-&gt;     b : &#34;&#34;?o-&gt;  &#34;&#34;
+?-&gt;o     b : &#34;&#34;?-&gt;o  &#34;&#34;
+?o-&gt;o    b : &#34;&#34;?o-&gt;o &#34;&#34;
+?&lt;-&gt;     b : &#34;&#34;?&lt;-&gt;  &#34;&#34;
+?o&lt;-&gt;o   b : &#34;&#34;?o&lt;-&gt;o&#34;&#34;
+?x&lt;-&gt;x   b : &#34;&#34;?x&lt;-&gt;x&#34;&#34;
+?-&gt;&gt;o    b : &#34;&#34;?-&gt;&gt;o &#34;&#34;
+?-\o     b : &#34;&#34;?-\o  &#34;&#34;
+?-\\o    b : &#34;&#34;?-\\\\o &#34;&#34;
+?-/o     b : &#34;&#34;?-/o  &#34;&#34;
+?-//o    b : &#34;&#34;?-//o &#34;&#34;
+?x-&gt;o    b : &#34;&#34;?x-&gt;o &#34;&#34;
+@enduml
+</textarea>
+                <div id="out612cbb842f77a04df34b294531fb7e77">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="168" height="745" class="scale"
+                            src="/imgw/img-612cbb842f77a04df34b294531fb7e77.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <h4>Short outgoing (with &#39;?&#39;)</h4>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+participant Alice as a
+participant Bob   as b
+a -&gt;     b : //Long long label//
+a -&gt;?      : &#34;&#34;-&gt;?   &#34;&#34;
+a -&gt;&gt;?     : &#34;&#34;-&gt;&gt;?  &#34;&#34;
+a -\?      : &#34;&#34;-\?   &#34;&#34;
+a -\\?     : &#34;&#34;-\\\\?&#34;&#34;
+a -/?      : &#34;&#34;-/?   &#34;&#34;
+a -//?     : &#34;&#34;-//?  &#34;&#34;
+a -&gt;x?     : &#34;&#34;-&gt;x?  &#34;&#34;
+a x-&gt;?     : &#34;&#34;x-&gt;?  &#34;&#34;
+a o-&gt;?     : &#34;&#34;o-&gt;?  &#34;&#34;
+a -&gt;o?     : &#34;&#34;-&gt;o?  &#34;&#34;
+a o-&gt;o?    : &#34;&#34;o-&gt;o? &#34;&#34;
+a &lt;-&gt;?     : &#34;&#34;&lt;-&gt;?  &#34;&#34;
+a o&lt;-&gt;o?   : &#34;&#34;o&lt;-&gt;o?&#34;&#34;
+a x&lt;-&gt;x?   : &#34;&#34;x&lt;-&gt;x?&#34;&#34;
+a -&gt;&gt;o?    : &#34;&#34;-&gt;&gt;o? &#34;&#34;
+a -\o?     : &#34;&#34;-\o?  &#34;&#34;
+a -\\o?    : &#34;&#34;-\\\\o?&#34;&#34;
+a -/o?     : &#34;&#34;-/o?  &#34;&#34;
+a -//o?    : &#34;&#34;-//o? &#34;&#34;
+a x-&gt;o?    : &#34;&#34;x-&gt;o? &#34;&#34;
+@enduml
+</textarea>
+                <div id="out52ad32e0d022f87e655412c9b57824a0">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="168" height="745" class="scale"
+                            src="/imgw/img-52ad32e0d022f87e655412c9b57824a0.png" />
+                    </div>
+                </div>
+            </div>
+            <a style="position:relative;top:-38px;" name="75b4984abd04b14f"></a>
+            <!--heading-->
+            <h2 class="chap">Specific SkinParameter</h2>
+            <p></p>
+            <h3>By default</h3>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+Bob -&gt; Alice : hello
+...
+Alice -&gt; Bob : ok
+@enduml
+</textarea>
+                <div id="out0aa1023017b9f80130e985d2d04967f6">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="108" height="183" class="scale"
+                            src="/imgw/img-0aa1023017b9f80130e985d2d04967f6.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <h3>Style strictuml</h3>
+            To be conform to strict UML (<em>for arrow style: emits triangle rather than sharp arrowheads</em>), you can
+            use:
+            <ul>
+                <li><code class="cod">skinparam style strictuml</code></li>
+            </ul>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+skinparam style strictuml
+Bob -&gt; Alice : hello
+...
+Alice -&gt; Bob : ok
+@enduml
+</textarea>
+                <div id="outccb1eafd96c3ae59b0f6814b8cd6889d">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="108" height="142" class="scale"
+                            src="/imgw/img-ccb1eafd96c3ae59b0f6814b8cd6889d.png" />
+                    </div>
+                </div>
+            </div>
+            <em>[Ref. <a href="https://forum.plantuml.net/1047">QA-1047</a>]</em>
+            <p></p>
+            <p></p>
+            <h3>LifelineStrategy </h3>
+            <p></p>
+            <ul>
+                <li><code class="cod">nosolid</code>/<code class="cod">solid</code></li>
+            </ul>
+            Since v1.2025.5, old <code class="cod">skinparam lifelineStrategy solid</code> no longer works.
+            <em>[Ref. <a href="https://forum.plantuml.net/9016/">QA-9016</a>, <a
+                    href="https://forum.plantuml.net/2794">QA-2794</a>]</em>
+            <p></p>
+            In order to have solid life line in sequence diagrams, you must now use style:
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+&lt;style&gt;
+lifeLine {
+  LineStyle 0
+}
+delay {
+  LineStyle 1-4
+}
+&lt;/style&gt;
+Bob -&gt; Alice : hello
+...
+Alice -&gt; Bob : ok
+@enduml
+</textarea>
+                <div id="out514b4adc764fbf7d09205eec8f3c52b5">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="108" height="183" class="scale"
+                            src="/imgw/img-514b4adc764fbf7d09205eec8f3c52b5.png" />
+                    </div>
+                </div>
+            </div>
+            <em>[Ref. <a href="https://github.com/plantuml/plantuml/pull/2266">GH-2266</a> and <a
+                    href="https://github.com/plantuml/plantuml/issues/2662">GH-2662</a>]</em>
+            <a style="position:relative;top:-38px;" name="fc006eba0d9dcacc"></a>
+            <!--heading-->
+            <h2 class="chap">Hide unlinked participant </h2>
+            <p></p>
+            By default, all participants are displayed.
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+participant Alice
+participant Bob
+participant Carol
+
+Alice -&gt; Bob : hello
+@enduml
+</textarea>
+                <div id="outb48f7b138e2593c54a33f4a02b59a25f">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="165" height="125" class="scale"
+                            src="/imgw/img-b48f7b138e2593c54a33f4a02b59a25f.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            But you can <code class="cod">hide unlinked</code> participant.
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+hide unlinked
+participant Alice
+participant Bob
+participant Carol
+
+Alice -&gt; Bob : hello
+@enduml
+</textarea>
+                <div id="out5494b5ec4c795ed58b5dd972fa9cef6a">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="108" height="125" class="scale"
+                            src="/imgw/img-5494b5ec4c795ed58b5dd972fa9cef6a.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <p></p>
+            <em>[Ref. <a href="https://forum.plantuml.net/4247">QA-4247</a>]</em>
+            <a style="position:relative;top:-38px;" name="b40d18fd973705df"></a>
+            <!--heading-->
+            <h2 class="chap">Color a group message</h2>
+            <p></p>
+            <p></p>
+            It is possible to <a href="color">color</a> a group messages:
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+Alice -&gt; Bob: Authentication Request
+alt#Gold #LightBlue Successful case
+    Bob -&gt; Alice: Authentication Accepted
+else #Pink Failure
+    Bob -&gt; Alice: Authentication Rejected
+end
+@enduml
+</textarea>
+                <div id="outd5ba34ff61f1126116b78fead8e9e3f6">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="250" height="234" class="scale"
+                            src="/imgw/img-d5ba34ff61f1126116b78fead8e9e3f6.png" />
+                    </div>
+                </div>
+            </div>
+            <em>[Ref. <a href="https://forum.plantuml.net/4750">QA-4750</a> and <a
+                    href="https://forum.plantuml.net/6410">QA-6410</a>]</em>
+            <a style="position:relative;top:-38px;" name="5640ee4b2a998e5e"></a>
+            <!--heading-->
+            <h2 class="chap">Mainframe</h2>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+mainframe This is a **mainframe**
+Alice-&gt;Bob : Hello
+@enduml
+</textarea>
+                <div id="out914ee86ab2883465a82b722d33b22103">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="161" height="190" class="scale"
+                            src="/imgw/img-914ee86ab2883465a82b722d33b22103.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <em>[Ref. <a href="https://forum.plantuml.net/4019">QA-4019</a> and <a
+                    href="https://github.com/plantuml/plantuml/issues/148">Issue#148</a>]</em>
+            <a style="position:relative;top:-38px;" name="5bd6712206960fab"></a>
+            <!--heading-->
+            <h2 class="chap">Slanted or odd arrows </h2>
+            <p></p>
+            You can use the <code class="cod">(nn)</code> option (before or after arrow) to make the arrows slanted,
+            where <em>nn</em> is the number of shift pixels.
+            <p></p>
+            <em>[Available only after v1.2022.6beta+]</em>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+A -&gt;(10) B: text 10
+B -&gt;(10) A: text 10
+
+A -&gt;(10) B: text 10
+A (10)&lt;- B: text 10
+@enduml
+</textarea>
+                <div id="outc22ca8b706a8dad6e553359606656c60">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="101" height="276" class="scale"
+                            src="/imgw/img-c22ca8b706a8dad6e553359606656c60.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+A -&gt;(40) B++: Rq
+B --&gt;(20) A--: Rs
+@enduml
+</textarea>
+                <div id="out245c4c6cd5467461e221b4e17495977a">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="83" height="235" class="scale"
+                            src="/imgw/img-245c4c6cd5467461e221b4e17495977a.png" />
+                    </div>
+                </div>
+            </div>
+            <em>[Ref. <a href="https://forum.plantuml.net/14145/plantuml-draw-odd-line">QA-14145</a>]</em>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+!pragma teoz true
+A -&gt;(50) C: Starts\nwhen &#39;B&#39; sends
+&amp; B -&gt;(25) C: \nBut B&#39;s message\n arrives before A&#39;s
+@enduml
+</textarea>
+                <div id="out1688ce60e73c517da2ae433cc5aabccb">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="282" height="216" class="scale"
+                            src="/imgw/img-1688ce60e73c517da2ae433cc5aabccb.png" />
+                    </div>
+                </div>
+            </div>
+            <em>[Ref. <a
+                    href="https://forum.plantuml.net/6684/non-instantaneous-messages-in-sequence-diagram">QA-6684</a>]</em>
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+!pragma teoz true
+
+S1 -&gt;(30) S2: msg 1\n
+&amp; S2 -&gt;(30) S1: msg 2
+
+note left S1: msg\nS2 to S1
+&amp; note right S2: msg\nS1 to S2
+@enduml
+</textarea>
+                <div id="outfb1553b293f7217f290ea39658c1ff57">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="241" height="262" class="scale"
+                            src="/imgw/img-fb1553b293f7217f290ea39658c1ff57.png" />
+                    </div>
+                </div>
+            </div>
+            <em>[Ref. <a href="https://forum.plantuml.net/1072/sequence-diagram-crossed-arrows">QA-1072</a>]</em>
+            <a style="position:relative;top:-38px;" name="6a350ce9cb7e7321"></a>
+            <!--heading-->
+            <h2 class="chap">Parallel messages <em>(with teoz)</em></h2>
+            <p></p>
+            You can use the <code class="cod">&amp;</code> <a href="teoz">teoz</a> command to display parallel messages:
+            <p></p>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+!pragma teoz true
+Alice -&gt; Bob : hello
+&amp; Bob -&gt; Charlie : hi
+@enduml
+</textarea>
+                <div id="out9757d8d9f3ae50e899a9bf125fa4ee0d">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="181" height="133" class="scale"
+                            src="/imgw/img-9757d8d9f3ae50e899a9bf125fa4ee0d.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <em>(See also <a href="teoz">Teoz</a> architecture)</em>
+            <a style="position:relative;top:-38px;" name="02700f6dcabf3589"></a>
+            <!--heading-->
+            <h2 class="chap">Style for Solid Lifeline</h2>
+            <p></p>
+            <h3>By default</h3>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+Alice -&gt; Bob : hello
+...
+Alice &lt;- Bob : hello
+@enduml
+</textarea>
+                <div id="out9cc59c2d01e6323f34e8757d581b255c">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="108" height="183" class="scale"
+                            src="/imgw/img-9cc59c2d01e6323f34e8757d581b255c.png" />
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <h3>Solid Lifeline using style</h3>
+            <div class="dyn">
+                <textarea spellcheck="false" rows="20">@startuml
+&lt;style&gt;
+lifeLine {
+  LineStyle 0
+}
+delay {
+  LineStyle 1-4
+}
+&lt;/style&gt;
+Alice -&gt; Bob : hello
+...
+Alice &lt;- Bob : hello
+@enduml
+</textarea>
+                <div id="outb05f1891265eb8a685b6d627008df0f1">
+                    <div class="mycell">
+                        <img loading="lazy" loading="lazy" width="108" height="183" class="scale"
+                            src="/imgw/img-b05f1891265eb8a685b6d627008df0f1.png" />
+                    </div>
+                </div>
+            </div>
+            <em>[Ref. <a href="https://github.com/plantuml/plantuml/pull/2266">GH-2266</a> and <a
+                    href="https://github.com/plantuml/plantuml/issues/2662">GH-2662</a>]</em>
+
+
+        </main>
+
+
+        <aside id="C6">
+            <!--toc-->
+            <div id="toc">
+                <ul>
+                    <li><a href="#7aea6e3ecced51f5">Basic Examples</a>
+                    </li>
+                    <li><a href="#5d2ed256d73a7298">Declaring participant</a>
+                    </li>
+                    <li><a href="#6c2a1c77df70f96d">Declaring participant on multiline</a>
+                    </li>
+                    <li><a href="#2210ebadb5117709">Use non-letters in participants</a>
+                    </li>
+                    <li><a href="#f5050860884ddf31">Message to Self</a>
+                    </li>
+                    <li><a href="#bf6bee6d96403148">Text alignment</a>
+                    </li>
+                    <li><a href="#1cc1efff0435a503">Change Actor style</a>
+                    </li>
+                    <li><a href="#efeda651e89e596c">Change arrow style</a>
+                    </li>
+                    <li><a href="#0b2e57c3d4eafdda">Change arrow color</a>
+                    </li>
+                    <li><a href="#ce3f7eb577ad5f4d">Message sequence numbering</a>
+                    </li>
+                    <li><a href="#77852febc7dde952">Page Title, Header and Footer</a>
+                    </li>
+                    <li><a href="#45d7d5b32d17a0f9">Splitting diagrams</a>
+                    </li>
+                    <li><a href="#425ba4350c02142c">Grouping message</a>
+                    </li>
+                    <li><a href="#7aad256d9e87308c">Secondary group label</a>
+                    </li>
+                    <li><a href="#cda0fcbd86347e43">Partition across the entire width</a>
+                    </li>
+                    <li><a href="#012d3e8694a98cc1">Notes on messages</a>
+                    </li>
+                    <li><a href="#f8c59a77112b60e7">Some other notes</a>
+                    </li>
+                    <li><a href="#84de38ea1ca38165">Changing notes shape [hnote, rnote]</a>
+                    </li>
+                    <li><a href="#39755e6414c00844">Note over all participants [across]</a>
+                    </li>
+                    <li><a href="#7514641e1b91c8ee">Several notes aligned at the same level [/]</a>
+                    </li>
+                    <li><a href="#28881bae78acd047">Creole and HTML</a>
+                    </li>
+                    <li><a href="#d4b2df53a72661cc">Divider or separator</a>
+                    </li>
+                    <li><a href="#63d5049791d9d79d">Reference</a>
+                    </li>
+                    <li><a href="#8f497c1a3d15af9e">Delay</a>
+                    </li>
+                    <li><a href="#8659eac9bf4c2629">Text wrapping</a>
+                    </li>
+                    <li><a href="#e660e0a9abbf4837">Message text spans beyond the involved participants</a>
+                    </li>
+                    <li><a href="#d511f8439ecde366">Space</a>
+                    </li>
+                    <li><a href="#5cc0040514e70f7b">Lifeline Activation and Destruction</a>
+                    </li>
+                    <li><a href="#988fd738de9c6d17">Return</a>
+                    </li>
+                    <li><a href="#b2c1d43bde93c643">Participant creation</a>
+                    </li>
+                    <li><a href="#35480215b426d170">Shortcut syntax for activation, deactivation, creation</a>
+                    </li>
+                    <li><a href="#05984b1743e67542">Incoming and outgoing messages</a>
+                    </li>
+                    <li><a href="#098797a007f231ea">Short arrows for incoming and outgoing messages</a>
+                    </li>
+                    <li><a href="#77c3940b98127fb8">Anchors and Duration</a>
+                    </li>
+                    <li><a href="#94190c2f242a5df2">Stereotypes and Spots</a>
+                    </li>
+                    <li><a href="#c142fb9b4429dca1">Position of the stereotypes</a>
+                    </li>
+                    <li><a href="#a21f56b1869e89e5">More information on titles</a>
+                    </li>
+                    <li><a href="#f52672a8f74a07df">Participants encompass</a>
+                    </li>
+                    <li><a href="#21380379ba44081d">Removing Foot Boxes</a>
+                    </li>
+                    <li><a href="#7aa53dbdfc2137bf">Skinparam</a>
+                    </li>
+                    <li><a href="#33cee7c2521befd3">Changing padding</a>
+                    </li>
+                    <li><a href="#4764f83f72ed032f">Appendix: Examples of all arrow type</a>
+                    </li>
+                    <li><a href="#75b4984abd04b14f">Specific SkinParameter</a>
+                    </li>
+                    <li><a href="#fc006eba0d9dcacc">Hide unlinked participant</a>
+                    </li>
+                    <li><a href="#b40d18fd973705df">Color a group message</a>
+                    </li>
+                    <li><a href="#5640ee4b2a998e5e">Mainframe</a>
+                    </li>
+                    <li><a href="#5bd6712206960fab">Slanted or odd arrows</a>
+                    </li>
+                    <li><a href="#6a350ce9cb7e7321">Parallel messages __(with teoz)__</a>
+                    </li>
+                    <li><a href="#02700f6dcabf3589">Style for Solid Lifeline</a>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+    </div>
+
+
+    <style>
+        #menuside li a#menu-sequence-diagram {
+            color: #0366d6;
+        }
+    </style>
+    <script src="../../viz-global.js"></script>
+    <script src="../../plantuml.js"></script>
+    <script>
+        (function () {
+            const render = window.plantumlRender;
+            if (typeof render !== "function") {
+                console.error("PlantUML renderer is unavailable.");
+                return;
+            }
+
+            const renderOptions = {};
+            let counter = 0;
+
+            document.querySelectorAll(".mycell").forEach((mycell) => {
+                const host = mycell.parentElement;
+                const textarea = host ? host.previousElementSibling : null;
+                if (!textarea || textarea.tagName !== "TEXTAREA") return;
+
+                if (!mycell.id) {
+                    counter += 1;
+                    mycell.id = "mycell-render-" + counter;
+                }
+
+                const draw = () => {
+                    mycell.innerHTML = "";
+                    render(textarea.value.split(/\r\n|\r|\n/), mycell.id, renderOptions);
+                };
+
+                textarea.addEventListener("input", draw);
+                draw();
+            });
+        })();
+    </script>
+</body>
+
+</html>

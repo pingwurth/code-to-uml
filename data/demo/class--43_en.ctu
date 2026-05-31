@@ -1,0 +1,33 @@
+Title: Qualified associations
+Describe: None
+------------------------------------------------------------
+[Example]
+Minimal example
+
+[Description]
+None
+
+[UML]
+@startuml
+class class1
+class class2
+
+class1 [Qualifier] - class2
+@enduml
+------------------------------------------------------------
+[Example]
+Another example
+
+[Description]
+None
+
+[UML]
+@startuml
+    interface Map<K,V>
+    class HashMap<Long,Customer>
+
+    Map <|.. HashMap
+    Shop [customerId: long] ---> "customer\n1" Customer
+    HashMap [id: Long] -r-> "value" Customer
+@enduml
+------------------------------------------------------------

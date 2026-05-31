@@ -1,0 +1,20 @@
+Title: Usecases
+Describe: None
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+Use cases are enclosed using between parentheses (because two parentheses looks like an oval). 
+You can also use the usecase keyword to define a `usecase`. And you can define an alias, using the `as` keyword. This alias will be used later, when defining relations.
+
+[UML]
+@startuml
+
+(First usecase)
+(Another usecase) as (UC2)
+usecase UC3
+usecase (Last\nusecase) as UC4
+
+@enduml
+------------------------------------------------------------

@@ -1,0 +1,29 @@
+Title: Skinparam
+Describe: None
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+You can use the command to change colors and fonts for the drawing.
+You can use this command :
+- In the diagram definition, like any other commands,
+- In an included file,
+- In a configuration file, provided in the command line or the ANT task.
+
+[UML]
+@startuml
+
+skinparam class {
+BackgroundColor PaleGreen
+ArrowColor SeaGreen
+BorderColor SpringGreen
+}
+skinparam stereotypeCBackgroundColor YellowGreen
+
+Class01 "1" *-- "many" Class02 : contains
+
+Class03 o-- Class04 : aggregation
+
+@enduml
+------------------------------------------------------------

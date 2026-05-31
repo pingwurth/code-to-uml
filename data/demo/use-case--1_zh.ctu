@@ -1,0 +1,20 @@
+Title: 用例
+Describe: None
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+用例是用小括号括起来的（因为两个 小括号看起来像一个椭圆）。 
+你也可以用 `usecase` 关键字来定义一个 用例。 你可以用 `as` 关键字来定义一个别名。 这个别名将在以后定义关系时使用。
+
+[UML]
+@startuml
+
+(First usecase)
+(Another usecase) as (UC2)
+usecase UC3
+usecase (Last\nusecase) as UC4
+
+@enduml
+------------------------------------------------------------

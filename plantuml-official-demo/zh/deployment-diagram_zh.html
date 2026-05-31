@@ -1,0 +1,3317 @@
+<html lang="zh">
+
+<head>
+
+
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Organization",
+  "url": "https://plantuml.com",
+  "name": "PlantUML",
+  "sameAs" : ["https://twitter.com/plantuml","https://en.wikipedia.org/wiki/PlantUML","https://www.wikidata.org/wiki/Q18346546"],
+  "logo": "https://cdn-0.plantuml.com/logo3.png",
+  "contactPoint": [{
+    "@type": "ContactPoint",
+    "email": "plantuml@gmail.com",
+    "url": "https://plantuml.com",
+    "contactType": "customer service"
+  }]
+}
+</script>
+  <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+    "@type": "ListItem",
+    "position": 1,
+    "item": {
+      "@id": "https://plantuml.com",
+      "name": "Home"
+    }
+  },{
+    "@type": "ListItem",
+    "position": 2,
+    "item": {
+      "@id": "https://plantuml.com/sitemap-language-specification",
+      "name": "Language specification"
+    }
+  },{
+    "@type": "ListItem",
+    "position": 3,
+    "item": {
+      "@id": "https://plantuml.com/deployment-diagram",
+      "name": "Deployment Diagram"
+  }
+  }]
+}
+</script>
+  <link rel="canonical" href="https://plantuml.com/zh/deployment-diagram" />
+  <link rel="alternate" hreflang="x-default" href="https://plantuml.com/deployment-diagram" />
+  <link rel="alternate" hreflang="de" href="https://plantuml.com/de/deployment-diagram" />
+  <link rel="alternate" hreflang="en" href="https://plantuml.com/deployment-diagram" />
+  <link rel="alternate" hreflang="es" href="https://plantuml.com/es/deployment-diagram" />
+  <link rel="alternate" hreflang="fr" href="https://plantuml.com/fr/deployment-diagram" />
+  <link rel="alternate" hreflang="ja" href="https://plantuml.com/ja/deployment-diagram" />
+  <link rel="alternate" hreflang="ko" href="https://plantuml.com/ko/deployment-diagram" />
+  <link rel="alternate" hreflang="zh" href="https://plantuml.com/zh/deployment-diagram" />
+
+  <link rel="shortcut icon" href="/favicon.ico" />
+
+
+  <!-- link rel="preload" as="image" href="https://img.shields.io/liberapay/patrons/plantuml.svg?logo=liberapay" -->
+
+
+  <title>部署图语法及功能</title>
+  <meta name="description" content="PlantUML 部署图语法: PlantUML 并未完全支持部署图。 这是该语言的草案版本可能会有所变化。" />
+
+  <meta property="og:type" content="article" />
+  <!-- volt:dokuwiki titleog: -->
+  <!-- volt:dokuwiki descriptionog: -->
+
+  <meta property="og:url" content="https://plantuml.com/zh/deployment-diagram" />
+  <meta property="og:site_name" content="PlantUML.com" />
+
+  <!-- meta property="og:image" content="https://plantuml.com/og-deployment-diagram" -->
+  <meta name="twitter:image" content="https://plantuml.com/og-deployment-diagram" />
+  <meta property="og:locale" content="zh" />
+
+  <meta name="twitter:card" content="summary" />
+  <!-- volt:dokuwiki titletwitter: -->
+  <!-- volt:dokuwiki descriptiontwitter: -->
+  <meta name="twitter:site" content="@PlantUML" />
+  <meta name="twitter:creator" content="@PlantUML" />
+
+
+  <!-- https://www.w3schools.com/colors/colors_picker.asp -->
+  <!-- filter css https://codepen.io/sosuke/pen/Pjoqqp -->
+
+
+  <style>
+    .scale {}
+
+    li {
+      margin: 2px;
+    }
+
+    #external li {
+      margin: 13px;
+    }
+
+    @media screen and (max-width: 1190px) {
+    }
+
+
+    .coptable {
+      max-width: 90%;
+    }
+
+    .mytab {
+      display: inline-block;
+      border-radius: 3px;
+      border: 1px solid #e1e4e8;
+    }
+
+    .mytab:hover {
+      border: 1px dashed #0366d6;
+      cursor: pointer;
+      color: #0366d6;
+      background: #f6f8fa;
+    }
+
+    .cop {
+      margin: 25px 10px 0 10px;
+    }
+
+    .cop:hover {
+      cursor: pointer;
+      filter: invert(30%) sepia(75%) saturate(4001%) hue-rotate(201deg) brightness(88%) contrast(98%);
+    }
+
+    .cop2 {
+      margin: 25px 10px 0 10px;
+    }
+
+    .cop2:hover {
+      cursor: pointer;
+    }
+
+    .msg {
+      position: absolute;
+      color: #339966;
+      background-color: #FFF;
+      margin-top: 55px;
+      display: none;
+      border-radius: 3px;
+      border: 1px solid #4dff00;
+    }
+
+    .mycell0 {
+      float: left;
+      vertical-align: top;
+      padding: 10px;
+    }
+
+    .mycell0 code:hover {
+      cursor: default;
+      color: #000;
+    }
+
+    .mycell {
+      float: right;
+      vertical-align: top;
+      padding: 10px;
+      max-width: 55vw;
+      overflow-x: auto;
+    }
+
+    .mycell0 pre {
+      max-width: 55vw;
+      overflow-x: auto;
+    }
+
+    .cod {
+      background: #edeff3;
+      padding: 2px 5px;
+      border-radius: 3px;
+    }
+
+    .colo {
+      display: inline-block;
+      background: #edeff3;
+      padding: 7px 12px;
+      border-radius: 3px;
+    }
+
+    .tag,
+    .tagg,
+    .tago,
+    .tagr {
+      text-rendering: optimizeLegibility;
+      display: inline-block;
+      padding: 3px 5px 2px 4px;
+      text-decoration: none;
+      white-space: nowrap;
+      border: 1px solid #999;
+      text-transform: uppercase;
+      text-align: center;
+      border-radius: 3px;
+      font-size: 11px;
+      font-weight: bold;
+      line-height: 90%;
+    }
+
+    .tag {
+      background-color: #EEEEEE;
+    }
+
+    .tagg {
+      background-color: #98FB98;
+    }
+
+    .tago {
+      background-color: #fafa00;
+    }
+
+    .tagr {
+      background-color: #FF4500;
+    }
+
+
+    a {
+      text-decoration: none;
+      color: #0366d6;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .menu1 {
+      display: flex;
+      flex-direction: row;
+      border: 0;
+      font-size: 14px;
+      padding: 0;
+      margin: 0;
+      white-space: nowrap;
+    }
+
+    .menu1 a {
+      white-space: nowrap;
+      padding: 0 8px;
+      text-decoration: none;
+      color: #5e6d7d;
+      line-height: 30px;
+      height: 30px;
+    }
+
+    .menu1 a:hover {
+      background: #fefefe;
+      color: #0366d6;
+    }
+
+    .menuside2 {
+      display: flex;
+      flex-direction: column;
+      border: 0;
+      font-size: 14px;
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+      justify-content: center;
+    }
+
+    .menuside2 img {
+      vertical-align: top;
+      padding: 0 8px;
+      filter: brightness(0) saturate(100%) invert(42%) sepia(22%) saturate(385%) hue-rotate(170deg) brightness(92%) contrast(84%);
+    }
+
+    .menuside2 a {
+      padding: 6px 0;
+      text-decoration: none;
+      color: #5e6d7d;
+    }
+
+    .menuside2 a:hover {
+      color: #0366d6;
+      background: #fefefe;
+    }
+
+    .menuside2 a:hover img {
+      filter: brightness(0) saturate(100%) invert(23%) sepia(44%) saturate(7029%) hue-rotate(203deg) brightness(94%) contrast(98%);
+    }
+
+    .breadcrumb {
+      z-index: 1;
+      font-size: 14px;
+      text-align: center;
+      display: inline-block;
+      overflow: hidden;
+      border-radius: 5px;
+    }
+
+
+    .breadcrumb a {
+      text-decoration: none;
+      outline: none;
+      display: block;
+      float: left;
+      font-size: 12px;
+      line-height: 24px;
+      color: #373f49;
+      padding: 0 10px 0 35px;
+      background: #f0f1f1;
+      background: linear-gradient(#f0f1f1, #c6d2d2);
+      position: relative;
+    }
+
+    .breadcrumb a:first-child {
+      padding-left: 21px;
+      border-radius: 5px 0 0 5px;
+      /*to match with the parent's radius*/
+    }
+
+    .breadcrumb a:first-child:before {
+      left: 14px;
+    }
+
+    .breadcrumb a:last-child {
+      visibility: hidden;
+    }
+
+    .breadcrumb a.active,
+    .breadcrumb a:hover {
+      color: #0366d6;
+      background: #c6d2d2;
+      background: linear-gradient(#e3e4e4, #b8c7c7);
+    }
+
+    .breadcrumb a.active:after,
+    .breadcrumb a:hover:after {
+      background: #c6d2d2;
+      background: linear-gradient(135deg, #e3e4e4, #b8c7c7);
+    }
+
+    .breadcrumb a:after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: -12px;
+      /*half of square's length*/
+      /*same dimension as the line-height of .breadcrumb a */
+      width: 24px;
+      height: 24px;
+      transform: scale(0.707) rotate(45deg);
+      /*we need to prevent the arrows from getting buried under the next link*/
+      z-index: 1;
+      /*background same as links but the gradient will be rotated to compensate with the transform applied*/
+      background: #f0f1f1;
+      background: linear-gradient(135deg, #f0f1f1, #c6d2d2);
+      /*stylish arrow design using box shadow*/
+      box-shadow:
+        2px -2px 0 2px rgba(0, 0, 0, 0.1),
+        3px -3px 0 2px rgba(255, 255, 255, 0.1);
+      /*
+		5px - for rounded arrows and 
+		50px - to prevent hover glitches on the border created using shadows*/
+      border-radius: 0 5px 0 50px;
+    }
+
+    /*we dont need an arrow after the last link*/
+    .breadcrumb a:last-child:after {
+      content: none;
+      visibility: hidden;
+    }
+
+
+    .lga,
+    .lga a,
+    .lgi,
+    .lgi a {
+      font-size: 13px;
+      text-align: center;
+      color: #fff;
+      padding: 0 5px;
+      margin: 0;
+    }
+
+    .lga,
+    .lga a {
+      background-color: #008;
+    }
+
+    .lgi,
+    .lgi a {
+      background-color: #888;
+    }
+
+    .lga:hover,
+    .lga:hover a {
+      text-decoration: none;
+      color: #BBB;
+    }
+
+    .lgi:hover,
+    .lgi:hover a {
+      text-decoration: none;
+      color: #CCC;
+    }
+  </style>
+  <style>
+    body {
+      font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+      font-size: 14px;
+      line-height: 1.5;
+      margin: auto;
+      overflow-x: hidden;
+      background: #fefefe;
+    }
+
+    h1.chap {
+      font-size: 1.8em;
+    }
+
+    h2.chap {
+      font-size: 1.35em;
+    }
+
+    h3,
+    h3.chap {
+      font-size: 1.15em;
+    }
+
+    h4 {
+      font-size: 1.05em;
+    }
+
+    table {
+      font-size: inherit;
+    }
+  </style>
+
+
+  <style>
+    .dyn {
+      display: flex;
+      flex-direction: row;
+      gap: 3em;
+      align-items: stretch;
+      flex-wrap: wrap;
+      margin: 10px 0;
+    }
+
+    .dyn textarea {
+      font-family: monospace;
+      font-size: 13px;
+      line-height: 1.4;
+      min-width: 30ch;
+      max-width: 90ch;
+      box-sizing: border-box;
+      resize: both;
+      white-space: pre;
+      overflow: auto;
+      field-sizing: content;
+      align-self: stretch;
+      border: 1px solid #888;
+      border-radius: 3px;
+      margin: 0;
+      padding: 4px 8px;
+      background: #fefefe;
+    }
+
+    .dyn>div {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      display: flex;
+    }
+
+    .dyn>div>div {
+      margin: 0;
+      padding: 0;
+    }
+
+    .dyn img {
+      margin: 0;
+      padding: 0;
+    }
+
+    .scale {
+      max-width: 100%;
+      height: auto;
+      border: 1px solid #dde;
+      border-radius: 4px;
+    }
+  </style>
+
+
+  <script>
+    var llg = "zh";
+    var az = 0;
+    var amdark = 0;
+    function ljs(n) {
+      if (az) return false;
+      var sc = document.createElement("script");
+      sc.type = "text/javascript";
+      sc.src = "/btn-" + n + ".js";
+      document.body.innerHTML = "<i style='position:absolute;top:30%;width:100%;'><center>Loading in progress...";
+      document.body.appendChild(sc);
+    }
+    function ctc(id) {
+      document.getElementById('img' + id).classList.remove('cop'); document.getElementById('img' + id).classList.add('cop2');
+      document.getElementById('pre' + id).style.backgroundColor = '#4dff00';
+      document.getElementById('msg' + id).style.display = 'inline';
+
+      setTimeout(function () { document.getElementById('img' + id).classList.remove('cop2'); document.getElementById('img' + id).classList.add('cop'); document.getElementById('pre' + id).style.backgroundColor = ''; document.getElementById('msg' + id).style.display = 'none'; }, 800);
+
+
+      text = document.getElementById('pre' + id).innerText;
+      if (window.clipboardData && window.clipboardData.setData)
+        return window.clipboardData.setData("Text", text);
+      else if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
+        var ta = document.createElement("textarea");
+        ta.textContent = text;
+        ta.style.position = "fixed";
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          return document.execCommand("copy");
+        }
+        catch (ex) {
+          return false;
+        }
+        finally {
+          document.body.removeChild(ta);
+        }
+      }
+    }
+  </script>
+</head>
+
+<body>
+  <style>
+    body,
+    .container,
+    #B3,
+    #C5,
+    #C6,
+    #C7,
+    #D7,
+    #D8 {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      overflow-y: scroll;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      grid-template-rows: auto 1fr auto;
+      min-height: 100vh;
+    }
+
+    #B3 {
+      grid-column: 1 / 5;
+      grid-row: 1;
+      position: sticky;
+      top: 0;
+      height: 30px;
+      padding: 0;
+      z-index: 10;
+      overflow: hidden;
+      background: #edeff3;
+      border-bottom: 1px solid #d4d8de;
+    }
+
+    #D7 {
+      grid-column: 1;
+      grid-row: 2;
+      margin: 0;
+      padding: 0;
+      padding-left: 30px;
+      line-height: 1.6;
+    }
+
+    #D8 {
+      grid-column: 1;
+      grid-row: 3;
+      position: sticky;
+      bottom: 0;
+      z-index: 5;
+      background: #fefefe;
+    }
+
+    #C5 {
+      grid-column: 2;
+      grid-row: 1 / -1;
+      position: sticky;
+      top: 40px;
+      align-self: start;
+      height: calc(98vh - 60px);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #C6 {
+      grid-column: 3;
+      grid-row: 1 / -1;
+      position: sticky;
+      top: 40px;
+      align-self: start;
+      height: calc(98vh - 60px);
+      max-width: 200px;
+      overflow: hidden;
+      margin: 0 10px;
+      padding: 8px 5px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #C7 {
+      grid-column: 4;
+      grid-row: 1 / -1;
+      position: sticky;
+      top: 40px;
+      align-self: start;
+      height: calc(98vh - 60px);
+      margin: 0 20px 0 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #toc {
+      z-index: 15;
+      overflow-x: hidden;
+      overflow-y: auto;
+      background: #f6f8fa;
+      border-width: 2px;
+      border-style: groove;
+      border-radius: 3px;
+      border-color: #e1e4e8;
+      margin: 0 5px;
+      padding: 0;
+      max-height: 100%;
+    }
+
+    #toc ul {
+      margin: 0;
+      list-style-type: none;
+      padding: 0;
+    }
+
+    #toc li {
+      padding: 0 10px;
+      margin: 0;
+    }
+
+    #toc li a {
+      padding: 5px 0;
+      display: inline-block;
+      text-decoration: none;
+      width: 100%;
+      color: #5e6d7d;
+    }
+
+    #toc li a:hover {
+      color: #0366d6;
+    }
+
+    #toc li:hover {
+      background: #fefefe;
+    }
+
+    #magic {
+      position: absolute;
+      top: 0;
+      right: 50px;
+      width: 30px;
+      height: 30px;
+      overflow: hidden;
+      background: #edeff3;
+      z-index: 14;
+    }
+
+    #magic:hover {
+      width: calc(100% - 50px);
+    }
+
+    #magic .menu1 {
+      position: absolute;
+      top: 0;
+      right: 30px;
+      height: 30px;
+      padding-left: 10px;
+      background: #edeff3;
+      border-left: 1px solid #d4d8de;
+      border-bottom: 1px solid #d4d8de;
+    }
+
+    .menu1-tail {
+      flex-grow: 1;
+      flex-shrink: 0;
+      height: 30px;
+      position: relative;
+      z-index: 15;
+      background: #edeff3;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: auto auto auto;
+      grid-auto-rows: auto;
+      gap: 5px;
+      margin: 0;
+      padding: 0;
+    }
+
+    .merged {
+      grid-column: 1 / -1;
+    }
+
+    #C6 {
+      display: none;
+    }
+
+    @media (min-width: 1401px) {
+      #C6:has(#toc li) {
+        display: flex;
+      }
+    }
+
+    @media (max-width: 1100px) {
+      #C5,
+      #C7 {
+        display: none;
+      }
+    }
+
+    @media (max-width: 1200px) {
+      .merged {
+        display: none;
+      }
+    }
+  </style>
+
+  <div class="container">
+
+    <footer id="D8">
+
+      <p>
+      </p>
+      <p>
+
+      </p>
+    </footer>
+
+
+    <header id="B3">
+      <div class="menu1">
+        <a id="titem10" href="sequence-diagram_zh.html">时序图</a>
+        <a id="titem20" href="use-case-diagram_zh.html">用例图</a>
+        <a id="titem30" href="class-diagram_zh.html">类图</a>
+        <a id="titem40" href="activity-diagram-beta_zh.html">活动图</a>
+        <a id="titem50" href="component-diagram_zh.html">组件图</a>
+        <a id="titem60" href="state-diagram_zh.html">状态图</a>
+        <a id="titem70" href="object-diagram_zh.html">对象图</a>
+        <a id="titem80" href="deployment-diagram_zh.html">部署图</a>
+        <a id="titem90" href="timing-diagram_zh.html">定时图</a>
+
+        <a id="titem99" href="regex_zh.html">Regex</a>
+        <a id="titem100" href="nwdiag_zh.html">Network</a>
+        <a id="titem110" href="salt_zh.html">Wireframe</a>
+        <a id="titem120" href="archimate-diagram_zh.html">Archimate</a>
+        <a id="titem130" href="gantt-diagram_zh.html">Gantt</a>
+        <a id="titem140" href="mindmap-diagram_zh.html">MindMap</a>
+        <a id="titem150" href="wbs-diagram_zh.html">WBS</a>
+        <a id="titem151" href="ebnf_zh.html">EBNF</a>
+        <a id="titem160" href="json_zh.html">JSON</a>
+        <a id="titem170" href="yaml_zh.html">YAML</a>
+
+        <div class="menu1-tail"></div>
+      </div>
+      <div id="magic">
+        <div class="menu1">
+          <a id="titem10" href="sequence-diagram_zh.html">时序图</a>
+          <a id="titem20" href="use-case-diagram_zh.html">用例图</a>
+          <a id="titem30" href="class-diagram_zh.html">类图</a>
+          <a id="titem40" href="activity-diagram-beta_zh.html">活动图</a>
+          <a id="titem50" href="component-diagram_zh.html">组件图</a>
+          <a id="titem60" href="state-diagram_zh.html">状态图</a>
+          <a id="titem70" href="object-diagram_zh.html">对象图</a>
+          <a id="titem80" href="deployment-diagram_zh.html">部署图</a>
+          <a id="titem90" href="timing-diagram_zh.html">定时图</a>
+
+          <a id="titem99" href="regex_zh.html">Regex</a>
+          <a id="titem100" href="nwdiag_zh.html">Network</a>
+          <a id="titem110" href="salt_zh.html">Wireframe</a>
+          <a id="titem120" href="archimate-diagram_zh.html">Archimate</a>
+          <a id="titem130" href="gantt-diagram_zh.html">Gantt</a>
+          <a id="titem140" href="mindmap-diagram_zh.html">MindMap</a>
+          <a id="titem150" href="wbs-diagram_zh.html">WBS</a>
+          <a id="titem151" href="ebnf_zh.html">EBNF</a>
+          <a id="titem160" href="json_zh.html">JSON</a>
+          <a id="titem170" href="yaml_zh.html">YAML</a>
+
+          <div class="menu1-tail"></div>
+        </div>
+      </div><!-- magic -->
+    </header>
+
+    <main id="D7">
+
+      <style>
+        #donate {
+          padding-top: 10px;
+          min-height: 30px;
+        }
+      </style>
+
+
+      <p style="clear:both;">
+
+
+        <style>
+          #titem80 {
+            color: #0366d6;
+            background-color: #fefefe;
+          }
+
+          #titem80 img {
+            filter: brightness(0) saturate(100%) invert(23%) sepia(44%) saturate(7029%) hue-rotate(203deg) brightness(94%) contrast(98%);
+          }
+
+          .menu1:hover #titem80 {
+            color: #5e6d7d;
+          }
+
+          .menu1:hover #titem80:hover {
+            color: #0366d6;
+          }
+
+          .menu1:hover #titem80 img {
+            filter: brightness(0) saturate(100%) invert(42%) sepia(22%) saturate(385%) hue-rotate(170deg) brightness(92%) contrast(84%);
+          }
+        </style>
+
+        <a style="position:relative;top:-38px;" name="6c38d20e9f7e0390"></a>
+        <!--heading-->
+      </p>
+      <h1 class="chap">部署图</h1>
+      <p></p>
+      <strong>部署</strong>图是一种可视化系统架构的图表，展示软件组件如何部署到硬件上。它能清晰地显示组件在服务器、工作站和设备等不同节点上的分布情况。
+      <p></p>
+      有了<a
+        href="https://plantuml.com/en/deployment-diagram">PlantUML</a>，创建部署图变得轻而易举。该平台提供了一种使用纯文本设计这些图表的简单而直观的方法，确保了快速迭代和轻松的版本控制。此外，<a
+        href="https://forum.plantuml.net/">PlantUML 论坛</a>还提供了一个充满活力的社区，用户可以在这里寻求帮助、分享想法，并共同应对图表设计方面的挑战。PlantUML
+      的主要优势之一是能与各种工具和平台无缝集成，因此成为专业人士和爱好者的首选。
+      <a style="position:relative;top:-38px;" name="e5cec68ef9127fc4"></a>
+      <!--heading-->
+      <h2 class="chap">声明元素</h2>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+actor actor
+agent agent
+artifact artifact
+boundary boundary
+card card
+cloud cloud
+component component
+control control
+database database
+entity entity
+file file
+folder folder
+frame frame
+interface  interface
+node node
+package package
+queue queue
+stack stack
+rectangle rectangle
+storage storage
+usecase usecase
+@enduml
+</textarea>
+        <div id="out95560f990c189f88b5a3a895bf374531">
+          <div class="mycell">
+            <img loading="lazy" width="545" height="518" class="scale"
+              src="/imgw/img-95560f990c189f88b5a3a895bf374531.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      可选的，您可以使用方括号 <code class="cod">[]</code> 放置长描述文本。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+folder folder [
+这是个 &lt;b&gt;文件夹
+----
+您可以使用
+====
+不同类型
+....
+的分隔符
+]
+
+node node [
+这是个 &lt;b&gt;结点
+----
+您可以使用
+====
+不同类型
+....
+的分隔符
+]
+
+database database [
+这是个 &lt;b&gt;数据库
+----
+您可以使用
+====
+不同类型
+....
+的分隔符
+]
+
+usecase usecase [
+这是个 &lt;b&gt;用例
+----
+您可以使用
+====
+不同类型
+....
+的分隔符
+]
+
+@enduml
+</textarea>
+        <div id="outa6b32fa46a933e4e1838de4611553f22">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="311" height="345" class="scale"
+              src="/imgw/img-a6b32fa46a933e4e1838de4611553f22.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <center>
+        <div class="tago">WARNING</div> <b>This translation need to be updated.</b> <div class="tago">WARNING</div>
+      </center>
+      <a style="position:relative;top:-38px;" name="ccbc4c57abc698a9"></a>
+      <!--heading-->
+      <h2 class="chap">声明元素（使用简短的形式）</h2>
+      <p></p>
+      我们可以使用一些简短的形式声明元素。
+      <p></p>
+      <table border="1" cellspacing="0" cellpadding="5">
+        <tbody>
+          <tr>
+            <td><b>
+                长格式关键词
+              </b></td>
+            <td><b>
+                短格式关键词
+              </b></td>
+            <td><b>
+                长表示例
+              </b></td>
+            <td><b>
+                短格式的例子
+              </b></td>
+            <td><b>
+                参考文献。
+              </b></td>
+          </tr>
+          <tr>
+            <td>
+              <code class="cod">actor</code>
+            </td>
+            <td>
+              <code class="cod">:</code> <em>a</em> <code class="cod">:</code>
+            </td>
+            <td>
+              <code class="cod">actor actor1</code>
+            </td>
+            <td>
+              <code class="cod">:actor2:</code>
+            </td>
+            <td>
+              <a href="https://plantuml.com/use-case-diagram#d9b36998c97be687">Actors</a>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <code class="cod">component</code>
+            </td>
+            <td>
+              <code class="cod">[</code> <em>c</em> <code class="cod">]</code>
+            </td>
+            <td>
+              <code class="cod">component component1</code>
+            </td>
+            <td>
+              <code class="cod">[component2]</code>
+            </td>
+            <td>
+              <a href="https://plantuml.com/component-diagram#05bbb43b3d923283">组件</a>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <code class="cod">interface</code>
+            </td>
+            <td>
+              <code class="cod">()</code> <em>i</em>
+            </td>
+            <td>
+              <code class="cod">interface interface1</code>
+            </td>
+            <td>
+              <code class="cod">() &#34;interface2&#34;</code>
+            </td>
+            <td>
+              <a href="https://plantuml.com/component-diagram#756640f0aea5f5be">接口</a>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <code class="cod">usecase</code>
+            </td>
+            <td>
+              <code class="cod">(</code> <em>u</em> <code class="cod">)</code>
+            </td>
+            <td>
+              <code class="cod">usecase usecase1</code>
+            </td>
+            <td>
+              <code class="cod">(usecase2)</code>
+            </td>
+            <td>
+              <a href="https://plantuml.com/use-case-diagram#5cb617d22da857ea">用例</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p></p>
+      <h3>Actor</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+actor actor1
+:actor2:
+
+@enduml
+</textarea>
+        <div id="out6ec57f42a98da91f15b30629ca1a3c4f">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="132" height="95" class="scale"
+              src="/imgw/img-6ec57f42a98da91f15b30629ca1a3c4f.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <strong>注意</strong>：有<em>一种旧的语法是用guillemet来表示actor的，现在已经过时了，过几天就会删除。请不要在你的图表中使用。</em>
+      <p></p>
+      <h3>组件</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+component 组件1
+[组件2]
+
+@enduml
+</textarea>
+        <div id="outf68071a9dc552b8123d3e94c8656eeb4">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="206" height="67" class="scale"
+              src="/imgw/img-f68071a9dc552b8123d3e94c8656eeb4.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>接口</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+interface 接口1
+() &#34;接口2&#34;
+
+label &#34;//接口示例//&#34;
+@enduml
+</textarea>
+        <div id="out75301cef06dd1db5d0bdae2a63013446">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="154" height="144" class="scale"
+              src="/imgw/img-75301cef06dd1db5d0bdae2a63013446.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>Usecase</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+usecase usecase1
+(usecase2)
+
+@enduml
+</textarea>
+        <div id="outcdbc3978c34f1ad8120169a786899271">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="235" height="49" class="scale"
+              src="/imgw/img-cdbc3978c34f1ad8120169a786899271.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="bb3fdb917676e9ae"></a>
+      <!--heading-->
+      <h2 class="chap">链接或箭头</h2>
+      <p></p>
+      你可以在有或没有标签的元素之间创建简单的链接。
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+node node1
+node node2
+node node3
+node node4
+node node5
+node1 -- node2 : label1
+node1 .. node3 : label2
+node1 ~~ node4 : label3
+node1 == node5
+
+@enduml
+</textarea>
+        <div id="outc9e9782e32671e77202d62d06ae7916d">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="460" height="203" class="scale"
+              src="/imgw/img-c9e9782e32671e77202d62d06ae7916d.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      可以使用几种类型的链接。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+artifact artifact1
+artifact artifact2
+artifact artifact3
+artifact artifact4
+artifact artifact5
+artifact artifact6
+artifact artifact7
+artifact artifact8
+artifact artifact9
+artifact artifact10
+artifact1 --&gt; artifact2
+artifact1 --* artifact3
+artifact1 --o artifact4
+artifact1 --+ artifact5
+artifact1 --# artifact6
+artifact1 --&gt;&gt; artifact7
+artifact1 --0 artifact8
+artifact1 --^ artifact9
+artifact1 --(0 artifact10
+
+@enduml
+</textarea>
+        <div id="out0bf2c2603da517a1cc522e122dc94d68">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="1033" height="161" class="scale"
+              src="/imgw/img-0bf2c2603da517a1cc522e122dc94d68.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      你也可以有以下类型。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+cloud cloud1
+cloud cloud2
+cloud cloud3
+cloud cloud4
+cloud cloud5
+cloud1 -0- cloud2
+cloud1 -0)- cloud3
+cloud1 -(0- cloud4
+cloud1 -(0)- cloud5
+
+@enduml
+</textarea>
+        <div id="outfcdf646d76236460d093b93030f96d28">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="421" height="181" class="scale"
+              src="/imgw/img-fcdf646d76236460d093b93030f96d28.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      或另一个例子。
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+actor foo1
+actor foo2
+foo1 &lt;-0-&gt; foo2
+foo1 &lt;-(0)-&gt; foo2
+ 
+(ac1) -le(0)-&gt; left1
+ac1 -ri(0)-&gt; right1
+ac1 .up(0).&gt; up1
+ac1 ~up(0)~&gt; up2
+ac1 -do(0)-&gt; down1
+ac1 -do(0)-&gt; down2
+ 
+actor1 -0)- actor2
+ 
+component comp1
+component comp2
+comp1 *-0)-+ comp2
+[comp3] &lt;--&gt;&gt; [comp4]
+
+boundary b1
+control c1
+b1 -(0)- c1
+
+component comp1
+interface interf1
+comp1 #~~( interf1
+
+:mode1actor: -0)- fooa1
+:mode1actorl: -ri0)- foo1l
+
+[component1] 0)-(0-(0 [componentC]
+() component3 )-0-(0 &#34;foo&#34; [componentC]
+
+[aze1] #--&gt;&gt; [aze2]
+@enduml
+</textarea>
+        <div id="out206c5b1ac395eb9588124ad1ec149f48">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="1390" height="371" class="scale"
+              src="/imgw/img-206c5b1ac395eb9588124ad1ec149f48.png" />
+          </div>
+        </div>
+      </div>
+      <em>[Ref.<a href="https://forum.plantuml.net/547/composite-structure-diagrams?show=554#a554">QA-547</a>and<a
+          href="https://forum.plantuml.net/1736/are-partial-lollipop-for-component-diagrams-supported?show=1737#a1737">QA-1736</a>]</em>
+      <p></p>
+      ⎘ 见<strong>附录</strong>上的所有类型。
+      <a style="position:relative;top:-38px;" name="b5f6831632fd63c1"></a>
+      <!--heading-->
+      <h2 class="chap">的箭头样式</h2>
+      <p></p>
+      <em>与<a href="class-diagram#chjviqthvhkikfmwbahk">括号内的<strong>类</strong></a>关系（链接或箭头）样式类似</em>
+      <p></p>
+      <h3>线条样式</h3>
+      也可以明确有<code class="cod">bold</code>,<code class="cod">dashed</code>,<code class="cod">dotted</code>,<code
+        class="cod">hidden</code> 或<code class="cod">plain</code>属性的箭头：<br />
+      <p></p>
+      <ul>
+        <li>无标签</li>
+      </ul>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+node foo
+title Bracketed line style without label
+foo --&gt; bar
+foo -[bold]-&gt; bar1
+foo -[dashed]-&gt; bar2
+foo -[dotted]-&gt; bar3
+foo -[hidden]-&gt; bar4
+foo -[plain]-&gt; bar5
+@enduml
+</textarea>
+        <div id="out63adb1c50b6bf61952c727edb56b5098">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="489" height="229" class="scale"
+              src="/imgw/img-63adb1c50b6bf61952c727edb56b5098.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <ul>
+        <li>带标签</li>
+      </ul>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+title Bracketed line style with label
+node foo
+foo --&gt; bar          : ∅
+foo -[bold]-&gt; bar1   : [bold]
+foo -[dashed]-&gt; bar2 : [dashed]
+foo -[dotted]-&gt; bar3 : [dotted]
+foo -[hidden]-&gt; bar4 : [hidden]
+foo -[plain]-&gt; bar5  : [plain]
+@enduml
+</textarea>
+        <div id="out9a99e23b087f76b48a6ef8c3230511d9">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="490" height="247" class="scale"
+              src="/imgw/img-9a99e23b087f76b48a6ef8c3230511d9.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[改编自<a
+          href="https://forum.plantuml.net/4181/how-change-width-line-in-a-relationship-between-two-classes?show=4232#a4232">QA-4181</a>]</em>
+      <p></p>
+      <h3>线条颜色</h3>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+title Bracketed line color
+node  foo
+foo --&gt; bar
+foo -[#red]-&gt; bar1     : [#red]
+foo -[#green]-&gt; bar2   : [#green]
+foo -[#blue]-&gt; bar3    : [#blue]
+foo -[#blue;#yellow;#green]-&gt; bar4
+@enduml
+</textarea>
+        <div id="out1a057967f6b352e16114e966a3fb4e6f">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="400" height="247" class="scale"
+              src="/imgw/img-1a057967f6b352e16114e966a3fb4e6f.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>线条粗细</h3>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+title Bracketed line thickness
+node foo
+foo --&gt; bar                 : ∅
+foo -[thickness=1]-&gt; bar1   : [1]
+foo -[thickness=2]-&gt; bar2   : [2]
+foo -[thickness=4]-&gt; bar3   : [4]
+foo -[thickness=8]-&gt; bar4   : [8]
+foo -[thickness=16]-&gt; bar5  : [16]
+@enduml
+</textarea>
+        <div id="outfe2d33efea20f024315038b6a5576ff1">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="489" height="247" class="scale"
+              src="/imgw/img-fe2d33efea20f024315038b6a5576ff1.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[改编自<a href="https://forum.plantuml.net/4949">QA-4949</a>]</em>
+      <p></p>
+      <h3>混合</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+title Bracketed line style mix
+node foo
+foo --&gt; bar                             : ∅
+foo -[#red,thickness=1]-&gt; bar1          : [#red,1]
+foo -[#red,dashed,thickness=2]-&gt; bar2   : [#red,dashed,2]
+foo -[#green,dashed,thickness=4]-&gt; bar3 : [#green,dashed,4]
+foo -[#blue,dotted,thickness=8]-&gt; bar4  : [blue,dotted,8]
+foo -[#blue,plain,thickness=16]-&gt; bar5  : [blue,plain,16]
+foo -[#blue;#green,dashed,thickness=4]-&gt; bar6  : [blue;green,dashed,4]
+@enduml
+</textarea>
+        <div id="outb3a9f1828ee4bb2a91e41361d451fed6">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="809" height="247" class="scale"
+              src="/imgw/img-b3a9f1828ee4bb2a91e41361d451fed6.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="39a64d49d97a1ea0"></a>
+      <!--heading-->
+      <h2 class="chap">改变箭头的颜色和样式（内联式）</h2>
+      <p></p>
+      你可以使用内联式以下符号改变单个箭头的<a href="color">颜色</a>或样式。
+      <p></p>
+      <ul>
+        <li><code class="cod">#color;line.[bold|dashed|dotted];text:color</code></li>
+      </ul>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+node foo
+foo --&gt; bar : normal
+foo --&gt; bar1 #line:red;line.bold;text:red  : red bold
+foo --&gt; bar2 #green;line.dashed;text:green : green dashed 
+foo --&gt; bar3 #blue;line.dotted;text:blue   : blue dotted
+@enduml
+</textarea>
+        <div id="outa821b94877255b00ddb12a7fb83f4754">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="357" height="209" class="scale"
+              src="/imgw/img-a821b94877255b00ddb12a7fb83f4754.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[参考<a href="https://forum.plantuml.net/3770">QA-3770</a>和<a
+          href="https://forum.plantuml.net/3816">QA-3816</a>]</em>
+      <em>[[见类图](class-diagram#b5b0e4228f2e5022)</em>上的类似功能]
+      <a style="position:relative;top:-38px;" name="ded8ac71cf351121"></a>
+      <!--heading-->
+      <h2 class="chap">改变元素的颜色和样式（内联样式）</h2>
+      <p></p>
+      你可以用以下符号改变单个元素的<a href="color">颜色</a>或样式。
+      <ul>
+        <li><code class="cod">#[color|back:color];line:color;line.[bold|dashed|dotted];text:color</code></li>
+      </ul>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+agent a
+cloud c #pink;line:red;line.bold;text:red
+file  f #palegreen;line:green;line.dashed;text:green
+node  n #aliceblue;line:blue;line.dotted;text:blue
+@enduml
+</textarea>
+        <div id="out81957562d8853a08cce6187e28d29989">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="139" height="185" class="scale"
+              src="/imgw/img-81957562d8853a08cce6187e28d29989.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+agent a
+cloud c #pink;line:red;line.bold;text:red [
+c
+cloud description
+]
+file  f #palegreen;line:green;line.dashed;text:green {
+[c1]
+[c2]
+}
+frame frame {
+node  n #aliceblue;line:blue;line.dotted;text:blue
+}
+@enduml
+</textarea>
+        <div id="out9053a8bab16a44c806de61c9bfef45ce">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="519" height="121" class="scale"
+              src="/imgw/img-9053a8bab16a44c806de61c9bfef45ce.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref.<a href="https://forum.plantuml.net/6852">QA-6852</a>]</em>
+      <a style="position:relative;top:-38px;" name="b2ecd56c45d3d896"></a>
+      <!--heading-->
+      <h2 class="chap">可嵌套的元素</h2>
+      <p></p>
+      这里是可嵌套的元素。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+artifact artifact {
+}
+card card {
+}
+cloud cloud {
+}
+component component {
+}
+database database {
+}
+file file {
+}
+folder folder {
+}
+frame frame {
+}
+hexagon hexagon {
+}
+node node {
+}
+package package {
+}
+queue queue {
+}
+rectangle rectangle {
+}
+stack stack {
+}
+storage storage {
+}
+@enduml
+</textarea>
+        <div id="out6ef446a61b1a2722b21753f0cf2443ba">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="1607" height="81" class="scale"
+              src="/imgw/img-6ef446a61b1a2722b21753f0cf2443ba.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <center>
+        <div class="tago">WARNING</div> <b>This translation need to be updated.</b> <div class="tago">WARNING</div>
+      </center>
+      <a style="position:relative;top:-38px;" name="f36f2582540e74f1"></a>
+      <!--heading-->
+      <h2 class="chap">包和嵌套元素</h2>
+      <p></p>
+      <h3>一层的例子</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+artifact    artifactVeryLOOOOOOOOOOOOOOOOOOOg    as &#34;artifact&#34; {
+file f1
+}
+card        cardVeryLOOOOOOOOOOOOOOOOOOOg        as &#34;card&#34; {
+file f2
+}
+cloud       cloudVeryLOOOOOOOOOOOOOOOOOOOg       as &#34;cloud&#34; {
+file f3
+}
+component   componentVeryLOOOOOOOOOOOOOOOOOOOg   as &#34;component&#34; {
+file f4
+}
+database    databaseVeryLOOOOOOOOOOOOOOOOOOOg    as &#34;database&#34; {
+file f5
+}
+file        fileVeryLOOOOOOOOOOOOOOOOOOOg        as &#34;file&#34; {
+file f6
+}
+folder      folderVeryLOOOOOOOOOOOOOOOOOOOg      as &#34;folder&#34; {
+file f7
+}
+frame       frameVeryLOOOOOOOOOOOOOOOOOOOg       as &#34;frame&#34; {
+file f8
+}
+hexagon     hexagonVeryLOOOOOOOOOOOOOOOOOOOg     as &#34;hexagon&#34; {
+file f9
+}
+node        nodeVeryLOOOOOOOOOOOOOOOOOOOg        as &#34;node&#34; {
+file f10
+}
+package     packageVeryLOOOOOOOOOOOOOOOOOOOg     as &#34;package&#34; {
+file f11
+}
+queue       queueVeryLOOOOOOOOOOOOOOOOOOOg       as &#34;queue&#34; {
+file f12
+}
+rectangle   rectangleVeryLOOOOOOOOOOOOOOOOOOOg   as &#34;rectangle&#34; {
+file f13
+}
+stack       stackVeryLOOOOOOOOOOOOOOOOOOOg       as &#34;stack&#34; {
+file f14
+}
+storage     storageVeryLOOOOOOOOOOOOOOOOOOOg     as &#34;storage&#34; {
+file f15
+}
+@enduml
+</textarea>
+        <div id="out8a9fa189c31489dc7e208ffe5e1ec29c">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="1455" height="135" class="scale"
+              src="/imgw/img-8a9fa189c31489dc7e208ffe5e1ec29c.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <h3>其他例子</h3>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+artifact Foo1 {
+  folder Foo2
+}
+
+folder Foo3 {
+  artifact Foo4
+}
+
+frame Foo5 {
+  database Foo6
+}
+
+cloud vpc {
+  node ec2 {
+    stack stack
+  }
+}
+
+@enduml
+</textarea>
+        <div id="oute6bf714ad2b2ce883b2f1ba114efd525">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="538" height="193" class="scale"
+              src="/imgw/img-e6bf714ad2b2ce883b2f1ba114efd525.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+node Foo1 {
+ cloud Foo2
+}
+
+cloud Foo3 {
+  frame Foo4
+}
+
+database Foo5  {
+  storage Foo6
+}
+
+storage Foo7 {
+  storage Foo8
+}
+@enduml
+</textarea>
+        <div id="outf29c031dd07b2efa0c1fb2ae9beb4301">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="482" height="140" class="scale"
+              src="/imgw/img-f29c031dd07b2efa0c1fb2ae9beb4301.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>完全嵌套</h3>
+      <p></p>
+      这里是所有的嵌套元素：
+      <ul>
+        <li>按字母顺序。</li>
+      </ul>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+artifact artifact {
+card card {
+cloud cloud {
+component component {
+database database {
+file file {
+folder folder {
+frame frame {
+hexagon hexagon {
+node node {
+package package {
+queue queue {
+rectangle rectangle {
+stack stack {
+storage storage {
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+@enduml
+</textarea>
+        <div id="out62cb8ebc51d7d4dbde4396704465c756">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="750" height="1014" class="scale"
+              src="/imgw/img-62cb8ebc51d7d4dbde4396704465c756.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <ul>
+        <li>或相反的字母顺序</li>
+      </ul>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+storage storage {
+stack stack {
+rectangle rectangle {
+queue queue {
+package package {
+node node {
+hexagon hexagon {
+frame frame {
+folder folder {
+file file {
+database database {
+component component {
+cloud cloud {
+card card {
+artifact artifact {
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+@enduml
+</textarea>
+        <div id="out29029a68c014361fcc8e4d2f85dd4b0a">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="748" height="1017" class="scale"
+              src="/imgw/img-29029a68c014361fcc8e4d2f85dd4b0a.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <center>
+        <div class="tago">WARNING</div> <b>This translation need to be updated.</b> <div class="tago">WARNING</div>
+      </center>
+      <a style="position:relative;top:-38px;" name="effdb9ce6c5d44df"></a>
+      <!--heading-->
+      <h2 class="chap">别名 </h2>
+      <p></p>
+      <h3>简单的别名有<code class="cod">as</code></h3>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+node Node1 as n1
+node &#34;Node 2&#34; as n2
+file f1 as &#34;File 1&#34;
+cloud c1 as &#34;this
+is
+a
+cloud&#34;
+cloud c2 [this
+is
+another
+cloud]
+
+n1 -&gt; n2
+n1 --&gt; f1
+f1 -&gt; c1
+c1 -&gt; c2
+@enduml
+</textarea>
+        <div id="outfe834748069decfc6eae629b7826ea0a">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="310" height="236" class="scale"
+              src="/imgw/img-fe834748069decfc6eae629b7826ea0a.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>长别名的例子</h3>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+actor        &#34;actor&#34;       as actorVeryLOOOOOOOOOOOOOOOOOOOg
+agent        &#34;agent&#34;       as agentVeryLOOOOOOOOOOOOOOOOOOOg
+artifact     &#34;artifact&#34;    as artifactVeryLOOOOOOOOOOOOOOOOOOOg
+boundary     &#34;boundary&#34;    as boundaryVeryLOOOOOOOOOOOOOOOOOOOg
+card         &#34;card&#34;        as cardVeryLOOOOOOOOOOOOOOOOOOOg
+cloud        &#34;cloud&#34;       as cloudVeryLOOOOOOOOOOOOOOOOOOOg
+collections  &#34;collections&#34; as collectionsVeryLOOOOOOOOOOOOOOOOOOOg
+component    &#34;component&#34;   as componentVeryLOOOOOOOOOOOOOOOOOOOg
+control      &#34;control&#34;     as controlVeryLOOOOOOOOOOOOOOOOOOOg
+database     &#34;database&#34;    as databaseVeryLOOOOOOOOOOOOOOOOOOOg
+entity       &#34;entity&#34;      as entityVeryLOOOOOOOOOOOOOOOOOOOg
+file         &#34;file&#34;        as fileVeryLOOOOOOOOOOOOOOOOOOOg
+folder       &#34;folder&#34;      as folderVeryLOOOOOOOOOOOOOOOOOOOg
+frame        &#34;frame&#34;       as frameVeryLOOOOOOOOOOOOOOOOOOOg
+hexagon      &#34;hexagon&#34;     as hexagonVeryLOOOOOOOOOOOOOOOOOOOg
+interface    &#34;interface&#34;   as interfaceVeryLOOOOOOOOOOOOOOOOOOOg
+label        &#34;label&#34;       as labelVeryLOOOOOOOOOOOOOOOOOOOg
+node         &#34;node&#34;        as nodeVeryLOOOOOOOOOOOOOOOOOOOg
+package      &#34;package&#34;     as packageVeryLOOOOOOOOOOOOOOOOOOOg
+person       &#34;person&#34;      as personVeryLOOOOOOOOOOOOOOOOOOOg
+queue        &#34;queue&#34;       as queueVeryLOOOOOOOOOOOOOOOOOOOg
+stack        &#34;stack&#34;       as stackVeryLOOOOOOOOOOOOOOOOOOOg
+rectangle    &#34;rectangle&#34;   as rectangleVeryLOOOOOOOOOOOOOOOOOOOg
+storage      &#34;storage&#34;     as storageVeryLOOOOOOOOOOOOOOOOOOOg
+usecase      &#34;usecase&#34;     as usecaseVeryLOOOOOOOOOOOOOOOOOOOg
+@enduml
+</textarea>
+        <div id="outb420659c197d56911c52d07472369098">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="763" height="541" class="scale"
+              src="/imgw/img-b420659c197d56911c52d07472369098.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+actor       actorVeryLOOOOOOOOOOOOOOOOOOOg       as &#34;actor&#34;
+agent       agentVeryLOOOOOOOOOOOOOOOOOOOg       as &#34;agent&#34;
+artifact    artifactVeryLOOOOOOOOOOOOOOOOOOOg    as &#34;artifact&#34;
+boundary    boundaryVeryLOOOOOOOOOOOOOOOOOOOg    as &#34;boundary&#34;
+card        cardVeryLOOOOOOOOOOOOOOOOOOOg        as &#34;card&#34;
+cloud       cloudVeryLOOOOOOOOOOOOOOOOOOOg       as &#34;cloud&#34;
+collections collectionsVeryLOOOOOOOOOOOOOOOOOOOg as &#34;collections&#34;
+component   componentVeryLOOOOOOOOOOOOOOOOOOOg   as &#34;component&#34;
+control     controlVeryLOOOOOOOOOOOOOOOOOOOg     as &#34;control&#34;
+database    databaseVeryLOOOOOOOOOOOOOOOOOOOg    as &#34;database&#34;
+entity      entityVeryLOOOOOOOOOOOOOOOOOOOg      as &#34;entity&#34;
+file        fileVeryLOOOOOOOOOOOOOOOOOOOg        as &#34;file&#34;
+folder      folderVeryLOOOOOOOOOOOOOOOOOOOg      as &#34;folder&#34;
+frame       frameVeryLOOOOOOOOOOOOOOOOOOOg       as &#34;frame&#34;
+hexagon     hexagonVeryLOOOOOOOOOOOOOOOOOOOg     as &#34;hexagon&#34;
+interface   interfaceVeryLOOOOOOOOOOOOOOOOOOOg   as &#34;interface&#34;
+label       labelVeryLOOOOOOOOOOOOOOOOOOOg       as &#34;label&#34;
+node        nodeVeryLOOOOOOOOOOOOOOOOOOOg        as &#34;node&#34;
+package     packageVeryLOOOOOOOOOOOOOOOOOOOg     as &#34;package&#34;
+person      personVeryLOOOOOOOOOOOOOOOOOOOg      as &#34;person&#34;
+queue       queueVeryLOOOOOOOOOOOOOOOOOOOg       as &#34;queue&#34;
+stack       stackVeryLOOOOOOOOOOOOOOOOOOOg       as &#34;stack&#34;
+rectangle   rectangleVeryLOOOOOOOOOOOOOOOOOOOg   as &#34;rectangle&#34;
+storage     storageVeryLOOOOOOOOOOOOOOOOOOOg     as &#34;storage&#34;
+usecase     usecaseVeryLOOOOOOOOOOOOOOOOOOOg     as &#34;usecase&#34;
+@enduml
+</textarea>
+        <div id="out5d63f9331aee6f84348a553ecd803186">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="763" height="541" class="scale"
+              src="/imgw/img-5d63f9331aee6f84348a553ecd803186.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[参考资料：<a href="https://forum.plantuml.net/12082">QA-12082</a>]</em>
+      <a style="position:relative;top:-38px;" name="d6ace33a51767250"></a>
+      <!--heading-->
+      <h2 class="chap">圆角</h2>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+skinparam rectangle {
+    roundCorner&lt;&lt;Concept&gt;&gt; 25
+}
+
+rectangle &#34;事件系统&#34; &lt;&lt;Concept&gt;&gt; {
+rectangle &#34;Example 1&#34; &lt;&lt;Concept&gt;&gt; as ex1
+rectangle &#34;Another rectangle&#34;
+}
+@enduml
+</textarea>
+        <div id="oute1842a6f89ed067734ee99ac3b2635fb">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="309" height="145" class="scale"
+              src="/imgw/img-e1842a6f89ed067734ee99ac3b2635fb.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="75b4984abd04b14f"></a>
+      <!--heading-->
+      <h2 class="chap">特定的SkinParameter</h2>
+      <p></p>
+      <h3>圆角 </h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+skinparam roundCorner 15
+actor actor
+agent agent
+artifact artifact
+boundary boundary
+card card
+circle circle
+cloud cloud
+collections collections
+component component
+control control
+database database
+entity entity
+file file
+folder folder
+frame frame
+hexagon hexagon
+interface interface
+label label
+node node
+package package
+person person
+queue queue
+rectangle rectangle
+stack stack
+storage storage
+usecase usecase
+@enduml
+</textarea>
+        <div id="outb0161188c48b9d8373ad242c65d91a9f">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="658" height="542" class="scale"
+              src="/imgw/img-b0161188c48b9d8373ad242c65d91a9f.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[参考<a href="https://forum.plantuml.net/5299">QA-5299</a>,<a
+          href="https://forum.plantuml.net/6915">QA-6915</a>,<a href="https://forum.plantuml.net/11943">QA-11943</a>]
+        。</em>
+      <a style="position:relative;top:-38px;" name="85f50efefa90c284"></a>
+      <!--heading-->
+      <h2 class="chap">附录。所有类型的箭线</h2>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+left to right direction
+skinparam nodesep 5
+
+f3  ~~  b3  : &#34;&#34;~~&#34;&#34;\n//dotted//
+f2  ..  b2  : &#34;&#34;..&#34;&#34;\n//dashed//
+f1  ==  b1  : &#34;&#34;==&#34;&#34;\n//bold//
+f0  --  b0  : &#34;&#34;--&#34;&#34;\n//plain//
+@enduml
+</textarea>
+        <div id="out07786f706d5277e49740915ec9c61f43">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="193" height="284" class="scale"
+              src="/imgw/img-07786f706d5277e49740915ec9c61f43.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="e281b137af34842a"></a>
+      <!--heading-->
+      <h2 class="chap">附录。所有类型的箭头或 &#34;0 &#34;箭头</h2>
+      <p></p>
+      <h3>箭头类型</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+left to right direction
+skinparam nodesep 5
+
+f13 --0   b13 : &#34;&#34;--0&#34;&#34;
+f12 --@   b12 : &#34;&#34;--@&#34;&#34;
+f11 --:|&gt; b11 : &#34;&#34;--:|&gt;&#34;&#34;
+f10 --||&gt; b10 : &#34;&#34;--||&gt;&#34;&#34;
+f9  --|&gt;  b9  : &#34;&#34;--|&gt;&#34;&#34;
+f8  --^   b8  : &#34;&#34;--^ &#34;&#34;
+f7  --\\  b7  : &#34;&#34;--\\\\&#34;&#34;
+f6  --#   b6  : &#34;&#34;--# &#34;&#34;
+f5  --+   b5  : &#34;&#34;--+ &#34;&#34;
+f4  --o   b4  : &#34;&#34;--o &#34;&#34;
+f3  --*   b3  : &#34;&#34;--* &#34;&#34;
+f2  --&gt;&gt;  b2  : &#34;&#34;--&gt;&gt;&#34;&#34;
+f1  --&gt;   b1  : &#34;&#34;--&gt; &#34;&#34;
+f0  --    b0  : &#34;&#34;--  &#34;&#34;
+@enduml
+</textarea>
+        <div id="out7527cb2667011160f58e8556b92131f8">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="212" height="758" class="scale"
+              src="/imgw/img-7527cb2667011160f58e8556b92131f8.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>0 &#34;箭头或圆形箭头的类型</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+left to right direction
+skinparam nodesep 5
+
+f10 0--0 b10 : &#34;&#34; 0--0 &#34;&#34;
+f9 )--(  b9  : &#34;&#34; )--( &#34;&#34;
+f8 0)--(0 b8 : &#34;&#34; 0)--(0&#34;&#34;
+f7 0)--  b7  : &#34;&#34; 0)-- &#34;&#34;
+f6 -0)-  b6  : &#34;&#34; -0)- &#34;&#34;
+f5 -(0)- b5  : &#34;&#34; -(0)-&#34;&#34;
+f4 -(0-  b4  : &#34;&#34; -(0- &#34;&#34;
+f3 --(0  b3  : &#34;&#34; --(0 &#34;&#34;
+f2 --(   b2  : &#34;&#34; --(  &#34;&#34;
+f1 --0   b1  : &#34;&#34; --0  &#34;&#34;
+@enduml
+</textarea>
+        <div id="out6ec58d60ee709834ab4ec575c7720888">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="231" height="546" class="scale"
+              src="/imgw/img-6ec58d60ee709834ab4ec575c7720888.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <center>
+        <div class="tago">WARNING</div> <b>This translation need to be updated.</b> <div class="tago">WARNING</div>
+      </center>
+      <a style="position:relative;top:-38px;" name="a1f5e07fd64da2cc"></a>
+      <!--heading-->
+      <h2 class="chap">附录。测试所有元素的内联样式</h2>
+      <p></p>
+      <h3>简单元素</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+actor actor             #aliceblue;line:blue;line.dotted;text:blue
+actor/ &#34;actor/&#34;         #aliceblue;line:blue;line.dotted;text:blue
+agent agent             #aliceblue;line:blue;line.dotted;text:blue
+artifact artifact       #aliceblue;line:blue;line.dotted;text:blue
+boundary boundary       #aliceblue;line:blue;line.dotted;text:blue
+card card               #aliceblue;line:blue;line.dotted;text:blue
+circle circle           #aliceblue;line:blue;line.dotted;text:blue
+cloud cloud             #aliceblue;line:blue;line.dotted;text:blue
+collections collections #aliceblue;line:blue;line.dotted;text:blue
+component component     #aliceblue;line:blue;line.dotted;text:blue
+control control         #aliceblue;line:blue;line.dotted;text:blue
+database database       #aliceblue;line:blue;line.dotted;text:blue
+entity entity           #aliceblue;line:blue;line.dotted;text:blue
+file file               #aliceblue;line:blue;line.dotted;text:blue
+folder folder           #aliceblue;line:blue;line.dotted;text:blue
+frame frame             #aliceblue;line:blue;line.dotted;text:blue
+hexagon hexagon         #aliceblue;line:blue;line.dotted;text:blue
+interface interface     #aliceblue;line:blue;line.dotted;text:blue
+label label             #aliceblue;line:blue;line.dotted;text:blue
+node node               #aliceblue;line:blue;line.dotted;text:blue
+package package         #aliceblue;line:blue;line.dotted;text:blue
+person person           #aliceblue;line:blue;line.dotted;text:blue
+queue queue             #aliceblue;line:blue;line.dotted;text:blue
+rectangle rectangle     #aliceblue;line:blue;line.dotted;text:blue
+stack stack             #aliceblue;line:blue;line.dotted;text:blue
+storage storage         #aliceblue;line:blue;line.dotted;text:blue
+usecase usecase         #aliceblue;line:blue;line.dotted;text:blue
+usecase/ &#34;usecase/&#34;     #aliceblue;line:blue;line.dotted;text:blue
+@enduml
+</textarea>
+        <div id="out4f3716b3ec3c4862329aede51383f3fe">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="651" height="553" class="scale"
+              src="/imgw/img-4f3716b3ec3c4862329aede51383f3fe.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>嵌套元素</h3>
+      <p></p>
+      <h4>没有子元素</h4>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+artifact artifact #aliceblue;line:blue;line.dotted;text:blue {
+}
+card card #aliceblue;line:blue;line.dotted;text:blue {
+}
+cloud cloud #aliceblue;line:blue;line.dotted;text:blue {
+}
+component component #aliceblue;line:blue;line.dotted;text:blue {
+}
+database database #aliceblue;line:blue;line.dotted;text:blue {
+}
+file file #aliceblue;line:blue;line.dotted;text:blue {
+}
+folder folder #aliceblue;line:blue;line.dotted;text:blue {
+}
+frame frame #aliceblue;line:blue;line.dotted;text:blue {
+}
+hexagon hexagon #aliceblue;line:blue;line.dotted;text:blue {
+}
+node node #aliceblue;line:blue;line.dotted;text:blue {
+}
+package package #aliceblue;line:blue;line.dotted;text:blue {
+}
+queue queue #aliceblue;line:blue;line.dotted;text:blue {
+}
+rectangle rectangle #aliceblue;line:blue;line.dotted;text:blue {
+}
+stack stack #aliceblue;line:blue;line.dotted;text:blue {
+}
+storage storage #aliceblue;line:blue;line.dotted;text:blue {
+}
+@enduml
+</textarea>
+        <div id="out43fd9728904b014157ae2d5459bd44dc">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="1607" height="81" class="scale"
+              src="/imgw/img-43fd9728904b014157ae2d5459bd44dc.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <h4>有子元素</h4>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+artifact    artifactVeryLOOOOOOOOOOOOOOOOOOOg    as &#34;artifact&#34; #aliceblue;line:blue;line.dotted;text:blue {
+file f1
+}
+card        cardVeryLOOOOOOOOOOOOOOOOOOOg        as &#34;card&#34; #aliceblue;line:blue;line.dotted;text:blue {
+file f2
+}
+cloud       cloudVeryLOOOOOOOOOOOOOOOOOOOg       as &#34;cloud&#34; #aliceblue;line:blue;line.dotted;text:blue {
+file f3
+}
+component   componentVeryLOOOOOOOOOOOOOOOOOOOg   as &#34;component&#34; #aliceblue;line:blue;line.dotted;text:blue {
+file f4
+}
+database    databaseVeryLOOOOOOOOOOOOOOOOOOOg    as &#34;database&#34; #aliceblue;line:blue;line.dotted;text:blue {
+file f5
+}
+file        fileVeryLOOOOOOOOOOOOOOOOOOOg        as &#34;file&#34; #aliceblue;line:blue;line.dotted;text:blue {
+file f6
+}
+folder      folderVeryLOOOOOOOOOOOOOOOOOOOg      as &#34;folder&#34; #aliceblue;line:blue;line.dotted;text:blue {
+file f7
+}
+frame       frameVeryLOOOOOOOOOOOOOOOOOOOg       as &#34;frame&#34; #aliceblue;line:blue;line.dotted;text:blue {
+file f8
+}
+hexagon     hexagonVeryLOOOOOOOOOOOOOOOOOOOg     as &#34;hexagon&#34; #aliceblue;line:blue;line.dotted;text:blue {
+file f9
+}
+node        nodeVeryLOOOOOOOOOOOOOOOOOOOg        as &#34;node&#34; #aliceblue;line:blue;line.dotted;text:blue {
+file f10
+}
+package     packageVeryLOOOOOOOOOOOOOOOOOOOg     as &#34;package&#34; #aliceblue;line:blue;line.dotted;text:blue {
+file f11
+}
+queue       queueVeryLOOOOOOOOOOOOOOOOOOOg       as &#34;queue&#34; #aliceblue;line:blue;line.dotted;text:blue {
+file f12
+}
+rectangle   rectangleVeryLOOOOOOOOOOOOOOOOOOOg   as &#34;rectangle&#34; #aliceblue;line:blue;line.dotted;text:blue {
+file f13
+}
+stack       stackVeryLOOOOOOOOOOOOOOOOOOOg       as &#34;stack&#34; #aliceblue;line:blue;line.dotted;text:blue {
+file f14
+}
+storage     storageVeryLOOOOOOOOOOOOOOOOOOOg     as &#34;storage&#34; #aliceblue;line:blue;line.dotted;text:blue {
+file f15
+}
+@enduml
+</textarea>
+        <div id="outfa3951abb4a567e211dd04716da81c5a">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="1455" height="135" class="scale"
+              src="/imgw/img-fa3951abb4a567e211dd04716da81c5a.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <center>
+        <div class="tago">WARNING</div> <b>This translation need to be updated.</b> <div class="tago">WARNING</div>
+      </center>
+      <a style="position:relative;top:-38px;" name="b3234841348a68e0"></a>
+      <!--heading-->
+      <h2 class="chap">附录。对所有元素的风格测试</h2>
+      <p></p>
+      <h3>简单元素</h3>
+      <h4>全局风格（在ComponentDiagram上）。</h4>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+&lt;style&gt;
+componentDiagram {
+  BackGroundColor palegreen
+  LineThickness 1
+  LineColor red
+}
+document {
+  BackGroundColor white
+}
+&lt;/style&gt;
+actor actor
+actor/ &#34;actor/&#34;
+agent agent
+artifact artifact
+boundary boundary
+card card
+circle circle
+cloud cloud
+collections collections
+component component
+control control
+database database
+entity entity
+file file
+folder folder
+frame frame
+hexagon hexagon
+interface interface
+label label
+node node
+package package
+person person
+queue queue
+rectangle rectangle
+stack stack
+storage storage
+usecase usecase
+usecase/ &#34;usecase/&#34;
+@enduml
+</textarea>
+        <div id="out78c7550383c8b5b8b5734e4c89a72da8">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="651" height="553" class="scale"
+              src="/imgw/img-78c7550383c8b5b8b5734e4c89a72da8.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h4>每个元素的风格</h4>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+&lt;style&gt;
+actor {
+  BackGroundColor #f80c12
+  LineThickness 1
+  LineColor black
+}
+agent {
+  BackGroundColor #f80c12
+  LineThickness 1
+  LineColor black
+}
+artifact {
+  BackGroundColor #ee1100
+  LineThickness 1
+  LineColor black
+}
+boundary {
+  BackGroundColor #ee1100
+  LineThickness 1
+  LineColor black
+}
+card {
+  BackGroundColor #ff3311
+  LineThickness 1
+  LineColor black
+}
+circle {
+  BackGroundColor #ff3311
+  LineThickness 1
+  LineColor black
+}
+cloud {
+  BackGroundColor #ff4422
+  LineThickness 1
+  LineColor black
+}
+collections {
+  BackGroundColor #ff4422
+  LineThickness 1
+  LineColor black
+}
+component {
+  BackGroundColor #ff6644
+  LineThickness 1
+  LineColor black
+}
+control {
+  BackGroundColor #ff6644
+  LineThickness 1
+  LineColor black
+}
+database {
+  BackGroundColor #ff9933
+  LineThickness 1
+  LineColor black
+}
+entity {
+  BackGroundColor #feae2d
+  LineThickness 1
+  LineColor black
+}
+file {
+  BackGroundColor #feae2d
+  LineThickness 1
+  LineColor black
+}
+folder {
+  BackGroundColor #ccbb33
+  LineThickness 1
+  LineColor black
+}
+frame {
+  BackGroundColor #d0c310
+  LineThickness 1
+  LineColor black
+}
+hexagon {
+  BackGroundColor #aacc22
+  LineThickness 1
+  LineColor black
+}
+interface {
+  BackGroundColor #69d025
+  LineThickness 1
+  LineColor black
+}
+label {
+  BackGroundColor black
+  LineThickness 1
+  LineColor black
+}
+node {
+  BackGroundColor #22ccaa
+  LineThickness 1
+  LineColor black
+}
+package {
+  BackGroundColor #12bdb9
+  LineThickness 1
+  LineColor black
+}
+person {
+  BackGroundColor #11aabb
+  LineThickness 1
+  LineColor black
+}
+queue {
+  BackGroundColor #11aabb
+  LineThickness 1
+  LineColor black
+}
+rectangle {
+  BackGroundColor #4444dd
+  LineThickness 1
+  LineColor black
+}
+stack {
+  BackGroundColor #3311bb
+  LineThickness 1
+  LineColor black
+}
+storage {
+  BackGroundColor #3b0cbd
+  LineThickness 1
+  LineColor black
+}
+usecase {
+  BackGroundColor #442299
+  LineThickness 1
+  LineColor black
+}
+&lt;/style&gt;
+actor actor
+actor/ &#34;actor/&#34;
+agent agent
+artifact artifact
+boundary boundary
+card card
+circle circle
+cloud cloud
+collections collections
+component component
+control control
+database database
+entity entity
+file file
+folder folder
+frame frame
+hexagon hexagon
+interface interface
+label label
+node node
+package package
+person person
+queue queue
+rectangle rectangle
+stack stack
+storage storage
+usecase usecase
+usecase/ &#34;usecase/&#34;
+@enduml
+</textarea>
+        <div id="out559977525858e1c7cb15e8cf066c6a33">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="651" height="553" class="scale"
+              src="/imgw/img-559977525858e1c7cb15e8cf066c6a33.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[参考<a href="https://forum.plantuml.net/13261/">QA-13261</a>]</em>
+      <p></p>
+      <h3>嵌套元素(无级别)</h3>
+      <h4>全局风格（在组件图上）。</h4>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+&lt;style&gt;
+componentDiagram {
+  BackGroundColor palegreen
+  LineThickness 2
+  LineColor red
+}
+&lt;/style&gt;
+artifact artifact {
+}
+card card {
+}
+cloud cloud {
+}
+component component {
+}
+database database {
+}
+file file {
+}
+folder folder {
+}
+frame frame {
+}
+hexagon hexagon {
+}
+node node {
+}
+package package {
+}
+queue queue {
+}
+rectangle rectangle {
+}
+stack stack {
+}
+storage storage {
+}
+@enduml
+</textarea>
+        <div id="out35b0a9bcb461781c9dd5969707ee0fb3">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="1607" height="81" class="scale"
+              src="/imgw/img-35b0a9bcb461781c9dd5969707ee0fb3.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h4>每个嵌套元素的样式</h4>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+&lt;style&gt;
+artifact {
+  BackGroundColor #ee1100
+  LineThickness 1
+  LineColor black
+}
+card {
+  BackGroundColor #ff3311
+  LineThickness 1
+  LineColor black
+}
+cloud {
+  BackGroundColor #ff4422
+  LineThickness 1
+  LineColor black
+}
+component {
+  BackGroundColor #ff6644
+  LineThickness 1
+  LineColor black
+}
+database {
+  BackGroundColor #ff9933
+  LineThickness 1
+  LineColor black
+}
+file {
+  BackGroundColor #feae2d
+  LineThickness 1
+  LineColor black
+}
+folder {
+  BackGroundColor #ccbb33
+  LineThickness 1
+  LineColor black
+}
+frame {
+  BackGroundColor #d0c310
+  LineThickness 1
+  LineColor black
+}
+hexagon {
+  BackGroundColor #aacc22
+  LineThickness 1
+  LineColor black
+}
+node {
+  BackGroundColor #22ccaa
+  LineThickness 1
+  LineColor black
+}
+package {
+  BackGroundColor #12bdb9
+  LineThickness 1
+  LineColor black
+}
+queue {
+  BackGroundColor #11aabb
+  LineThickness 1
+  LineColor black
+}
+rectangle {
+  BackGroundColor #4444dd
+  LineThickness 1
+  LineColor black
+}
+stack {
+  BackGroundColor #3311bb
+  LineThickness 1
+  LineColor black
+}
+storage {
+  BackGroundColor #3b0cbd
+  LineThickness 1
+  LineColor black
+}
+
+&lt;/style&gt;
+artifact artifact {
+}
+card card {
+}
+cloud cloud {
+}
+component component {
+}
+database database {
+}
+file file {
+}
+folder folder {
+}
+frame frame {
+}
+hexagon hexagon {
+}
+node node {
+}
+package package {
+}
+queue queue {
+}
+rectangle rectangle {
+}
+stack stack {
+}
+storage storage {
+}
+@enduml
+</textarea>
+        <div id="out6208a7b1f5afa7c869941b368eda856a">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="1607" height="81" class="scale"
+              src="/imgw/img-6208a7b1f5afa7c869941b368eda856a.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>嵌套元素（有一个层次）</h3>
+      <h4>全局风格（在组件图上）。</h4>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+&lt;style&gt;
+componentDiagram {
+  BackGroundColor palegreen
+  LineThickness 1
+  LineColor red
+}
+document {
+  BackGroundColor white
+}
+&lt;/style&gt;
+artifact e1 as &#34;artifact&#34; {
+file f1
+}
+card e2 as &#34;card&#34; {
+file f2
+}
+cloud e3 as &#34;cloud&#34; {
+file f3
+}
+component e4 as &#34;component&#34; {
+file f4
+}
+database e5 as &#34;database&#34; {
+file f5
+}
+file e6 as &#34;file&#34; {
+file f6
+}
+folder e7 as &#34;folder&#34; {
+file f7
+}
+frame e8 as &#34;frame&#34; {
+file f8
+}
+hexagon e9 as &#34;hexagon&#34; {
+file f9
+}
+node e10 as &#34;node&#34; {
+file f10
+}
+package e11 as &#34;package&#34; {
+file f11
+}
+queue e12 as &#34;queue&#34; {
+file f12
+}
+rectangle e13 as &#34;rectangle&#34; {
+file f13
+}
+stack e14 as &#34;stack&#34; {
+file f14
+}
+storage e15 as &#34;storage&#34; {
+file f15
+}
+@enduml
+</textarea>
+        <div id="out892c8fb5bfe9b513a1812c08bf7cfe6a">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="1455" height="135" class="scale"
+              src="/imgw/img-892c8fb5bfe9b513a1812c08bf7cfe6a.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h4>每个嵌套元素的样式</h4>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+&lt;style&gt;
+artifact {
+  BackGroundColor #ee1100
+  LineThickness 1
+  LineColor black
+}
+card {
+  BackGroundColor #ff3311
+  LineThickness 1
+  LineColor black
+}
+cloud {
+  BackGroundColor #ff4422
+  LineThickness 1
+  LineColor black
+}
+component {
+  BackGroundColor #ff6644
+  LineThickness 1
+  LineColor black
+}
+database {
+  BackGroundColor #ff9933
+  LineThickness 1
+  LineColor black
+}
+file {
+  BackGroundColor #feae2d
+  LineThickness 1
+  LineColor black
+}
+folder {
+  BackGroundColor #ccbb33
+  LineThickness 1
+  LineColor black
+}
+frame {
+  BackGroundColor #d0c310
+  LineThickness 1
+  LineColor black
+}
+hexagon {
+  BackGroundColor #aacc22
+  LineThickness 1
+  LineColor black
+}
+node {
+  BackGroundColor #22ccaa
+  LineThickness 1
+  LineColor black
+}
+package {
+  BackGroundColor #12bdb9
+  LineThickness 1
+  LineColor black
+}
+queue {
+  BackGroundColor #11aabb
+  LineThickness 1
+  LineColor black
+}
+rectangle {
+  BackGroundColor #4444dd
+  LineThickness 1
+  LineColor black
+}
+stack {
+  BackGroundColor #3311bb
+  LineThickness 1
+  LineColor black
+}
+storage {
+  BackGroundColor #3b0cbd
+  LineThickness 1
+  LineColor black
+}
+&lt;/style&gt;
+artifact e1 as &#34;artifact&#34; {
+file f1
+}
+card e2 as &#34;card&#34; {
+file f2
+}
+cloud e3 as &#34;cloud&#34; {
+file f3
+}
+component e4 as &#34;component&#34; {
+file f4
+}
+database e5 as &#34;database&#34; {
+file f5
+}
+file e6 as &#34;file&#34; {
+file f6
+}
+folder e7 as &#34;folder&#34; {
+file f7
+}
+frame e8 as &#34;frame&#34; {
+file f8
+}
+hexagon e9 as &#34;hexagon&#34; {
+file f9
+}
+node e10 as &#34;node&#34; {
+file f10
+}
+package e11 as &#34;package&#34; {
+file f11
+}
+queue e12 as &#34;queue&#34; {
+file f12
+}
+rectangle e13 as &#34;rectangle&#34; {
+file f13
+}
+stack e14 as &#34;stack&#34; {
+file f14
+}
+storage e15 as &#34;storage&#34; {
+file f15
+}
+@enduml
+</textarea>
+        <div id="out811d030d549e24c14ee7e09d1e70858e">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="1455" height="135" class="scale"
+              src="/imgw/img-811d030d549e24c14ee7e09d1e70858e.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="a2583a8e681fd647"></a>
+      <!--heading-->
+      <h2 class="chap">附录。在所有元素上用风格测试定型</h2>
+      <p></p>
+      <h3>简单元素</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+&lt;style&gt;
+.stereo {
+  BackgroundColor palegreen
+}
+&lt;/style&gt;
+actor actor &lt;&lt; stereo &gt;&gt;
+actor/ &#34;actor/&#34; &lt;&lt; stereo &gt;&gt;
+agent agent &lt;&lt; stereo &gt;&gt;
+artifact artifact &lt;&lt; stereo &gt;&gt;
+boundary boundary &lt;&lt; stereo &gt;&gt;
+card card &lt;&lt; stereo &gt;&gt;
+circle circle &lt;&lt; stereo &gt;&gt;
+cloud cloud &lt;&lt; stereo &gt;&gt;
+collections collections &lt;&lt; stereo &gt;&gt;
+component component &lt;&lt; stereo &gt;&gt;
+control control &lt;&lt; stereo &gt;&gt;
+database database &lt;&lt; stereo &gt;&gt;
+entity entity &lt;&lt; stereo &gt;&gt;
+file file &lt;&lt; stereo &gt;&gt;
+folder folder &lt;&lt; stereo &gt;&gt;
+frame frame &lt;&lt; stereo &gt;&gt;
+hexagon hexagon &lt;&lt; stereo &gt;&gt;
+interface interface &lt;&lt; stereo &gt;&gt;
+label label &lt;&lt; stereo &gt;&gt;
+node node &lt;&lt; stereo &gt;&gt;
+package package &lt;&lt; stereo &gt;&gt;
+person person &lt;&lt; stereo &gt;&gt;
+queue queue &lt;&lt; stereo &gt;&gt;
+rectangle rectangle &lt;&lt; stereo &gt;&gt;
+stack stack &lt;&lt; stereo &gt;&gt;
+storage storage &lt;&lt; stereo &gt;&gt;
+usecase usecase &lt;&lt; stereo &gt;&gt;
+usecase/ &#34;usecase/&#34; &lt;&lt; stereo &gt;&gt;
+@enduml
+</textarea>
+        <div id="out7c6fe27df9e2399f7c19ddd5caa46d4c">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="712" height="635" class="scale"
+              src="/imgw/img-7c6fe27df9e2399f7c19ddd5caa46d4c.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="770d6bd35757f49a"></a>
+      <!--heading-->
+      <h2 class="chap">Display JSON Data on Deployment diagram</h2>
+      <p></p>
+      <h3>Simple example</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+allowmixing
+
+component Component
+actor     Actor
+usecase   Usecase
+()        Interface
+node      Node
+cloud     Cloud
+
+json JSON {
+   &#34;fruit&#34;:&#34;Apple&#34;,
+   &#34;size&#34;:&#34;Large&#34;,
+   &#34;color&#34;: [&#34;Red&#34;, &#34;Green&#34;]
+}
+@enduml
+</textarea>
+        <div id="out87b2d68589866ae4b4bd55103ec8f150">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="331" height="389" class="scale"
+              src="/imgw/img-87b2d68589866ae4b4bd55103ec8f150.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a
+          href="https://forum.plantuml.net/15481/possible-link-elements-from-two-jsons-with-both-jsons-embeded?show=15567#c15567">QA-15481</a>]</em>
+      <p></p>
+      For another example, see on <a href="json#2fyxla9p9ob6l3t3tjre">JSON page</a>.
+      <a style="position:relative;top:-38px;" name="e75c1203eb5d242a"></a>
+      <!--heading-->
+      <h2 class="chap">Mixing Deployment (Usecase, Component, Deployment) element within a Class or Object diagram</h2>
+      <p></p>
+      In order to add a Deployment element or a State element within a Class or Object diagram, you can use the <code
+        class="cod">allowmixing</code> or <code class="cod">allow_mixing</code> directive.
+      <p></p>
+      <h3>Mixing all elements</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+allowmixing
+skinparam nodesep 10
+hide empty members
+
+abstract        abstract
+abstract class  &#34;abstract class&#34;
+annotation      annotation
+circle          circle
+()              circle_short_form
+class           class
+class           class_stereo  &lt;&lt;stereotype&gt;&gt;
+dataclass       dataclass
+diamond         diamond
+&lt;&gt;              diamond_short_form
+entity          entity
+enum            enum
+exception       exception
+interface       interface
+metaclass       metaclass
+protocol        protocol
+record          record
+stereotype      stereotype
+struct          struct
+object          object
+map map {
+ key =&gt; value
+}
+json JSON {
+   &#34;fruit&#34;:&#34;Apple&#34;,
+   &#34;size&#34;:&#34;Large&#34;,
+   &#34;color&#34;: [&#34;Red&#34;, &#34;Green&#34;]
+}
+action action
+actor actor
+actor/ &#34;actor/&#34;
+agent agent
+artifact artifact
+boundary boundary
+card card
+circle circle
+cloud cloud
+collections collections
+component component
+control control
+database database
+entity entity
+file file
+folder folder
+frame frame
+hexagon hexagon
+interface interface
+label label
+node node
+package package
+person person
+process process
+queue queue
+rectangle rectangle
+stack stack
+storage storage
+usecase usecase
+usecase/ &#34;usecase/&#34;
+state state
+@enduml
+</textarea>
+        <div id="outfbb11e771c135cffbe356eac5d24db37">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="842" height="821" class="scale"
+              src="/imgw/img-fbb11e771c135cffbe356eac5d24db37.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/2335/use-of-actor-inside-class-diagrams">QA-2335</a> and <a
+          href="https://forum.plantuml.net/5329/language-definition">QA-5329</a>]</em>
+      <a style="position:relative;top:-38px;" name="76402ab93d6541bf"></a>
+      <!--heading-->
+      <h2 class="chap">Port [port, portIn, portOut]</h2>
+      <p></p>
+      You can added <strong>port</strong> with <code class="cod">port</code>, <code class="cod">portin</code>and <code
+        class="cod">portout</code> keywords.
+      <p></p>
+      <h3>Port</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+[c]
+node node {
+  port p1
+  port p2
+  port p3
+  file f1
+}
+
+c --&gt; p1
+c --&gt; p2
+c --&gt; p3
+p1 --&gt; f1
+p2 --&gt; f1
+@enduml
+</textarea>
+        <div id="out2bf63287ceeb1084dfc8ea3471104dbd">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="184" height="265" class="scale"
+              src="/imgw/img-2bf63287ceeb1084dfc8ea3471104dbd.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>PortIn</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+[c]
+node node {
+  portin p1
+  portin p2
+  portin p3
+  file f1
+}
+
+c --&gt; p1
+c --&gt; p2
+c --&gt; p3
+p1 --&gt; f1
+p2 --&gt; f1
+@enduml
+</textarea>
+        <div id="outfc5c382fe27c93444a37cea726633a6d">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="184" height="265" class="scale"
+              src="/imgw/img-fc5c382fe27c93444a37cea726633a6d.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>PortOut</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+node node {
+  portout p1
+  portout p2
+  portout p3
+  file f1
+}
+[o]
+p1 --&gt; o
+p2 --&gt; o
+p3 --&gt; o
+f1 --&gt; p1
+@enduml
+</textarea>
+        <div id="out75aff3df83aaff41e13eec15e91fed0d">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="190" height="252" class="scale"
+              src="/imgw/img-75aff3df83aaff41e13eec15e91fed0d.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>Mixing PortIn &amp; PortOut</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+[i]
+node node {
+  portin p1
+  portin p2
+  portin p3
+  portout po1
+  portout po2
+  portout po3
+  file f1
+}
+[o]
+
+i --&gt; p1
+i --&gt; p2
+i --&gt; p3
+p1 --&gt; f1
+p2 --&gt; f1
+po1 --&gt; o
+po2 --&gt; o
+po3 --&gt; o
+f1 --&gt; po1
+@enduml
+</textarea>
+        <div id="out583e263a042917834db3e0b6dcb3daee">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="190" height="417" class="scale"
+              src="/imgw/img-583e263a042917834db3e0b6dcb3daee.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="3530c544ab82f199"></a>
+      <!--heading-->
+      <h2 class="chap">Change diagram orientation</h2>
+      <p></p>
+      You can change (whole) diagram orientation with:
+      <ul>
+        <li><code class="cod">top to bottom direction</code> <em>(by default)</em></li>
+        <li><code class="cod">left to right direction</code></li>
+      </ul>
+      <p></p>
+      <h3>Top to bottom <em>(by default)</em></h3>
+      <p></p>
+      <h4>With <a href="graphviz-dot">Graphviz</a> <em>(layout engine by default)</em></h4>
+      <p></p>
+      The main rule is: <strong>Nested element first, then simple element.</strong>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+card a
+card b
+package A {
+  card a1
+  card a2
+  card a3
+  card a4
+  card a5
+  package sub_a {
+   card sa1
+   card sa2
+   card sa3
+  }
+}
+  
+package B {
+  card b1
+  card b2
+  card b3
+  card b4
+  card b5
+  package sub_b {
+   card sb1
+   card sb2
+   card sb3
+  }
+}
+@enduml
+</textarea>
+        <div id="out1c569e98aa617a6b79151af238050b23">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="931" height="248" class="scale"
+              src="/imgw/img-1c569e98aa617a6b79151af238050b23.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h4>With <a href="smetana02">Smetana</a> <em>(internal layout engine)</em></h4>
+      <p></p>
+      The main rule is the opposite: <strong>Simple element first, then nested element.</strong>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+!pragma layout smetana
+card a
+card b
+package A {
+  card a1
+  card a2
+  card a3
+  card a4
+  card a5
+  package sub_a {
+   card sa1
+   card sa2
+   card sa3
+  }
+}
+  
+package B {
+  card b1
+  card b2
+  card b3
+  card b4
+  card b5
+  package sub_b {
+   card sb1
+   card sb2
+   card sb3
+  }
+}
+@enduml
+</textarea>
+        <div id="out72b51e81cfd8cbf5254ce10e4788bc88">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="695" height="167" class="scale"
+              src="/imgw/img-72b51e81cfd8cbf5254ce10e4788bc88.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>Left to right</h3>
+      <p></p>
+      <h4>With <a href="graphviz-dot">Graphviz</a> <em>(layout engine by default)</em></h4>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+left to right direction
+card a
+card b
+package A {
+  card a1
+  card a2
+  card a3
+  card a4
+  card a5
+  package sub_a {
+   card sa1
+   card sa2
+   card sa3
+  }
+}
+  
+package B {
+  card b1
+  card b2
+  card b3
+  card b4
+  card b5
+  package sub_b {
+   card sb1
+   card sb2
+   card sb3
+  }
+}
+@enduml
+</textarea>
+        <div id="out0434f215501c32cf65ad37d155d79dbb">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="246" height="856" class="scale"
+              src="/imgw/img-0434f215501c32cf65ad37d155d79dbb.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h4>With <a href="smetana02">Smetana</a> <em>(internal layout engine)</em></h4>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+!pragma layout smetana
+left to right direction
+card a
+card b
+package A {
+  card a1
+  card a2
+  card a3
+  card a4
+  card a5
+  package sub_a {
+   card sa1
+   card sa2
+   card sa3
+  }
+}
+  
+package B {
+  card b1
+  card b2
+  card b3
+  card b4
+  card b5
+  package sub_b {
+   card sb1
+   card sb2
+   card sb3
+  }
+}
+@enduml
+</textarea>
+        <div id="out159c470a77d2ac937361821cbddfeee5">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="175" height="607" class="scale"
+              src="/imgw/img-159c470a77d2ac937361821cbddfeee5.png" />
+          </div>
+        </div>
+      </div>
+
+
+    </main>
+
+
+    <aside id="C6">
+      <!--toc-->
+      <div id="toc">
+        <ul>
+          <li><a href="#e5cec68ef9127fc4">声明元素</a>
+          </li>
+          <li><a href="#ccbc4c57abc698a9">声明元素（使用简短的形式）</a>
+          </li>
+          <li><a href="#bb3fdb917676e9ae">链接或箭头</a>
+          </li>
+          <li><a href="#b5f6831632fd63c1">的箭头样式</a>
+          </li>
+          <li><a href="#39a64d49d97a1ea0">改变箭头的颜色和样式（内联式）</a>
+          </li>
+          <li><a href="#ded8ac71cf351121">改变元素的颜色和样式（内联样式）</a>
+          </li>
+          <li><a href="#b2ecd56c45d3d896">可嵌套的元素</a>
+          </li>
+          <li><a href="#f36f2582540e74f1">包和嵌套元素</a>
+          </li>
+          <li><a href="#effdb9ce6c5d44df">别名</a>
+          </li>
+          <li><a href="#d6ace33a51767250">圆角</a>
+          </li>
+          <li><a href="#75b4984abd04b14f">特定的SkinParameter</a>
+          </li>
+          <li><a href="#85f50efefa90c284">附录。所有类型的箭线</a>
+          </li>
+          <li><a href="#e281b137af34842a">附录。所有类型的箭头或 &#34;0 &#34;箭头</a>
+          </li>
+          <li><a href="#a1f5e07fd64da2cc">附录。测试所有元素的内联样式</a>
+          </li>
+          <li><a href="#b3234841348a68e0">附录。对所有元素的风格测试</a>
+          </li>
+          <li><a href="#a2583a8e681fd647">附录。在所有元素上用风格测试定型</a>
+          </li>
+          <li><a href="#770d6bd35757f49a">Display JSON Data on Deployment diagram</a>
+          </li>
+          <li><a href="#e75c1203eb5d242a">Mixing Deployment (Usecase, Component, Deployment) element within a Class or
+              Object diagram</a>
+          </li>
+          <li><a href="#76402ab93d6541bf">Port [port, portIn, portOut]</a>
+          </li>
+          <li><a href="#3530c544ab82f199">Change diagram orientation</a>
+          </li>
+        </ul>
+      </div>
+    </aside>
+
+  </div>
+    <script src="../../viz-global.js"></script>
+    <script src="../../plantuml.js"></script>
+    <script>
+        (function () {
+            const render = window.plantumlRender;
+            if (typeof render !== "function") {
+                console.error("PlantUML renderer is unavailable.");
+                return;
+            }
+
+            const renderOptions = {};
+            let counter = 0;
+
+            document.querySelectorAll(".mycell").forEach((mycell) => {
+                const host = mycell.parentElement;
+                const textarea = host ? host.previousElementSibling : null;
+                if (!textarea || textarea.tagName !== "TEXTAREA") return;
+
+                if (!mycell.id) {
+                    counter += 1;
+                    mycell.id = "mycell-render-" + counter;
+                }
+
+                const draw = () => {
+                    mycell.innerHTML = "";
+                    render(textarea.value.split(/\r\n|\r|\n/), mycell.id, renderOptions);
+                };
+
+                textarea.addEventListener("input", draw);
+                draw();
+            });
+        })();
+    </script>
+</body>
+
+</html>

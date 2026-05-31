@@ -1,0 +1,43 @@
+Title: Usecases description
+Describe: None
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+If you want to have a description spanning several lines, you can use quotes. 
+You can also use the following separators: 
+  - `--` (dashes)
+  - `..` (periods)
+  - `==` (equals)
+  - `__` (underscores)
+
+By using them pairwise and enclosing text between them, you can created separators with titles.
+
+[UML]
+@startuml
+
+usecase UC1 as "You can use
+several lines to define your usecase.
+You can also use separators.
+--
+Several separators are possible.
+==
+And you can add titles:
+..Conclusion..
+This allows large description."
+
+@enduml
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+Please note that the alias and the description are switched around from the basic example:
+
+[UML]
+@startuml
+usecase description1 as alias1
+usecase alias2 as "description2"
+@enduml
+------------------------------------------------------------

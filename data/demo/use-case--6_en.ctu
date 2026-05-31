@@ -1,0 +1,21 @@
+Title: Basic example
+Describe: None
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+To link actors and use cases, the arrow `-->` is used. 
+The more dashes `-` in the arrow, the longer the arrow. You can add a label on the arrow, by adding a `:` character in the arrow definition. 
+In this example, you see that User has not been defined before, and is used as an actor.
+
+[UML]
+@startuml
+
+User -> (Start)
+User --> (Use the application) : A small label
+
+:Main Admin: ---> (Use the application) : This is\nyet another\nlabel
+
+@enduml
+------------------------------------------------------------

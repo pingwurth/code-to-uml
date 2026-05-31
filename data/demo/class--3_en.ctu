@@ -1,0 +1,40 @@
+Title: Label on relations
+Describe: None
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+It is possible to add a label on the relation, using `:` , followed
+by the text of the label.
+For cardinality, you can use double-quotes `""` on each side
+of the relation.
+
+[UML]
+@startuml
+
+Class01 "1" *-- "many" Class02 : contains
+
+Class03 o-- Class04 : aggregation
+
+Class05 --> "1" Class06
+
+@enduml
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+You can add an extra arrow pointing at one object showing
+which object acts on the other object, using `<` or `>` at the begin or at the end of the label.
+
+[UML]
+@startuml
+class Car
+
+Driver - Car : drives >
+Car *- Wheel : have 4 >
+Car -- Person : < owns
+
+@enduml
+------------------------------------------------------------

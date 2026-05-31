@@ -1,0 +1,3746 @@
+<html lang="en">
+
+<head>
+
+
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Organization",
+  "url": "https://plantuml.com",
+  "name": "PlantUML",
+  "sameAs" : ["https://twitter.com/plantuml","https://en.wikipedia.org/wiki/PlantUML","https://www.wikidata.org/wiki/Q18346546"],
+  "logo": "https://cdn-0.plantuml.com/logo3.png",
+  "contactPoint": [{
+    "@type": "ContactPoint",
+    "email": "plantuml@gmail.com",
+    "url": "https://plantuml.com",
+    "contactType": "customer service"
+  }]
+}
+</script>
+  <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+    "@type": "ListItem",
+    "position": 1,
+    "item": {
+      "@id": "https://plantuml.com",
+      "name": "Home"
+    }
+  },{
+    "@type": "ListItem",
+    "position": 2,
+    "item": {
+      "@id": "https://plantuml.com/sitemap-language-specification",
+      "name": "Language specification"
+    }
+  },{
+    "@type": "ListItem",
+    "position": 3,
+    "item": {
+      "@id": "https://plantuml.com/class-diagram",
+      "name": "Class Diagram"
+  }
+  }]
+}
+</script>
+  <link rel="canonical" href="https://plantuml.com/class-diagram" />
+  <link rel="alternate" hreflang="x-default" href="https://plantuml.com/class-diagram" />
+  <link rel="alternate" hreflang="de" href="https://plantuml.com/de/class-diagram" />
+  <link rel="alternate" hreflang="en" href="https://plantuml.com/class-diagram" />
+  <link rel="alternate" hreflang="es" href="https://plantuml.com/es/class-diagram" />
+  <link rel="alternate" hreflang="fr" href="https://plantuml.com/fr/class-diagram" />
+  <link rel="alternate" hreflang="ja" href="https://plantuml.com/ja/class-diagram" />
+  <link rel="alternate" hreflang="ko" href="https://plantuml.com/ko/class-diagram" />
+  <link rel="alternate" hreflang="zh" href="https://plantuml.com/zh/class-diagram" />
+
+  <link rel="shortcut icon" href="/favicon.ico" />
+
+
+  <!-- link rel="preload" as="image" href="https://img.shields.io/liberapay/patrons/plantuml.svg?logo=liberapay" -->
+
+
+  <title>Class Diagram syntax and features</title>
+  <meta name="description"
+    content="PlantUML class diagram syntax: You can define interfaces, members, relationships, packages, generics, notes...  Changing fonts and colors is also possible." />
+
+  <meta property="og:type" content="article" />
+  <!-- volt:dokuwiki titleog: -->
+  <!-- volt:dokuwiki descriptionog: -->
+
+  <meta property="og:url" content="https://plantuml.com/class-diagram" />
+  <meta property="og:site_name" content="PlantUML.com" />
+
+  <!-- meta property="og:image" content="https://plantuml.com/og-class-diagram" -->
+  <meta name="twitter:image" content="https://plantuml.com/og-class-diagram" />
+  <meta property="og:locale" content="en" />
+
+  <meta name="twitter:card" content="summary" />
+  <!-- volt:dokuwiki titletwitter: -->
+  <!-- volt:dokuwiki descriptiontwitter: -->
+  <meta name="twitter:site" content="@PlantUML" />
+  <meta name="twitter:creator" content="@PlantUML" />
+
+  <script>
+    if (window.location.href.indexOf("/en/") == -1) {
+      var lg = navigator.language.substring(0, 2);
+      if (lg == "de") window.location.href = "/de/class-diagram";
+      if (lg == "es") window.location.href = "/es/class-diagram";
+      if (lg == "fr") window.location.href = "/fr/class-diagram";
+      if (lg == "ja") window.location.href = "/ja/class-diagram";
+      if (lg == "ko") window.location.href = "/ko/class-diagram";
+      if (lg == "ru") window.location.href = "/ru/class-diagram";
+      if (lg == "zh") window.location.href = "/zh/class-diagram";
+    }
+  </script>
+
+
+  <!-- https://www.w3schools.com/colors/colors_picker.asp -->
+  <!-- filter css https://codepen.io/sosuke/pen/Pjoqqp -->
+
+
+  <style>
+    .scale {}
+
+    li {
+      margin: 2px;
+    }
+
+    #external li {
+      margin: 13px;
+    }
+
+    @media screen and (max-width: 1190px) {
+    }
+
+
+    .coptable {
+      max-width: 90%;
+    }
+
+    .mytab {
+      display: inline-block;
+      border-radius: 3px;
+      border: 1px solid #e1e4e8;
+    }
+
+    .mytab:hover {
+      border: 1px dashed #0366d6;
+      cursor: pointer;
+      color: #0366d6;
+      background: #f6f8fa;
+    }
+
+    .cop {
+      margin: 25px 10px 0 10px;
+    }
+
+    .cop:hover {
+      cursor: pointer;
+      filter: invert(30%) sepia(75%) saturate(4001%) hue-rotate(201deg) brightness(88%) contrast(98%);
+    }
+
+    .cop2 {
+      margin: 25px 10px 0 10px;
+    }
+
+    .cop2:hover {
+      cursor: pointer;
+    }
+
+    .msg {
+      position: absolute;
+      color: #339966;
+      background-color: #FFF;
+      margin-top: 55px;
+      display: none;
+      border-radius: 3px;
+      border: 1px solid #4dff00;
+    }
+
+    .mycell0 {
+      float: left;
+      vertical-align: top;
+      padding: 10px;
+    }
+
+    .mycell0 code:hover {
+      cursor: default;
+      color: #000;
+    }
+
+    .mycell {
+      float: right;
+      vertical-align: top;
+      padding: 10px;
+      max-width: 55vw;
+      overflow-x: auto;
+    }
+
+    .mycell0 pre {
+      max-width: 55vw;
+      overflow-x: auto;
+    }
+
+    .cod {
+      background: #edeff3;
+      padding: 2px 5px;
+      border-radius: 3px;
+    }
+
+    .colo {
+      display: inline-block;
+      background: #edeff3;
+      padding: 7px 12px;
+      border-radius: 3px;
+    }
+
+    .tag,
+    .tagg,
+    .tago,
+    .tagr {
+      text-rendering: optimizeLegibility;
+      display: inline-block;
+      padding: 3px 5px 2px 4px;
+      text-decoration: none;
+      white-space: nowrap;
+      border: 1px solid #999;
+      text-transform: uppercase;
+      text-align: center;
+      border-radius: 3px;
+      font-size: 11px;
+      font-weight: bold;
+      line-height: 90%;
+    }
+
+    .tag {
+      background-color: #EEEEEE;
+    }
+
+    .tagg {
+      background-color: #98FB98;
+    }
+
+    .tago {
+      background-color: #fafa00;
+    }
+
+    .tagr {
+      background-color: #FF4500;
+    }
+
+
+    a {
+      text-decoration: none;
+      color: #0366d6;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .menu1 {
+      display: flex;
+      flex-direction: row;
+      border: 0;
+      font-size: 14px;
+      padding: 0;
+      margin: 0;
+      white-space: nowrap;
+    }
+
+    .menu1 a {
+      white-space: nowrap;
+      padding: 0 8px;
+      text-decoration: none;
+      color: #5e6d7d;
+      line-height: 30px;
+      height: 30px;
+    }
+
+    .menu1 a:hover {
+      background: #fefefe;
+      color: #0366d6;
+    }
+
+    .menuside2 {
+      display: flex;
+      flex-direction: column;
+      border: 0;
+      font-size: 14px;
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+      justify-content: center;
+    }
+
+    .menuside2 img {
+      vertical-align: top;
+      padding: 0 8px;
+      filter: brightness(0) saturate(100%) invert(42%) sepia(22%) saturate(385%) hue-rotate(170deg) brightness(92%) contrast(84%);
+    }
+
+    .menuside2 a {
+      padding: 6px 0;
+      text-decoration: none;
+      color: #5e6d7d;
+    }
+
+    .menuside2 a:hover {
+      color: #0366d6;
+      background: #fefefe;
+    }
+
+    .menuside2 a:hover img {
+      filter: brightness(0) saturate(100%) invert(23%) sepia(44%) saturate(7029%) hue-rotate(203deg) brightness(94%) contrast(98%);
+    }
+
+    .breadcrumb {
+      z-index: 1;
+      font-size: 14px;
+      text-align: center;
+      display: inline-block;
+      overflow: hidden;
+      border-radius: 5px;
+    }
+
+
+    .breadcrumb a {
+      text-decoration: none;
+      outline: none;
+      display: block;
+      float: left;
+      font-size: 12px;
+      line-height: 24px;
+      color: #373f49;
+      padding: 0 10px 0 35px;
+      background: #f0f1f1;
+      background: linear-gradient(#f0f1f1, #c6d2d2);
+      position: relative;
+    }
+
+    .breadcrumb a:first-child {
+      padding-left: 21px;
+      border-radius: 5px 0 0 5px;
+      /*to match with the parent's radius*/
+    }
+
+    .breadcrumb a:first-child:before {
+      left: 14px;
+    }
+
+    .breadcrumb a:last-child {
+      visibility: hidden;
+    }
+
+    .breadcrumb a.active,
+    .breadcrumb a:hover {
+      color: #0366d6;
+      background: #c6d2d2;
+      background: linear-gradient(#e3e4e4, #b8c7c7);
+    }
+
+    .breadcrumb a.active:after,
+    .breadcrumb a:hover:after {
+      background: #c6d2d2;
+      background: linear-gradient(135deg, #e3e4e4, #b8c7c7);
+    }
+
+    .breadcrumb a:after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: -12px;
+      /*half of square's length*/
+      /*same dimension as the line-height of .breadcrumb a */
+      width: 24px;
+      height: 24px;
+      transform: scale(0.707) rotate(45deg);
+      /*we need to prevent the arrows from getting buried under the next link*/
+      z-index: 1;
+      /*background same as links but the gradient will be rotated to compensate with the transform applied*/
+      background: #f0f1f1;
+      background: linear-gradient(135deg, #f0f1f1, #c6d2d2);
+      /*stylish arrow design using box shadow*/
+      box-shadow:
+        2px -2px 0 2px rgba(0, 0, 0, 0.1),
+        3px -3px 0 2px rgba(255, 255, 255, 0.1);
+      /*
+		5px - for rounded arrows and 
+		50px - to prevent hover glitches on the border created using shadows*/
+      border-radius: 0 5px 0 50px;
+    }
+
+    /*we dont need an arrow after the last link*/
+    .breadcrumb a:last-child:after {
+      content: none;
+      visibility: hidden;
+    }
+
+
+    .lga,
+    .lga a,
+    .lgi,
+    .lgi a {
+      font-size: 13px;
+      text-align: center;
+      color: #fff;
+      padding: 0 5px;
+      margin: 0;
+    }
+
+    .lga,
+    .lga a {
+      background-color: #008;
+    }
+
+    .lgi,
+    .lgi a {
+      background-color: #888;
+    }
+
+    .lga:hover,
+    .lga:hover a {
+      text-decoration: none;
+      color: #BBB;
+    }
+
+    .lgi:hover,
+    .lgi:hover a {
+      text-decoration: none;
+      color: #CCC;
+    }
+  </style>
+  <style>
+    body {
+      font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+      font-size: 14px;
+      line-height: 1.5;
+      margin: auto;
+      overflow-x: hidden;
+      background: #fefefe;
+    }
+
+    h1.chap {
+      font-size: 1.8em;
+    }
+
+    h2.chap {
+      font-size: 1.35em;
+    }
+
+    h3,
+    h3.chap {
+      font-size: 1.15em;
+    }
+
+    h4 {
+      font-size: 1.05em;
+    }
+
+    table {
+      font-size: inherit;
+    }
+  </style>
+
+
+  <style>
+    .dyn {
+      display: flex;
+      flex-direction: row;
+      gap: 3em;
+      align-items: stretch;
+      flex-wrap: wrap;
+      margin: 10px 0;
+    }
+
+    .dyn textarea {
+      font-family: monospace;
+      font-size: 13px;
+      line-height: 1.4;
+      min-width: 30ch;
+      max-width: 90ch;
+      box-sizing: border-box;
+      resize: both;
+      white-space: pre;
+      overflow: auto;
+      field-sizing: content;
+      align-self: stretch;
+      border: 1px solid #888;
+      border-radius: 3px;
+      margin: 0;
+      padding: 4px 8px;
+      background: #fefefe;
+    }
+
+    .dyn>div {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      display: flex;
+    }
+
+    .dyn>div>div {
+      margin: 0;
+      padding: 0;
+    }
+
+    .dyn img {
+      margin: 0;
+      padding: 0;
+    }
+
+    .scale {
+      max-width: 100%;
+      height: auto;
+      border: 1px solid #dde;
+      border-radius: 4px;
+    }
+  </style>
+
+
+  <script>
+    var llg = "en";
+    var az = 0;
+    var amdark = 0;
+    function ljs(n) {
+      if (az) return false;
+      var sc = document.createElement("script");
+      sc.type = "text/javascript";
+      sc.src = "/btn-" + n + ".js";
+      document.body.innerHTML = "<i style='position:absolute;top:30%;width:100%;'><center>Loading in progress...";
+      document.body.appendChild(sc);
+    }
+    function ctc(id) {
+      document.getElementById('img' + id).classList.remove('cop'); document.getElementById('img' + id).classList.add('cop2');
+      document.getElementById('pre' + id).style.backgroundColor = '#4dff00';
+      document.getElementById('msg' + id).style.display = 'inline';
+
+      setTimeout(function () { document.getElementById('img' + id).classList.remove('cop2'); document.getElementById('img' + id).classList.add('cop'); document.getElementById('pre' + id).style.backgroundColor = ''; document.getElementById('msg' + id).style.display = 'none'; }, 800);
+
+
+      text = document.getElementById('pre' + id).innerText;
+      if (window.clipboardData && window.clipboardData.setData)
+        return window.clipboardData.setData("Text", text);
+      else if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
+        var ta = document.createElement("textarea");
+        ta.textContent = text;
+        ta.style.position = "fixed";
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          return document.execCommand("copy");
+        }
+        catch (ex) {
+          return false;
+        }
+        finally {
+          document.body.removeChild(ta);
+        }
+      }
+    }
+  </script>
+</head>
+
+<body>
+  <style>
+    body,
+    .container,
+    #B3,
+    #C5,
+    #C6,
+    #C7,
+    #D7,
+    #D8 {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      overflow-y: scroll;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      grid-template-rows: auto 1fr auto;
+      min-height: 100vh;
+    }
+
+    #B3 {
+      grid-column: 1 / 5;
+      grid-row: 1;
+      position: sticky;
+      top: 0;
+      height: 30px;
+      padding: 0;
+      z-index: 10;
+      overflow: hidden;
+      background: #edeff3;
+      border-bottom: 1px solid #d4d8de;
+    }
+
+    #D7 {
+      grid-column: 1;
+      grid-row: 2;
+      margin: 0;
+      padding: 0;
+      padding-left: 30px;
+      line-height: 1.6;
+    }
+
+    #D8 {
+      grid-column: 1;
+      grid-row: 3;
+      position: sticky;
+      bottom: 0;
+      z-index: 5;
+      background: #fefefe;
+    }
+
+    #C5 {
+      grid-column: 2;
+      grid-row: 1 / -1;
+      position: sticky;
+      top: 40px;
+      align-self: start;
+      height: calc(98vh - 60px);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #C6 {
+      grid-column: 3;
+      grid-row: 1 / -1;
+      position: sticky;
+      top: 40px;
+      align-self: start;
+      height: calc(98vh - 60px);
+      max-width: 200px;
+      overflow: hidden;
+      margin: 0 10px;
+      padding: 8px 5px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #C7 {
+      grid-column: 4;
+      grid-row: 1 / -1;
+      position: sticky;
+      top: 40px;
+      align-self: start;
+      height: calc(98vh - 60px);
+      margin: 0 20px 0 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #toc {
+      z-index: 15;
+      overflow-x: hidden;
+      overflow-y: auto;
+      background: #f6f8fa;
+      border-width: 2px;
+      border-style: groove;
+      border-radius: 3px;
+      border-color: #e1e4e8;
+      margin: 0 5px;
+      padding: 0;
+      max-height: 100%;
+    }
+
+    #toc ul {
+      margin: 0;
+      list-style-type: none;
+      padding: 0;
+    }
+
+    #toc li {
+      padding: 0 10px;
+      margin: 0;
+    }
+
+    #toc li a {
+      padding: 5px 0;
+      display: inline-block;
+      text-decoration: none;
+      width: 100%;
+      color: #5e6d7d;
+    }
+
+    #toc li a:hover {
+      color: #0366d6;
+    }
+
+    #toc li:hover {
+      background: #fefefe;
+    }
+
+    #magic {
+      position: absolute;
+      top: 0;
+      right: 50px;
+      width: 30px;
+      height: 30px;
+      overflow: hidden;
+      background: #edeff3;
+      z-index: 14;
+    }
+
+    #magic:hover {
+      width: calc(100% - 50px);
+    }
+
+    #magic .menu1 {
+      position: absolute;
+      top: 0;
+      right: 30px;
+      height: 30px;
+      padding-left: 10px;
+      background: #edeff3;
+      border-left: 1px solid #d4d8de;
+      border-bottom: 1px solid #d4d8de;
+    }
+
+    .menu1-tail {
+      flex-grow: 1;
+      flex-shrink: 0;
+      height: 30px;
+      position: relative;
+      z-index: 15;
+      background: #edeff3;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: auto auto auto;
+      grid-auto-rows: auto;
+      gap: 5px;
+      margin: 0;
+      padding: 0;
+    }
+
+    .merged {
+      grid-column: 1 / -1;
+    }
+
+    #C6 {
+      display: none;
+    }
+
+    @media (min-width: 1401px) {
+      #C6:has(#toc li) {
+        display: flex;
+      }
+    }
+
+    @media (max-width: 1100px) {
+      #C5,
+      #C7 {
+        display: none;
+      }
+    }
+
+    @media (max-width: 1200px) {
+      .merged {
+        display: none;
+      }
+    }
+  </style>
+
+  <div class="container">
+
+    <footer id="D8">
+
+      <p>
+      </p>
+      <p>
+
+      </p>
+    </footer>
+
+
+    <header id="B3">
+      <div class="menu1">
+        <a id="titem10" href="sequence-diagram_en.html">Sequence</a>
+        <a id="titem20" href="use-case-diagram_en.html">Use Case</a>
+        <a id="titem30" href="class-diagram_en.html">Class</a>
+        <a id="titem40" href="activity-diagram-beta_en.html">Activity</a>
+        <a id="titem50" href="component-diagram_en.html">Component</a>
+        <a id="titem60" href="state-diagram_en.html">State</a>
+        <a id="titem70" href="object-diagram_en.html">Object</a>
+        <a id="titem80" href="deployment-diagram_en.html">Deployment</a>
+        <a id="titem90" href="timing-diagram_en.html">Timing</a>
+
+        <a id="titem99" href="regex_en.html">Regex</a>
+        <a id="titem100" href="nwdiag_en.html">Network</a>
+        <a id="titem110" href="salt_en.html">Wireframe</a>
+        <a id="titem120" href="archimate-diagram_en.html">Archimate</a>
+        <a id="titem130" href="gantt-diagram_en.html">Gantt</a>
+        <a id="titem140" href="mindmap-diagram_en.html">MindMap</a>
+        <a id="titem150" href="wbs-diagram_en.html">WBS</a>
+        <a id="titem151" href="ebnf_en.html">EBNF</a>
+        <a id="titem160" href="json_en.html">JSON</a>
+        <a id="titem170" href="yaml_en.html">YAML</a>
+
+        <div class="menu1-tail"></div>
+      </div>
+      <div id="magic">
+        <div class="menu1">
+          <a id="titem10" href="sequence-diagram_en.html">Sequence</a>
+          <a id="titem20" href="use-case-diagram_en.html">Use Case</a>
+          <a id="titem30" href="class-diagram_en.html">Class</a>
+          <a id="titem40" href="activity-diagram-beta_en.html">Activity</a>
+          <a id="titem50" href="component-diagram_en.html">Component</a>
+          <a id="titem60" href="state-diagram_en.html">State</a>
+          <a id="titem70" href="object-diagram_en.html">Object</a>
+          <a id="titem80" href="deployment-diagram_en.html">Deployment</a>
+          <a id="titem90" href="timing-diagram_en.html">Timing</a>
+
+          <a id="titem99" href="regex_en.html">Regex</a>
+          <a id="titem100" href="nwdiag_en.html">Network</a>
+          <a id="titem110" href="salt_en.html">Wireframe</a>
+          <a id="titem120" href="archimate-diagram_en.html">Archimate</a>
+          <a id="titem130" href="gantt-diagram_en.html">Gantt</a>
+          <a id="titem140" href="mindmap-diagram_en.html">MindMap</a>
+          <a id="titem150" href="wbs-diagram_en.html">WBS</a>
+          <a id="titem151" href="ebnf_en.html">EBNF</a>
+          <a id="titem160" href="json_en.html">JSON</a>
+          <a id="titem170" href="yaml_en.html">YAML</a>
+
+          <div class="menu1-tail"></div>
+        </div>
+      </div><!-- magic -->
+    </header>
+
+    <main id="D7">
+
+      <style>
+        #donate {
+          padding-top: 10px;
+          min-height: 30px;
+        }
+      </style>
+
+
+      <p style="clear:both;">
+
+
+        <style>
+          #titem30 {
+            color: #0366d6;
+            background-color: #fefefe;
+          }
+
+          #titem30 img {
+            filter: brightness(0) saturate(100%) invert(23%) sepia(44%) saturate(7029%) hue-rotate(203deg) brightness(94%) contrast(98%);
+          }
+
+          .menu1:hover #titem30 {
+            color: #5e6d7d;
+          }
+
+          .menu1:hover #titem30:hover {
+            color: #0366d6;
+          }
+
+          .menu1:hover #titem30 img {
+            filter: brightness(0) saturate(100%) invert(42%) sepia(22%) saturate(385%) hue-rotate(170deg) brightness(92%) contrast(84%);
+          }
+        </style>
+
+        <a style="position:relative;top:-38px;" name="4b7db6d5322e5d6d"></a>
+        <!--heading-->
+      </p>
+      <h1 class="chap">Class diagram</h1>
+      <p></p>
+      A class diagram describes the static structure of a system: its classes, their attributes and methods, and the
+      relationships between them. It&#39;s the most common UML diagram for documenting code organization and design.
+      <p></p>
+      In PlantUML, the syntax mirrors what you&#39;d write in a programming language, so attributes, methods, and
+      visibility markers feel familiar. Relationships use the same arrow style as sequence diagrams.
+      <p></p>
+      <ul>
+        <li><strong>Text in, diagram out.</strong> Declare classes, fields, and relationships in a few lines.</li>
+        <li><strong>Reads like code.</strong> <code class="cod">+</code>, <code class="cod">-</code>, <code
+            class="cod">#</code> for visibility, <code class="cod">:</code> for types, <code class="cod">()</code> for
+          methods.</li>
+        <li><strong>Annotate freely.</strong> Add notes, colors, and stereotypes without leaving the text.</li>
+      </ul>
+      <p></p>
+      See <a href="commons">common commands</a> for features available across all diagram types.
+      <a style="position:relative;top:-38px;" name="96f154df2bc1cb46"></a>
+      <!--heading-->
+      <h2 class="chap">Declarative element</h2>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+hide empty members
+abstract        abstract
+abstract class  &#34;abstract class&#34;
+annotation      annotation
+circle          circle
+()              circle_short_form
+class           class
+class           class_stereo  &lt;&lt;stereotype&gt;&gt;
+dataclass       dataclass
+diamond         diamond
+&lt;&gt;              diamond_short_form
+entity          entity
+enum            enum
+exception       exception
+interface       interface
+metaclass       metaclass
+protocol        protocol
+record          record
+stereotype      stereotype
+struct          struct
+@enduml
+</textarea>
+        <div id="outb5d063aade513fc9546dfe5f9a236ba5">
+          <div class="mycell">
+            <img loading="lazy" width="627" height="354" class="scale"
+              src="/imgw/img-b5d063aade513fc9546dfe5f9a236ba5.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. for <code class="cod">protocol</code> and <code class="cod">struct</code>: <a
+          href="https://github.com/plantuml/plantuml/pull/1028">GH-1028</a>; for <code class="cod">exception</code>: <a
+          href="https://github.com/plantuml/plantuml/pull/1056">GH-1056</a>, <a
+          href="https://forum.plantuml.net/16258/adding-exception-keyword-for-class-diagram">QA-16258</a>; for <code
+          class="cod">metaclass</code> and <code class="cod">stereotype</code>: <a
+          href="https://github.com/plantuml/plantuml/pull/1159">GH-1159</a>, <a
+          href="https://forum.plantuml.net/16784/class-entities-keywords-request-metaclass-and-stereotype">QA-16784</a>;
+        for <code class="cod">record</code> and <code class="cod">dataclass</code>: <a
+          href="https://github.com/plantuml/plantuml/pull/2232">GH-2232</a>]</em>
+      <a style="position:relative;top:-38px;" name="9dd2a6eca0c2a0e7"></a>
+      <!--heading-->
+      <h2 class="chap">Relations between classes</h2>
+      <p></p>
+      Relations between classes are defined using the following symbols :
+      <p></p>
+      <table border="1" cellspacing="0" cellpadding="5">
+        <tbody>
+          <tr>
+            <td><b>
+                Type
+              </b></td>
+            <td><b>
+                Symbol
+              </b></td>
+            <td><b>
+                Purpose
+              </b></td>
+          </tr>
+          <tr>
+            <td>
+              Extension
+            </td>
+            <td>
+              <code class="cod">&lt;|--</code>
+            </td>
+            <td>
+              Specialization of a class in a hierarchy
+            </td>
+          </tr>
+          <tr>
+            <td>
+              Implementation
+            </td>
+            <td>
+              <code class="cod">&lt;|..</code>
+            </td>
+            <td>
+              Realization of an interface by a class
+            </td>
+          </tr>
+          <tr>
+            <td>
+              Composition
+            </td>
+            <td>
+              <code class="cod">*--</code>
+            </td>
+            <td>
+              The part cannot exist without the whole
+            </td>
+          </tr>
+          <tr>
+            <td>
+              Aggregation
+            </td>
+            <td>
+              <code class="cod">o--</code>
+            </td>
+            <td>
+              The part can exist independently of the whole
+            </td>
+          </tr>
+          <tr>
+            <td>
+              Dependency
+            </td>
+            <td>
+              <code class="cod">--&gt;</code>
+            </td>
+            <td>
+              The object uses another object
+            </td>
+          </tr>
+          <tr>
+            <td>
+              Dependency
+            </td>
+            <td>
+              <code class="cod">..&gt;</code>
+            </td>
+            <td>
+              A weaker form of dependency
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p></p>
+      It is possible to replace <code class="cod">--</code> by <code class="cod">..</code> to have a dotted
+      line.
+      <p></p>
+      Knowing those rules, it is possible to draw the following drawings:
+      <p></p>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+Class01 &lt;|-- Class02
+Class03 *-- Class04
+Class05 o-- Class06
+Class07 .. Class08
+Class09 -- Class10
+@enduml
+</textarea>
+        <div id="out3f0f74ce91d45f8f97b8510f172ef59b">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="575" height="177" class="scale"
+              src="/imgw/img-3f0f74ce91d45f8f97b8510f172ef59b.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+Class11 &lt;|.. Class12
+Class13 --&gt; Class14
+Class15 ..&gt; Class16
+Class17 ..|&gt; Class18
+Class19 &lt;--* Class20
+@enduml
+</textarea>
+        <div id="out68266d3e517588bf64d0ea833b72ad69">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="575" height="177" class="scale"
+              src="/imgw/img-68266d3e517588bf64d0ea833b72ad69.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+Class21 #-- Class22
+Class23 x-- Class24
+Class25 }-- Class26
+Class27 +-- Class28
+Class29 ^-- Class30
+@enduml
+</textarea>
+        <div id="out215be4dc27e94d33f0eee27e3e7def5d">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="575" height="177" class="scale"
+              src="/imgw/img-215be4dc27e94d33f0eee27e3e7def5d.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="4a705b44651caa59"></a>
+      <!--heading-->
+      <h2 class="chap">Label on relations</h2>
+      <p></p>
+      <p></p>
+      It is possible to add a label on the relation, using <code class="cod">:</code>, followed
+      by the text of the label.
+      <p></p>
+      For cardinality, you can use double-quotes <code class="cod">&#34;&#34;</code> on each side
+      of the relation.
+      <p></p>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+Class01 &#34;1&#34; *-- &#34;many&#34; Class02 : contains
+
+Class03 o-- Class04 : aggregation
+
+Class05 --&gt; &#34;1&#34; Class06
+
+@enduml
+</textarea>
+        <div id="out2a4f69b0afb2c07be5d1d8691433cdff">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="339" height="195" class="scale"
+              src="/imgw/img-2a4f69b0afb2c07be5d1d8691433cdff.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      You can add an extra arrow pointing at one object showing
+      which object acts on the other object, using <code class="cod">&lt;</code> or <code class="cod">&gt;</code>
+      at the begin or at the end of the label.
+      <p></p>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+class Car
+
+Driver - Car : drives &gt;
+Car *- Wheel : have 4 &gt;
+Car -- Person : &lt; owns
+
+@enduml
+</textarea>
+        <div id="out65b11196e39ebd72d5f20b7acabb45b5">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="389" height="195" class="scale"
+              src="/imgw/img-65b11196e39ebd72d5f20b7acabb45b5.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="bd62ba9333d08763"></a>
+      <!--heading-->
+      <h2 class="chap">Using non-letters in element names and relation labels</h2>
+      <p></p>
+      <p></p>
+      If you want to use <a href="unicode">non-letters</a> in the class (or enum...) display name, you can either :
+      <ul>
+        <li>Use the <code class="cod">as</code> keyword in the class definition to assign an alias</li>
+        <li>Put quotes <code class="cod">&#34;&#34;</code> around the class name</li>
+      </ul>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+class &#34;This is my class&#34; as class1
+class class2 as &#34;It works this way too&#34;
+
+class2 *-- &#34;foo/dummy&#34; : use
+@enduml
+</textarea>
+        <div id="outcbd495946b5cfbb7089c59d35ab57c3f">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="345" height="195" class="scale"
+              src="/imgw/img-cbd495946b5cfbb7089c59d35ab57c3f.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      If an alias is assigned to an element, the rest of the file must refer to the element by the alias instead of the
+      name.
+      <p></p>
+      <h3>Starting names with <code class="cod">$</code></h3>
+      Note that names starting with <code class="cod">$</code> cannot be hidden or removed later, because <code
+        class="cod">hide</code> and <code class="cod">remove</code> command will consider the name a <code
+        class="cod">$tag</code> instead of a component name. To later remove such elements they must have an alias or
+      must be tagged.
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+class $C1
+class $C2 $C2
+class &#34;$C2&#34; as dollarC2
+remove $C1
+remove $C2
+remove dollarC2
+@enduml
+</textarea>
+        <div id="out911f706ec8a337d8e1e752f01d628878">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="78" height="69" class="scale"
+              src="/imgw/img-911f706ec8a337d8e1e752f01d628878.png" />
+          </div>
+        </div>
+      </div>
+      Also note that names starting with <code class="cod">$</code> are valid, but to assign an alias to such element
+      the name must be put between quotes <code class="cod">&#34;&#34;</code>.
+      <a style="position:relative;top:-38px;" name="090967fbee930909"></a>
+      <!--heading-->
+      <h2 class="chap">Adding methods</h2>
+      <p></p>
+      To declare fields and methods, you can use the symbol
+      <code class="cod">:</code> followed by the field&#39;s or method&#39;s name.
+      <p></p>
+      The system checks for parenthesis to choose between methods and fields.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+Object &lt;|-- ArrayList
+
+Object : equals()
+ArrayList : Object[] elementData
+ArrayList : size()
+
+@enduml
+</textarea>
+        <div id="out4793e2e38c1b954e4b854baa719083df">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="164" height="230" class="scale"
+              src="/imgw/img-4793e2e38c1b954e4b854baa719083df.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      It is also possible to group between brackets
+      <code class="cod">{}</code> all fields and methods.
+      <p></p>
+      Note that the syntax is highly flexible about type/name order.
+      <p></p>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+class Dummy {
+  String data
+  void methods()
+}
+
+class Flight {
+   flightNumber : Integer
+   departureTime : Date
+}
+@enduml
+</textarea>
+        <div id="out4e0a737ef87b2b431bc86119c5e2d26d">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="307" height="104" class="scale"
+              src="/imgw/img-4e0a737ef87b2b431bc86119c5e2d26d.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      You can use <code class="cod">{field}</code> and <code class="cod">{method}</code> modifiers to
+      override default behaviour of the parser about fields and methods.
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+class Dummy {
+  {field} A field (despite parentheses)
+  {method} Some method
+}
+
+@enduml
+</textarea>
+        <div id="outc94020a8fa5fdd599374598aa080c4b2">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="209" height="102" class="scale"
+              src="/imgw/img-c94020a8fa5fdd599374598aa080c4b2.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <a style="position:relative;top:-38px;" name="3644720244dd6c6a"></a>
+      <!--heading-->
+      <h2 class="chap">Defining visibility</h2>
+      <p></p>
+      <h3>Visibility for methods or fields</h3>
+      When you define methods or fields, you can use characters to define the
+      visibility of the corresponding item:
+      <p></p>
+      <table border="1" cellspacing="0" cellpadding="5">
+        <tbody>
+          <tr>
+            <td><b>
+                Character
+              </b></td>
+            <td><b>
+                Icon for field
+              </b></td>
+            <td><b>
+                Icon for method
+              </b></td>
+            <td><b>
+                Visibility
+              </b></td>
+          </tr>
+          <tr>
+            <td>
+              <code class="cod">-</code>
+            </td>
+            <td>
+              <img loading="lazy" src="/img/private-field.png" />
+            </td>
+            <td>
+              <img loading="lazy" src="/img/private-method.png" />
+            </td>
+            <td>
+              <code class="cod">private</code>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <code class="cod">#</code>
+            </td>
+            <td>
+              <img loading="lazy" src="/img/protected-field.png" />
+            </td>
+            <td>
+              <img loading="lazy" src="/img/protected-method.png" />
+            </td>
+            <td>
+              <code class="cod">protected</code>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <code class="cod">~</code>
+            </td>
+            <td>
+              <img loading="lazy" src="/img/package-private-field.png" />
+            </td>
+            <td>
+              <img loading="lazy" src="/img/package-private-method.png" />
+            </td>
+            <td>
+              <code class="cod">package private</code>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <code class="cod">+</code>
+            </td>
+            <td>
+              <img loading="lazy" src="/img/public-field.png" />
+            </td>
+            <td>
+              <img loading="lazy" src="/img/public-method.png" />
+            </td>
+            <td>
+              <code class="cod">public</code>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+class Dummy {
+ -field1
+ #field2
+ ~method1()
+ +method2()
+}
+
+@enduml
+</textarea>
+        <div id="outbbd86f7d221bc98551997ac63f3e9303">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="108" height="137" class="scale"
+              src="/imgw/img-bbd86f7d221bc98551997ac63f3e9303.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      You can turn off this feature using the <code class="cod">skinparam classAttributeIconSize 0</code> command :
+      <p></p>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+skinparam classAttributeIconSize 0
+class Dummy {
+ -field1
+ #field2
+ ~method1()
+ +method2()
+}
+
+@enduml
+</textarea>
+        <div id="outb3e2300ba2b5c2e0d05905dbd6e162e2">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="102" height="137" class="scale"
+              src="/imgw/img-b3e2300ba2b5c2e0d05905dbd6e162e2.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      Visibility indicators are optional and can be ommitted individualy without turning off the icons globally using
+      <code class="cod">skinparam classAttributeIconSize 0</code>.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+class Dummy {
+ field1
+ field2
+ method1()
+ method2()
+}
+
+@enduml
+</textarea>
+        <div id="outfe65bf3ab152373fcf8de40f734e087f">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="99" height="137" class="scale"
+              src="/imgw/img-fe65bf3ab152373fcf8de40f734e087f.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      In such case if you&#39;d like to use methods or fields that start with <code class="cod">-</code>, <code
+        class="cod">#</code>, <code class="cod">~</code> or <code class="cod">+</code> characters such as a destructor
+      in some languages for <code class="cod">Dummy</code> class <code class="cod">~Dummy()</code>, escape the first
+      character with a <code class="cod">\</code> character:
+      <p></p>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+class Dummy {
+ field1
+ \~Dummy()
+ method1()
+}
+
+@enduml
+</textarea>
+        <div id="out9d2f6938b02381ef8ae428acc70ccac9">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="99" height="119" class="scale"
+              src="/imgw/img-9d2f6938b02381ef8ae428acc70ccac9.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <h3>Visibility for class</h3>
+      <p></p>
+      Similar to methods or fields, you can use same characters to define the Class visibility:
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+-class &#34;private Class&#34; {
+}
+
+#class &#34;protected Class&#34; {
+}
+
+~class &#34;package private Class&#34; {
+}
+
++class &#34;public Class&#34; {
+}
+@enduml
+</textarea>
+        <div id="out8c4552d90155b96b32c137a7b1cb79a9">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="355" height="177" class="scale"
+              src="/imgw/img-8c4552d90155b96b32c137a7b1cb79a9.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a
+          href="https://forum.plantuml.net/4755/provide-display-visibility-attributes-private-protected">QA-4755</a>]</em>
+      <a style="position:relative;top:-38px;" name="631c2725deb35a73"></a>
+      <!--heading-->
+      <h2 class="chap">Visibility on compositions and aggregations</h2>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+class Aaa {
+    -bbb : int
+    +ccc : string
+    #aa : float
+    +void addEntry(mmm : Entry)
+    +int setFactory(ddd : string)
+}
+class Factory {
+    #fff : string
+}
+class Entry {
+    -yyy : int
+}
+class Parent {
+}
+Aaa *--&gt; &#34;1..100&#34; Entry : -entries
+Aaa o--&gt; Factory : #factory
+Aaa o--&gt; Parent : +parent
+@enduml
+</textarea>
+        <div id="out2e22e0cd0baa3e841282c065a4d439cc">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="323" height="300" class="scale"
+              src="/imgw/img-2e22e0cd0baa3e841282c065a4d439cc.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a
+          href="https://forum.plantuml.net/8294/support-visibility-on-compositions-and-aggregations">QA-8294</a>]</em>
+      <a style="position:relative;top:-38px;" name="9fd9d25be2fbb118"></a>
+      <!--heading-->
+      <h2 class="chap">Abstract and Static</h2>
+      <p></p>
+      <p></p>
+      <p></p>
+      You can define static or abstract methods or fields using the <code class="cod">{static}</code>
+      or <code class="cod">{abstract}</code> modifier.
+      <p></p>
+      These modifiers can be used at the start or at the end of the line.
+      You can also use <code class="cod">{classifier}</code> instead of <code class="cod">{static}</code>.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+class Dummy {
+  {static} String id
+  {abstract} void methods()
+}
+@enduml
+</textarea>
+        <div id="out75a274e17540fe2e48d7caadca36e1c4">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="123" height="102" class="scale"
+              src="/imgw/img-75a274e17540fe2e48d7caadca36e1c4.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <a style="position:relative;top:-38px;" name="08ca680401eefe3a"></a>
+      <!--heading-->
+      <h2 class="chap">Advanced class body</h2>
+      <p></p>
+      <p></p>
+      <p></p>
+      By default, methods and fields are automatically regrouped by PlantUML.
+      You can use separators to define your own way of ordering fields and methods.
+      The following separators are possible : <code class="cod">--</code> <code class="cod">..</code> <code
+        class="cod">==</code> <code class="cod">__</code>.
+      <p></p>
+      You can also use titles within the separators:
+      <p></p>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+class Foo1 {
+  You can use
+  several lines
+  ..
+  as you want
+  and group
+  ==
+  things together.
+  __
+  You can have as many groups
+  as you want
+  --
+  End of class
+}
+
+class User {
+  .. Simple Getter ..
+  + getName()
+  + getAddress()
+  .. Some setter ..
+  + setName()
+  __ private data __
+  int age
+  -- encrypted --
+  String password
+}
+
+@enduml
+</textarea>
+        <div id="outc66ece964ce751325e1d531817febba1">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="369" height="235" class="scale"
+              src="/imgw/img-c66ece964ce751325e1d531817febba1.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="59c91a18bcc97bb0"></a>
+      <!--heading-->
+      <h2 class="chap">Notes and stereotypes</h2>
+      <p></p>
+      Stereotypes are defined with the <code class="cod">class</code> keyword, <code class="cod">&lt;&lt;</code> and
+      <code class="cod">&gt;&gt;</code>.
+      <p></p>
+      You can also define notes using <code class="cod">note left of</code> , <code class="cod">note right of</code> ,
+      <code class="cod">note top of</code> , <code class="cod">note bottom of</code>
+      keywords.
+      <p></p>
+      You can also define a note on the last defined element using <code class="cod">note left</code>, <code
+        class="cod">note right</code>,
+      <code class="cod">note top</code>, <code class="cod">note bottom</code>.
+      <p></p>
+      A note can be also define alone with the <code class="cod">note</code>
+      keywords, then linked to other objects using the <code class="cod">..</code> symbol.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+class Object &lt;&lt; general &gt;&gt;
+Object &lt;|--- ArrayList
+
+note top of Object : In java, every class\nextends this one.
+
+note &#34;This is a floating note&#34; as N1
+note &#34;This note is connected\nto several objects.&#34; as N2
+Object .. N2
+N2 .. ArrayList
+
+class Foo
+note left: On last defined class
+
+@enduml
+</textarea>
+        <div id="outb3d704329b9d6305340e1e87bca32d16">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="598" height="399" class="scale"
+              src="/imgw/img-b3d704329b9d6305340e1e87bca32d16.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="23ca7846dedbb80a"></a>
+      <!--heading-->
+      <h2 class="chap">More on notes</h2>
+      <p></p>
+      <p></p>
+      It is also possible to use few HTML tags (See <a href="creole">Creole expression</a>) like :
+      <p></p>
+      <ul>
+        <li><code class="cod">&lt;b&gt;</code></li>
+        <li><code class="cod">&lt;u&gt;</code></li>
+        <li><code class="cod">&lt;i&gt;</code></li>
+        <li><code class="cod">&lt;s&gt;</code>, <code class="cod">&lt;del&gt;</code>, <code
+            class="cod">&lt;strike&gt;</code></li>
+        <li><code class="cod">&lt;font color=&#34;#AAAAAA&#34;&gt;</code> or <code
+            class="cod">&lt;font color=&#34;colorName&#34;&gt;</code></li>
+        <li><code class="cod">&lt;color:#AAAAAA&gt;</code> or <code class="cod">&lt;color:colorName&gt;</code></li>
+        <li><code class="cod">&lt;size:nn&gt;</code> to change font size</li>
+        <li><code class="cod">&lt;img src=&#34;file&#34;&gt;</code> or <code class="cod">&lt;img:file&gt;</code>: the
+          file must be accessible by the filesystem</li>
+      </ul>
+      <p></p>
+      <p></p>
+      You can also have a note on several lines.
+      <p></p>
+      You can also define a note on the last defined element using <code class="cod">note left</code>, <code
+        class="cod">note right</code>,
+      <code class="cod">note top</code>, <code class="cod">note bottom</code>.
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+class Foo
+note left: On last defined class
+
+note top of Foo
+  In java, &lt;size:18&gt;every&lt;/size&gt; &lt;u&gt;class&lt;/u&gt;
+  &lt;b&gt;extends&lt;/b&gt;
+  &lt;i&gt;this&lt;/i&gt; one.
+end note
+
+note as N1
+  This note is &lt;u&gt;also&lt;/u&gt;
+  &lt;b&gt;&lt;color:royalBlue&gt;on several&lt;/color&gt;
+  &lt;s&gt;words&lt;/s&gt; lines
+  And this is hosted by &lt;img:https://plantuml.com/sourceforge.jpg&gt;
+end note
+
+@enduml
+</textarea>
+        <div id="out43bd61c3a727cccc78db5fb54f2639c9">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="583" height="218" class="scale"
+              src="/imgw/img-43bd61c3a727cccc78db5fb54f2639c9.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="c909b0b5f0434a64"></a>
+      <!--heading-->
+      <h2 class="chap">Note on field (field, attribute, member) or method</h2>
+      <p></p>
+      <p></p>
+      It is possible to add a note on field (field, attribute, member) or on method.
+      <p></p>
+      <h3>⚠ Constraint</h3>
+      <ul>
+        <li>This cannot be used with <code class="cod">top</code> or <code class="cod">bottom</code> <em>(only <code
+              class="cod">left</code> and <code class="cod">right</code> are implemented)</em></li>
+        <li>This cannot be used with namespaceSeparator <code class="cod">::</code></li>
+      </ul>
+      <p></p>
+      <p></p>
+      <h3>Note on field or method</h3>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+class A {
+{static} int counter
++void {abstract} start(int timeout)
+}
+note right of A::counter
+  This member is annotated
+end note
+note right of A::start
+  This method is now explained in a UML note
+end note
+@enduml
+</textarea>
+        <div id="out793d2f1ac7818695b429c5fd23a1268c">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="489" height="104" class="scale"
+              src="/imgw/img-793d2f1ac7818695b429c5fd23a1268c.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <h3>Note on method with the same name</h3>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+class A {
+{static} int counter
++void {abstract} start(int timeoutms)
++void {abstract} start(Duration timeout)
+}
+note left of A::counter
+  This member is annotated
+end note
+note right of A::&#34;start(int timeoutms)&#34;
+  This method with int
+end note
+note right of A::&#34;start(Duration timeout)&#34;
+  This method with Duration
+end note
+@enduml
+</textarea>
+        <div id="out8cad26af2763fbd0f1b332ab9010902d">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="628" height="121" class="scale"
+              src="/imgw/img-8cad26af2763fbd0f1b332ab9010902d.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/3474">QA-3474</a> and <a
+          href="https://forum.plantuml.net/5835">QA-5835</a>]</em>
+      <a style="position:relative;top:-38px;" name="1d010d898a1fead2"></a>
+      <!--heading-->
+      <h2 class="chap">Note on links</h2>
+      <p></p>
+      <p></p>
+      It is possible to add a note on a link, just after the link definition, using <code
+        class="cod">note on link</code>.
+      <p></p>
+      You can also use <code class="cod">note left on link</code>, <code class="cod">note right on link</code>, <code
+        class="cod">note top on link</code>,
+      <code class="cod">note bottom on link</code> if you want to change the relative position of the note with the
+      label.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+class Dummy
+Dummy --&gt; Foo : A link
+note on link #red: note that is red
+
+Dummy --&gt; Foo2 : Another link
+note right on link #blue
+this is my note on right link
+and in blue
+end note
+
+@enduml
+</textarea>
+        <div id="out7b8a7d84bf8f3f2b9097ec0c5ceca78f">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="437" height="231" class="scale"
+              src="/imgw/img-7b8a7d84bf8f3f2b9097ec0c5ceca78f.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <a style="position:relative;top:-38px;" name="a339d3559f33ad64"></a>
+      <!--heading-->
+      <h2 class="chap">Abstract class and interface</h2>
+      <p></p>
+      <p></p>
+      You can declare a class as abstract using <code class="cod">abstract</code> or <code
+        class="cod">abstract class</code> keywords.
+      <p></p>
+      The class will be printed in <em>italic</em>.
+      <p></p>
+      <p></p>
+      You can use the <code class="cod">interface</code>, <code class="cod">annotation</code> and <code
+        class="cod">enum</code> keywords too.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+abstract class AbstractList
+abstract AbstractCollection
+interface List
+interface Collection
+
+List &lt;|-- AbstractList
+Collection &lt;|-- AbstractCollection
+
+Collection &lt;|- List
+AbstractCollection &lt;|- AbstractList
+AbstractList &lt;|-- ArrayList
+
+class ArrayList {
+  Object[] elementData
+  size()
+}
+
+enum TimeUnit {
+  DAYS
+  HOURS
+  MINUTES
+}
+
+annotation SuppressWarnings
+
+annotation Annotation {
+  annotation with members
+  String foo()
+  String bar()
+}
+
+
+@enduml
+</textarea>
+        <div id="out7ec671652722a594668a5d8b83b79206">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="654" height="426" class="scale"
+              src="/imgw/img-7ec671652722a594668a5d8b83b79206.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. &#39;Annotation with members&#39; <a
+          href="https://github.com/plantuml/plantuml/issues/458">Issue#458</a>]</em>
+      <a style="position:relative;top:-38px;" name="6a8ec84e53ede3ae"></a>
+      <!--heading-->
+      <h2 class="chap">Hide attributes, methods...</h2>
+      <p></p>
+      You can parameterize the display of classes using the <code class="cod">hide/show</code>
+      command.
+      <p></p>
+      The basic command is: <code class="cod">hide empty members</code>. This
+      command will hide attributes or methods if they are empty.
+      <p></p>
+      Instead of <code class="cod">empty members</code>, you can use:
+      <ul>
+        <li><code class="cod">empty fields</code> or <code class="cod">empty attributes</code> for empty fields,</li>
+        <li><code class="cod">empty methods</code> for empty methods,</li>
+        <li><code class="cod">fields</code> or <code class="cod">attributes</code> which will hide fields, even if they
+          are described,</li>
+        <li><code class="cod">methods</code> which will hide methods, even if they are described,</li>
+        <li><code class="cod">members</code> which will hide fields <u>and</u> methods, even if they are described,</li>
+        <li><code class="cod">circle</code> for the circled character in front of class name,</li>
+        <li><code class="cod">stereotype</code> for the stereotype.</li>
+      </ul>
+      <p></p>
+      You can also provide, just after the <code class="cod">hide</code> or <code class="cod">show</code>
+      keyword:
+      <ul>
+        <li><code class="cod">class</code> for all classes,</li>
+        <li><code class="cod">interface</code> for all interfaces,</li>
+        <li><code class="cod">enum</code> for all enums,</li>
+        <li><code class="cod">&lt;&lt;foo1&gt;&gt;</code> for classes which are stereotyped with <em>foo1</em>,</li>
+        <li>an existing class name.</li>
+      </ul>
+      <p></p>
+      You can use several <code class="cod">show/hide</code> commands to define rules and
+      exceptions.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+class Dummy1 {
+  +myMethods()
+}
+
+class Dummy2 {
+  +hiddenMethod()
+}
+
+class Dummy3 &lt;&lt;Serializable&gt;&gt; {
+String name
+}
+
+hide members
+hide &lt;&lt;Serializable&gt;&gt; circle
+show Dummy1 methods
+show &lt;&lt;Serializable&gt;&gt; fields
+
+@enduml
+</textarea>
+        <div id="out58f4092606342fbcccbd2c867ea72c67">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="252" height="207" class="scale"
+              src="/imgw/img-58f4092606342fbcccbd2c867ea72c67.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      You can also mix with visibility:
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+hide private members
+hide protected members
+hide package members
+
+class Foo {
+  - private
+  # protected
+  ~ package
+}
+@enduml
+</textarea>
+        <div id="out5f67434c2382595ceaa9619c9c8096c3">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="75" height="67" class="scale"
+              src="/imgw/img-5f67434c2382595ceaa9619c9c8096c3.png" />
+          </div>
+        </div>
+      </div>
+      <em>[Ref. <a href="https://forum.plantuml.net/2913/hiding-based-on-visibilty?show=2916#a2916">QA-2913</a>]</em>
+      <a style="position:relative;top:-38px;" name="20ec7d48c223b142"></a>
+      <!--heading-->
+      <h2 class="chap">Hide classes</h2>
+      <p></p>
+      You can also use the <code class="cod">show/hide</code> commands to hide classes.
+      <p></p>
+      This may be useful if you define a large <a href="preprocessing">!included file</a>,
+      and if you want to hide some classes after <a href="preprocessing">file inclusion</a>.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+class Foo1
+class Foo2
+
+Foo2 *-- Foo1
+
+hide Foo2
+
+@enduml
+</textarea>
+        <div id="out6971835b9a4da479195ab98551fab131">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="84" height="177" class="scale"
+              src="/imgw/img-6971835b9a4da479195ab98551fab131.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="3efa75742a5e3384"></a>
+      <!--heading-->
+      <h2 class="chap">Remove classes</h2>
+      <p></p>
+      You can also use the <code class="cod">remove</code> commands to remove classes.
+      <p></p>
+      This may be useful if you define a large <a href="preprocessing">!included file</a>,
+      and if you want to remove some classes after <a href="preprocessing">file inclusion</a>.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+class Foo1
+class Foo2
+
+Foo2 *-- Foo1
+
+remove Foo2
+
+@enduml
+</textarea>
+        <div id="out4f2951adb4cd5921c7a0f6b5291ea02e">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="84" height="69" class="scale"
+              src="/imgw/img-4f2951adb4cd5921c7a0f6b5291ea02e.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="c0ef243486e3ad85"></a>
+      <!--heading-->
+      <h2 class="chap">Hide, Remove or Restore tagged element or wildcard</h2>
+      <p></p>
+      You can put <code class="cod">$tags</code> (using <code class="cod">$</code>) on elements, then remove, hide or
+      restore components either individually or by tags.
+      <p></p>
+      By default, all components are displayed:
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+class C1 $tag13
+enum E1
+interface I1 $tag13
+C1 -- I1
+@enduml
+</textarea>
+        <div id="out2178f21758eae02da17f97e8ba9ec21d">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="155" height="177" class="scale"
+              src="/imgw/img-2178f21758eae02da17f97e8ba9ec21d.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      But you can:
+      <ul>
+        <li><code class="cod">hide $tag13</code> components:</li>
+      </ul>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+class C1 $tag13
+enum E1
+interface I1 $tag13
+C1 -- I1
+
+hide $tag13
+@enduml
+</textarea>
+        <div id="outd9eb2357df62170b2708f8b715c7d78f">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="155" height="177" class="scale"
+              src="/imgw/img-d9eb2357df62170b2708f8b715c7d78f.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <ul>
+        <li>or <code class="cod">remove $tag13</code> components:</li>
+      </ul>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+class C1 $tag13
+enum E1
+interface I1 $tag13
+C1 -- I1
+
+remove $tag13
+@enduml
+</textarea>
+        <div id="outddf264dc4de6e2222a21e9610a100653">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="70" height="69" class="scale"
+              src="/imgw/img-ddf264dc4de6e2222a21e9610a100653.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <ul>
+        <li>or <code class="cod">remove $tag13 and restore $tag1</code> components:</li>
+      </ul>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+class C1 $tag13 $tag1
+enum E1
+interface I1 $tag13
+C1 -- I1
+
+remove $tag13
+restore $tag1
+@enduml
+</textarea>
+        <div id="out2f7f93043307874b27b8d9faaf6ec034">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="155" height="69" class="scale"
+              src="/imgw/img-2f7f93043307874b27b8d9faaf6ec034.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <ul>
+        <li>or <code class="cod">remove * and restore $tag1</code> components:</li>
+      </ul>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+class C1 $tag13 $tag1
+enum E1
+interface I1 $tag13
+C1 -- I1
+
+remove *
+restore $tag1
+@enduml
+</textarea>
+        <div id="out7b7e46b28561d344c5d9627108d95ae3">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="70" height="69" class="scale"
+              src="/imgw/img-7b7e46b28561d344c5d9627108d95ae3.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="382f74cc79c4edbc"></a>
+      <!--heading-->
+      <h2 class="chap">Hide or Remove unlinked class</h2>
+      <p></p>
+      By default, all classes are displayed:
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+class C1
+class C2
+class C3
+C1 -- C2
+@enduml
+</textarea>
+        <div id="out91f4c4439b14ed1b6f97ae223764229e">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="155" height="177" class="scale"
+              src="/imgw/img-91f4c4439b14ed1b6f97ae223764229e.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      But you can:
+      <ul>
+        <li><code class="cod">hide @unlinked</code> classes:</li>
+      </ul>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+class C1
+class C2
+class C3
+C1 -- C2
+
+hide @unlinked
+@enduml
+</textarea>
+        <div id="outed0459209a85e5de9e2e7f49493100f3">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="155" height="177" class="scale"
+              src="/imgw/img-ed0459209a85e5de9e2e7f49493100f3.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <ul>
+        <li>or <code class="cod">remove @unlinked</code> classes:</li>
+      </ul>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+class C1
+class C2
+class C3
+C1 -- C2
+
+remove @unlinked
+@enduml
+</textarea>
+        <div id="outaea5b4ef495217881f8ff3e855544ff9">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="70" height="177" class="scale"
+              src="/imgw/img-aea5b4ef495217881f8ff3e855544ff9.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <em>[Adapted from <a href="https://forum.plantuml.net/11052">QA-11052</a>]</em>
+      <a style="position:relative;top:-38px;" name="b09695ba6d76313d"></a>
+      <!--heading-->
+      <h2 class="chap">Use generics</h2>
+      <p></p>
+      <p></p>
+      You can also use bracket <code class="cod">&lt;</code> and <code class="cod">&gt;</code> to define generics usage
+      in a class.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+class Foo&lt;? extends Element&gt; {
+  int size()
+}
+Foo *- Element
+
+@enduml
+</textarea>
+        <div id="outc1800fa9b709461c87683e773aec76d4">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="299" height="89" class="scale"
+              src="/imgw/img-c1800fa9b709461c87683e773aec76d4.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      It is possible to disable this drawing using <code class="cod">skinparam genericDisplay old</code> command.
+      <p></p>
+      <a style="position:relative;top:-38px;" name="4b62dd14f1d33739"></a>
+      <!--heading-->
+      <h2 class="chap">Specific Spot</h2>
+      <p></p>
+      Usually, a spotted character (C, I, E or A) is used for classes,
+      interface, enum and abstract classes.
+      <p></p>
+      But you can define your own spot for a class when you define the stereotype,
+      adding a single character and a color, like in this example:
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+class System &lt;&lt; (S,#FF7700) Singleton &gt;&gt;
+class Date &lt;&lt; (D,orchid) &gt;&gt;
+@enduml
+</textarea>
+        <div id="out72e113241f411130ea0b74c1095b5593">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="209" height="79" class="scale"
+              src="/imgw/img-72e113241f411130ea0b74c1095b5593.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <a style="position:relative;top:-38px;" name="27fe4eb3edbaff8f"></a>
+      <!--heading-->
+      <h2 class="chap">Packages</h2>
+      <p></p>
+      You can define a package using the
+      <code class="cod">package</code> keyword, and optionally declare a background color
+      for your package (Using a CSS color code or name).
+      <p></p>
+      Note that package definitions can be nested.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+package &#34;Classic Collections&#34; #DDDDDD {
+  Object &lt;|-- ArrayList
+}
+
+package com.plantuml {
+  Object &lt;|-- Demo1
+  Demo1 *- Demo2
+}
+
+@enduml
+</textarea>
+        <div id="out1d35a4e9276e9513bc7a5d83d3b208d5">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="458" height="288" class="scale"
+              src="/imgw/img-1d35a4e9276e9513bc7a5d83d3b208d5.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="a05971470d7fd711"></a>
+      <!--heading-->
+      <h2 class="chap">Packages style</h2>
+      <p></p>
+      <p></p>
+      <p></p>
+      There are different styles available for packages.
+      <p></p>
+      You can specify them either by setting a default style with the command : <code
+        class="cod">skinparam packageStyle</code>,
+      or by using a stereotype on the package:
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+scale 750 width
+package foo1 &lt;&lt;Node&gt;&gt; {
+  class Class1
+}
+
+package foo2 &lt;&lt;Rectangle&gt;&gt; {
+  class Class2
+}
+
+package foo3 &lt;&lt;Folder&gt;&gt; {
+  class Class3
+}
+
+package foo4 &lt;&lt;Frame&gt;&gt; {
+  class Class4
+}
+
+package foo5 &lt;&lt;Cloud&gt;&gt; {
+  class Class5
+}
+
+package foo6 &lt;&lt;Database&gt;&gt; {
+  class Class6
+}
+
+@enduml
+</textarea>
+        <div id="out2312baed51e01dc9a9c6b3bfdf0d2a5b">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="750" height="134" class="scale"
+              src="/imgw/img-2312baed51e01dc9a9c6b3bfdf0d2a5b.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      You can also define links between packages, like in the following
+      example:
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+skinparam packageStyle rectangle
+
+package foo1.foo2 {
+}
+
+package foo1.foo2.foo3 {
+  class Object
+}
+
+foo1.foo2 +-- foo1.foo2.foo3
+
+@enduml
+</textarea>
+        <div id="out4c4d69280b57878197134c54d6dd24f8">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="303" height="328" class="scale"
+              src="/imgw/img-4c4d69280b57878197134c54d6dd24f8.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <a style="position:relative;top:-38px;" name="13d28e8dfc702e34"></a>
+      <!--heading-->
+      <h2 class="chap">Namespaces</h2>
+      <p></p>
+      Starting with version 1.2023.2, PlantUML handles differently namespaces and packages.
+      <p></p>
+      There won&#39;t be any difference between <code class="cod">namespaces</code> and <code
+        class="cod">packages</code> anymore: both keywords are now synonymous.
+      <a style="position:relative;top:-38px;" name="0d2504841361d7da"></a>
+      <!--heading-->
+      <h2 class="chap">Automatic package creation</h2>
+      <p></p>
+      <p></p>
+      You can define another separator (other than the dot) using
+      the command : <code class="cod">set separator ???</code>.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+set separator ::
+class X1::X2::foo {
+  some info
+}
+
+@enduml
+</textarea>
+        <div id="oute3a930c7e1dc9adeac68777ccdc798fa">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="174" height="206" class="scale"
+              src="/imgw/img-e3a930c7e1dc9adeac68777ccdc798fa.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      You can disable automatic namespace creation using the command
+      <code class="cod">set separator none</code>.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+set separator none
+class X1.X2.foo {
+  some info
+}
+
+@enduml
+</textarea>
+        <div id="out86fce7000d097efb74ec9904d2037c1f">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="112" height="84" class="scale"
+              src="/imgw/img-86fce7000d097efb74ec9904d2037c1f.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="8b64d7547fa4f699"></a>
+      <!--heading-->
+      <h2 class="chap">Lollipop interface</h2>
+      <p></p>
+      <p></p>
+      You can also define lollipops interface on classes, using the following
+      syntax:
+      <ul>
+        <li><code class="cod">bar ()- foo</code></li>
+        <li><code class="cod">bar ()-- foo</code></li>
+        <li><code class="cod">foo -() bar</code></li>
+      </ul>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+class foo
+bar ()- foo
+@enduml
+</textarea>
+        <div id="out28a7ddd8290cb11f66e5371c1d0f8fc7">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="122" height="69" class="scale"
+              src="/imgw/img-28a7ddd8290cb11f66e5371c1d0f8fc7.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <a style="position:relative;top:-38px;" name="5a6e75f1261e3d91"></a>
+      <!--heading-->
+      <h2 class="chap">Changing arrows orientation</h2>
+      <p></p>
+      By default, links between classes have two dashes <code class="cod">--</code> and are vertically oriented.
+      It is possible to use horizontal link by putting a single dash (or dot) like this:
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+Room o- Student
+Room *-- Chair
+@enduml
+</textarea>
+        <div id="outd224f1b107cf59f4aa4dfb9fb58c7425">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="205" height="177" class="scale"
+              src="/imgw/img-d224f1b107cf59f4aa4dfb9fb58c7425.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      You can also change directions by reversing the link:
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+Student -o Room
+Chair --* Room
+@enduml
+</textarea>
+        <div id="out7f86df8a850f47b40f92ef0ef352a683">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="205" height="177" class="scale"
+              src="/imgw/img-7f86df8a850f47b40f92ef0ef352a683.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      It is also possible to change arrow direction by adding <code class="cod">left</code>, <code
+        class="cod">right</code>, <code class="cod">up</code>
+      or <code class="cod">down</code> keywords inside the arrow:
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+foo -left-&gt; dummyLeft
+foo -right-&gt; dummyRight
+foo -up-&gt; dummyUp
+foo -down-&gt; dummyDown
+@enduml
+</textarea>
+        <div id="outd58cb6f64f940a1663b2c7b87651d93e">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="353" height="285" class="scale"
+              src="/imgw/img-d58cb6f64f940a1663b2c7b87651d93e.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      You can shorten the arrow by using only the first character of the direction (for example, <code
+        class="cod">-d-</code> instead of
+      <code class="cod">-down-</code>)
+      or the two first characters (<code class="cod">-do-</code>).
+      <p></p>
+      Please note that you should not abuse this functionality : <em>Graphviz</em> gives usually good results without
+      tweaking.
+      <p></p>
+      And with the <a href="use-case-diagram#d551e48d272b2b07"><code class="cod">left to right direction</code></a>
+      parameter:
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+left to right direction
+foo -left-&gt; dummyLeft
+foo -right-&gt; dummyRight
+foo -up-&gt; dummyUp
+foo -down-&gt; dummyDown
+@enduml
+</textarea>
+        <div id="outcabbb5a51fb01c2214632b7f184cfc41">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="461" height="235" class="scale"
+              src="/imgw/img-cabbb5a51fb01c2214632b7f184cfc41.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="fbbc0504d940020e"></a>
+      <!--heading-->
+      <h2 class="chap">Association classes</h2>
+      <p></p>
+      You can define <em>association class</em> after that a relation has been
+      defined between two classes, like in this example:
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+class Student {
+  Name
+}
+Student &#34;0..*&#34; - &#34;1..*&#34; Course
+(Student, Course) .. Enrollment
+
+class Enrollment {
+  drop()
+  cancel()
+}
+@enduml
+</textarea>
+        <div id="out4f80984e827f28b4d9b8840de9c0db89">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="252" height="230" class="scale"
+              src="/imgw/img-4f80984e827f28b4d9b8840de9c0db89.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      You can define it in another direction:
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+class Student {
+  Name
+}
+Student &#34;0..*&#34; -- &#34;1..*&#34; Course
+(Student, Course) . Enrollment
+
+class Enrollment {
+  drop()
+  cancel()
+}
+@enduml
+</textarea>
+        <div id="out16cdfa822fa99231527cb4a8f6c80912">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="197" height="338" class="scale"
+              src="/imgw/img-16cdfa822fa99231527cb4a8f6c80912.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <a style="position:relative;top:-38px;" name="43980c266e3ad62c"></a>
+      <!--heading-->
+      <h2 class="chap">Association on same class</h2>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+class Station {
+    +name: string
+}
+
+class StationCrossing {
+    +cost: TimeInterval
+}
+
+&lt;&gt; diamond
+
+StationCrossing . diamond
+diamond - &#34;from 0..*&#34; Station
+diamond - &#34;to 0..* &#34; Station
+@enduml
+</textarea>
+        <div id="outc6abdad9f8ef327e8de6ea7a1037b6a0">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="354" height="92" class="scale"
+              src="/imgw/img-c6abdad9f8ef327e8de6ea7a1037b6a0.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="http://wiki.plantuml.net/site/incubation#associations">Incubation: Associations</a>]</em>
+      <a style="position:relative;top:-38px;" name="7aa53dbdfc2137bf"></a>
+      <!--heading-->
+      <h2 class="chap">Skinparam</h2>
+      <p></p>
+      <p></p>
+      <p></p>
+      You can use the <a href="skinparam">skinparam</a>
+      command to change colors and fonts for the drawing.
+      <p></p>
+      You can use this command :
+      <ul>
+        <li>In the diagram definition, like any other commands,</li>
+        <li>In an <a href="preprocessing">included file</a>,</li>
+        <li>In a configuration file, provided in the <a href="command-line">command line</a> or the <a
+            href="ant-task">ANT task</a>.</li>
+      </ul>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+skinparam class {
+BackgroundColor PaleGreen
+ArrowColor SeaGreen
+BorderColor SpringGreen
+}
+skinparam stereotypeCBackgroundColor YellowGreen
+
+Class01 &#34;1&#34; *-- &#34;many&#34; Class02 : contains
+
+Class03 o-- Class04 : aggregation
+
+@enduml
+</textarea>
+        <div id="out1a37fc8f0d6c6505aa075d2774a48b6e">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="251" height="195" class="scale"
+              src="/imgw/img-1a37fc8f0d6c6505aa075d2774a48b6e.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <a style="position:relative;top:-38px;" name="89a4c54a52d87715"></a>
+      <!--heading-->
+      <h2 class="chap">Skinned Stereotypes</h2>
+      <p></p>
+      <p></p>
+      You can define specific color and fonts for stereotyped classes.
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+skinparam class {
+BackgroundColor PaleGreen
+ArrowColor SeaGreen
+BorderColor SpringGreen
+BackgroundColor&lt;&lt;Foo&gt;&gt; Wheat
+BorderColor&lt;&lt;Foo&gt;&gt; Tomato
+}
+skinparam stereotypeCBackgroundColor YellowGreen
+skinparam stereotypeCBackgroundColor&lt;&lt; Foo &gt;&gt; DimGray
+
+class Class01 &lt;&lt;Foo&gt;&gt;
+class Class03 &lt;&lt;Foo&gt;&gt;
+Class01 &#34;1&#34; *-- &#34;many&#34; Class02 : contains
+
+Class03 o-- Class04 : aggregation
+
+@enduml
+</textarea>
+        <div id="out2baa907336bb2aa81fb1cd1eb909dfd2">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="251" height="206" class="scale"
+              src="/imgw/img-2baa907336bb2aa81fb1cd1eb909dfd2.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <strong>Important</strong>: unlike class stereotypes, there must be no space between the skin parameter and the
+      following stereotype.
+      <p></p>
+      Any of the spaces shown as <code class="cod">_</code> below will cause <strong>all</strong> skinparams to be
+      ignored,
+      see <a href="https://discord.com/channels/1083727021328306236/1289954399321329755/1289967399302467614">discord
+        discussion</a>
+      and <a href="https://github.com/plantuml/plantuml/issues/1932">issue #1932</a>:
+      <ul>
+        <li><code class="cod">BackgroundColor_&lt;&lt;Foo&gt;&gt; Wheat</code></li>
+        <li><code class="cod">skinparam stereotypeCBackgroundColor_&lt;&lt;Foo&gt;&gt; DimGray</code></li>
+      </ul>
+      <a style="position:relative;top:-38px;" name="cfe920390b501516"></a>
+      <!--heading-->
+      <h2 class="chap">Color gradient</h2>
+      <p></p>
+      You can declare individual colors for classes, notes etc using the # notation.
+      <p></p>
+      You can use standard color names or RGB codes in various notations, see <a href="color">Colors</a>.
+      <p></p>
+      You can also use color gradient for background colors, with the following syntax:
+      two colors names separated either by:
+      <ul>
+        <li><code class="cod">|</code>,</li>
+        <li><code class="cod">/</code>,</li>
+        <li><code class="cod">\</code>, or </li>
+        <li><code class="cod">-</code></li>
+      </ul>
+      depending on the direction of the gradient.
+      <p></p>
+      For example:
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+skinparam backgroundcolor AntiqueWhite/Gold
+skinparam classBackgroundColor Wheat|CornflowerBlue
+
+class Foo #red-green
+note left of Foo #blue\9932CC
+  this is my
+  note on this class
+end note
+
+package example #GreenYellow/LightGoldenRodYellow {
+  class Dummy
+}
+
+@enduml
+</textarea>
+        <div id="oute379bca431eb7cb4f624dad0fe0e8deb">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="363" height="120" class="scale"
+              src="/imgw/img-e379bca431eb7cb4f624dad0fe0e8deb.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="c08f8d9927fcb626"></a>
+      <!--heading-->
+      <h2 class="chap">Help on layout</h2>
+      <p></p>
+      <p></p>
+      Sometimes, the default layout is not perfect...
+      <p></p>
+      You can use <code class="cod">together</code> keyword to group some classes together :
+      the layout engine will try to group them (as if they were in the same package).
+      <p></p>
+      You can also use <code class="cod">hidden</code> links to force the layout.
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+class Bar1
+class Bar2
+together {
+  class Together1
+  class Together2
+  class Together3
+}
+Together1 - Together2
+Together2 - Together3
+Together2 -[hidden]--&gt; Bar1
+Bar1 -[hidden]&gt; Bar2
+
+
+@enduml
+</textarea>
+        <div id="out4f367eaae90fbb7e675252e34ed19ca0">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="378" height="238" class="scale"
+              src="/imgw/img-4f367eaae90fbb7e675252e34ed19ca0.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <p></p>
+      <a style="position:relative;top:-38px;" name="fc6a662f75b53104"></a>
+      <!--heading-->
+      <h2 class="chap">Splitting large files</h2>
+      <p></p>
+      Sometimes, you will get some very large image files.
+      <p></p>
+      You can use the <code class="cod">page (hpages)x(vpages)</code> command to split the generated image into several
+      files :
+      <p></p>
+      <code class="cod">hpages</code> is a number that indicated the number of horizontal pages,
+      and <code class="cod">vpages</code> is a number that indicated the number of vertical pages.
+      <p></p>
+      You can also use some specific skinparam settings to put borders on splitted pages (see example).
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+&#39; Split into 4 pages
+page 2x2
+skinparam pageMargin 10
+skinparam pageExternalColor gray
+skinparam pageBorderColor black
+
+class BaseClass
+
+namespace net.dummy #DDDDDD {
+    .BaseClass &lt;|-- Person
+    Meeting o-- Person
+
+    .BaseClass &lt;|- Meeting
+
+}
+
+namespace net.foo {
+  net.dummy.Person  &lt;|- Person
+  .BaseClass &lt;|-- Person
+
+  net.dummy.Meeting o-- Person
+}
+
+BaseClass &lt;|-- net.unused.Person
+@enduml
+</textarea>
+        <div id="outf4a48be9c3836759f034a9152f254085">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="446" height="364" class="scale"
+              src="/imgw/img-f4a48be9c3836759f034a9152f254085.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <a style="position:relative;top:-38px;" name="6e0d446ea2c5bf82"></a>
+      <!--heading-->
+      <h2 class="chap">Extends and implements</h2>
+      <p></p>
+      It is also possible to use <code class="cod">extends</code> and <code class="cod">implements</code> keywords.
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+class ArrayList implements List
+class ArrayList extends AbstractList
+@enduml
+</textarea>
+        <div id="out3dffeafc74580d507e0b451b99ffcd1b">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="215" height="177" class="scale"
+              src="/imgw/img-3dffeafc74580d507e0b451b99ffcd1b.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+class A extends B, C {
+}
+@enduml
+</textarea>
+        <div id="outba4fc82544afef639b8ac94c1a348c71">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="139" height="177" class="scale"
+              src="/imgw/img-ba4fc82544afef639b8ac94c1a348c71.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a
+          href="https://forum.plantuml.net/2239/is-multiple-inheritance-or-implementation-possible">QA-2239</a>]</em>
+      <a style="position:relative;top:-38px;" name="4ffca7d13182195f"></a>
+      <!--heading-->
+      <h2 class="chap">Bracketed relations (linking or arrow) style </h2>
+      <p></p>
+      <h3>Line style</h3>
+      It&#39;s also possible to have explicitly <code class="cod">bold</code>, <code class="cod">dashed</code>, <code
+        class="cod">dotted</code>, <code class="cod">hidden</code> or <code class="cod">plain</code> relation, links or
+      arrows:<br />
+      <p></p>
+      <ul>
+        <li>without label</li>
+      </ul>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+title Bracketed line style without label
+class foo
+class bar
+bar1 : [bold]  
+bar2 : [dashed]
+bar3 : [dotted]
+bar4 : [hidden]
+bar5 : [plain] 
+
+foo --&gt; bar
+foo -[bold]-&gt; bar1
+foo -[dashed]-&gt; bar2
+foo -[dotted]-&gt; bar3
+foo -[hidden]-&gt; bar4
+foo -[plain]-&gt; bar5
+@enduml
+</textarea>
+        <div id="out5a1d3d83cf36f508c0d8a5d6dce7d55b">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="556" height="233" class="scale"
+              src="/imgw/img-5a1d3d83cf36f508c0d8a5d6dce7d55b.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <ul>
+        <li>with label</li>
+      </ul>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+title Bracketed line style with label
+class foo
+class bar
+bar1 : [bold]  
+bar2 : [dashed]
+bar3 : [dotted]
+bar4 : [hidden]
+bar5 : [plain] 
+
+foo --&gt; bar          : ∅
+foo -[bold]-&gt; bar1   : [bold]
+foo -[dashed]-&gt; bar2 : [dashed]
+foo -[dotted]-&gt; bar3 : [dotted]
+foo -[hidden]-&gt; bar4 : [hidden]
+foo -[plain]-&gt; bar5  : [plain]
+
+@enduml
+</textarea>
+        <div id="outaeec3ae34c32a1b70a28191652a87e8a">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="556" height="251" class="scale"
+              src="/imgw/img-aeec3ae34c32a1b70a28191652a87e8a.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Adapted from <a
+          href="https://forum.plantuml.net/4181/how-change-width-line-in-a-relationship-between-two-classes?show=4232#a4232">QA-4181</a>]</em>
+      <p></p>
+      <h3>Line color</h3>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+title Bracketed line color
+class foo
+class bar
+bar1 : [#red]
+bar2 : [#green]
+bar3 : [#blue]
+
+foo --&gt; bar
+foo -[#red]-&gt; bar1     : [#red]
+foo -[#green]-&gt; bar2   : [#green]
+foo -[#blue]-&gt; bar3    : [#blue]
+&#39;foo -[#blue;#yellow;#green]-&gt; bar4
+@enduml
+</textarea>
+        <div id="outd333682cea76210806139af68e90c362">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="362" height="251" class="scale"
+              src="/imgw/img-d333682cea76210806139af68e90c362.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>Line thickness</h3>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+title Bracketed line thickness
+class foo
+class bar
+bar1 : [thickness=1]
+bar2 : [thickness=2]
+bar3 : [thickness=4]
+bar4 : [thickness=8]
+bar5 : [thickness=16]
+
+foo --&gt; bar                 : ∅
+foo -[thickness=1]-&gt; bar1   : [1]
+foo -[thickness=2]-&gt; bar2   : [2]
+foo -[thickness=4]-&gt; bar3   : [4]
+foo -[thickness=8]-&gt; bar4   : [8]
+foo -[thickness=16]-&gt; bar5  : [16]
+
+@enduml
+</textarea>
+        <div id="out4b3db747cc542e671464cec5d683eb86">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="725" height="251" class="scale"
+              src="/imgw/img-4b3db747cc542e671464cec5d683eb86.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/4949">QA-4949</a>]</em>
+      <p></p>
+      <h3>Mix</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+title Bracketed line style mix
+class foo
+class bar
+bar1 : [#red,thickness=1]
+bar2 : [#red,dashed,thickness=2]
+bar3 : [#green,dashed,thickness=4]
+bar4 : [#blue,dotted,thickness=8]
+bar5 : [#blue,plain,thickness=16]
+
+foo --&gt; bar                             : ∅
+foo -[#red,thickness=1]-&gt; bar1          : [#red,1]
+foo -[#red,dashed,thickness=2]-&gt; bar2   : [#red,dashed,2]
+foo -[#green,dashed,thickness=4]-&gt; bar3 : [#green,dashed,4]
+foo -[#blue,dotted,thickness=8]-&gt; bar4  : [blue,dotted,8]
+foo -[#blue,plain,thickness=16]-&gt; bar5  : [blue,plain,16]
+@enduml
+</textarea>
+        <div id="outbab1eb74f3baf2a55d4e2bafaf79f3ee">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="1089" height="251" class="scale"
+              src="/imgw/img-bab1eb74f3baf2a55d4e2bafaf79f3ee.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="8dfb3b05fc895d2b"></a>
+      <!--heading-->
+      <h2 class="chap">Change relation (linking or arrow) color and style (inline style)</h2>
+      <p></p>
+      You can change the <a href="color">color</a> or style of individual relation or arrows using the inline following
+      notation:
+      <p></p>
+      <ul>
+        <li><code class="cod">#color;line.[bold|dashed|dotted];text:color</code></li>
+      </ul>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+class foo
+foo --&gt; bar : normal
+foo --&gt; bar1 #line:red;line.bold;text:red  : red bold
+foo --&gt; bar2 #green;line.dashed;text:green : green dashed
+foo --&gt; bar3 #blue;line.dotted;text:blue   : blue dotted
+@enduml
+</textarea>
+        <div id="outdb1f6ef5b231739a21a8bbde66e81179">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="381" height="195" class="scale"
+              src="/imgw/img-db1f6ef5b231739a21a8bbde66e81179.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[See similar feature on <a href="deployment-diagram#0b2e57c3d4eafdda">deployment</a>]</em>
+      <a style="position:relative;top:-38px;" name="fab0ecfcfd0af288"></a>
+      <!--heading-->
+      <h2 class="chap">Change class color and style (inline style)</h2>
+      <p></p>
+      You can change the <a href="color">color</a> or style of individual class using the two following notations:
+      <p></p>
+      <ul>
+        <li><code class="cod">#color ##[style]color</code> </li>
+      </ul>
+      <p></p>
+      With background color first (<code class="cod">#color</code>), then line style and line color (<code
+        class="cod">##[style]color</code> )
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+abstract   abstract
+annotation annotation #pink ##[bold]red
+class      class      #palegreen ##[dashed]green
+interface  interface  #aliceblue ##[dotted]blue
+@enduml
+</textarea>
+        <div id="out139070f4b95d212eef2fa23bcb1aa4ca">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="235" height="177" class="scale"
+              src="/imgw/img-139070f4b95d212eef2fa23bcb1aa4ca.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/1487">QA-1487</a>]</em>
+      <p></p>
+      <ul>
+        <li><code class="cod">#[color|back:color];header:color;line:color;line.[bold|dashed|dotted];text:color</code>
+        </li>
+      </ul>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+abstract   abstract
+annotation annotation #pink;line:red;line.bold;text:red
+class      class      #palegreen;line:green;line.dashed;text:green
+interface  interface  #aliceblue;line:blue;line.dotted;text:blue
+@enduml
+</textarea>
+        <div id="out8f555ac6ffdcbda3068b873ab9dec2f7">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="235" height="177" class="scale"
+              src="/imgw/img-8f555ac6ffdcbda3068b873ab9dec2f7.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      First original example:
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+class bar #line:green;back:lightblue
+class bar2 #lightblue;line:green
+
+class Foo1 #back:red;line:00FFFF
+class FooDashed #line.dashed:blue
+class FooDotted #line.dotted:blue
+class FooBold #line.bold
+class Demo1 #back:lightgreen|yellow;header:blue/red
+@enduml
+</textarea>
+        <div id="out02fdc8a2eae10c0f5c372d2bee63ac31">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="377" height="285" class="scale"
+              src="/imgw/img-02fdc8a2eae10c0f5c372d2bee63ac31.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/3770">QA-3770</a>]</em>
+      <a style="position:relative;top:-38px;" name="4829cb0f596c9350"></a>
+      <!--heading-->
+      <h2 class="chap">Arrows from/to class members</h2>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+class Foo {
++ field1
++ field2
+}
+
+class Bar {
++ field3
++ field4
+}
+
+Foo::field1 --&gt; Bar::field3 : foo
+Foo::field2 --&gt; Bar::field4 : bar
+@enduml
+</textarea>
+        <div id="out83b1e549422b92386e8ec906cd30b8bd">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="208" height="273" class="scale"
+              src="/imgw/img-83b1e549422b92386e8ec906cd30b8bd.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/3636">QA-3636</a>]</em>
+      <p></p>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+left to right direction
+
+class User {
+  id : INTEGER
+  ..
+  other_id : INTEGER
+}
+
+class Email {
+  id : INTEGER
+  ..
+  user_id : INTEGER
+  address : INTEGER
+}
+
+User::id *-- Email::user_id
+@enduml
+</textarea>
+        <div id="outf0ff16d922a13c40a98fa4b0f6fa9244">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="368" height="128" class="scale"
+              src="/imgw/img-f0ff16d922a13c40a98fa4b0f6fa9244.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/5261">QA-5261</a>]</em>
+      <a style="position:relative;top:-38px;" name="49b7759afaffc066"></a>
+      <!--heading-->
+      <h2 class="chap">Grouping inheritance arrow heads</h2>
+      <p></p>
+      You can merge all arrow heads using the <code class="cod">skinparam groupInheritance</code>, with a threshold as
+      parameter.
+      <p></p>
+      <h3>GroupInheritance 1 (no grouping)</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+skinparam groupInheritance 1
+
+A1 &lt;|-- B1
+
+A2 &lt;|-- B2
+A2 &lt;|-- C2
+
+A3 &lt;|-- B3
+A3 &lt;|-- C3
+A3 &lt;|-- D3
+
+A4 &lt;|-- B4
+A4 &lt;|-- C4
+A4 &lt;|-- D4
+A4 &lt;|-- E4
+@enduml
+</textarea>
+        <div id="oute22ad64173e5efa63ba341dfde2266c5">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="834" height="177" class="scale"
+              src="/imgw/img-e22ad64173e5efa63ba341dfde2266c5.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>GroupInheritance 2 (grouping from 2)</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+skinparam groupInheritance 2
+
+A1 &lt;|-- B1
+
+A2 &lt;|-- B2
+A2 &lt;|-- C2
+
+A3 &lt;|-- B3
+A3 &lt;|-- C3
+A3 &lt;|-- D3
+
+A4 &lt;|-- B4
+A4 &lt;|-- C4
+A4 &lt;|-- D4
+A4 &lt;|-- E4
+@enduml
+</textarea>
+        <div id="out8de1f8e61d11a93438e4918341cd24d0">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="834" height="197" class="scale"
+              src="/imgw/img-8de1f8e61d11a93438e4918341cd24d0.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>GroupInheritance 3 (grouping only from 3)</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+skinparam groupInheritance 3
+
+A1 &lt;|-- B1
+
+A2 &lt;|-- B2
+A2 &lt;|-- C2
+
+A3 &lt;|-- B3
+A3 &lt;|-- C3
+A3 &lt;|-- D3
+
+A4 &lt;|-- B4
+A4 &lt;|-- C4
+A4 &lt;|-- D4
+A4 &lt;|-- E4
+@enduml
+</textarea>
+        <div id="oute83c28d33fcb2f5ed5112baa075278bb">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="834" height="197" class="scale"
+              src="/imgw/img-e83c28d33fcb2f5ed5112baa075278bb.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>GroupInheritance 4 (grouping only from 4)</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+skinparam groupInheritance 4
+
+A1 &lt;|-- B1
+
+A2 &lt;|-- B2
+A2 &lt;|-- C2
+
+A3 &lt;|-- B3
+A3 &lt;|-- C3
+A3 &lt;|-- D3
+
+A4 &lt;|-- B4
+A4 &lt;|-- C4
+A4 &lt;|-- D4
+A4 &lt;|-- E4
+@enduml
+</textarea>
+        <div id="out8365856bc85abe63ff017861bef1ccdd">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="834" height="197" class="scale"
+              src="/imgw/img-8365856bc85abe63ff017861bef1ccdd.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/3193/grouping-inheritance-arrow-ends">QA-3193</a>, and Defect <a
+          href="https://forum.plantuml.net/13532/groupinheritance-bug">QA-13532</a>]</em>
+      <a style="position:relative;top:-38px;" name="a3e433077b7a6be8"></a>
+      <!--heading-->
+      <h2 class="chap">Display JSON Data on Class or Object diagram</h2>
+      <p></p>
+      <h3>Simple example</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+class Class
+object Object
+json JSON {
+   &#34;fruit&#34;:&#34;Apple&#34;,
+   &#34;size&#34;:&#34;Large&#34;,
+   &#34;color&#34;: [&#34;Red&#34;, &#34;Green&#34;]
+}
+@enduml
+</textarea>
+        <div id="out6a7ee08059d72d372b482acd31af4d40">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="187" height="241" class="scale"
+              src="/imgw/img-6a7ee08059d72d372b482acd31af4d40.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a
+          href="https://forum.plantuml.net/15481/possible-link-elements-from-two-jsons-with-both-jsons-embeded?show=15567#c15567">QA-15481</a>]</em>
+      <p></p>
+      For another example, see on <a href="json#jinnkhaa7d65l0fkhfec">JSON page</a>.
+      <a style="position:relative;top:-38px;" name="dbeeec19b401ede6"></a>
+      <!--heading-->
+      <h2 class="chap">Packages and Namespaces Enhancement</h2>
+      <p></p>
+      <em>[From V1.2023.2+, and V1.2023.5]</em>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+class A.B.C.D.Z {
+}
+@enduml
+</textarea>
+        <div id="oute406728f5557bcb28d5eabaf0cf4714c">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="238" height="324" class="scale"
+              src="/imgw/img-e406728f5557bcb28d5eabaf0cf4714c.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+set separator none
+class A.B.C.D.Z {
+}
+@enduml
+</textarea>
+        <div id="out94b3016b13e63db55d8a1b1150d5f6b0">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="114" height="67" class="scale"
+              src="/imgw/img-94b3016b13e63db55d8a1b1150d5f6b0.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+!pragma useIntermediatePackages false
+class A.B.C.D.Z {
+}
+@enduml
+</textarea>
+        <div id="out307af643c29eb5656709fdffe75bc63e">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="94" height="120" class="scale"
+              src="/imgw/img-307af643c29eb5656709fdffe75bc63e.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+set separator none
+package A.B.C.D {
+  class Z {
+  }
+}
+@enduml
+</textarea>
+        <div id="out2f50d44de843779f95a59678e73df87d">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="94" height="120" class="scale"
+              src="/imgw/img-2f50d44de843779f95a59678e73df87d.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://github.com/plantuml/plantuml/issues/1352">GH-1352</a>]</em>
+      <a style="position:relative;top:-38px;" name="fbeb2067fcf011c5"></a>
+      <!--heading-->
+      <h2 class="chap">Qualified associations</h2>
+      <p></p>
+      <h3>Minimal example</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+class class1
+class class2
+
+class1 [Qualifier] - class2
+@enduml
+</textarea>
+        <div id="out0a9df3380557089008b0c486462ac06f">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="262" height="69" class="scale"
+              src="/imgw/img-0a9df3380557089008b0c486462ac06f.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://forum.plantuml.net/16397/add-qualified-associations-to-class-diagrams">QA-16397</a>, <a
+          href="https://github.com/plantuml/plantuml/issues/1467">GH-1467</a>]</em>
+      <p></p>
+      <h3>Another example</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+    interface Map&lt;K,V&gt;
+    class HashMap&lt;Long,Customer&gt;
+
+    Map &lt;|.. HashMap
+    Shop [customerId: long] ---&gt; &#34;customer\n1&#34; Customer
+    HashMap [id: Long] -r-&gt; &#34;value&#34; Customer
+@enduml
+</textarea>
+        <div id="out16a9d97a06e6ea729a1b2b592bb82d95">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="409" height="311" class="scale"
+              src="/imgw/img-16a9d97a06e6ea729a1b2b592bb82d95.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="3530c544ab82f199"></a>
+      <!--heading-->
+      <h2 class="chap">Change diagram orientation</h2>
+      <p></p>
+      You can change (whole) diagram orientation with:
+      <ul>
+        <li><code class="cod">top to bottom direction</code> <em>(by default)</em></li>
+        <li><code class="cod">left to right direction</code></li>
+      </ul>
+      <p></p>
+      <h3>Top to bottom <em>(by default)</em></h3>
+      <p></p>
+      <h4>With <a href="graphviz-dot">Graphviz</a> <em>(layout engine by default)</em></h4>
+      <p></p>
+      The main rule is: <strong>Nested element first, then simple element.</strong>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+class a
+class b
+package A {
+  class a1
+  class a2
+  class a3
+  class a4
+  class a5
+  package sub_a {
+   class sa1
+   class sa2
+   class sa3
+  }
+}
+  
+package B {
+  class b1
+  class b2
+  class b3
+  class b4
+  class b5
+  package sub_b {
+   class sb1
+   class sb2
+   class sb3
+  }
+}
+@enduml
+</textarea>
+        <div id="out22f143472bbb0a5307e0e1b5417e41fb">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="1076" height="296" class="scale"
+              src="/imgw/img-22f143472bbb0a5307e0e1b5417e41fb.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h4>With <a href="smetana02">Smetana</a> <em>(internal layout engine)</em></h4>
+      <p></p>
+      The main rule is the opposite: <strong>Simple element first, then nested element.</strong>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+!pragma layout smetana
+class a
+class b
+package A {
+  class a1
+  class a2
+  class a3
+  class a4
+  class a5
+  package sub_a {
+   class sa1
+   class sa2
+   class sa3
+  }
+}
+  
+package B {
+  class b1
+  class b2
+  class b3
+  class b4
+  class b5
+  package sub_b {
+   class sb1
+   class sb2
+   class sb3
+  }
+}
+@enduml
+</textarea>
+        <div id="oute8ea959afd49668124286c662a89c7ca">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="839" height="215" class="scale"
+              src="/imgw/img-e8ea959afd49668124286c662a89c7ca.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>Left to right</h3>
+      <p></p>
+      <h4>With <a href="graphviz-dot">Graphviz</a> <em>(layout engine by default)</em></h4>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+left to right direction
+class a
+class b
+package A {
+  class a1
+  class a2
+  class a3
+  class a4
+  class a5
+  package sub_a {
+   class sa1
+   class sa2
+   class sa3
+  }
+}
+  
+package B {
+  class b1
+  class b2
+  class b3
+  class b4
+  class b5
+  package sub_b {
+   class sb1
+   class sb2
+   class sb3
+  }
+}
+@enduml
+</textarea>
+        <div id="out8a70e705168e4f5fcc93c97bfb956264">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="270" height="1144" class="scale"
+              src="/imgw/img-8a70e705168e4f5fcc93c97bfb956264.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h4>With <a href="smetana02">Smetana</a> <em>(internal layout engine)</em></h4>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+!pragma layout smetana
+left to right direction
+class a
+class b
+package A {
+  class a1
+  class a2
+  class a3
+  class a4
+  class a5
+  package sub_a {
+   class sa1
+   class sa2
+   class sa3
+  }
+}
+  
+package B {
+  class b1
+  class b2
+  class b3
+  class b4
+  class b5
+  package sub_b {
+   class sb1
+   class sb2
+   class sb3
+  }
+}
+@enduml
+</textarea>
+        <div id="out23a427f2bdabf09392deaf7c7009458c">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="199" height="895" class="scale"
+              src="/imgw/img-23a427f2bdabf09392deaf7c7009458c.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="e7c09eecc1d616b2"></a>
+      <!--heading-->
+      <h2 class="chap">Role label to associations</h2>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+class User
+class Item
+User &#34;owner which is very long&#34;/1 -- &#34;0..n&#34;/items Item
+@enduml
+</textarea>
+        <div id="out48a1a9f863b3eca02df088af47621b3c">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="211" height="177" class="scale"
+              src="/imgw/img-48a1a9f863b3eca02df088af47621b3c.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a href="https://github.com/plantuml/plantuml/issues/2536">GH-2536</a>, <a
+          href="https://github.com/plantuml/plantuml/pull/2537">GH-2537</a>]</em>
+
+
+    </main>
+
+
+    <aside id="C6">
+      <!--toc-->
+      <div id="toc">
+        <ul>
+          <li><a href="#96f154df2bc1cb46">Declarative element</a>
+          </li>
+          <li><a href="#9dd2a6eca0c2a0e7">Relations between classes</a>
+          </li>
+          <li><a href="#4a705b44651caa59">Label on relations</a>
+          </li>
+          <li><a href="#bd62ba9333d08763">Using non-letters in element names and relation labels</a>
+          </li>
+          <li><a href="#090967fbee930909">Adding methods</a>
+          </li>
+          <li><a href="#3644720244dd6c6a">Defining visibility</a>
+          </li>
+          <li><a href="#631c2725deb35a73">Visibility on compositions and aggregations</a>
+          </li>
+          <li><a href="#9fd9d25be2fbb118">Abstract and Static</a>
+          </li>
+          <li><a href="#08ca680401eefe3a">Advanced class body</a>
+          </li>
+          <li><a href="#59c91a18bcc97bb0">Notes and stereotypes</a>
+          </li>
+          <li><a href="#23ca7846dedbb80a">More on notes</a>
+          </li>
+          <li><a href="#c909b0b5f0434a64">Note on field (field, attribute, member) or method</a>
+          </li>
+          <li><a href="#1d010d898a1fead2">Note on links</a>
+          </li>
+          <li><a href="#a339d3559f33ad64">Abstract class and interface</a>
+          </li>
+          <li><a href="#6a8ec84e53ede3ae">Hide attributes, methods...</a>
+          </li>
+          <li><a href="#20ec7d48c223b142">Hide classes</a>
+          </li>
+          <li><a href="#3efa75742a5e3384">Remove classes</a>
+          </li>
+          <li><a href="#c0ef243486e3ad85">Hide, Remove or Restore tagged element or wildcard</a>
+          </li>
+          <li><a href="#382f74cc79c4edbc">Hide or Remove unlinked class</a>
+          </li>
+          <li><a href="#b09695ba6d76313d">Use generics</a>
+          </li>
+          <li><a href="#4b62dd14f1d33739">Specific Spot</a>
+          </li>
+          <li><a href="#27fe4eb3edbaff8f">Packages</a>
+          </li>
+          <li><a href="#a05971470d7fd711">Packages style</a>
+          </li>
+          <li><a href="#13d28e8dfc702e34">Namespaces</a>
+          </li>
+          <li><a href="#0d2504841361d7da">Automatic package creation</a>
+          </li>
+          <li><a href="#8b64d7547fa4f699">Lollipop interface</a>
+          </li>
+          <li><a href="#5a6e75f1261e3d91">Changing arrows orientation</a>
+          </li>
+          <li><a href="#fbbc0504d940020e">Association classes</a>
+          </li>
+          <li><a href="#43980c266e3ad62c">Association on same class</a>
+          </li>
+          <li><a href="#7aa53dbdfc2137bf">Skinparam</a>
+          </li>
+          <li><a href="#89a4c54a52d87715">Skinned Stereotypes</a>
+          </li>
+          <li><a href="#cfe920390b501516">Color gradient</a>
+          </li>
+          <li><a href="#c08f8d9927fcb626">Help on layout</a>
+          </li>
+          <li><a href="#fc6a662f75b53104">Splitting large files</a>
+          </li>
+          <li><a href="#6e0d446ea2c5bf82">Extends and implements</a>
+          </li>
+          <li><a href="#4ffca7d13182195f">Bracketed relations (linking or arrow) style</a>
+          </li>
+          <li><a href="#8dfb3b05fc895d2b">Change relation (linking or arrow) color and style (inline style)</a>
+          </li>
+          <li><a href="#fab0ecfcfd0af288">Change class color and style (inline style)</a>
+          </li>
+          <li><a href="#4829cb0f596c9350">Arrows from/to class members</a>
+          </li>
+          <li><a href="#49b7759afaffc066">Grouping inheritance arrow heads</a>
+          </li>
+          <li><a href="#a3e433077b7a6be8">Display JSON Data on Class or Object diagram</a>
+          </li>
+          <li><a href="#dbeeec19b401ede6">Packages and Namespaces Enhancement</a>
+          </li>
+          <li><a href="#fbeb2067fcf011c5">Qualified associations</a>
+          </li>
+          <li><a href="#3530c544ab82f199">Change diagram orientation</a>
+          </li>
+          <li><a href="#e7c09eecc1d616b2">Role label to associations</a>
+          </li>
+        </ul>
+      </div>
+    </aside>
+
+  </div>
+    <script src="../../viz-global.js"></script>
+    <script src="../../plantuml.js"></script>
+    <script>
+        (function () {
+            const render = window.plantumlRender;
+            if (typeof render !== "function") {
+                console.error("PlantUML renderer is unavailable.");
+                return;
+            }
+
+            const renderOptions = {};
+            let counter = 0;
+
+            document.querySelectorAll(".mycell").forEach((mycell) => {
+                const host = mycell.parentElement;
+                const textarea = host ? host.previousElementSibling : null;
+                if (!textarea || textarea.tagName !== "TEXTAREA") return;
+
+                if (!mycell.id) {
+                    counter += 1;
+                    mycell.id = "mycell-render-" + counter;
+                }
+
+                const draw = () => {
+                    mycell.innerHTML = "";
+                    render(textarea.value.split(/\r\n|\r|\n/), mycell.id, renderOptions);
+                };
+
+                textarea.addEventListener("input", draw);
+                draw();
+            });
+        })();
+    </script>
+</body>
+
+</html>

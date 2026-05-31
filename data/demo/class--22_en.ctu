@@ -1,0 +1,25 @@
+Title: Packages
+Describe: None
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+You can define a package using the `package` keyword, and optionally declare a background color
+for your package (Using a CSS color code or name).
+Note that package definitions can be nested.
+
+[UML]
+@startuml
+
+package "Classic Collections" #DDDDDD {
+  Object <|-- ArrayList
+}
+
+package com.plantuml {
+  Object <|-- Demo1
+  Demo1 *- Demo2
+}
+
+@enduml
+------------------------------------------------------------

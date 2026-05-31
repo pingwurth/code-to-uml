@@ -1,0 +1,23 @@
+Title: Display JSON Data on Usecase diagram
+Describe: None
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+None
+
+[UML]
+@startuml
+allowmixing
+
+actor     Actor
+usecase   Usecase
+
+json JSON {
+   "fruit":"Apple",
+   "size":"Large",
+   "color": ["Red", "Green"]
+}
+@enduml
+------------------------------------------------------------

@@ -1,0 +1,1653 @@
+<html lang="zh">
+
+<head>
+
+
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Organization",
+  "url": "https://plantuml.com",
+  "name": "PlantUML",
+  "sameAs" : ["https://twitter.com/plantuml","https://en.wikipedia.org/wiki/PlantUML","https://www.wikidata.org/wiki/Q18346546"],
+  "logo": "https://cdn-0.plantuml.com/logo3.png",
+  "contactPoint": [{
+    "@type": "ContactPoint",
+    "email": "plantuml@gmail.com",
+    "url": "https://plantuml.com",
+    "contactType": "customer service"
+  }]
+}
+</script>
+  <script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+    "@type": "ListItem",
+    "position": 1,
+    "item": {
+      "@id": "https://plantuml.com",
+      "name": "Home"
+    }
+  },{
+    "@type": "ListItem",
+    "position": 2,
+    "item": {
+      "@id": "https://plantuml.com/sitemap-language-specification",
+      "name": "Language specification"
+    }
+  },{
+    "@type": "ListItem",
+    "position": 3,
+    "item": {
+      "@id": "https://plantuml.com/use-case-diagram",
+      "name": "Use Case Diagram"
+  }
+  }]
+}
+</script>
+  <link rel="canonical" href="https://plantuml.com/zh/use-case-diagram" />
+  <link rel="alternate" hreflang="x-default" href="https://plantuml.com/use-case-diagram" />
+  <link rel="alternate" hreflang="de" href="https://plantuml.com/de/use-case-diagram" />
+  <link rel="alternate" hreflang="en" href="https://plantuml.com/use-case-diagram" />
+  <link rel="alternate" hreflang="es" href="https://plantuml.com/es/use-case-diagram" />
+  <link rel="alternate" hreflang="fr" href="https://plantuml.com/fr/use-case-diagram" />
+  <link rel="alternate" hreflang="ja" href="https://plantuml.com/ja/use-case-diagram" />
+  <link rel="alternate" hreflang="ko" href="https://plantuml.com/ko/use-case-diagram" />
+  <link rel="alternate" hreflang="zh" href="https://plantuml.com/zh/use-case-diagram" />
+
+  <link rel="shortcut icon" href="/favicon.ico" />
+
+
+  <!-- link rel="preload" as="image" href="https://img.shields.io/liberapay/patrons/plantuml.svg?logo=liberapay" -->
+
+
+  <title>用例图语法和功能</title>
+  <meta name="description" content="PlantUML用例图语法：您可以有用例，actors，扩展，注释，构造型，箭头...更改字体和颜色也是可能的。" />
+
+  <meta property="og:type" content="article" />
+  <!-- volt:dokuwiki titleog: -->
+  <!-- volt:dokuwiki descriptionog: -->
+
+  <meta property="og:url" content="https://plantuml.com/zh/use-case-diagram" />
+  <meta property="og:site_name" content="PlantUML.com" />
+
+  <!-- meta property="og:image" content="https://plantuml.com/og-use-case-diagram" -->
+  <meta name="twitter:image" content="https://plantuml.com/og-use-case-diagram" />
+  <meta property="og:locale" content="zh" />
+
+  <meta name="twitter:card" content="summary" />
+  <!-- volt:dokuwiki titletwitter: -->
+  <!-- volt:dokuwiki descriptiontwitter: -->
+  <meta name="twitter:site" content="@PlantUML" />
+  <meta name="twitter:creator" content="@PlantUML" />
+
+
+  <!-- https://www.w3schools.com/colors/colors_picker.asp -->
+  <!-- filter css https://codepen.io/sosuke/pen/Pjoqqp -->
+
+
+  <style>
+    .scale {}
+
+    li {
+      margin: 2px;
+    }
+
+    #external li {
+      margin: 13px;
+    }
+
+    @media screen and (max-width: 1190px) {
+    }
+
+
+    .coptable {
+      max-width: 90%;
+    }
+
+    .mytab {
+      display: inline-block;
+      border-radius: 3px;
+      border: 1px solid #e1e4e8;
+    }
+
+    .mytab:hover {
+      border: 1px dashed #0366d6;
+      cursor: pointer;
+      color: #0366d6;
+      background: #f6f8fa;
+    }
+
+    .cop {
+      margin: 25px 10px 0 10px;
+    }
+
+    .cop:hover {
+      cursor: pointer;
+      filter: invert(30%) sepia(75%) saturate(4001%) hue-rotate(201deg) brightness(88%) contrast(98%);
+    }
+
+    .cop2 {
+      margin: 25px 10px 0 10px;
+    }
+
+    .cop2:hover {
+      cursor: pointer;
+    }
+
+    .msg {
+      position: absolute;
+      color: #339966;
+      background-color: #FFF;
+      margin-top: 55px;
+      display: none;
+      border-radius: 3px;
+      border: 1px solid #4dff00;
+    }
+
+    .mycell0 {
+      float: left;
+      vertical-align: top;
+      padding: 10px;
+    }
+
+    .mycell0 code:hover {
+      cursor: default;
+      color: #000;
+    }
+
+    .mycell {
+      float: right;
+      vertical-align: top;
+      padding: 10px;
+      max-width: 55vw;
+      overflow-x: auto;
+    }
+
+    .mycell0 pre {
+      max-width: 55vw;
+      overflow-x: auto;
+    }
+
+    .cod {
+      background: #edeff3;
+      padding: 2px 5px;
+      border-radius: 3px;
+    }
+
+    .colo {
+      display: inline-block;
+      background: #edeff3;
+      padding: 7px 12px;
+      border-radius: 3px;
+    }
+
+    .tag,
+    .tagg,
+    .tago,
+    .tagr {
+      text-rendering: optimizeLegibility;
+      display: inline-block;
+      padding: 3px 5px 2px 4px;
+      text-decoration: none;
+      white-space: nowrap;
+      border: 1px solid #999;
+      text-transform: uppercase;
+      text-align: center;
+      border-radius: 3px;
+      font-size: 11px;
+      font-weight: bold;
+      line-height: 90%;
+    }
+
+    .tag {
+      background-color: #EEEEEE;
+    }
+
+    .tagg {
+      background-color: #98FB98;
+    }
+
+    .tago {
+      background-color: #fafa00;
+    }
+
+    .tagr {
+      background-color: #FF4500;
+    }
+
+
+    a {
+      text-decoration: none;
+      color: #0366d6;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .menu1 {
+      display: flex;
+      flex-direction: row;
+      border: 0;
+      font-size: 14px;
+      padding: 0;
+      margin: 0;
+      white-space: nowrap;
+    }
+
+    .menu1 a {
+      white-space: nowrap;
+      padding: 0 8px;
+      text-decoration: none;
+      color: #5e6d7d;
+      line-height: 30px;
+      height: 30px;
+    }
+
+    .menu1 a:hover {
+      background: #fefefe;
+      color: #0366d6;
+    }
+
+    .menuside2 {
+      display: flex;
+      flex-direction: column;
+      border: 0;
+      font-size: 14px;
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+      justify-content: center;
+    }
+
+    .menuside2 img {
+      vertical-align: top;
+      padding: 0 8px;
+      filter: brightness(0) saturate(100%) invert(42%) sepia(22%) saturate(385%) hue-rotate(170deg) brightness(92%) contrast(84%);
+    }
+
+    .menuside2 a {
+      padding: 6px 0;
+      text-decoration: none;
+      color: #5e6d7d;
+    }
+
+    .menuside2 a:hover {
+      color: #0366d6;
+      background: #fefefe;
+    }
+
+    .menuside2 a:hover img {
+      filter: brightness(0) saturate(100%) invert(23%) sepia(44%) saturate(7029%) hue-rotate(203deg) brightness(94%) contrast(98%);
+    }
+
+    .breadcrumb {
+      z-index: 1;
+      font-size: 14px;
+      text-align: center;
+      display: inline-block;
+      overflow: hidden;
+      border-radius: 5px;
+    }
+
+
+    .breadcrumb a {
+      text-decoration: none;
+      outline: none;
+      display: block;
+      float: left;
+      font-size: 12px;
+      line-height: 24px;
+      color: #373f49;
+      padding: 0 10px 0 35px;
+      background: #f0f1f1;
+      background: linear-gradient(#f0f1f1, #c6d2d2);
+      position: relative;
+    }
+
+    .breadcrumb a:first-child {
+      padding-left: 21px;
+      border-radius: 5px 0 0 5px;
+      /*to match with the parent's radius*/
+    }
+
+    .breadcrumb a:first-child:before {
+      left: 14px;
+    }
+
+    .breadcrumb a:last-child {
+      visibility: hidden;
+    }
+
+    .breadcrumb a.active,
+    .breadcrumb a:hover {
+      color: #0366d6;
+      background: #c6d2d2;
+      background: linear-gradient(#e3e4e4, #b8c7c7);
+    }
+
+    .breadcrumb a.active:after,
+    .breadcrumb a:hover:after {
+      background: #c6d2d2;
+      background: linear-gradient(135deg, #e3e4e4, #b8c7c7);
+    }
+
+    .breadcrumb a:after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: -12px;
+      /*half of square's length*/
+      /*same dimension as the line-height of .breadcrumb a */
+      width: 24px;
+      height: 24px;
+      transform: scale(0.707) rotate(45deg);
+      /*we need to prevent the arrows from getting buried under the next link*/
+      z-index: 1;
+      /*background same as links but the gradient will be rotated to compensate with the transform applied*/
+      background: #f0f1f1;
+      background: linear-gradient(135deg, #f0f1f1, #c6d2d2);
+      /*stylish arrow design using box shadow*/
+      box-shadow:
+        2px -2px 0 2px rgba(0, 0, 0, 0.1),
+        3px -3px 0 2px rgba(255, 255, 255, 0.1);
+      /*
+		5px - for rounded arrows and 
+		50px - to prevent hover glitches on the border created using shadows*/
+      border-radius: 0 5px 0 50px;
+    }
+
+    /*we dont need an arrow after the last link*/
+    .breadcrumb a:last-child:after {
+      content: none;
+      visibility: hidden;
+    }
+
+
+    .lga,
+    .lga a,
+    .lgi,
+    .lgi a {
+      font-size: 13px;
+      text-align: center;
+      color: #fff;
+      padding: 0 5px;
+      margin: 0;
+    }
+
+    .lga,
+    .lga a {
+      background-color: #008;
+    }
+
+    .lgi,
+    .lgi a {
+      background-color: #888;
+    }
+
+    .lga:hover,
+    .lga:hover a {
+      text-decoration: none;
+      color: #BBB;
+    }
+
+    .lgi:hover,
+    .lgi:hover a {
+      text-decoration: none;
+      color: #CCC;
+    }
+  </style>
+  <style>
+    body {
+      font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+      font-size: 14px;
+      line-height: 1.5;
+      margin: auto;
+      overflow-x: hidden;
+      background: #fefefe;
+    }
+
+    h1.chap {
+      font-size: 1.8em;
+    }
+
+    h2.chap {
+      font-size: 1.35em;
+    }
+
+    h3,
+    h3.chap {
+      font-size: 1.15em;
+    }
+
+    h4 {
+      font-size: 1.05em;
+    }
+
+    table {
+      font-size: inherit;
+    }
+  </style>
+
+
+  <style>
+    .dyn {
+      display: flex;
+      flex-direction: row;
+      gap: 3em;
+      align-items: stretch;
+      flex-wrap: wrap;
+      margin: 10px 0;
+    }
+
+    .dyn textarea {
+      font-family: monospace;
+      font-size: 13px;
+      line-height: 1.4;
+      min-width: 30ch;
+      max-width: 90ch;
+      box-sizing: border-box;
+      resize: both;
+      white-space: pre;
+      overflow: auto;
+      field-sizing: content;
+      align-self: stretch;
+      border: 1px solid #888;
+      border-radius: 3px;
+      margin: 0;
+      padding: 4px 8px;
+      background: #fefefe;
+    }
+
+    .dyn>div {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      display: flex;
+    }
+
+    .dyn>div>div {
+      margin: 0;
+      padding: 0;
+    }
+
+    .dyn img {
+      margin: 0;
+      padding: 0;
+    }
+
+    .scale {
+      max-width: 100%;
+      height: auto;
+      border: 1px solid #dde;
+      border-radius: 4px;
+    }
+  </style>
+
+
+  <script>
+    var llg = "zh";
+    var az = 0;
+    var amdark = 0;
+    function ljs(n) {
+      if (az) return false;
+      var sc = document.createElement("script");
+      sc.type = "text/javascript";
+      sc.src = "/btn-" + n + ".js";
+      document.body.innerHTML = "<i style='position:absolute;top:30%;width:100%;'><center>Loading in progress...";
+      document.body.appendChild(sc);
+    }
+    function ctc(id) {
+      document.getElementById('img' + id).classList.remove('cop'); document.getElementById('img' + id).classList.add('cop2');
+      document.getElementById('pre' + id).style.backgroundColor = '#4dff00';
+      document.getElementById('msg' + id).style.display = 'inline';
+
+      setTimeout(function () { document.getElementById('img' + id).classList.remove('cop2'); document.getElementById('img' + id).classList.add('cop'); document.getElementById('pre' + id).style.backgroundColor = ''; document.getElementById('msg' + id).style.display = 'none'; }, 800);
+
+
+      text = document.getElementById('pre' + id).innerText;
+      if (window.clipboardData && window.clipboardData.setData)
+        return window.clipboardData.setData("Text", text);
+      else if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
+        var ta = document.createElement("textarea");
+        ta.textContent = text;
+        ta.style.position = "fixed";
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          return document.execCommand("copy");
+        }
+        catch (ex) {
+          return false;
+        }
+        finally {
+          document.body.removeChild(ta);
+        }
+      }
+    }
+  </script>
+</head>
+
+<body>
+  <style>
+    body,
+    .container,
+    #B3,
+    #C5,
+    #C6,
+    #C7,
+    #D7,
+    #D8 {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      overflow-y: scroll;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      grid-template-rows: auto 1fr auto;
+      min-height: 100vh;
+    }
+
+    #B3 {
+      grid-column: 1 / 5;
+      grid-row: 1;
+      position: sticky;
+      top: 0;
+      height: 30px;
+      padding: 0;
+      z-index: 10;
+      overflow: hidden;
+      background: #edeff3;
+      border-bottom: 1px solid #d4d8de;
+    }
+
+    #D7 {
+      grid-column: 1;
+      grid-row: 2;
+      margin: 0;
+      padding: 0;
+      padding-left: 30px;
+      line-height: 1.6;
+    }
+
+    #D8 {
+      grid-column: 1;
+      grid-row: 3;
+      position: sticky;
+      bottom: 0;
+      z-index: 5;
+      background: #fefefe;
+    }
+
+    #C5 {
+      grid-column: 2;
+      grid-row: 1 / -1;
+      position: sticky;
+      top: 40px;
+      align-self: start;
+      height: calc(98vh - 60px);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #C6 {
+      grid-column: 3;
+      grid-row: 1 / -1;
+      position: sticky;
+      top: 40px;
+      align-self: start;
+      height: calc(98vh - 60px);
+      max-width: 200px;
+      overflow: hidden;
+      margin: 0 10px;
+      padding: 8px 5px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #C7 {
+      grid-column: 4;
+      grid-row: 1 / -1;
+      position: sticky;
+      top: 40px;
+      align-self: start;
+      height: calc(98vh - 60px);
+      margin: 0 20px 0 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #toc {
+      z-index: 15;
+      overflow-x: hidden;
+      overflow-y: auto;
+      background: #f6f8fa;
+      border-width: 2px;
+      border-style: groove;
+      border-radius: 3px;
+      border-color: #e1e4e8;
+      margin: 0 5px;
+      padding: 0;
+      max-height: 100%;
+    }
+
+    #toc ul {
+      margin: 0;
+      list-style-type: none;
+      padding: 0;
+    }
+
+    #toc li {
+      padding: 0 10px;
+      margin: 0;
+    }
+
+    #toc li a {
+      padding: 5px 0;
+      display: inline-block;
+      text-decoration: none;
+      width: 100%;
+      color: #5e6d7d;
+    }
+
+    #toc li a:hover {
+      color: #0366d6;
+    }
+
+    #toc li:hover {
+      background: #fefefe;
+    }
+
+    #magic {
+      position: absolute;
+      top: 0;
+      right: 50px;
+      width: 30px;
+      height: 30px;
+      overflow: hidden;
+      background: #edeff3;
+      z-index: 14;
+    }
+
+    #magic:hover {
+      width: calc(100% - 50px);
+    }
+
+    #magic .menu1 {
+      position: absolute;
+      top: 0;
+      right: 30px;
+      height: 30px;
+      padding-left: 10px;
+      background: #edeff3;
+      border-left: 1px solid #d4d8de;
+      border-bottom: 1px solid #d4d8de;
+    }
+
+    .menu1-tail {
+      flex-grow: 1;
+      flex-shrink: 0;
+      height: 30px;
+      position: relative;
+      z-index: 15;
+      background: #edeff3;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: auto auto auto;
+      grid-auto-rows: auto;
+      gap: 5px;
+      margin: 0;
+      padding: 0;
+    }
+
+    .merged {
+      grid-column: 1 / -1;
+    }
+
+    #C6 {
+      display: none;
+    }
+
+    @media (min-width: 1401px) {
+      #C6:has(#toc li) {
+        display: flex;
+      }
+    }
+
+    @media (max-width: 1100px) {
+      #C5,
+      #C7 {
+        display: none;
+      }
+    }
+
+    @media (max-width: 1200px) {
+      .merged {
+        display: none;
+      }
+    }
+  </style>
+
+  <div class="container">
+
+    <footer id="D8">
+
+      <p>
+      </p>
+      <p>
+
+      </p>
+    </footer>
+
+
+    <header id="B3">
+      <div class="menu1">
+        <a id="titem10" href="sequence-diagram_zh.html">时序图</a>
+        <a id="titem20" href="use-case-diagram_zh.html">用例图</a>
+        <a id="titem30" href="class-diagram_zh.html">类图</a>
+        <a id="titem40" href="activity-diagram-beta_zh.html">活动图</a>
+        <a id="titem50" href="component-diagram_zh.html">组件图</a>
+        <a id="titem60" href="state-diagram_zh.html">状态图</a>
+        <a id="titem70" href="object-diagram_zh.html">对象图</a>
+        <a id="titem80" href="deployment-diagram_zh.html">部署图</a>
+        <a id="titem90" href="timing-diagram_zh.html">定时图</a>
+
+        <a id="titem99" href="regex_zh.html">Regex</a>
+        <a id="titem100" href="nwdiag_zh.html">Network</a>
+        <a id="titem110" href="salt_zh.html">Wireframe</a>
+        <a id="titem120" href="archimate-diagram_zh.html">Archimate</a>
+        <a id="titem130" href="gantt-diagram_zh.html">Gantt</a>
+        <a id="titem140" href="mindmap-diagram_zh.html">MindMap</a>
+        <a id="titem150" href="wbs-diagram_zh.html">WBS</a>
+        <a id="titem151" href="ebnf_zh.html">EBNF</a>
+        <a id="titem160" href="json_zh.html">JSON</a>
+        <a id="titem170" href="yaml_zh.html">YAML</a>
+
+        <div class="menu1-tail"></div>
+      </div>
+      <div id="magic">
+        <div class="menu1">
+          <a id="titem10" href="sequence-diagram_zh.html">时序图</a>
+          <a id="titem20" href="use-case-diagram_zh.html">用例图</a>
+          <a id="titem30" href="class-diagram_zh.html">类图</a>
+          <a id="titem40" href="activity-diagram-beta_zh.html">活动图</a>
+          <a id="titem50" href="component-diagram_zh.html">组件图</a>
+          <a id="titem60" href="state-diagram_zh.html">状态图</a>
+          <a id="titem70" href="object-diagram_zh.html">对象图</a>
+          <a id="titem80" href="deployment-diagram_zh.html">部署图</a>
+          <a id="titem90" href="timing-diagram_zh.html">定时图</a>
+
+          <a id="titem99" href="regex_zh.html">Regex</a>
+          <a id="titem100" href="nwdiag_zh.html">Network</a>
+          <a id="titem110" href="salt_zh.html">Wireframe</a>
+          <a id="titem120" href="archimate-diagram_zh.html">Archimate</a>
+          <a id="titem130" href="gantt-diagram_zh.html">Gantt</a>
+          <a id="titem140" href="mindmap-diagram_zh.html">MindMap</a>
+          <a id="titem150" href="wbs-diagram_zh.html">WBS</a>
+          <a id="titem151" href="ebnf_zh.html">EBNF</a>
+          <a id="titem160" href="json_zh.html">JSON</a>
+          <a id="titem170" href="yaml_zh.html">YAML</a>
+
+          <div class="menu1-tail"></div>
+        </div>
+      </div><!-- magic -->
+    </header>
+
+    <main id="D7">
+
+      <style>
+        #donate {
+          padding-top: 10px;
+          min-height: 30px;
+        }
+      </style>
+
+
+      <p style="clear:both;">
+
+
+        <style>
+          #titem20 {
+            color: #0366d6;
+            background-color: #fefefe;
+          }
+
+          #titem20 img {
+            filter: brightness(0) saturate(100%) invert(23%) sepia(44%) saturate(7029%) hue-rotate(203deg) brightness(94%) contrast(98%);
+          }
+
+          .menu1:hover #titem20 {
+            color: #5e6d7d;
+          }
+
+          .menu1:hover #titem20:hover {
+            color: #0366d6;
+          }
+
+          .menu1:hover #titem20 img {
+            filter: brightness(0) saturate(100%) invert(42%) sepia(22%) saturate(385%) hue-rotate(170deg) brightness(92%) contrast(84%);
+          }
+        </style>
+
+
+        <a style="position:relative;top:-38px;" name="0eb597b52f8eb819"></a>
+        <!--heading-->
+      </p>
+      <h1 class="chap">用例图</h1>
+      <p></p>
+      用例图展示外部参与者如何与系统交互：谁做什么，以及系统提供哪些功能。它从高层次呈现功能需求，在设计初期对齐各方认识时尤为有用。
+      <p></p>
+      在 PlantUML 中，您用文本描述参与者、用例以及它们之间的关系，图形会自动生成。
+      <p></p>
+      <ul>
+        <li><strong>文本输入，图形输出。</strong> 用几行代码定义参与者、用例和关系。</li>
+        <li><strong>易于重构。</strong> 重命名一个参与者或移动一个用例，只需修改一行文本。</li>
+        <li><strong>融入您的代码仓库。</strong> 图与所记录的代码并排存放，纳入版本管理。</li>
+      </ul>
+      <p></p>
+      所有图类型通用的功能，请参阅<a href="commons">通用命令</a>。
+      <a style="position:relative;top:-38px;" name="5cb617d22da857ea"></a>
+      <!--heading-->
+      <h2 class="chap">用例</h2>
+      用例是用小括号括起来的（因为两个
+      小括号看起来像一个椭圆）。
+      <p></p>
+      你也可以用<code class="cod">usecase</code> 关键字来定义一个
+      用例。
+      你可以用<code class="cod">as</code> 关键字来定义一个别名。
+      这个别名将在以后定义关系时使用。
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+(First usecase)
+(Another usecase) as (UC2)
+usecase UC3
+usecase (Last\nusecase) as UC4
+
+@enduml
+</textarea>
+        <div id="out674b12bf3b079e0c3ccf4047d49078a1">
+          <div class="mycell">
+            <img loading="lazy" width="321" height="163" class="scale"
+              src="/imgw/img-674b12bf3b079e0c3ccf4047d49078a1.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="d9b36998c97be687"></a>
+      <!--heading-->
+      <h2 class="chap">角色</h2>
+      <p></p>
+      定义一个角色的名字被括在冒号之间。
+      <p></p>
+      你也可以使用<code class="cod">actor</code> 关键字来定义一个行为体。
+      一个别名可以使用<code class="cod">as</code> 关键字来指定，并且可以在以后代替行为体的名称，例如在定义关系时使用。
+      <p></p>
+      你可以从下面的例子中看到，角色的定义是可选的。
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+:First Actor:
+:Another\nactor: as Man2
+actor Woman3
+actor :Last actor: as Person1
+
+@enduml
+</textarea>
+        <div id="out8236b10861769579a65fa0d21eabcbf4">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="176" height="250" class="scale"
+              src="/imgw/img-8236b10861769579a65fa0d21eabcbf4.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="1cc1efff0435a503"></a>
+      <!--heading-->
+      <h2 class="chap">改变角色的样式</h2>
+      <p></p>
+      可以将角色的样式从默认的火柴人改成：
+      <ul>
+        <li>用户头像样式：<code class="cod">skinparam actorStyle awesome</code></li>
+        <li>透明人样式：<code class="cod">skinparam actorStyle hollow</code></li>
+      </ul>
+      <p></p>
+      <h3>火柴人 <em>默认</em></h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+:User: --&gt; (Use)
+&#34;Main Admin&#34; as Admin
+&#34;Use the application&#34; as (Use)
+Admin --&gt; (Admin the application)
+@enduml
+</textarea>
+        <div id="out164401d766c1c8fbbfac8adc3770b650">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="374" height="194" class="scale"
+              src="/imgw/img-164401d766c1c8fbbfac8adc3770b650.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>用户头像</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+skinparam actorStyle awesome
+:User: --&gt; (Use)
+&#34;Main Admin&#34; as Admin
+&#34;Use the application&#34; as (Use)
+Admin --&gt; (Admin the application)
+@enduml
+</textarea>
+        <div id="outfdaf751fa9c2d1625352ba34eb2e11cd">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="374" height="195" class="scale"
+              src="/imgw/img-fdaf751fa9c2d1625352ba34eb2e11cd.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[参见 <a
+          href="https://forum.plantuml.net/10493/how-can-i-customize-the-actor-icon-in-svg-output?show=10513#c10513">QA-10493</a>]</em>
+      <p></p>
+      <h3>透明人</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+skinparam actorStyle Hollow 
+:User: --&gt; (Use)
+&#34;Main Admin&#34; as Admin
+&#34;Use the application&#34; as (Use)
+Admin --&gt; (Admin the application)
+@enduml
+</textarea>
+        <div id="outab407300c3e5f70ebb1ea0e374839c57">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="374" height="167" class="scale"
+              src="/imgw/img-ab407300c3e5f70ebb1ea0e374839c57.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[参见 <a href="https://github.com/plantuml/plantuml/pull/396">PR#396</a>]</em>
+      <a style="position:relative;top:-38px;" name="72f2908d8be5b528"></a>
+      <!--heading-->
+      <h2 class="chap">用例描述</h2>
+      <p></p>
+      <p></p>
+      如果想定义跨越多行的用例描述，可以用双引号将其裹起来。
+      <p></p>
+      还可以使用这些分隔符：
+      <ul>
+        <li><code class="cod">--</code>（横线）</li>
+        <li><code class="cod">..</code>（虚线）</li>
+        <li><code class="cod">==</code>（双横线）</li>
+        <li><code class="cod">__</code>（下划线）</li>
+      </ul>
+      并且还可以在分隔符中间放置标题。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+usecase UC1 as &#34;You can use
+several lines to define your usecase.
+You can also use separators.
+--
+Several separators are possible.
+==
+And you can add titles:
+..Conclusion..
+This allows large description.&#34;
+
+@enduml
+</textarea>
+        <div id="out0371d2420df8916466d6caefa6a0f550">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="314" height="208" class="scale"
+              src="/imgw/img-0371d2420df8916466d6caefa6a0f550.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <center>
+        <div class="tago">WARNING</div> <b>This translation need to be updated.</b> <div class="tago">WARNING</div>
+      </center>
+      <a style="position:relative;top:-38px;" name="9b9f78e65119262a"></a>
+      <!--heading-->
+      <h2 class="chap">使用包</h2>
+      <p></p>
+      您可以一使用包来对角色或用例进行分组。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+left to right direction
+actor Guest as g
+package Professional {
+  actor Chef as c
+  actor &#34;Food Critic&#34; as fc
+}
+package Restaurant {
+  usecase &#34;Eat Food&#34; as UC1
+  usecase &#34;Pay for Food&#34; as UC2
+  usecase &#34;Drink&#34; as UC3
+  usecase &#34;Review&#34; as UC4
+}
+fc --&gt; UC4
+g --&gt; UC1
+g --&gt; UC2
+g --&gt; UC3
+@enduml
+</textarea>
+        <div id="out988baf984bc6049b3de2dfee3afd6dac">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="299" height="403" class="scale"
+              src="/imgw/img-988baf984bc6049b3de2dfee3afd6dac.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      您可以使用<code class="cod">rectangle</code>来改变包的外观。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+left to right direction
+actor &#34;Food Critic&#34; as fc
+rectangle Restaurant {
+  usecase &#34;Eat Food&#34; as UC1
+  usecase &#34;Pay for Food&#34; as UC2
+  usecase &#34;Drink&#34; as UC3
+}
+fc --&gt; UC1
+fc --&gt; UC2
+fc --&gt; UC3
+@enduml
+</textarea>
+        <div id="out578df3ad618fd9a45edba114e27e1aaa">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="282" height="236" class="scale"
+              src="/imgw/img-578df3ad618fd9a45edba114e27e1aaa.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="c96ad883675e26af"></a>
+      <!--heading-->
+      <h2 class="chap">基础示例</h2>
+      <p></p>
+      <p></p>
+      用箭头<code class="cod">--&gt;</code>连接角色和用例。
+      <p></p>
+      横杠<code class="cod">-</code>越多，箭头越长。
+      通过在箭头定义的后面加一个冒号及文字的方式来添加标签。
+      <p></p>
+      在这个例子中，<em>User</em>并没有定义，而是直接拿来当做一个角色使用。
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+User -&gt; (Start)
+User --&gt; (Use the application) : A small label
+
+:Main Admin: ---&gt; (Use the application) : This is\nyet another\nlabel
+
+@enduml
+</textarea>
+        <div id="out6daeb3f0232a3347fa590276780e026f">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="273" height="349" class="scale"
+              src="/imgw/img-6daeb3f0232a3347fa590276780e026f.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <a style="position:relative;top:-38px;" name="63e4e92bb7d207ca"></a>
+      <!--heading-->
+      <h2 class="chap">继承</h2>
+      <p></p>
+      如果一个角色或者用例继承于另一个，那么可以用<code class="cod">&lt;|--</code>符号表示。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+:Main Admin: as Admin
+(Use the application) as (Use)
+
+User &lt;|-- Admin
+(Start) &lt;|-- (Use)
+
+@enduml
+</textarea>
+        <div id="outc3f450bfc25728a16bd0089befecb0ee">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="282" height="233" class="scale"
+              src="/imgw/img-c3f450bfc25728a16bd0089befecb0ee.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <a style="position:relative;top:-38px;" name="d50d8f9219a41435"></a>
+      <!--heading-->
+      <h2 class="chap">使用注释</h2>
+      <p></p>
+      可以用<code class="cod">note left of</code> , <code class="cod">note right of</code> ,
+      <code class="cod">note top of</code> , <code class="cod">note bottom of</code>等关键字给一个对象添加注释。
+      <p></p>
+      注释还可以通过<code class="cod">note</code>关键字来定义，然后用<code class="cod">..</code>连接其他对象。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+:Main Admin: as Admin
+(Use the application) as (Use)
+
+User -&gt; (Start)
+User --&gt; (Use)
+
+Admin ---&gt; (Use)
+
+note right of Admin : This is an example.
+
+note right of (Use)
+  A note can also
+  be on several lines
+end note
+
+note &#34;This note is connected\nto several objects.&#34; as N2
+(Start) .. N2
+N2 .. (Use)
+@enduml
+</textarea>
+        <div id="out1ed2251ed5a0d1f10d057a49cd2d451e">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="484" height="303" class="scale"
+              src="/imgw/img-1ed2251ed5a0d1f10d057a49cd2d451e.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <a style="position:relative;top:-38px;" name="c2f000e210baa94d"></a>
+      <!--heading-->
+      <h2 class="chap">构造类型</h2>
+      <p></p>
+      用 <code class="cod">&lt;&lt;</code>
+      和 <code class="cod">&gt;&gt;</code> 来定义角色或者用例的构造类型。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+User &lt;&lt; Human &gt;&gt;
+:Main Database: as MySql &lt;&lt; Application &gt;&gt;
+(Start) &lt;&lt; One Shot &gt;&gt;
+(Use the application) as (Use) &lt;&lt; Main &gt;&gt;
+
+User -&gt; (Start)
+User --&gt; (Use)
+
+MySql --&gt; (Use)
+
+@enduml
+</textarea>
+        <div id="out3544933a4fa1f3745b6aaa44fe44ff5a">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="350" height="226" class="scale"
+              src="/imgw/img-3544933a4fa1f3745b6aaa44fe44ff5a.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <a style="position:relative;top:-38px;" name="9a49d5ae2dd333a4"></a>
+      <!--heading-->
+      <h2 class="chap">改变箭头方向</h2>
+      <p></p>
+      默认情况下，类之间的链接有两个破折号<code class="cod">--</code> ，并且是垂直方向的。
+      可以通过像这样放一个破折号（或点）来使用水平链接。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+:user: --&gt; (Use case 1)
+:user: -&gt; (Use case 2)
+@enduml
+</textarea>
+        <div id="outc3c81d862be392f278c8be0bc958d27b">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="225" height="187" class="scale"
+              src="/imgw/img-c3c81d862be392f278c8be0bc958d27b.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      你也可以通过反转链接来改变方向。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+(Use case 1) &lt;.. :user:
+(Use case 2) &lt;- :user:
+@enduml
+</textarea>
+        <div id="oute29f98b123b7299e830a92da0ca74583">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="225" height="187" class="scale"
+              src="/imgw/img-e29f98b123b7299e830a92da0ca74583.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      也可以通过在箭头内添加<code class="cod">left</code>,<code class="cod">right</code>,<code class="cod">up</code>
+      或<code class="cod">down</code> 关键字来改变箭头方向。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+:user: -left-&gt; (dummyLeft)
+:user: -right-&gt; (dummyRight)
+:user: -up-&gt; (dummyUp)
+:user: -down-&gt; (dummyDown)
+@enduml
+</textarea>
+        <div id="out06ef1eba53ee466ef0dc5494f40e77be">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="337" height="278" class="scale"
+              src="/imgw/img-06ef1eba53ee466ef0dc5494f40e77be.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      你可以通过只使用方向的第一个字符来缩短箭头（例如，<code class="cod">-d-</code> ，而不是
+      <code class="cod">-down-</code> ）
+      或两个第一个字符(<code class="cod">-do-</code>)。
+      <p></p>
+      请注意，你不应该滥用这个功能：<em>Graphviz</em>通常在没有
+      调整的情况下给出良好的结果。
+      <p></p>
+      并使用 <a href="use-case-diagram#d551e48d272b2b07"><code class="cod">left to right direction</code></a>参数。
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+left to right direction
+:user: -left-&gt; (dummyLeft)
+:user: -right-&gt; (dummyRight)
+:user: -up-&gt; (dummyUp)
+:user: -down-&gt; (dummyDown)
+@enduml
+</textarea>
+        <div id="out89ed2f5154dc9b306af4d3e4efb8c31d">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="473" height="229" class="scale"
+              src="/imgw/img-89ed2f5154dc9b306af4d3e4efb8c31d.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="45d7d5b32d17a0f9"></a>
+      <!--heading-->
+      <h2 class="chap">分割图示</h2>
+      <p></p>
+      用<code class="cod">newpage</code>关键字将图示分解为多个页面。
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+:actor1: --&gt; (Usecase1)
+newpage
+:actor2: --&gt; (Usecase2)
+@enduml
+</textarea>
+        <div id="out8a840ab601541fde5dce34f0a18cf361">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="113" height="187" class="scale"
+              src="/imgw/img-8a840ab601541fde5dce34f0a18cf361.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <a style="position:relative;top:-38px;" name="d551e48d272b2b07"></a>
+      <!--heading-->
+      <h2 class="chap">从左向右方向</h2>
+      <p></p>
+      默认从上往下构建图示。
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+&#39;default
+top to bottom direction
+user1 --&gt; (Usecase 1)
+user2 --&gt; (Usecase 2)
+
+@enduml
+</textarea>
+        <div id="out8e970593983eedbb6e09d6a6c48feb27">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="253" height="187" class="scale"
+              src="/imgw/img-8e970593983eedbb6e09d6a6c48feb27.png" />
+          </div>
+        </div>
+      </div>
+      你可以用<code class="cod">left to right direction</code>命令改变图示方向。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+left to right direction
+user1 --&gt; (Usecase 1)
+user2 --&gt; (Usecase 2)
+
+@enduml
+</textarea>
+        <div id="outc0a49a94325e5db27b882044fd037382">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="213" height="208" class="scale"
+              src="/imgw/img-c0a49a94325e5db27b882044fd037382.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      _See also &#39;Change diagram orientation&#39; on [Deployment diagram](deployment-diagram) page._
+      <a style="position:relative;top:-38px;" name="7aa53dbdfc2137bf"></a>
+      <!--heading-->
+      <h2 class="chap">显示参数</h2>
+      <p></p>
+      <p></p>
+      用<a href="skinparam">skinparam</a>改变字体和颜色。
+      <p></p>
+      可以在如下场景中使用：
+      <ul>
+        <li>在图示的定义中，</li>
+        <li><a href="preprocessing">在引入的文件中</a>，</li>
+        <li>在<a href="command-line">命令行</a>或者<a href="ant-task">ANT任务</a>提供的配置文件中。</li>
+      </ul>
+      <p></p>
+      你也可以给构造的角色和用例指定特殊颜色和字体。
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+skinparam handwritten true
+
+skinparam usecase {
+BackgroundColor DarkSeaGreen
+BorderColor DarkSlateGray
+
+BackgroundColor&lt;&lt; Main &gt;&gt; YellowGreen
+BorderColor&lt;&lt; Main &gt;&gt; YellowGreen
+
+ArrowColor Olive
+ActorBorderColor black
+ActorFontName Courier
+
+ActorBackgroundColor&lt;&lt; Human &gt;&gt; Gold
+}
+
+User &lt;&lt; Human &gt;&gt;
+:Main Database: as MySql &lt;&lt; Application &gt;&gt;
+(Start) &lt;&lt; One Shot &gt;&gt;
+(Use the application) as (Use) &lt;&lt; Main &gt;&gt;
+
+User -&gt; (Start)
+User --&gt; (Use)
+
+MySql --&gt; (Use)
+
+@enduml
+</textarea>
+        <div id="out098eeb2b31f8d9d1470caee8604befae">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="385" height="249" class="scale"
+              src="/imgw/img-098eeb2b31f8d9d1470caee8604befae.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <center>
+        <div class="tago">WARNING</div> <b>This translation need to be updated.</b> <div class="tago">WARNING</div>
+      </center>
+      <a style="position:relative;top:-38px;" name="d23dee2d0707a741"></a>
+      <!--heading-->
+      <h2 class="chap">完整样例</h2>
+      <p></p>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+left to right direction
+skinparam packageStyle rectangle
+actor customer
+actor clerk
+rectangle checkout {
+  customer -- (checkout)
+  (checkout) .&gt; (payment) : include
+  (help) .&gt; (checkout) : extends
+  (checkout) -- clerk
+}
+@enduml
+</textarea>
+        <div id="out711ce15d76a074dfb6ed64af7a711d17">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="389" height="252" class="scale"
+              src="/imgw/img-711ce15d76a074dfb6ed64af7a711d17.png" />
+          </div>
+        </div>
+      </div>
+      <a style="position:relative;top:-38px;" name="8acdcaa15380c78d"></a>
+      <!--heading-->
+      <h2 class="chap">业务用例</h2>
+      <p></p>
+      你可以添加<code class="cod">/</code> 来制作业务用例。
+      <p></p>
+      <h3>业务用例</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+(First usecase)/
+(Another usecase)/ as (UC2)
+usecase/ UC3
+usecase/ (Last\nusecase) as UC4
+
+@enduml
+</textarea>
+        <div id="outbba268655969045be77f5ae55ed1f483">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="346" height="170" class="scale"
+              src="/imgw/img-bba268655969045be77f5ae55ed1f483.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <h3>商业行为者</h3>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+
+:First Actor:/
+:Another\nactor:/ as Man2
+actor/ Woman3
+actor/ :Last actor: as Person1
+
+@enduml
+</textarea>
+        <div id="out09224809841ea5db1820538d785adcf0">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="176" height="250" class="scale"
+              src="/imgw/img-09224809841ea5db1820538d785adcf0.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <p></p>
+      <em>[Ref.<a href="https://forum.plantuml.net/12179/">QA-12179</a>]</em>
+      <a style="position:relative;top:-38px;" name="39a64d49d97a1ea0"></a>
+      <!--heading-->
+      <h2 class="chap">改变箭头的颜色和样式（内联样式）</h2>
+      <p></p>
+      你可以使用以下的内联式符号改变单个箭头的<a href="color">颜色</a>或样式。
+      <p></p>
+      <ul>
+        <li><code class="cod">#color;line.[bold|dashed|dotted];text:color</code></li>
+      </ul>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+actor foo
+foo --&gt; (bar) : normal
+foo --&gt; (bar1) #line:red;line.bold;text:red  : red bold
+foo --&gt; (bar2) #green;line.dashed;text:green : green dashed 
+foo --&gt; (bar3) #blue;line.dotted;text:blue   : blue dotted
+@enduml
+</textarea>
+        <div id="outb637975efc4030cb426632485c0626f7">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="362" height="205" class="scale"
+              src="/imgw/img-b637975efc4030cb426632485c0626f7.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[参考<a href="https://forum.plantuml.net/3770">QA-3770</a>和<a
+          href="https://forum.plantuml.net/3816">QA-3816</a>]</em>
+      <em>[参见<a href="deployment-diagram#qjxu5xkj874qkedanfcf">部署图</a>或<a
+          href="class-diagram#b5b0e4228f2e5022">类图</a></em>的类似功能]
+      <a style="position:relative;top:-38px;" name="ded8ac71cf351121"></a>
+      <!--heading-->
+      <h2 class="chap">改变元素的颜色和样式（内联样式）</h2>
+      <p></p>
+      你可以用以下符号改变单个元素的<a href="color">颜色</a>或样式。
+      <ul>
+        <li><code class="cod">#[color|back:color];line:color;line.[bold|dashed|dotted];text:color</code></li>
+      </ul>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+actor a
+actor b #pink;line:red;line.bold;text:red
+usecase c #palegreen;line:green;line.dashed;text:green
+usecase d #aliceblue;line:blue;line.dotted;text:blue
+@enduml
+</textarea>
+        <div id="out5f6d96e7bcc4cc2b7bfb49dfc130cf05">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="112" height="182" class="scale"
+              src="/imgw/img-5f6d96e7bcc4cc2b7bfb49dfc130cf05.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[参考<a href="https://forum.plantuml.net/5340">QA-5340</a>和改编自<a
+          href="https://forum.plantuml.net/6852">QA-6852</a>]</em>
+      <a style="position:relative;top:-38px;" name="dfe9a2d0af3ac592"></a>
+      <!--heading-->
+      <h2 class="chap">显示 JSON 数据</h2>
+      <p></p>
+      <div class="dyn">
+        <textarea spellcheck="false" rows="20">@startuml
+allowmixing
+
+actor     用户
+usecase   用例
+
+json JSON {
+   &#34;水果&#34;:&#34;苹果&#34;,
+   &#34;尺寸&#34;:&#34;大&#34;,
+   &#34;颜色&#34;: [&#34;红&#34;, &#34;绿&#34;]
+}
+@enduml
+</textarea>
+        <div id="out6038f6e918911ad2edbf62f91884ced2">
+          <div class="mycell">
+            <img loading="lazy" loading="lazy" width="152" height="269" class="scale"
+              src="/imgw/img-6038f6e918911ad2edbf62f91884ced2.png" />
+          </div>
+        </div>
+      </div>
+      <p></p>
+      <em>[Ref. <a
+          href="https://forum.plantuml.net/15481/possible-link-elements-from-two-jsons-with-both-jsons-embeded?show=15567#c15567">QA-15481</a>]</em>
+      <p></p>
+      更多示例，参见 <a href="json#2fyxla9p9ob6l3t3tjre">JSON</a>.
+
+
+    </main>
+
+
+    <aside id="C6">
+      <!--toc-->
+      <div id="toc">
+        <ul>
+          <li><a href="#5cb617d22da857ea">用例</a>
+          </li>
+          <li><a href="#d9b36998c97be687">角色</a>
+          </li>
+          <li><a href="#1cc1efff0435a503">改变角色的样式</a>
+          </li>
+          <li><a href="#72f2908d8be5b528">用例描述</a>
+          </li>
+          <li><a href="#9b9f78e65119262a">使用包</a>
+          </li>
+          <li><a href="#c96ad883675e26af">基础示例</a>
+          </li>
+          <li><a href="#63e4e92bb7d207ca">继承</a>
+          </li>
+          <li><a href="#d50d8f9219a41435">使用注释</a>
+          </li>
+          <li><a href="#c2f000e210baa94d">构造类型</a>
+          </li>
+          <li><a href="#9a49d5ae2dd333a4">改变箭头方向</a>
+          </li>
+          <li><a href="#45d7d5b32d17a0f9">分割图示</a>
+          </li>
+          <li><a href="#d551e48d272b2b07">从左向右方向</a>
+          </li>
+          <li><a href="#7aa53dbdfc2137bf">显示参数</a>
+          </li>
+          <li><a href="#d23dee2d0707a741">完整样例</a>
+          </li>
+          <li><a href="#8acdcaa15380c78d">业务用例</a>
+          </li>
+          <li><a href="#39a64d49d97a1ea0">改变箭头的颜色和样式（内联样式）</a>
+          </li>
+          <li><a href="#ded8ac71cf351121">改变元素的颜色和样式（内联样式）</a>
+          </li>
+          <li><a href="#dfe9a2d0af3ac592">显示 JSON 数据</a>
+          </li>
+        </ul>
+      </div>
+    </aside>
+
+  </div>
+    <script src="../../viz-global.js"></script>
+    <script src="../../plantuml.js"></script>
+    <script>
+        (function () {
+            const render = window.plantumlRender;
+            if (typeof render !== "function") {
+                console.error("PlantUML renderer is unavailable.");
+                return;
+            }
+
+            const renderOptions = {};
+            let counter = 0;
+
+            document.querySelectorAll(".mycell").forEach((mycell) => {
+                const host = mycell.parentElement;
+                const textarea = host ? host.previousElementSibling : null;
+                if (!textarea || textarea.tagName !== "TEXTAREA") return;
+
+                if (!mycell.id) {
+                    counter += 1;
+                    mycell.id = "mycell-render-" + counter;
+                }
+
+                const draw = () => {
+                    mycell.innerHTML = "";
+                    render(textarea.value.split(/\r\n|\r|\n/), mycell.id, renderOptions);
+                };
+
+                textarea.addEventListener("input", draw);
+                draw();
+            });
+        })();
+    </script>
+</body>
+
+</html>

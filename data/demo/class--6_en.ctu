@@ -1,0 +1,100 @@
+Title: Defining visibility
+Describe: None
+------------------------------------------------------------
+[Example]
+Visibility for methods or fields
+
+[Description]
+When you define methods or fields, you can use characters to define the
+visibility of the corresponding item:
+| **Character** | **Icon for field** | **Icon for method** | **Visibility** |
+| --- | --- | --- | --- |
+| `-` | | | `private` |
+| `#` | | | `protected` |
+| `~` | | | `package private` |
+| `+` | | | `public` |
+
+[UML]
+@startuml
+
+class Dummy {
+ -field1
+ #field2
+ ~method1()
+ +method2()
+}
+
+@enduml
+------------------------------------------------------------
+[Example]
+Visibility for methods or fields
+
+[Description]
+You can turn off this feature using the `skinparam classAttributeIconSize 0` command :
+
+[UML]
+@startuml
+skinparam classAttributeIconSize 0
+class Dummy {
+ -field1
+ #field2
+ ~method1()
+ +method2()
+}
+
+@enduml
+------------------------------------------------------------
+[Example]
+Visibility for methods or fields
+
+[Description]
+Visibility indicators are optional and can be ommitted individualy without turning off the icons globally using `skinparam classAttributeIconSize 0` .
+
+[UML]
+@startuml
+class Dummy {
+ field1
+ field2
+ method1()
+ method2()
+}
+
+@enduml
+------------------------------------------------------------
+[Example]
+Visibility for methods or fields
+
+[Description]
+In such case if you'd like to use methods or fields that start with `-` , `#` , `~` or `+` characters such as a destructor in some languages for `Dummy` class `~Dummy()` , escape the first character with a `\` character:
+
+[UML]
+@startuml
+class Dummy {
+ field1
+ \~Dummy()
+ method1()
+}
+
+@enduml
+------------------------------------------------------------
+[Example]
+Visibility for class
+
+[Description]
+Similar to methods or fields, you can use same characters to define the Class visibility:
+
+[UML]
+@startuml
+-class "private Class" {
+}
+
+#class "protected Class" {
+}
+
+~class "package private Class" {
+}
+
++class "public Class" {
+}
+@enduml
+------------------------------------------------------------

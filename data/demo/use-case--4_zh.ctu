@@ -1,0 +1,43 @@
+Title: 用例描述
+Describe: None
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+如果想定义跨越多行的用例描述，可以用双引号将其裹起来。
+还可以使用这些分隔符： 
+  - `--` （横线）
+  - `..` （虚线）
+  - `==` （双横线）
+  - `__` （下划线）
+
+并且还可以在分隔符中间放置标题。
+
+[UML]
+@startuml
+
+usecase UC1 as "You can use
+several lines to define your usecase.
+You can also use separators.
+--
+Several separators are possible.
+==
+And you can add titles:
+..Conclusion..
+This allows large description."
+
+@enduml
+------------------------------------------------------------
+[Example]
+None
+
+[Description]
+请注意，与基本示例不同的是，这里别名和描述的顺序进行了反转。
+
+[UML]
+@startuml
+usecase description1 as alias1
+usecase alias2 as "description2"
+@enduml
+------------------------------------------------------------
