@@ -1391,23 +1391,109 @@ json JSON {
             const renderOptions = {};
             let counter = 0;
 
+            function nextId() {
+                counter += 1;
+                return "mycell-render-" + counter;
+            }
+
+            function hasRenderableContent(mycell) {
+                return !!mycell.querySelector("svg") || !!mycell.querySelector(".mycell-render-host > *") || mycell.textContent.trim().length > 0;
+            }
+
+            function renderOne(mycell, textarea) {
+                return new Promise((resolve) => {
+                    if (!mycell.id) {
+                        mycell.id = nextId();
+                    }
+                    mycell.dataset.renderStatus = "rendering";
+
+                    const loading = document.createElement("span");
+                    loading.className = "mycell-render-loading";
+                    loading.textContent = "Rendering...";
+
+                    const target = document.createElement("div");
+                    target.className = "mycell-render-host";
+                    target.id = mycell.id + "-host";
+
+                    mycell.innerHTML = "";
+                    mycell.appendChild(loading);
+                    mycell.appendChild(target);
+
+                    const timeoutMs = 20000;
+                    const start = Date.now();
+
+                    const observer = new MutationObserver(() => {
+                        if (target.querySelector("svg") || target.children.length > 0 || target.textContent.trim().length > 0) {
+                            mycell.dataset.renderStatus = "ok";
+                            const loadingEl = mycell.querySelector(".mycell-render-loading");
+                            if (loadingEl) loadingEl.remove();
+                            observer.disconnect();
+                            resolve(true);
+                        }
+                    });
+                    observer.observe(target, { childList: true, subtree: true, characterData: true });
+
+                    try {
+                        render(textarea.value.split(/\r\n|\r|\n/), target.id, renderOptions);
+                    } catch (err) {
+                        mycell.dataset.renderStatus = "error";
+                        mycell.innerHTML = '<pre style="white-space:pre-wrap;color:#b00020;">PlantUML render error</pre>';
+                        observer.disconnect();
+                        console.error("PlantUML render failed:", err);
+                        resolve(false);
+                        return;
+                    }
+
+                    function checkDone() {
+                        if (target.querySelector("svg") || target.children.length > 0 || target.textContent.trim().length > 0) {
+                            mycell.dataset.renderStatus = "ok";
+                            const loadingEl = mycell.querySelector(".mycell-render-loading");
+                            if (loadingEl) loadingEl.remove();
+                            observer.disconnect();
+                            resolve(true);
+                            return;
+                        }
+                        if (Date.now() - start >= timeoutMs) {
+                            mycell.dataset.renderStatus = "timeout";
+                            mycell.innerHTML = '<pre style="white-space:pre-wrap;color:#b00020;">PlantUML render timeout</pre>';
+                            observer.disconnect();
+                            resolve(false);
+                            return;
+                        }
+                        window.setTimeout(checkDone, 100);
+                    }
+
+                    window.setTimeout(checkDone, 100);
+                });
+            }
+
+            async function renderQueue(items) {
+                for (const item of items) {
+                    await renderOne(item.mycell, item.textarea);
+                }
+            }
+
+            const jobs = [];
             document.querySelectorAll(".mycell").forEach((mycell) => {
                 const host = mycell.parentElement;
                 const textarea = host ? host.previousElementSibling : null;
-                if (!textarea || textarea.tagName !== "TEXTAREA") return;
-
-                if (!mycell.id) {
-                    counter += 1;
-                    mycell.id = "mycell-render-" + counter;
+                if (!textarea || textarea.tagName !== "TEXTAREA") {
+                    mycell.dataset.renderStatus = "skip";
+                    return;
                 }
+                jobs.push({ mycell, textarea });
+            });
 
-                const draw = () => {
-                    mycell.innerHTML = "";
-                    render(textarea.value.split(/\r\n|\r|\n/), mycell.id, renderOptions);
-                };
+            renderQueue(jobs);
 
-                textarea.addEventListener("input", draw);
-                draw();
+            jobs.forEach(({ mycell, textarea }) => {
+                let timer = null;
+                textarea.addEventListener("input", () => {
+                    if (timer) window.clearTimeout(timer);
+                    timer = window.setTimeout(() => {
+                        renderOne(mycell, textarea);
+                    }, 120);
+                });
             });
         })();
     </script>
