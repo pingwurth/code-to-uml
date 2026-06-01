@@ -30,7 +30,7 @@ The server hosts static files and exposes backend rendering via `plantuml.jar`, 
 There is currently no automated test suite in this repository. Validate changes manually:
 
 1. Start server (`./serve.sh`).
-2. Open `http://localhost:5401/demo.html`.
+2. Open `http://localhost:5401`.
 3. Verify diagram rendering, localization switch, and failure states.
 4. If server/render logic changed, test at least one `.ctu` file from `data/demo/`.
 

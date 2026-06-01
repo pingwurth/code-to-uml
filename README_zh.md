@@ -15,7 +15,6 @@
 
 - ✅ **浏览器优先渲染** — PlantUML WASM，零服务器延迟
 - ✅ **自动降级** — 客户端失败 → 服务端 plantuml.jar 自动重试
-- ✅ **原生双语** — 中英文一键切换，偏好持久化存储
 - ✅ **交互式灯箱** — 全屏查看，支持缩放、平移、键盘导航
 - ✅ **侧边目录同步滚动** — 长报告始终可见导航
 - ✅ **零构建工具** — 无 npm 依赖，纯 HTML/JS 直接运行
@@ -90,7 +89,7 @@
 1. 克隆仓库：
 
 ```bash
-git clone <repo-url> code-to-uml
+git clone https://github.com/pingwurth/code-to-uml.git
 cd code-to-uml
 ```
 
@@ -112,8 +111,11 @@ node serve.js 5401
 
 4. 打开浏览器：
 
-```
-http://localhost:5401/demo.html
+```bash
+# 访问如下 url 查看分析示例
+http://localhost:5401
+# 或者查看 uml 语法示例
+http://localhost:5401/plantuml-official-demo/zh/sequence-diagram_zh.html
 ```
 
 无需 `npm install`。无需构建步骤。就是这么简单。
@@ -121,6 +123,36 @@ http://localhost:5401/demo.html
 ---
 
 ## 使用指南
+
+### 使用示例
+
+在 AI 代理中使用 `/code-to-uml` 斜杠命令，可对任意粒度的代码生成 UML 驱动的 HTML 报告：
+
+**文件级别分析**
+
+```
+/code-to-uml 请分析 component/render-failure-common.js 文件，并生成基于 UML 的、格式统一的 HTML 报告
+```
+
+**函数级别分析**
+
+```
+/code-to-uml 请分析 renderWithFailureHandling 函数，并生成基于 UML 的、格式统一的 HTML 报告
+```
+
+**工程/项目级别分析**
+
+```
+/code-to-uml 请分析 code-to-uml 工程，并生成基于 UML 的、格式统一的 HTML 报告
+```
+
+**模块级别分析**
+
+```
+/code-to-uml 请分析 component/ 模块，并生成基于 UML 的、格式统一的 HTML 报告
+```
+
+四种命令生成相同的 13 节报告结构 — 分析粒度决定内容深度和示例数量，不影响章节契约。生成的报告保存至 `cache/` 目录，可通过 `index.html` 访问。
 
 ### 交互式演示
 

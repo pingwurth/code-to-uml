@@ -9,6 +9,7 @@
 - [data/demo/sequence--1_en.ctu](file://data/demo/sequence--1_en.ctu)
 - [data/demo/class--1_en.ctu](file://data/demo/class--1_en.ctu)
 - [data/demo/use-case--1_en.ctu](file://data/demo/use-case--1_en.ctu)
+- [data/demo/use-case--17_en.ctu](file://data/demo/use-case--17_en.ctu)
 - [data/demo/regex--1_en.ctu](file://data/demo/regex--1_en.ctu)
 - [data/demo/gantt--1_en.ctu](file://data/demo/gantt--1_en.ctu)
 - [i18n/en.js](file://i18n/en.js)
@@ -16,7 +17,16 @@
 - [component/docs-page-core.js](file://component/docs-page-core.js)
 - [plantuml-official-demo/en/sequence-diagram_en.html](file://plantuml-official-demo/en/sequence-diagram_en.html)
 - [plantuml-official-demo/zh/sequence-diagram_zh.html](file://plantuml-official-demo/zh/sequence-diagram_zh.html)
+- [main.css](file://main.css)
+- [js/c4.min.js](file://js/c4.min.js)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Added new section on Visual Presentation Guidelines and Styling Recommendations
+- Updated Theme Improvements section with enhanced styling standards
+- Added content refinement standards documentation
+- Enhanced example quality guidelines and best practices
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -24,53 +34,65 @@
 3. [Core Components](#core-components)
 4. [Architecture Overview](#architecture-overview)
 5. [Detailed Component Analysis](#detailed-component-analysis)
-6. [Dependency Analysis](#dependency-analysis)
-7. [Performance Considerations](#performance-considerations)
-8. [Troubleshooting Guide](#troubleshooting-guide)
-9. [Conclusion](#conclusion)
-10. [Appendices](#appendices)
+6. [Visual Presentation Guidelines and Styling Recommendations](#visual-presentation-guidelines-and-styling-recommendations)
+7. [Theme Improvements](#theme-improvements)
+8. [Content Refinement Standards](#content-refinement-standards)
+9. [Dependency Analysis](#dependency-analysis)
+10. [Performance Considerations](#performance-considerations)
+11. [Troubleshooting Guide](#troubleshooting-guide)
+12. [Conclusion](#conclusion)
+13. [Appendices](#appendices)
 
 ## Introduction
-This document describes Code-To-UML’s extensive diagram example library. It explains how examples are categorized by UML and Non-UML types, how CTU files are named and organized, how bilingual examples work, and how the official PlantUML demo integrates with the built-in examples. It also provides practical guidance for adding and maintaining examples, and discusses how example complexity relates to rendering performance.
+This document describes Code-To-UML's extensive diagram example library. It explains how examples are categorized by UML and Non-UML types, how CTU files are named and organized, how bilingual examples work, and how the official PlantUML demo integrates with the built-in examples. It also provides practical guidance for adding and maintaining examples, documents enhanced visual presentation guidelines and styling recommendations, and discusses how example complexity relates to rendering performance.
 
 ## Project Structure
-The example library lives under the data/demo/ directory and is consumed by the interactive demo page. The demo page loads examples via an API endpoint, renders them using PlantUML (client or server), and supports bilingual display.
+The example library lives under the data/demo/ directory and is consumed by the interactive demo page. The demo page loads examples via an API endpoint, renders them using PlantUML (client or server), and supports bilingual display with enhanced visual styling.
 
 ```mermaid
 graph TB
 subgraph "Demo UI"
 A["demo.html"]
 B["demo.js"]
+C["main.css"]
 end
 subgraph "Core Runtime"
-C["component/docs-page-core.js"]
+D["component/docs-page-core.js"]
 end
 subgraph "Data"
-D["data/demo/*.ctu"]
-E["data/_TEMPLATE.ctu"]
+E["data/demo/*.ctu"]
+F["data/_TEMPLATE.ctu"]
 end
 subgraph "Internationalization"
-F["i18n/en.js"]
-G["i18n/zh.js"]
+G["i18n/en.js"]
+H["i18n/zh.js"]
 end
 subgraph "Official PlantUML Docs"
-H["plantuml-official-demo/en/*.html"]
-I["plantuml-official-demo/zh/*.html"]
+I["plantuml-official-demo/en/*.html"]
+J["plantuml-official-demo/zh/*.html"]
+end
+subgraph "Theme System"
+K["js/c4.min.js"]
+L["Enhanced CSS Variables"]
 end
 A --> B
 B --> C
 B --> D
-B --> F
+B --> E
 B --> G
-D --> E
-H -. "Reference syntax & features" .-> A
+B --> H
+D --> K
+E --> F
 I -. "Reference syntax & features" .-> A
+J -. "Reference syntax & features" .-> A
 ```
 
 **Diagram sources**
 - [demo.js:146-185](file://demo.js#L146-L185)
 - [README.md:166-198](file://README.md#L166-L198)
 - [README_zh.md:166-198](file://README_zh.md#L166-L198)
+- [main.css:1-16](file://main.css#L1-L16)
+- [js/c4.min.js:121-144](file://js/c4.min.js#L121-L144)
 
 **Section sources**
 - [README.md:166-198](file://README.md#L166-L198)
@@ -82,15 +104,18 @@ I -. "Reference syntax & features" .-> A
 - Organization: data/demo/ holds all built-in examples grouped by diagram type and language.
 - Bilingual support: Each diagram type typically includes both _en.ctu and _zh.ctu variants.
 - API consumption: demo.js fetches examples from /api/demo-examples?lang=en|zh and renders them dynamically.
+- Enhanced styling: Built-in theme system with CSS variables and C4 framework integration.
 
 **Section sources**
 - [README.md:135-163](file://README.md#L135-L163)
 - [README_zh.md:135-163](file://README_zh.md#L135-L163)
 - [demo.js:174-185](file://demo.js#L174-L185)
 - [data/_TEMPLATE.ctu:1-46](file://data/_TEMPLATE.ctu#L1-L46)
+- [main.css:1-16](file://main.css#L1-L16)
+- [js/c4.min.js:121-144](file://js/c4.min.js#L121-L144)
 
 ## Architecture Overview
-The demo page orchestrates loading, internationalization, and rendering of examples. It normalizes diagram keys, applies i18n labels, and renders PlantUML sources with robust error handling and fallback to server-side rendering when needed.
+The demo page orchestrates loading, internationalization, and rendering of examples with enhanced visual styling. It normalizes diagram keys, applies i18n labels, renders PlantUML sources with robust error handling, and implements theme-aware styling through CSS variables and C4 framework integration.
 
 ```mermaid
 sequenceDiagram
@@ -98,6 +123,7 @@ participant U as "User"
 participant P as "demo.html"
 participant J as "demo.js"
 participant C as "docs-page-core.js"
+participant T as "Theme System"
 participant S as "Server"
 U->>P : Open demo.html
 P->>J : Initialize page
@@ -105,6 +131,7 @@ J->>J : Load active tab & language
 J->>S : GET /api/demo-examples?lang={en|zh}
 S-->>J : JSON examples
 J->>J : Normalize diagram keys<br/>Apply i18n labels
+J->>T : Apply theme styling<br/>CSS variables & C4 themes
 loop For each example
 J->>C : readExampleSource()
 J->>C : renderWithFailureHandling()
@@ -113,13 +140,15 @@ J->>S : POST /api/plantuml-svg (fallback)
 S-->>J : SVG
 end
 end
-J->>P : Render preview + actions
+J->>P : Render preview + actions<br/>with enhanced styling
 ```
 
 **Diagram sources**
 - [demo.js:146-185](file://demo.js#L146-L185)
 - [demo.js:374-439](file://demo.js#L374-L439)
 - [component/docs-page-core.js:12-23](file://component/docs-page-core.js#L12-L23)
+- [main.css:1-16](file://main.css#L1-L16)
+- [js/c4.min.js:121-144](file://js/c4.min.js#L121-L144)
 
 **Section sources**
 - [demo.js:146-185](file://demo.js#L146-L185)
@@ -219,6 +248,7 @@ D --> E["Render with localized titles/descriptions"]
 - Place the .ctu file in data/demo/.
 - Ensure both _en.ctu and _zh.ctu variants exist for bilingual coverage.
 - Use the template to structure content consistently.
+- Apply enhanced visual styling guidelines for improved presentation.
 
 **Section sources**
 - [README.md:160-163](file://README.md#L160-L163)
@@ -229,6 +259,7 @@ D --> E["Render with localized titles/descriptions"]
 - Update the relevant .ctu file in data/demo/.
 - Keep the filename unchanged to preserve tab and link stability.
 - When changing diagram keys, update i18n labels accordingly.
+- Apply content refinement standards for consistency.
 
 **Section sources**
 - [demo.js:35-52](file://demo.js#L35-L52)
@@ -239,11 +270,144 @@ D --> E["Render with localized titles/descriptions"]
 - Use the shared template to ensure consistent metadata and section ordering.
 - Keep titles concise and descriptions clear; leverage Markdown formatting.
 - Prefer canonical diagram types aligned with the supported list.
+- Follow visual presentation guidelines for uniform styling.
 
 **Section sources**
 - [README.md:57-63](file://README.md#L57-L63)
 - [README_zh.md:57-63](file://README_zh.md#L57-L63)
 - [data/_TEMPLATE.ctu:1-46](file://data/_TEMPLATE.ctu#L1-L46)
+
+## Visual Presentation Guidelines and Styling Recommendations
+
+### Enhanced Visual Guidelines
+The example library now incorporates comprehensive visual presentation guidelines to ensure consistent, professional appearance across all diagrams:
+
+#### Color Scheme Standards
+- Primary accent color: #1f6feb (blue) for interactive elements and highlights
+- Success color: #1a7f37 for positive feedback states
+- Error color: #cf222e for error states and warnings
+- Surface colors: #f6f8fa for backgrounds, #ffffff for diagram backgrounds
+- Text colors: #1f2328 for primary text, #59636e for muted text
+
+#### Typography and Spacing
+- Base font size: 15px with 1.55 line height
+- Monospace font for code blocks: Consolas, Monaco, "Courier New"
+- Grid spacing: 1rem base unit for consistent layout
+- Responsive breakpoints at 900px and 520px for optimal viewing
+
+#### Interactive Elements
+- Button states: Hover effects with brightness adjustments
+- Active states: Accent color borders with soft backgrounds
+- Focus states: 2px solid outline with offset for accessibility
+- Tooltip positioning: Absolute positioning with directional arrows
+
+#### Layout and Responsiveness
+- Fixed sidebar navigation with scrollable content
+- Mobile-first responsive design with adaptive layouts
+- Flexible grid system for example presentations
+- Lightbox modal system for diagram magnification
+
+**Section sources**
+- [main.css:1-804](file://main.css#L1-L804)
+
+## Theme Improvements
+
+### Advanced Theme System
+The example library now features an enhanced theme system supporting multiple visual styles and customization options:
+
+#### CSS Custom Properties System
+- Comprehensive color palette defined through CSS custom properties
+- Light and dark mode support through color-scheme property
+- Dynamic color mixing for hover states and interactive elements
+- Semantic color naming for maintainability
+
+#### C4 Framework Integration
+- Multiple predefined themes: blue, brown, green, violet, superhero, united
+- Language-specific legend translations for international users
+- Style customization through skinparam directives
+- Theme inheritance and override capabilities
+
+#### Theme Features
+- Rounded corners for modern aesthetic appeal
+- Consistent border styling across all diagram elements
+- Typography hierarchy with proper font weights and sizes
+- Accessibility considerations with proper contrast ratios
+- Performance optimization through efficient CSS delivery
+
+```mermaid
+graph LR
+A["Theme System"] --> B["CSS Variables"]
+A --> C["C4 Framework"]
+A --> D["Skin Parameters"]
+B --> E["Color Palette"]
+B --> F["Layout System"]
+C --> G["Multiple Themes"]
+C --> H["Language Support"]
+D --> I["Element Styling"]
+D --> J["Diagram Customization"]
+```
+
+**Diagram sources**
+- [main.css:1-16](file://main.css#L1-L16)
+- [js/c4.min.js:121-144](file://js/c4.min.js#L121-L144)
+
+**Section sources**
+- [main.css:1-16](file://main.css#L1-L16)
+- [js/c4.min.js:121-144](file://js/c4.min.js#L121-L144)
+
+### Inline Styling Capabilities
+Examples now demonstrate advanced inline styling techniques for fine-grained control:
+
+#### Element-Level Styling
+- Individual element color customization using `#[color|back:color]` syntax
+- Line style variations: bold, dashed, dotted for visual distinction
+- Text color customization for improved readability
+- Combined styling attributes for complex visual effects
+
+#### Styling Syntax Examples
+- `#pink;line:red;line.bold;text:red` - Multi-colored actor with bold lines
+- `#palegreen;line:green;line.dashed;text:green` - Green dashed usecase
+- `#aliceblue;line:blue;line.dotted;text:blue` - Blue dotted usecase
+
+**Section sources**
+- [data/demo/use-case--17_en.ctu:1-19](file://data/demo/use-case--17_en.ctu#L1-L19)
+
+## Content Refinement Standards
+
+### Quality Assurance Guidelines
+The example library maintains high standards for content quality and presentation consistency:
+
+#### Content Structure Standards
+- Clear, descriptive titles that accurately represent diagram content
+- Concise descriptions with practical explanations
+- Well-formatted PlantUML code with proper indentation
+- Logical grouping of related examples
+- Consistent use of markdown formatting
+
+#### Technical Quality Standards
+- Valid PlantUML syntax without deprecated features
+- Optimized diagram complexity for rendering performance
+- Proper use of diagram elements and relationships
+- Consistent naming conventions for participants and elements
+- Appropriate use of stereotypes and annotations
+
+#### Visual Quality Standards
+- Balanced composition with adequate spacing
+- Consistent color usage following theme guidelines
+- Readable typography with appropriate sizing
+- Accessible contrast ratios for text and backgrounds
+- Responsive design considerations for different screen sizes
+
+#### Educational Value Standards
+- Progressive complexity from basic to advanced examples
+- Clear learning objectives for each example
+- Practical applications and real-world scenarios
+- Cross-references to related diagram types
+- Links to official PlantUML documentation
+
+**Section sources**
+- [data/_TEMPLATE.ctu:1-46](file://data/_TEMPLATE.ctu#L1-L46)
+- [data/demo/use-case--17_en.ctu:1-19](file://data/demo/use-case--17_en.ctu#L1-L19)
 
 ## Dependency Analysis
 The demo page depends on:
@@ -251,6 +415,8 @@ The demo page depends on:
 - i18n modules for labels and UI strings.
 - data/demo files for example content.
 - Official PlantUML docs for reference.
+- Enhanced theme system for visual styling.
+- CSS custom properties for dynamic theming.
 
 ```mermaid
 graph LR
@@ -261,12 +427,18 @@ J --> EN["i18n/en.js"]
 J --> ZH["i18n/zh.js"]
 J --> OFF_EN["plantuml-official-demo/en/*.html"]
 J --> OFF_ZH["plantuml-official-demo/zh/*.html"]
+J --> THEME["Theme System"]
+J --> CSS_VARS["CSS Variables"]
+THEME --> C4["C4 Framework"]
+CSS_VARS --> MAIN_CSS["main.css"]
 ```
 
 **Diagram sources**
 - [demo.js:1-30](file://demo.js#L1-L30)
 - [component/docs-page-core.js:12-35](file://component/docs-page-core.js#L12-L35)
 - [README.md:192-192](file://README.md#L192-L192)
+- [main.css:1-16](file://main.css#L1-L16)
+- [js/c4.min.js:121-144](file://js/c4.min.js#L121-L144)
 
 **Section sources**
 - [demo.js:1-30](file://demo.js#L1-L30)
@@ -276,6 +448,8 @@ J --> OFF_ZH["plantuml-official-demo/zh/*.html"]
 - Large diagrams may exceed browser rendering capacity; the demo detects oversized diagrams and attempts auto-scaling.
 - If auto-scaling still fails, the demo falls back to server-side rendering via /api/plantuml-svg.
 - Rendering is queued and generation-aware to avoid stale updates when switching tabs or languages.
+- Enhanced theme system uses CSS custom properties for efficient styling updates.
+- Responsive design minimizes layout thrashing during theme switching.
 
 ```mermaid
 flowchart TD
@@ -289,12 +463,15 @@ B -- No --> H["Direct client render"]
 H --> I{"Error?"}
 I -- Yes --> F
 I -- No --> G
+J["Theme change"] --> K["Update CSS variables"]
+K --> L["Re-render with new theme"]
 ```
 
 **Diagram sources**
 - [demo.js:413-429](file://demo.js#L413-L429)
 - [demo.js:395-403](file://demo.js#L395-L403)
 - [README.md:237-274](file://README.md#L237-L274)
+- [main.css:1-16](file://main.css#L1-L16)
 
 **Section sources**
 - [demo.js:413-429](file://demo.js#L413-L429)
@@ -306,6 +483,8 @@ I -- No --> G
 - If rendering fails, check for syntax errors or unsupported constructs; the demo detects common error markers in the rendered SVG.
 - For large diagrams, confirm auto-scaling is applied and consider simplifying the diagram.
 - If client rendering crashes persistently, ensure server-side fallback is functioning.
+- For theme-related issues, verify CSS variable definitions and C4 framework integration.
+- Check color contrast ratios for accessibility compliance.
 
 **Section sources**
 - [demo.js:124-130](file://demo.js#L124-L130)
@@ -313,7 +492,7 @@ I -- No --> G
 - [component/docs-page-core.js:77-130](file://component/docs-page-core.js#L77-L130)
 
 ## Conclusion
-Code-To-UML’s example library offers a comprehensive, bilingual, and maintainable collection of diagrams spanning UML and Non-UML categories. The demo page’s architecture ensures reliable rendering with graceful fallbacks, while the official PlantUML docs provide authoritative reference material. Following the naming convention, using the template, and keeping bilingual parity will help sustain a high-quality example library.
+Code-To-UML's example library offers a comprehensive, bilingual, and maintainable collection of diagrams spanning UML and Non-UML categories. The enhanced visual presentation guidelines and styling recommendations ensure consistent, professional appearance across all examples. The advanced theme system provides flexibility while maintaining design coherence. The demo page's architecture ensures reliable rendering with graceful fallbacks, while the official PlantUML docs provide authoritative reference material. Following the naming convention, using the template, applying visual guidelines, and keeping bilingual parity will help sustain a high-quality example library with excellent visual presentation.
 
 ## Appendices
 
@@ -338,3 +517,14 @@ Code-To-UML’s example library offers a comprehensive, bilingual, and maintaina
 - [data/demo/use-case--1_en.ctu:1-21](file://data/demo/use-case--1_en.ctu#L1-L21)
 - [data/demo/regex--1_en.ctu:1-17](file://data/demo/regex--1_en.ctu#L1-L17)
 - [data/demo/gantt--1_en.ctu:1-23](file://data/demo/gantt--1_en.ctu#L1-L23)
+
+### Appendix C: Visual Styling Reference
+- Primary colors: #1f6feb (accent), #1a7f37 (success), #cf222e (error)
+- Background colors: #ffffff (white), #f6f8fa (surface), #1f2328 (dark text)
+- Typography: 15px base font with 1.55 line height
+- Responsive breakpoints: 900px and 520px
+- CSS custom properties for dynamic theming
+
+**Section sources**
+- [main.css:1-804](file://main.css#L1-L804)
+- [js/c4.min.js:121-144](file://js/c4.min.js#L121-L144)

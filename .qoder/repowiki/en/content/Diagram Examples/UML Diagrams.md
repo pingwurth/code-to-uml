@@ -4,6 +4,7 @@
 **Referenced Files in This Document**
 - [README.md](file://README.md)
 - [README_zh.md](file://README_zh.md)
+- [main.css](file://main.css)
 - [data/demo/class--1_en.ctu](file://data/demo/class--1_en.ctu)
 - [data/demo/class--10_en.ctu](file://data/demo/class--10_en.ctu)
 - [data/demo/sequence--1_en.ctu](file://data/demo/sequence--1_en.ctu)
@@ -22,22 +23,100 @@
 - [data/demo/state--3_en.ctu](file://data/demo/state--3_en.ctu)
 - [data/demo/timing--1_en.ctu](file://data/demo/timing--1_en.ctu)
 - [data/demo/timing--3_en.ctu](file://data/demo/timing--3_en.ctu)
+- [data/cc-haha/architecture--1_zh.ctu](file://data/cc-haha/architecture--1_zh.ctu)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Updated visual theme section to reflect comprehensive visual improvements
+- Added detailed information about color scheme changes and styling enhancements
+- Enhanced styling guidance for different diagram types with specific examples
+- Updated background and font color specifications for improved readability
 
 ## Table of Contents
 1. [Introduction](#introduction)
-2. [Project Structure](#project-structure)
-3. [Core Components](#core-components)
-4. [Architecture Overview](#architecture-overview)
-5. [Detailed Component Analysis](#detailed-component-analysis)
-6. [Dependency Analysis](#dependency-analysis)
-7. [Performance Considerations](#performance-considerations)
-8. [Troubleshooting Guide](#troubleshooting-guide)
-9. [Conclusion](#conclusion)
-10. [Appendices](#appendices)
+2. [Visual Theme and Styling](#visual-theme-and-styling)
+3. [Project Structure](#project-structure)
+4. [Core Components](#core-components)
+5. [Architecture Overview](#architecture-overview)
+6. [Detailed Component Analysis](#detailed-component-analysis)
+7. [Dependency Analysis](#dependency-analysis)
+8. [Performance Considerations](#performance-considerations)
+9. [Troubleshooting Guide](#troubleshooting-guide)
+10. [Conclusion](#conclusion)
+11. [Appendices](#appendices)
 
 ## Introduction
 This document explains the UML diagram examples included in Code-To-UML, covering all nine standard UML diagram types: Class diagrams, Sequence diagrams, Use Case diagrams, Object diagrams, Activity diagrams, Component diagrams, Deployment diagrams, State diagrams, and Timing diagrams. It documents the naming convention for examples, how complexity progresses from basic to advanced, and how the bilingual English and Chinese variants relate. It also outlines PlantUML syntax patterns, common use cases, best practices, and guidance on when to use each diagram type within software architecture documentation.
+
+**Updated** The visual theme has been comprehensively improved with modern color schemes and enhanced styling for better readability and developer experience.
+
+## Visual Theme and Styling
+
+### Color Scheme Improvements
+The visual theme has undergone comprehensive improvements with the following color scheme updates:
+
+- **Background**: Changed from dark blue (#0d1117) to clean white (#ffffff)
+- **Primary Text**: Changed from bright white (#f6f8fa) to dark gray (#1f2328)
+- **Surface Colors**: Enhanced with light gray (#f6f8fa) and soft line (#eaeef2) variations
+- **Accent Colors**: Maintained blue (#1f6feb) with light blue variant (#ddf4ff) for highlights
+
+### Enhanced Diagram Type Styling
+Different diagram types now feature specialized styling for improved visual distinction:
+
+#### Activity Diagrams
+- **Light Orange Borders**: Activity diagrams now feature light orange borders (#FF7A00) for better visual separation
+- **Warm Background**: Subtle warm background (#FFF8F0) to complement the orange borders
+- **Dark Gray Text**: Default font color (#333333) for optimal readability
+
+#### Class Diagrams  
+- **Light Blue Backgrounds**: Class diagrams utilize light blue backgrounds (#F0F7FF) for enhanced visual appeal
+- **Consistent Border Colors**: Maintained orange border styling (#FF7A00) for professional appearance
+- **Dark Gray Typography**: Consistent dark gray text (#333333) for readability
+
+#### Component Diagrams
+- **Enhanced Note Styling**: Improved note styling with better contrast and readability
+- **Professional Color Schemes**: Balanced color palettes for technical documentation
+- **Optimized Contrast Ratios**: Ensured WCAG compliance for accessibility
+
+### CSS Custom Properties
+The theme utilizes CSS custom properties for consistent theming:
+
+```css
+:root {
+  --bg: #ffffff;           /* Clean white background */
+  --fg: #1f2328;           /* Dark gray primary text */
+  --muted: #59636e;        /* Secondary muted text */
+  --line: #d8dee4;         /* Light gray borders */
+  --soft-line: #eaeef2;    /* Soft line separators */
+  --surface: #f6f8fa;      /* Surface backgrounds */
+  --accent: #1f6feb;       /* Primary accent color */
+  --accent-soft: #ddf4ff;  /* Light accent variant */
+  --success: #1a7f37;      /* Success indicators */
+  --error: #cf222e;        /* Error indicators */
+}
+```
+
+### Example Implementation
+The enhanced theming is demonstrated in the Chinese architecture examples:
+
+```plantuml
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontColor #333333
+skinparam activityBackgroundColor #FFF8F0
+skinparam activityBorderColor #FF7A00
+skinparam arrowColor #2563EB
+skinparam activityFontColor #333333
+```
+
+**Section sources**
+- [main.css:1-16](file://main.css#L1-L16)
+- [main.css:26-31](file://main.css#L26-L31)
+- [main.css:42-44](file://main.css#L42-L44)
+- [main.css:467-469](file://main.css#L467-L469)
+- [data/cc-haha/architecture--1_zh.ctu:11-17](file://data/cc-haha/architecture--1_zh.ctu#L11-L17)
+- [data/cc-haha/architecture--1_zh.ctu:82-87](file://data/cc-haha/architecture--1_zh.ctu#L82-L87)
+- [data/cc-haha/architecture--1_zh.ctu:161-167](file://data/cc-haha/architecture--1_zh.ctu#L161-L167)
 
 ## Project Structure
 The UML examples are stored as structured text files with the .ctu extension under the data/demo directory. Each .ctu file contains one or more examples with metadata and PlantUML blocks. The naming convention is {diagram-type}--{number}_{language}.ctu, such as class--1_en.ctu, sequence--1_zh.ctu, activity--2_en.ctu.
@@ -394,8 +473,6 @@ end
 - Use server fallback only when client rendering fails (e.g., large diagrams or specific stdlib imports).
 - Keep examples focused and minimal to reduce rendering time.
 
-[No sources needed since this section provides general guidance]
-
 ## Troubleshooting Guide
 - If a diagram does not render, check for syntax errors in the [UML] block.
 - If client rendering fails, the system attempts server-side rendering automatically.
@@ -408,7 +485,7 @@ end
 ## Conclusion
 The Code-To-UML repository provides a comprehensive, bilingual set of UML examples that progress logically from basic constructs to advanced features. By following the naming convention and example order, you can learn each diagram type effectively and apply the patterns to real-world architecture documentation. The rendering pipeline ensures reliable presentation across browsers and environments.
 
-[No sources needed since this section summarizes without analyzing specific files]
+**Updated** The comprehensive visual theme improvements enhance readability and developer experience with modern color schemes, improved contrast ratios, and specialized styling for different diagram types.
 
 ## Appendices
 
@@ -423,4 +500,8 @@ The Code-To-UML repository provides a comprehensive, bilingual set of UML exampl
 - State diagrams: Model lifecycle and reactive behavior.
 - Timing diagrams: Specify precise temporal interactions.
 
-[No sources needed since this section provides general guidance]
+### Visual Theme Best Practices
+- **Color Accessibility**: All diagrams use WCAG-compliant color contrasts
+- **Consistent Styling**: Each diagram type maintains distinct visual identity
+- **Readability Focus**: Dark gray text (#1f2328) on white backgrounds for optimal legibility
+- **Professional Appearance**: Balanced color schemes suitable for technical documentation

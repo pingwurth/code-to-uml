@@ -8,6 +8,12 @@
 - [class--1_en.ctu](file://data/demo/class--1_en.ctu)
 - [use-case--1_en.ctu](file://data/demo/use-case--1_en.ctu)
 - [sequence--1_en.ctu](file://data/demo/sequence--1_en.ctu)
+- [use-case--13_en.ctu](file://data/demo/use-case--13_en.ctu)
+- [use-case--14_en.ctu](file://data/demo/use-case--14_en.ctu)
+- [use-case--15_en.ctu](file://data/demo/use-case--15_en.ctu)
+- [use-case--16_en.ctu](file://data/demo/use-case--16_en.ctu)
+- [use-case--17_en.ctu](file://data/demo/use-case--17_en.ctu)
+- [use-case--18_en.ctu](file://data/demo/use-case--18_en.ctu)
 - [_TEMPLATE.html](file://cache/_TEMPLATE.html)
 - [index.html](file://index.html)
 - [install-ctu-home.js](file://install-ctu-home.js)
@@ -18,23 +24,32 @@
 - [zh.js](file://i18n/zh.js)
 </cite>
 
+## Update Summary
+**Changes Made**
+- Added comprehensive documentation for visual styling capabilities and theme customization options
+- Documented inline element styling syntax and color scheme guidelines
+- Added section on skinparam usage for global diagram theming
+- Included examples of advanced styling techniques for arrows, elements, and themes
+- Enhanced best practices for maintaining visual consistency across diagram examples
+
 ## Table of Contents
 1. [Introduction](#introduction)
 2. [Project Structure](#project-structure)
 3. [Core Components](#core-components)
 4. [Architecture Overview](#architecture-overview)
 5. [Detailed Component Analysis](#detailed-component-analysis)
-6. [Dependency Analysis](#dependency-analysis)
-7. [Performance Considerations](#performance-considerations)
-8. [Troubleshooting Guide](#troubleshooting-guide)
-9. [Conclusion](#conclusion)
-10. [Appendices](#appendices)
+6. [Visual Styling and Theme Customization](#visual-styling-and-theme-customization)
+7. [Dependency Analysis](#dependency-analysis)
+8. [Performance Considerations](#performance-considerations)
+9. [Troubleshooting Guide](#troubleshooting-guide)
+10. [Conclusion](#conclusion)
+11. [Appendices](#appendices)
 
 ## Introduction
-This document specifies the CTU (Code-To-UML Template) file format used to define structured, localized diagram examples for the Code-To-UML system. It explains the complete syntax for headers, example blocks, PlantUML source formatting, and localization support. It also documents how CTU files are organized hierarchically, how the server parses them into a JSON API consumed by the frontend, and how they integrate with HTML presentation templates. Practical examples, best practices, and maintenance guidelines are included to ensure consistency across template files.
+This document specifies the CTU (Code-To-UML Template) file format used to define structured, localized diagram examples for the Code-To-UML system. It explains the complete syntax for headers, example blocks, PlantUML source formatting, localization support, and advanced visual styling capabilities. It also documents how CTU files are organized hierarchically, how the server parses them into a JSON API consumed by the frontend, and how they integrate with HTML presentation templates. Practical examples, best practices, and maintenance guidelines are included to ensure consistency across template files.
 
 ## Project Structure
-CTU files live under the data/ directory, grouped by report categories and language variants. Each report directory corresponds to a dedicated HTML page that reads from the data/ tree via the server’s API.
+CTU files live under the data/ directory, grouped by report categories and language variants. Each report directory corresponds to a dedicated HTML page that reads from the data/ tree via the server's API.
 
 - Data organization
   - data/{report-directory-name}/ stores CTU files for a report page.
@@ -243,6 +258,122 @@ The install-ctu-home.js script:
 **Section sources**
 - [install-ctu-home.js:150-220](file://install-ctu-home.js#L150-L220)
 
+## Visual Styling and Theme Customization
+
+### Inline Element Styling
+CTU files now support advanced inline styling for individual diagram elements and arrows using PlantUML's inline styling syntax. This allows precise control over colors, line styles, and text appearance.
+
+**Element Styling Syntax:**
+- `#[color|back:color];line:color;line.[bold|dashed|dotted];text:color`
+- `#[color|back:color];line:color;line.[bold|dashed|dotted];text:color;thickness:n`
+
+**Examples:**
+- Actors with custom colors: `actor b #pink;line:red;line.bold;text:red`
+- Use cases with different line styles: `usecase c #palegreen;line:green;line.dashed;text:green`
+- Arrows with custom styling: `foo --> (bar1) #line:red;line.bold;text:red`
+
+**Section sources**
+- [use-case--16_en.ctu:8-18](file://data/demo/use-case--16_en.ctu#L8-L18)
+- [use-case--17_en.ctu:8-17](file://data/demo/use-case--17_en.ctu#L8-L17)
+
+### Advanced Color Scheme Guidelines
+The system supports comprehensive color customization through multiple approaches:
+
+**Built-in Color Options:**
+- Named colors: `#red`, `#blue`, `#green`, `#yellow`, `#purple`, `#orange`
+- Web-safe colors: `#FF0000`, `#00FF00`, `#0000FF`
+- CSS color names: `DarkSeaGreen`, `Gold`, `Olive`, `Black`
+
+**Theme Integration:**
+- Colors automatically adapt to dark/light mode themes
+- Consistent color palette maintained across all diagram types
+- Accessibility considerations for color contrast
+
+**Best Practices:**
+- Use consistent color schemes within related diagrams
+- Maintain sufficient contrast for readability
+- Limit color variations to avoid visual clutter
+- Consider color-blind accessibility
+
+**Section sources**
+- [use-case--17_en.ctu:14-16](file://data/demo/use-case--17_en.ctu#L14-L16)
+- [use-case--16_en.ctu:15-17](file://data/demo/use-case--16_en.ctu#L15-L17)
+
+### Global Theme Customization with Skinparam
+CTU files support comprehensive theme customization using PlantUML's skinparam system for global diagram styling.
+
+**Skinparam Categories:**
+- `skinparam usecase { ... }` - Individual element styling
+- `skinparam actor { ... }` - Actor appearance
+- `skinparam arrow { ... }` - Arrow styling
+- `skinparam package { ... }` - Package/container styling
+
+**Styling Parameters:**
+- `BackgroundColor` - Element background color
+- `BorderColor` - Element border color
+- `BorderThickness` - Line thickness
+- `FontName` - Text font family
+- `FontSize` - Text font size
+- `FontColor` - Text color
+- `Shadowing` - Drop shadow effect
+- `RoundCorner` - Corner rounding
+
+**Advanced Examples:**
+- Stereotype-specific styling: `BackgroundColor<< Main >> YellowGreen`
+- Directional styling: `left to right direction`
+- Handwritten style: `!option handwritten true`
+
+**Section sources**
+- [use-case--13_en.ctu:18-44](file://data/demo/use-case--13_en.ctu#L18-L44)
+- [use-case--14_en.ctu:12-22](file://data/demo/use-case--14_en.ctu#L12-L22)
+- [use-case--15_en.ctu:13-33](file://data/demo/use-case--15_en.ctu#L13-L33)
+
+### Business Use Cases and Advanced Notations
+CTU files support specialized diagram notations for business scenarios and complex relationships.
+
+**Business Use Case Syntax:**
+- Standard use case: `(First usecase)`
+- Business use case: `(First usecase)/`
+- Named business use case: `(Another usecase)/ as (UC2)`
+- Multi-line business use case: `(Last\nusecase) as UC4`
+
+**Business Actor Notation:**
+- Standard actor: `actor customer`
+- Business actor: `:First Actor:/`
+- Named business actor: `:Another\nactor:/ as Man2`
+- Business actor with stereotype: `actor/ :Last actor: as Person1`
+
+**Section sources**
+- [use-case--15_en.ctu:13-33](file://data/demo/use-case--15_en.ctu#L13-L33)
+
+### JSON Data Integration
+CTU files can incorporate JSON data structures directly into diagrams for enhanced visualization.
+
+**JSON Integration Syntax:**
+- `json JSON { ... }` - Define JSON data block
+- Nested objects and arrays supported
+- Automatic formatting and display
+- Integration with use case diagrams
+
+**Example Usage:**
+```plantuml
+json JSON {
+   "fruit":"Apple",
+   "size":"Large", 
+   "color": ["Red", "Green"]
+}
+```
+
+**Section sources**
+- [use-case--18_en.ctu:17-21](file://data/demo/use-case--18_en.ctu#L17-L21)
+
+### Best Practices for Visual Styling
+- **Consistency**: Maintain uniform styling across related diagrams
+- **Accessibility**: Ensure sufficient color contrast and readable fonts
+- **Simplicity**: Avoid excessive styling that distracts from diagram purpose
+- **Documentation**: Include styling rationale in descriptions
+- **Testing**: Verify styling across different browsers and devices
+
 ## Dependency Analysis
 CTU files depend on consistent naming and structure to be parsed and rendered correctly. The server depends on:
 - Correct file naming: {category}--{id}_{lang}.ctu.
@@ -295,7 +426,7 @@ Frontend --> I18n["i18n/en.js / i18n/zh.js"]
 Common issues and resolutions:
 - No examples appear
   - Verify the data directory exists and contains .ctu files with correct naming and PlantUML blocks.
-  - Confirm the HTML template’s tabs match the category prefixes in filenames.
+  - Confirm the HTML template's tabs match the category prefixes in filenames.
 - Wrong language shown
   - Ensure both _en and _zh variants exist for the same {category}--{id}.
   - Check the lang query parameter and i18n resource availability.
@@ -303,6 +434,10 @@ Common issues and resolutions:
   - For very large diagrams, the frontend attempts a scaled render; if it fails, the server-side plantuml.jar endpoint can be used as a fallback.
 - Cache index errors
   - Use the cache index UI to delete problematic HTML files and their matching data directories, or clear all generated content.
+- Styling issues
+  - Verify PlantUML syntax is correct for inline styling and skinparam commands.
+  - Check color values are valid and accessible.
+  - Ensure styling doesn't conflict with global theme settings.
 
 **Section sources**
 - [demo.js:124-129](file://demo.js#L124-L129)
@@ -311,7 +446,7 @@ Common issues and resolutions:
 - [serve.js:472-496](file://serve.js#L472-L496)
 
 ## Conclusion
-The CTU file format provides a compact, structured way to author PlantUML examples with localization support. The server’s parser and the frontend’s rendering pipeline work together to deliver an interactive, localized experience. By following the naming conventions, section structure, and localization patterns described here, teams can maintain consistent, scalable sets of diagram examples across projects and languages.
+The CTU file format provides a compact, structured way to author PlantUML examples with comprehensive localization support and advanced visual styling capabilities. The enhanced styling system enables precise control over colors, line styles, and typography through inline styling, skinparam commands, and theme customization. The server's parser and the frontend's rendering pipeline work together to deliver an interactive, customizable, and accessible experience. By following the naming conventions, section structure, localization patterns, and styling best practices described here, teams can maintain consistent, visually appealing, and scalable sets of diagram examples across projects and languages.
 
 ## Appendices
 
@@ -334,8 +469,13 @@ The CTU file format provides a compact, structured way to author PlantUML exampl
   - [activity--1_zh.ctu:1-18](file://data/demo/activity--1_zh.ctu#L1-L18)
 - Class diagram examples
   - [class--1_en.ctu:1-34](file://data/demo/class--1_en.ctu#L1-34)
-- Use-case examples
-  - [use-case--1_en.ctu:1-21](file://data/demo/use-case--1_en.ctu#L1-21)
+- Use-case examples with advanced styling
+  - [use-case--13_en.ctu:1-46](file://data/demo/use-case--13_en.ctu#L1-46)
+  - [use-case--14_en.ctu:1-24](file://data/demo/use-case--14_en.ctu#L1-24)
+  - [use-case--15_en.ctu:1-36](file://data/demo/use-case--15_en.ctu#L1-36)
+  - [use-case--16_en.ctu:1-20](file://data/demo/use-case--16_en.ctu#L1-20)
+  - [use-case--17_en.ctu:1-19](file://data/demo/use-case--17_en.ctu#L1-19)
+  - [use-case--18_en.ctu:1-24](file://data/demo/use-case--18_en.ctu#L1-24)
 - Sequence examples
   - [sequence--1_en.ctu:1-23](file://data/demo/sequence--1_en.ctu#L1-23)
 
@@ -346,7 +486,13 @@ The CTU file format provides a compact, structured way to author PlantUML exampl
 - Maintain both _en and _zh variants for bilingual audiences.
 - Use 60+ hyphens to separate blocks; avoid mixing spaces with hyphens in separators.
 - Align tab names with category prefixes to ensure proper loading.
+- **Updated**: Utilize inline styling for precise element customization.
+- **Updated**: Leverage skinparam for comprehensive theme control.
+- **Updated**: Follow color accessibility guidelines and maintain consistency.
+- **Updated**: Test styling across different browsers and devices.
 
 **Section sources**
 - [_TEMPLATE.ctu:1-46](file://data/_TEMPLATE.ctu#L1-L46)
 - [demo.js:728-778](file://demo.js#L728-L778)
+- [use-case--13_en.ctu:8-12](file://data/demo/use-case--13_en.ctu#L8-L12)
+- [use-case--17_en.ctu:8-9](file://data/demo/use-case--17_en.ctu#L8-L9)

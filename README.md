@@ -15,7 +15,6 @@
 
 - ✅ **Browser-First Rendering** — PlantUML WASM, zero server latency
 - ✅ **Automatic Fallback** — Client fails → server-side retry with plantuml.jar
-- ✅ **Bilingual by Default** — English ↔ Chinese switching with persistent preference
 - ✅ **Interactive Lightbox** — Full-screen with zoom, pan, keyboard navigation
 - ✅ **Side TOC with Scroll Sync** — Always-visible navigation for long reports
 - ✅ **No Build Tools** — Zero npm overhead, pure HTML/JS served directly
@@ -90,11 +89,11 @@ No frameworks. No transpilers. No `node_modules`. Just open `demo.html` and go.
 1. Clone the repository:
 
 ```bash
-git clone <repo-url> code-to-uml
+git clone https://github.com/pingwurth/code-to-uml.git
 cd code-to-uml
 ```
 
-2. (Optional) Set up `CTU_HOME` for AI agent integration:
+2. Set up `CTU_HOME` for AI agent integration:
 
 ```bash
 node install-ctu-home.js
@@ -112,8 +111,11 @@ node serve.js 5401
 
 4. Open your browser:
 
-```
-http://localhost:5401/demo.html
+```bash
+# Visit the following URL to view analysis examples
+http://localhost:5401
+# Or view UML syntax examples
+http://localhost:5401/plantuml-official-demo/en/sequence-diagram_en.html
 ```
 
 No `npm install`. No build step. That's it.
@@ -121,6 +123,36 @@ No `npm install`. No build step. That's it.
 ---
 
 ## Usage
+
+### Usage Examples
+
+Use the `/code-to-uml` slash command in your AI agent to generate UML-backed HTML reports at any scope:
+
+**File-level analysis**
+
+```
+/code-to-uml Please analyze the file component/render-failure-common.js and generate a UML-backed, consistently formatted HTML report.
+```
+
+**Function-level analysis**
+
+```
+/code-to-uml Please analyze the renderWithFailureHandling function and generate a UML-backed, consistently formatted HTML report.
+```
+
+**Project-level analysis**
+
+```
+/code-to-uml Please analyze the entire code-to-uml project and generate a UML-backed, consistently formatted HTML report.
+```
+
+**Module-level analysis**
+
+```
+/code-to-uml Please analyze the component/ module and generate a UML-backed, consistently formatted HTML report.
+```
+
+All four commands produce the same 13-section report structure — scope changes the depth and examples, not the section contract. Reports are saved to `cache/` and accessible via `index.html`.
 
 ### Interactive Demo
 
