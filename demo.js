@@ -28,7 +28,7 @@
 		? core.createRuntimeErrorBuffer({ windowRef: window, windowMs: RUNTIME_ERROR_WINDOW_MS })
 		: null;
 	function tr(key) {
-		const mode = i18n && typeof i18n.getMode === "function" ? i18n.getMode() : "zh";
+		const mode = i18n && typeof i18n.getMode === "function" ? i18n.getMode() : "en";
 		return i18n && typeof i18n.t === "function" ? i18n.t(`demoPage.${key}`, mode) : "";
 	}
 
@@ -172,7 +172,7 @@
 	}
 
 	async function loadDiagramExamples() {
-		const mode = i18n && typeof i18n.getMode === "function" ? i18n.getMode() : "zh";
+		const mode = i18n && typeof i18n.getMode === "function" ? i18n.getMode() : "en";
 		const apiUrl = dataDir
 			? `${DEMO_EXAMPLES_API_PATH}?lang=${encodeURIComponent(mode)}&dir=${encodeURIComponent(dataDir)}`
 			: `${DEMO_EXAMPLES_API_PATH}?lang=${encodeURIComponent(mode)}`;
@@ -216,7 +216,7 @@
 
 	function setActiveTab(key) {
 		activeDiagram = key;
-		const mode = i18n && typeof i18n.getMode === "function" ? i18n.getMode() : "zh";
+		const mode = i18n && typeof i18n.getMode === "function" ? i18n.getMode() : "en";
 		const activeNormalized = toDiagramKey(key);
 		for (const tab of tabs) {
 			tab.classList.toggle("is-active", toDiagramKey(tab.dataset.diagram) === activeNormalized);
@@ -239,7 +239,7 @@
 		activeTocHref = "";
 		const examples = diagramExamples[key] || [];
 		const tocItems = [];
-		const mode = i18n && typeof i18n.getMode === "function" ? i18n.getMode() : "zh";
+		const mode = i18n && typeof i18n.getMode === "function" ? i18n.getMode() : "en";
 		let activeSectionKey = "";
 		for (let i = 0; i < examples.length; i += 1) {
 			const sectionTitle = sectionTitleForMode(examples[i], mode);
@@ -511,7 +511,7 @@
 				const zoomIn = overlay.querySelector('[data-lb-action="zoom-in"]');
 				const reset = overlay.querySelector('[data-lb-action="reset"]');
 				const close = overlay.querySelector('[data-lb-action="close"]');
-				const mode = i18n && typeof i18n.getMode === "function" ? i18n.getMode() : "zh";
+				const mode = i18n && typeof i18n.getMode === "function" ? i18n.getMode() : "en";
 				const resetLabel = tr("reset") || (mode === "en" ? "Reset" : "重置");
 				const closeLabel = tr("close") || (mode === "en" ? "Close" : "关闭");
 				if (zoomOut) zoomOut.setAttribute("aria-label", tr("zoomOut"));
@@ -726,7 +726,7 @@
 	}
 
 	function applyDemoI18n() {
-		const mode = i18n && typeof i18n.getMode === "function" ? i18n.getMode() : "zh";
+		const mode = i18n && typeof i18n.getMode === "function" ? i18n.getMode() : "en";
 		const hasI18n = i18n && typeof i18n.t === "function";
 		if (hasI18n) {
 			document.documentElement.lang = i18n && i18n.getMode() === "en" ? "en" : "zh-CN";
