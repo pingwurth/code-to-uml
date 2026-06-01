@@ -1,0 +1,263 @@
+Title: 开发上手指南
+Describe: 提供阅读顺序建议、调试技巧、扩展入口、常见问题解答以及维护者索引，帮助开发者快速上手 s20 代码。
+------------------------------------------------------------
+[Example]
+推荐阅读顺序
+
+[Description]
+对于首次阅读 s20_comprehensive.py 的开发者，推荐以下渐进式阅读路径：
+
+**第一遍：理解骨架（30 分钟）**
+1. `__main__` 入口 (L2034-2069) — 理解 REPL 结构
+2. `agent_loop` (L1901-2004) — 理解主循环流程
+3. `BUILTIN_TOOLS` (L1670-1814) — 浏览所有工具 schema
+4. `BUILTIN_HANDLERS` (L1816-1835) — 对应的 handler 映射
+
+**第二遍：理解核心机制（1 小时）**
+5. `prepare_context` (L1861-1868) — 压缩管道入口
+6. `tool_result_budget` → `snip_compact` → `micro_compact` (L1068-1109)
+7. `with_retry` + `RecoveryState` (L1153-1194) — 错误恢复
+8. `permission_hook` (L879-904) — 权限检查
+
+**第三遍：理解协作系统（1 小时）**
+9. `MessageBus` (L479-498) — 通信基础
+10. `spawn_teammate_thread` (L605-809) — Teammate 完整实现
+11. `idle_poll` (L566-600) — 自治机制
+12. `ProtocolState` + `match_response` (L504-546) — 协议匹配
+
+**第四遍：理解辅助系统（按需）**
+13. `CronJob` + `cron_scheduler_loop` (L1275-1473)
+14. `MCPClient` + `assemble_tool_pool` (L1476-1590)
+15. `Task` + Worktree (L70-280)
+
+[UML]
+@startuml
+@startmindmap
+* 阅读路径
+** 第一遍: 骨架 (30min)
+*** __main__ 入口
+*** agent_loop 主循环
+*** BUILTIN_TOOLS 工具表
+*** BUILTIN_HANDLERS 映射
+** 第二遍: 核心机制 (1h)
+*** prepare_context 压缩
+*** 4 层压缩函数
+*** with_retry 重试
+*** permission_hook 权限
+** 第三遍: 协作系统 (1h)
+*** MessageBus 通信
+*** spawn_teammate_thread
+*** idle_poll 自治
+*** ProtocolState 协议
+** 第四遍: 辅助系统 (按需)
+*** Cron 调度器
+*** MCP 插件
+*** Task & Worktree
+@endmindmap
+@enduml
+
+[Detail]
+阅读顺序的设计逻辑是"**从整体到局部、从简单到复杂**"。先看 `agent_loop` 理解系统如何运转，再看各机制如何被 loop 调用。不建议从文件头部顺序阅读——Task System 虽然在前面，但要等看完 Teammate 才能理解它的完整用途。
+
+------------------------------------------------------------
+[Example]
+调试技巧
+
+[Description]
+调试 s20 Agent 时的实用技巧：
+
+**1. 观察 Hook 日志**
+```bash
+# log_hook 会打印每个工具调用
+[HOOK] bash
+[HOOK] read_file
+```
+
+**2. 查看压缩行为**
+```bash
+# compact_history 触发时会打印
+[compact] transcript saved: .transcripts/transcript_1234.jsonl
+# reactive_compact 触发时
+[reactive compact] transcript saved: ...
+```
+
+**3. 监控后台任务**
+```bash
+# 后台任务启动
+[background] bg_0001: pip install ...
+# Cron 触发
+[cron inject] Run daily check...
+```
+
+**4. 调试 Teammate 通信**
+```bash
+# MessageBus 每次发送都会打印
+[bus] lead → worker: (message) Check auth module...
+[bus] worker → lead: (plan_approval_request) Plan: ...
+```
+
+**5. 关键断点位置**
+- L1928: `call_llm` 返回后 — 检查 response 内容
+- L1972: `trigger_hooks("PreToolUse")` — 检查 Hook 是否拦截
+- L1989: `handler(...)` 调用 — 检查工具参数
+- L2004: `messages.append` — 检查最终注入的 tool_results
+
+[UML]
+@startuml
+@startmindmap
+* 调试技巧
+** 日志观察
+*** [HOOK] 前缀 → 工具调用跟踪
+*** [compact] → 压缩触发
+*** [background] → 后台任务
+*** [cron inject] → 定时触发
+*** [bus] → 团队通信
+** 关键断点
+*** L1928 call_llm 返回
+*** L1972 PreToolUse hook
+*** L1989 handler 调用
+*** L2004 messages.append
+** 状态检查
+*** estimate_size(messages) → 上下文大小
+*** len(messages) → 消息数量
+*** active_teammates → 活跃线程
+*** scheduled_jobs → Cron 任务
+*** background_tasks → 后台状态
+** 常用调试命令
+*** Agent 内输入:
+*** "list tasks" → 查看任务状态
+*** "check inbox" → 查看消息
+*** "list crons" → 查看 Cron
+@endmindmap
+@enduml
+
+[Detail]
+s20 的日志系统使用 ANSI 颜色编码区分不同来源：蓝色=任务操作，黄色=警告/后台，绿色=完成，红色=MCP/错误，灰色=Hook。在终端中可以通过颜色快速定位问题来源。如果需要更详细的调试，可以在 `agent_loop` 开头添加 `print(json.dumps(messages[-1], default=str)[:500])` 查看每轮的输入。
+
+------------------------------------------------------------
+[Example]
+扩展入口
+
+[Description]
+s20 提供了多个清晰的扩展入口：
+
+**添加新工具**:
+1. 在 `BUILTIN_TOOLS` 列表中添加工具 schema
+2. 实现 handler 函数
+3. 在 `BUILTIN_HANDLERS` 字典中注册
+
+**添加新 Hook**:
+```python
+def my_audit_hook(block):
+    # 自定义审计逻辑
+    log_to_external_service(block.name, block.input)
+    return None  # None = 允许执行
+
+register_hook("PreToolUse", my_audit_hook)
+```
+
+**添加新 MCP 服务器**:
+```python
+def _mock_server_myservice():
+    client = MCPClient("myservice")
+    client.register(tool_defs=[...], handlers={...})
+    return client
+
+MOCK_SERVERS["myservice"] = _mock_server_myservice
+```
+
+**添加新 Cron 任务类型**:
+- 修改 `schedule_job` 或通过 Agent 对话动态创建
+
+**自定义上下文源**:
+- 修改 `update_context()` 添加新的上下文信息
+- 修改 `assemble_system_prompt()` 控制 LLM 看到什么
+
+[UML]
+@startuml
+@startmindmap
+* 扩展入口
+** 新工具
+*** BUILTIN_TOOLS + schema
+*** handler 函数实现
+*** BUILTIN_HANDLERS + 注册
+** 新 Hook
+*** register_hook(event, fn)
+*** PreToolUse: return str 拒绝
+*** PostToolUse: 监控/审计
+** 新 MCP 服务器
+*** MCPClient(name)
+*** client.register(defs, handlers)
+*** MOCK_SERVERS[name] = factory
+** 新上下文源
+*** update_context() 扩展
+*** assemble_system_prompt() 注入
+** 新协议类型
+*** ProtocolState 新 type
+*** match_response 新分支
+*** consume_lead_inbox 路由
+@endmindmap
+@enduml
+
+[Detail]
+扩展的最佳实践：(1) 新工具应包含完整的 `input_schema`——LLM 依赖 schema 来生成正确参数；(2) 新 Hook 应尽快返回——PreToolUse 中的阻塞操作会延迟整个工具调用链；(3) 新 MCP 服务器应在 `inputSchema` 中标注 `readOnly` 或 `destructive`——permission_hook 据此决定是否弹出确认。
+
+------------------------------------------------------------
+[Example]
+常见问题 Q&A
+
+[Description]
+**Q1: Agent 为什么突然停止了？**
+- 检查 LLM 是否返回了纯文本（无 tool_use）— 这是正常终止
+- 检查是否触发了不可恢复错误（查看终端红色输出）
+- 检查 `max_tokens` 是否用尽（`recovery_count >= 2`）
+
+**Q2: 工具被拒绝了怎么排查？**
+- 查看 `[permission]` 前缀的日志
+- 检查 `DENY_LIST` 和 `DESTRUCTIVE` 列表
+- 检查 `safe_path()` 是否抛出异常
+
+**Q3: Teammate 创建后没反应？**
+- 检查 `active_teammates` 字典确认线程存活
+- 查看 `[bus]` 日志确认消息已发送
+- Teammate 可能在 `idle_poll` 中等待（60s 超时后自动退出）
+
+**Q4: Cron 任务不触发？**
+- 用 `list_crons` 确认任务已注册
+- 检查 cron 表达式是否匹配当前时间
+- 确认 `cron_scheduler_loop` 线程在运行
+
+**Q5: 上下文被过度压缩了？**
+- 增大 `CONTEXT_LIMIT`（默认 50000）
+- 增大 `KEEP_RECENT_TOOL_RESULTS`（默认 3）
+- 查看 `.transcripts/` 目录恢复原始对话
+
+[UML]
+@startuml
+@startmindmap
+* 常见问题
+** Agent 停止
+*** 正常: 无 tool_use 返回
+*** 错误: 不可恢复异常
+*** 耗尽: max_tokens retries
+** 工具被拒
+*** 查 DENY_LIST
+*** 查 DESTRUCTIVE
+*** 查 safe_path
+** Teammate 无响应
+*** 查 active_teammates
+*** 查 [bus] 日志
+*** 可能在 idle_poll (60s)
+** Cron 不触发
+*** 查 list_crons
+*** 验证 cron 表达式
+*** 确认线程运行
+** 过度压缩
+*** 调 CONTEXT_LIMIT
+*** 调 KEEP_RECENT_TOOL_RESULTS
+*** 查 .transcripts/ 恢复
+@endmindmap
+@enduml
+
+[Detail]
+维护者快速索引——当需要修改特定行为时，直接定位到对应模块：权限问题看 L855-940；压缩问题看 L1036-1148；重试问题看 L1152-1201；工具注册看 L1666-1835；Teammate 问题看 L603-809；Cron 问题看 L1275-1473；MCP 问题看 L1476-1590。

@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 PORT="${1:-5401}"
+MODE="${2:---bg}" # --bg (default) | --fg
+LOG_FILE="${TMPDIR:-/tmp}/code-to-uml-serve-${PORT}.log"
+PID_FILE="${TMPDIR:-/tmp}/code-to-uml-serve-${PORT}.pid"
 
 find_port_pids() {
 	if command -v lsof >/dev/null 2>&1; then
@@ -30,4 +33,21 @@ kill_port_processes() {
 }
 
 kill_port_processes
-node serve.js "$PORT"
+
+if [ "$MODE" = "--fg" ]; then
+	echo "Starting in foreground on http://localhost:${PORT}"
+	exec node serve.js "$PORT"
+fi
+
+echo "Starting in background on http://localhost:${PORT}"
+echo "Log: ${LOG_FILE}"
+setsid bash -lc "node serve.js '$PORT' >> '$LOG_FILE' 2>&1" </dev/null >/dev/null 2>&1 &
+sleep 1
+NODE_PID="$(find_port_pids | head -n 1 || true)"
+if [ -n "$NODE_PID" ] && kill -0 "$NODE_PID" 2>/dev/null; then
+	echo "$NODE_PID" > "$PID_FILE"
+	echo "Started. PID=${NODE_PID} (pid file: ${PID_FILE})"
+else
+	echo "Failed to start. Check log: ${LOG_FILE}" >&2
+	exit 1
+fi

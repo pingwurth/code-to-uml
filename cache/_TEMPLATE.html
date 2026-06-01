@@ -1,117 +1,128 @@
 <!DOCTYPE html>
 <!--
   =============================================================================
-  Code-To-UML — 图文报告页面模板
+  Code-To-UML — Illustrated Report Page Template
   =============================================================================
 
-  本文件是一个「数据驱动的图文报告」HTML 骨架。
-  你将 .ctu 数据文件放入 data/ 目录后，服务端自动解析并生成 JSON API，
-  本页面消费该 API，渲染出带有可编辑源码 + 实时预览的报告卡片。
+  This file is an HTML skeleton for a data-driven illustrated report.
+  After you place .ctu data files in the data/ directory, the server parses
+  them and generates a JSON API automatically.
+  This page consumes that API and renders report cards with editable source
+  and real-time preview.
 
   ─────────────────────────────────────────────────────────────────────────────
-  ★ 区域标记约定 ★
-  在本文件中，所有 HTML 注释使用以下标记来区分可编辑性：
+  ★ Section Marker Convention ★
+  In this file, all HTML comments use the following markers to indicate
+  editability:
 
-    [FIXED]   — 不可修改。这些是页面运行的结构性依赖，
-                删除或改动 class / id / data-* 属性会导致 JS 失效。
-    [EDIT]    — 可自由编辑。文本、标题、描述等内容区域，
-                根据实际项目替换为你自己的文案即可。
-    [CONFIG]  — 可配置。标签页列表、数据目录等需要与 .ctu 数据文件
-                保持对应关系的区域。增删改时需同步修改 .ctu 文件。
-  ─────────────────────────────────────────────────────────────────────────────
-
-  ─────────────────────────────────────────────────────────────────────────────
-  ★ 数据约定：.ctu 文件 ★
-    存放路径：data/{报告目录名}/
-      例如：data/demo/  data/my-project/  data/auth-module/
-    命名规则：{category}--{id}_{lang}.ctu
-      例如：sequence--1_en.ctu  auth--2_zh.ctu  init-flow--1_en.ctu
-      - {category} 必须与标签页按钮的 data-diagram 属性值一致
-        （"diagram" 是历史命名，实际可代表任意分类维度）
-    文件结构：Title / Describe 文件头 + 若干数据块，
-      块与块之间用 60 个以上短横线分隔。
-      详见 data/_TEMPLATE.ctu。
+    [FIXED]   — Do not modify. These are structural runtime dependencies.
+                Removing or changing class / id / data-* attributes will
+                break JavaScript behavior.
+    [EDIT]    — Freely editable. Text, titles, descriptions, and other
+                content areas can be replaced with project-specific copy.
+    [CONFIG]  — Configurable. Areas such as tab lists and data directories
+                that must stay aligned with .ctu data files.
+                If you add/remove/change items, update .ctu files accordingly.
   ─────────────────────────────────────────────────────────────────────────────
 
   ─────────────────────────────────────────────────────────────────────────────
-  ★ 整体架构 ★
+  ★ Data Convention: .ctu Files ★
+    Storage path: data/{report-directory-name}/
+      For example: data/demo/  data/my-project/  data/auth-module/
+    File naming: {category}--{id}_{lang}.ctu
+      For example: sequence--1_en.ctu  auth--2_zh.ctu  init-flow--1_en.ctu
+      - {category} must match the tab button's data-diagram value
+        ("diagram" is historical naming and can represent any category)
+    File structure: Title / Describe header + multiple data blocks.
+      Separate blocks with at least 60 hyphens.
+      See data/_TEMPLATE.ctu for details.
+  ─────────────────────────────────────────────────────────────────────────────
+
+  ─────────────────────────────────────────────────────────────────────────────
+  ★ Architecture Overview ★
     ┌─────────────────────────────────────────────────────────────────┐
-    │ serve.js（服务端）                                               │
+    │ serve.js (server)                                               │
     │  ├─ GET  /api/demo-examples?lang=zh  → JSON {category: [items]} │
-    │  ├─ POST /api/plantuml-svg           → plantuml.jar 回退渲染    │
-    │  └─ 静态文件服务（HTML / CSS / JS）                               │
+    │  ├─ POST /api/plantuml-svg           → plantuml.jar fallback    │
+    │  └─ Static file hosting (HTML / CSS / JS)                       │
     └─────────────────────────────┬───────────────────────────────────┘
                                   │ fetch()
     ┌─────────────────────────────▼───────────────────────────────────┐
-    │ 本 HTML + demo.js（前端）                                        │
-    │  ├─ PlantUML WASM（js/plantuml.js）     — 主渲染引擎             │
-    │  ├─ plantuml.jar（/api/plantuml-svg）   — 服务端回退渲染          │
-    │  └─ 组件：core / toc / example-card / markdown-it                │
+    │ This HTML + demo.js (frontend)                                 │
+    │  ├─ PlantUML WASM (js/plantuml.js)     — Primary render engine  │
+    │  ├─ plantuml.jar (/api/plantuml-svg)   — Server-side fallback   │
+    │  └─ Components: core / toc / example-card / markdown-it         │
     └─────────────────────────────────────────────────────────────────┘
   ─────────────────────────────────────────────────────────────────────────────
 
   ─────────────────────────────────────────────────────────────────────────────
-  ★ 常见场景快速指南 ★
+  ★ Quick Guide for Common Scenarios ★
 
-  场景 A：分析一个项目的多个模块
-    → 每个标签页 = 一个模块（data-diagram="auth"、"database"、"api"…）
-    → 每个 .ctu 文件 = 该模块下的一组架构图 / 流程图
-    → 修改 <nav class="demo-tabs"> 中的按钮列表
+  Scenario A: Analyze multiple modules in one project
+    → Each tab = one module (data-diagram="auth", "database", "api", ...)
+    → Each .ctu file = one set of architecture/flow diagrams for that module
+    → Update the button list in <nav class="demo-tabs">
 
-  场景 B：分析一个类的多个方法
-    → 每个标签页 = 一个方法或方法组（data-diagram="init"、"render"、"update"…）
-    → 每个 .ctu 文件 = 该方法的时序图 / 状态图 / 调用关系图
+  Scenario B: Analyze multiple methods in one class
+    → Each tab = one method or method group
+      (data-diagram="init", "render", "update", ...)
+    → Each .ctu file = sequence/state/call-relationship diagrams
 
-  场景 C：讲解多个核心原理
-    → 每个标签页 = 一个原理主题（data-diagram="principle-1"、"principle-2"…）
-    → 每个 .ctu 文件 = 该原理的示意图 + 文字说明
+  Scenario C: Explain multiple core principles
+    → Each tab = one principle topic
+      (data-diagram="principle-1", "principle-2", ...)
+    → Each .ctu file = one illustration + textual explanation
 
-  场景 D：多页面报告（如不同子系统各一个页面）
-    → 复制本模板为多个 HTML 文件（如 auth.html、db.html）
-    → 每个 HTML 指向不同的 data/ 子目录
-    → 各 HTML 文件拥有独立的标签页和数据集
+  Scenario D: Multi-page reports
+    (for example, separate page per subsystem)
+    → Copy this template into multiple HTML files
+      (for example, auth.html, db.html)
+    → Point each HTML file to a different subdirectory under data/
+    → Each HTML file has independent tabs and datasets
 
-  通用定制步骤：
-    1. 复制本文件，重命名为你的报告页面（如 my-report.html）。
-    2. 创建对应的 data/ 子目录，放入 .ctu 数据文件。
-    3. 修改 [EDIT] 区域的标题和文案。
-    4. 修改 [CONFIG] 区域的标签页列表，使其与 .ctu 文件名中的 category 一致。
-    5. 所有 [FIXED] 区域保持原样，不要修改 class / id / data-* 属性。
+  General customization steps:
+    1. Copy this file and rename it to your report page
+       (for example, my-report.html).
+    2. Create the matching data/ subdirectory and add .ctu data files.
+    3. Update titles and copy in [EDIT] sections.
+    4. Update tab list in [CONFIG] sections so category names match .ctu files.
+    5. Keep all [FIXED] sections unchanged.
+       Do not modify class / id / data-* attributes.
   ─────────────────────────────────────────────────────────────────────────────
 -->
-<html lang="zh-CN">
+<html lang="en">
 
 <head>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<!-- [EDIT] 页面标题：显示在浏览器标签页上。根据报告主题修改。 -->
+	<!-- [EDIT] Page title shown in the browser tab. Update based on report topic. -->
 	<title>Code-To-UML Template</title>
-	<!-- [FIXED] 以下两个 link 保持原样 -->
+	<!-- [FIXED] Keep the following two links unchanged -->
 	<link rel="icon" href="../favicon.svg" type="image/svg+xml" />
 	<link rel="stylesheet" href="../main.css">
 </head>
 
 <body class="demo-page">
-	<!-- [FIXED] 顶部导航栏结构。仅可修改 href / aria-label / 显示文本。 -->
+	<!-- [FIXED] Top navigation structure. Only href / aria-label / visible text can be changed. -->
 	<header class="demo-topbar">
 		<a class="demo-topbar-logo" href="../index.html" aria-label="Code-To-UML Home">
 			<img src="../favicon.svg" alt="" />
-			<!-- [EDIT] 品牌名称 -->
+			<!-- [EDIT] Brand name -->
 			<span>Code-To-UML</span>
 		</a>
 	</header>
 
-	<!-- [FIXED] page-shell 布局容器 -->
+	<!-- [FIXED] page-shell layout container -->
 	<div class="page-shell demo-shell">
 
-		<!-- [FIXED] main.content 主内容区 -->
+		<!-- [FIXED] main.content primary content area -->
 		<main class="content">
 
 			<!-- =============================================================
-			  [EDIT] 区块：页面介绍
-			 自由修改 <h1> 标题和 <p> 概述文本。
-			 可在此处描述项目名称、分析范围、版本信息等。
-			 不要修改 class="intro"。
+			  [EDIT] Section: Page Introduction
+			 Freely edit the <h1> title and <p> summary text.
+			 You can describe project name, analysis scope, version info, etc.
+			 Do not change class="intro".
 			=============================================================== -->
 			<section class="intro">
 				<h1>Code-To-UML Template</h1>
@@ -119,34 +130,37 @@
 			</section>
 
 			<!-- =============================================================
-			  [CONFIG] 区块：分类标签页（导航栏）
+			  [CONFIG] Section: Category Tabs (Navigation)
 
-			  ★ 这是最关键的配置区 ★
-			  每个 <button> 代表一个分类维度，点击后加载对应的 .ctu 数据。
+			  ★ Most important configuration section ★
+			  Each <button> represents one category and loads matching .ctu data.
 
-			  按钮属性说明：
-			    class="demo-tab"       — [FIXED] 必须保留，JS 通过此选择器绑定事件
-			    type="button"           — [FIXED] 防止表单提交
-			    data-diagram="xxx"      — [CONFIG] 分类标识符，必须与 .ctu 文件名中
-			                              的 {category} 前缀一致（注意：属性名
-			                              "data-diagram" 是历史遗留命名，实际
-			                              可代表任意分类：模块、函数、原理等）
-			    按钮文本（如 "Sequence"）— [EDIT] 显示在界面上的标签名，自由修改
-			    class="... is-active"   — [CONFIG] 标记默认激活的标签页，
-			                              只能有一个按钮带此 class
+			  Button attributes:
+			    class="demo-tab"       — [FIXED] Required for JS event binding
+			    type="button"           — [FIXED] Prevents form submission
+			    data-diagram="xxx"      — [CONFIG] Category identifier.
+			                              Must match the {category} prefix in
+			                              .ctu filenames.
+			                              ("data-diagram" is historical naming and
+			                              can represent modules, functions,
+			                              principles, etc.)
+			    Button text (e.g. "Sequence")
+			                            — [EDIT] Display label in UI; freely editable
+			    class="... is-active"   — [CONFIG] Marks default active tab.
+			                              Only one button can have this class.
 
-			  增删改规则：
-			    增加：添加 <button> + 对应的 .ctu 文件
-			    删除：直接移除 <button>，对应的 .ctu 文件将不再被加载
-			    改名：修改 data-diagram 值 + 同步重命名 .ctu 文件前缀
+			  Add / remove / rename rules:
+			    Add:    add a <button> + matching .ctu file
+			    Remove: remove the <button>; matching .ctu data will no longer load
+			    Rename: update data-diagram value + rename .ctu filename prefix
 
-			  示例：分析一个 Auth 模块的三个子功能
-			    <button class="demo-tab is-active" data-diagram="login">登录流程</button>
-			    <button class="demo-tab" data-diagram="register">注册流程</button>
-			    <button class="demo-tab" data-diagram="reset-pwd">重置密码</button>
+			  Example: three subfeatures for an Auth module
+			    <button class="demo-tab is-active" data-diagram="login">Login flow</button>
+			    <button class="demo-tab" data-diagram="register">Registration flow</button>
+			    <button class="demo-tab" data-diagram="reset-pwd">Password reset</button>
 			=============================================================== -->
-			<nav class="demo-tabs" aria-label="Demo 图类型">
-				<!-- [CONFIG] 标签按钮列表 — 按上述规则增删改 -->
+			<nav class="demo-tabs" aria-label="Demo Diagram Types">
+				<!-- [CONFIG] Tab button list — add/remove/update using the rules above -->
 				<button class="demo-tab is-active" type="button" data-diagram="sequence">Sequence</button>
 				<button class="demo-tab" type="button" data-diagram="use-case">Use Case</button>
 				<button class="demo-tab" type="button" data-diagram="class">Class</button>
@@ -170,34 +184,36 @@
 
 
 			<!-- =============================================================
-			  区块：内容展示面板
+			  Section: Content Display Panel
 
-			  结构说明：
-			    <section>              — [FIXED] 外层容器，不要修改 class
-			    #demo-title            — [EDIT] 默认显示的标题文本（与 is-active
-			                              标签页对应），页面加载后由 JS 动态更新
-			    .demo-section-overview — [CONFIG] 每个标签页各对应一个 <p>，
-			                              其 data-diagram-overview 值必须与
-			                              demo-tabs 中对应按钮的 data-diagram 一致；
-			                              <p> 内的文本 [EDIT] 可自由修改。
-			                              第一个（is-active 标签对应的）带 is-active
-			                              class，其余带 hidden 属性。
-			                              增删标签时同步增删对应的 <p>。
-			    [data-examples]        — [FIXED] JS 动态追加报告卡片的容器，
-			                              每张卡片包含：
-			                               · 标题 + 描述（来自 .ctu 的 [Example] / [Description]）
-			                               · <textarea>：可编辑的 PlantUML 源码
-			                               · <div>：渲染后的 SVG 预览
-			                               · 详解（来自 .ctu 的 [Detail]，支持 Markdown，
-			                                 用于对 UML 图的详细解读，帮助用户理解
-			                                 图中的关键元素、箭头和关系。
-			                                 写 "None" 或留空则不显示。）
-			                               · 操作按钮：复制源码、复制 SVG、下载 SVG
+			  Structure:
+			    <section>              — [FIXED] Outer container; do not change class
+			    #demo-title            — [EDIT] Default title text (matches is-active
+			                              tab), dynamically updated by JS after load
+			    .demo-section-overview — [CONFIG] One <p> per tab.
+			                              data-diagram-overview must match the
+			                              corresponding tab's data-diagram value.
+			                              Text inside <p> is [EDIT] and freely editable.
+			                              The first one (for is-active tab) has
+			                              class is-active; others use hidden.
+			                              Add/remove matching <p> when tabs change.
+			    [data-examples]        — [FIXED] Container where JS appends report cards.
+			                              Each card includes:
+			                               · title + description
+			                                 (from .ctu [Example] / [Description])
+			                               · <textarea>: editable PlantUML source
+			                               · <div>: rendered SVG preview
+			                               · details (from .ctu [Detail], Markdown supported)
+			                                 for in-depth explanation of UML elements,
+			                                 arrows, and relationships.
+			                                 Use "None" or leave blank to hide.
+			                               · action buttons:
+			                                 copy source, copy SVG, download SVG
 			=============================================================== -->
 			<section class="doc-section demo-panel">
-				<!-- [EDIT] 默认标题，与 is-active 标签页一致 -->
+				<!-- [EDIT] Default title, aligned with the is-active tab -->
 				<h2 id="demo-title">Sequence</h2>
-				<!-- [CONFIG] 各标签页概述 — data-diagram-overview 与 data-diagram 一一对应 -->
+				<!-- [CONFIG] Tab overviews — data-diagram-overview maps 1:1 to data-diagram -->
 				<p class="demo-section-overview is-active" data-diagram-overview="sequence">Sequence Overview</p>
 				<p class="demo-section-overview" data-diagram-overview="use-case" hidden>Use Case Overview</p>
 				<p class="demo-section-overview" data-diagram-overview="class" hidden>Class Overview</p>
@@ -221,14 +237,14 @@
 			</section>
 
 		</main>
-		<!-- [FIXED] 侧边目录容器，由 JS 动态填充 -->
+		<!-- [FIXED] Sidebar TOC container, populated dynamically by JS -->
 		<aside data-demo-toc></aside>
 	</div>
 
 	<!-- =================================================================
-	  [FIXED] 脚本依赖（加载顺序不可调整）
-	  所有 <script> 标签必须保留，顺序固定，src 路径不可修改。
-	  如需添加自定义脚本，请在 demo.js 之后追加。
+	  [FIXED] Script dependencies (load order must not change)
+	  All <script> tags must remain and keep their order and src paths.
+	  If you need custom scripts, append them after demo.js.
 	=================================================================== -->
 	<script src="../js/viz-global.js"></script>
 	<script src="../js/plantuml.js"></script>

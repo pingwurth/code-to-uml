@@ -506,22 +506,25 @@
 		updateLightboxLabels();
 		document.addEventListener("docs:langchange", updateLightboxLabels);
 
-		function updateLightboxLabels() {
-			const zoomOut = overlay.querySelector('[data-lb-action="zoom-out"]');
-			const zoomIn = overlay.querySelector('[data-lb-action="zoom-in"]');
-			const reset = overlay.querySelector('[data-lb-action="reset"]');
-			const close = overlay.querySelector('[data-lb-action="close"]');
-			if (zoomOut) zoomOut.setAttribute("aria-label", tr("zoomOut"));
-			if (zoomIn) zoomIn.setAttribute("aria-label", tr("zoomIn"));
-			if (reset) {
-				reset.setAttribute("aria-label", tr("reset"));
-				reset.textContent = tr("reset");
+			function updateLightboxLabels() {
+				const zoomOut = overlay.querySelector('[data-lb-action="zoom-out"]');
+				const zoomIn = overlay.querySelector('[data-lb-action="zoom-in"]');
+				const reset = overlay.querySelector('[data-lb-action="reset"]');
+				const close = overlay.querySelector('[data-lb-action="close"]');
+				const mode = i18n && typeof i18n.getMode === "function" ? i18n.getMode() : "zh";
+				const resetLabel = tr("reset") || (mode === "en" ? "Reset" : "重置");
+				const closeLabel = tr("close") || (mode === "en" ? "Close" : "关闭");
+				if (zoomOut) zoomOut.setAttribute("aria-label", tr("zoomOut"));
+				if (zoomIn) zoomIn.setAttribute("aria-label", tr("zoomIn"));
+				if (reset) {
+					reset.setAttribute("aria-label", resetLabel);
+					reset.textContent = resetLabel;
+				}
+				if (close) {
+					close.setAttribute("aria-label", closeLabel);
+					close.textContent = closeLabel;
+				}
 			}
-			if (close) {
-				close.setAttribute("aria-label", tr("close"));
-				close.textContent = tr("close");
-			}
-		}
 
 		const stage = overlay.querySelector(".uml-lightbox-stage");
 		const viewport = overlay.querySelector(".uml-lightbox-viewport");

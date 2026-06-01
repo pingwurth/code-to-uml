@@ -1,0 +1,246 @@
+Title: 核心设计原理
+Describe: s20 体现了四个核心设计原理：Harness vs Model 职责分离、Hook 驱动的可扩展性、分层压缩策略、协议驱动的团队协调。
+------------------------------------------------------------
+[Example]
+Harness vs Model 职责分离
+
+[Description]
+s20 最根本的设计原则是 **Harness（Python 代码）负责编排，Model（LLM）负责决策**：
+
+**Harness 职责（确定性、可审计）**:
+- 工具注册与分发
+- 权限检查与路径验证
+- 上下文预算管理
+- 重试与错误恢复
+- 线程与锁管理
+- 文件 I/O 与持久化
+
+**Model 职责（概率性、创造性）**:
+- 理解用户意图
+- 选择使用哪个工具
+- 生成工具参数
+- 决定何时结束
+- 文本输出（解释、代码）
+
+**不应由 Model 做的事**:
+- 自己判断权限 → Harness hook 管理
+- 自己计算上下文大小 → Harness 自动压缩
+- 自己管理重试 → Harness with_retry 处理
+- 自己调度定时任务 → Harness cron 执行
+
+[UML]
+@startuml
+@startmindmap
+* Harness vs Model
+** Harness (Python)
+*** 确定性逻辑
+**** 权限检查
+**** 路径验证
+**** 重试策略
+**** 上下文压缩
+*** 编排控制
+**** 循环结构
+**** 线程管理
+**** 工具分发
+**** 协议路由
+*** 持久化
+**** Task JSON
+**** Transcript JSONL
+**** Cron durable
+**** Mailbox JSONL
+** Model (LLM)
+*** 决策能力
+**** 工具选择
+**** 参数生成
+**** 任务规划
+**** 终止判断
+*** 创造能力
+**** 代码生成
+**** 文本解释
+**** 问题分析
+*** 不应做的事
+**** 权限判断
+**** 上下文管理
+**** 重试控制
+**** 定时调度
+@endmindmap
+@enduml
+
+[Detail]
+这种分离的核心好处是**可测试性**和**可预测性**：Harness 的行为是确定性的，可以编写单元测试验证；Model 的决策虽然概率性，但被限制在"选择工具+生成参数"的范围内。如果 Model 做出错误决策（如尝试删除系统文件），Harness 的 permission_hook 会阻止执行。这就是"Agent 安全"的工程化实现。
+
+------------------------------------------------------------
+[Example]
+Hook 驱动的可扩展性
+
+[Description]
+Hook 系统（第 855-940 行）提供了不修改工具代码就能增加行为的扩展机制：
+
+**事件类型**:
+- `UserPromptSubmit` — 用户输入时触发
+- `PreToolUse` — 工具执行前触发（可拦截）
+- `PostToolUse` — 工具执行后触发（可监控）
+- `Stop` — Agent 循环结束时触发
+
+**设计模式**: 责任链 (Chain of Responsibility)
+- 多个 hook 按注册顺序执行
+- PreToolUse 中任何 hook 返回非 None 即短路（拒绝执行）
+- PostToolUse 只做监控，不影响结果
+
+**内置 Hook**:
+1. `permission_hook` — 权限检查（deny list + destructive confirm）
+2. `log_hook` — 工具调用日志
+3. `large_output_hook` — 大输出告警
+4. `user_prompt_hook` — 输入日志
+5. `stop_hook` — 统计 tool_result 数量
+
+[UML]
+@startuml
+component [Tool Dispatch] as dispatch
+component [Hook Pipeline] as pipeline
+
+interface "PreToolUse" as pre
+interface "PostToolUse" as post
+
+component [permission_hook] as perm #LightCoral
+component [log_hook] as log #LightGreen
+component [large_output_hook] as large #LightBlue
+
+dispatch --> pre : 执行前检查
+pre --> perm : 第1个
+perm --> log : 第2个 (如果 perm 允许)
+
+dispatch --> post : 执行后通知
+post --> large : 监控
+
+note right of perm
+  返回 str → 拒绝 (短路)
+  返回 None → 允许 (继续)
+end note
+
+note right of large
+  只做告警日志
+  不影响 tool_result
+end note
+
+note bottom of pipeline
+  扩展方式:
+  register_hook("PreToolUse", my_custom_hook)
+  无需修改任何工具代码
+end note
+@enduml
+
+[Detail]
+Hook 系统的设计优势：(1) **解耦** — 工具不知道有 hook 存在，hook 不知道工具实现细节；(2) **组合性** — 可以任意添加/移除 hook 而不影响其他 hook；(3) **短路语义** — PreToolUse 的短路返回确保权限检查拥有最高优先级。这种模式在生产级 Agent 框架（如 Claude Code 的 permission system）中被广泛使用。
+
+------------------------------------------------------------
+[Example]
+分层压缩策略
+
+[Description]
+上下文压缩采用 4 层渐进式策略，从最轻量到最激进：
+
+**设计原则**:
+1. **Recency Bias** — 最近的信息最可能与当前任务相关
+2. **先便宜后昂贵** — L1-L3 不调用 LLM，L4 才用 LLM
+3. **永不丢失** — `write_transcript` 保存原始记录到磁盘
+4. **按需触发** — 只有超出预算时才执行更激进的层
+
+**层级触发条件与影响**:
+
+| 层级 | 触发条件 | 影响范围 | LLM 调用 |
+|------|---------|---------|---------|
+| L1 tool_result_budget | 最后消息 results > 200KB | 单个大输出 | 否 |
+| L2 snip_compact | messages > 50 条 | 中间消息 | 否 |
+| L3 micro_compact | tool_results > 3 个 | 旧 result 内容 | 否 |
+| L4 compact_history | 总大小 > 50000 字符 | 全部历史 | 是 |
+
+[UML]
+@startuml
+@startmindmap
+* 分层压缩策略
+** L1: tool_result_budget
+*** 触发: results > 200KB
+*** 动作: 大输出写磁盘
+*** 成本: O(n) + 磁盘 I/O
+*** 保留: 前 2000 字符预览
+** L2: snip_compact
+*** 触发: messages > 50
+*** 动作: 保头3+尾47, 裁中间
+*** 成本: O(1)
+*** 保留: 首尾消息完整
+** L3: micro_compact
+*** 触发: tool_results > 3
+*** 动作: 旧结果 → placeholder
+*** 成本: O(n)
+*** 保留: 最近 3 个完整
+** L4: compact_history
+*** 触发: 总大小 > 50000
+*** 动作: LLM 摘要替换全部
+*** 成本: 1 次 LLM 调用
+*** 保留: 目标/发现/文件/约束
+** 特殊: reactive_compact
+*** 触发: prompt-too-long 错误
+*** 动作: 摘要 + 保留最近 5 条
+*** 成本: 1 次 LLM 调用
+*** 保留: 更多近期上下文
+@endmindmap
+@enduml
+
+[Detail]
+分层策略的工程价值在于**避免过度压缩**：如果只有一个大工具输出导致超限，L1 就能解决，不需要执行代价高昂的 L4。`reactive_compact` 是 L4 的紧急变体——当 API 返回 prompt-too-long 错误时触发，它比 `compact_history` 多保留 5 条最近消息，因为这些消息最可能包含 Agent 当前工作所需的上下文。
+
+------------------------------------------------------------
+[Example]
+协议驱动的团队协调
+
+[Description]
+团队协调采用**消息驱动 + 协议状态机**模式：
+
+**通信基础设施**: MessageBus（JSONL 文件信箱）
+- 异步、持久、可审计
+- 每个 agent 一个 inbox 文件
+- 破坏性读取（读后删除）
+
+**协议类型**:
+1. **Plan Approval** — 计划审批（gate 阻塞模式）
+2. **Shutdown** — 优雅关闭（request/response 模式）
+3. **Message** — 普通通信（fire-and-forget）
+
+**状态匹配**: ProtocolState + request_id
+- 每个协议交互生成唯一 `req_id`
+- 响应通过 `match_response(type, req_id, approve)` 匹配
+- 防止跨协议误匹配
+
+**Plan Approval Gate 机制**:
+- Teammate 调用 `submit_plan` → 设置 `waiting_plan = req_id`
+- 等待循环：只轮询 inbox，不调用 LLM
+- Lead 审批后 → `waiting_plan = None`，恢复正常循环
+
+[UML]
+@startuml
+state "Teammate 状态机" as tm {
+  [*] --> Working
+  Working --> PlanGate : submit_plan()
+  PlanGate --> Working : plan_approval_response(approve=True)
+  PlanGate --> Working : plan_approval_response(approve=False)
+  Working --> Idle : 无任务
+  Idle --> Working : inbox message / unclaimed task
+  Working --> Shutdown : shutdown_request
+  Idle --> Shutdown : shutdown_request / timeout
+  Shutdown --> [*]
+}
+
+state "Lead 协议处理" as lead {
+  [*] --> Listening
+  Listening --> Reviewing : plan_approval_request 收到
+  Reviewing --> Listening : review_plan() 发送响应
+  Listening --> Requesting : request_shutdown() 发送
+  Requesting --> Listening : shutdown_response 收到
+}
+
+tm -right-> lead : MessageBus
+@enduml
+
+[Detail]
+协议设计的关键考量：(1) **request_id 匹配** — 在并发环境下，多个 Teammate 可能同时提交 plan，`request_id` 确保每个响应准确送达对应请求；(2) **Gate 阻塞而非忙等** — `waiting_plan` 期间 Teammate 只做 `time.sleep(5)` + 检查 inbox，不浪费 LLM token；(3) **优雅关闭** — `shutdown_request` 是请求而非强制，Teammate 有机会完成当前工作后再退出。这种协议模式借鉴了分布式系统中的 RPC 请求/响应模式。

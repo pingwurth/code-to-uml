@@ -1,0 +1,229 @@
+Title: 数据流与状态
+Describe: 系统中有四条主要数据流：messages 列表生命周期、上下文压缩管道、后台任务通知流、Cron 注入流，它们共同维持 Agent 的运行状态。
+------------------------------------------------------------
+[Example]
+Messages 列表生命周期
+
+[Description]
+`messages: list[dict]` 是系统的核心数据结构，承载了完整的对话历史：
+
+**数据来源（写入 messages）**:
+- 用户输入 → `{"role": "user", "content": query}`
+- LLM 响应 → `{"role": "assistant", "content": response.content}`
+- 工具结果 → `{"role": "user", "content": [tool_results]}`
+- Cron 注入 → `{"role": "user", "content": "[Scheduled] ..."}`
+- 后台通知 → `{"role": "user", "content": [task_notifications]}`
+- Inbox 消息 → `{"role": "user", "content": "[Inbox]\\n..."}`
+- 压缩摘要 → `{"role": "user", "content": "[Compacted]\\n..."}`
+
+**数据消费（读取 messages）**:
+- `prepare_context` — 压缩和裁剪
+- `call_llm` — 发送给 API
+- `write_transcript` — 保存到磁盘
+- `summarize_history` — 生成摘要
+
+[UML]
+@startuml
+state "messages: list" as msgs {
+  state "用户消息" as user
+  state "助手响应" as assistant
+  state "工具结果" as tools
+  state "注入消息" as inject
+}
+
+state "写入来源" as writers {
+  state "用户输入" as w1
+  state "LLM 响应" as w2
+  state "tool_result" as w3
+  state "Cron inject" as w4
+  state "Background notify" as w5
+  state "Inbox" as w6
+  state "Compact summary" as w7
+}
+
+state "消费方" as readers {
+  state "prepare_context" as r1
+  state "call_llm (API)" as r2
+  state "write_transcript" as r3
+  state "summarize_history" as r4
+}
+
+writers --> msgs
+msgs --> readers
+
+note right of msgs
+  格式: list[dict]
+  每个 dict 有 role + content
+  content 可以是 str 或 list[block]
+end note
+@enduml
+
+[Detail]
+Messages 列表的生命周期贯穿整个 Agent 会话。关键的不变量：(1) role 必须交替出现 user/assistant（Anthropic API 要求）；(2) tool_result 必须跟在包含对应 tool_use 的 assistant 消息之后；(3) `prepare_context` 可能原地修改 messages（通过 `messages[:]` 赋值）。压缩后 messages 可能只剩一条 `[Compacted]` 摘要消息。
+
+------------------------------------------------------------
+[Example]
+上下文压缩管道
+
+[Description]
+`prepare_context(messages)` 执行 4 层压缩管道，按顺序处理：
+
+```
+messages → tool_result_budget → snip_compact → micro_compact → [compact_history]
+```
+
+| 层级 | 函数 | 触发条件 | 动作 |
+|------|------|---------|------|
+| L1 | `tool_result_budget` | 最后一条消息的 tool_results 总字节 > 200KB | 大输出持久化到磁盘 |
+| L2 | `snip_compact` | messages 数量 > 50 | 保留头3+尾47，中间标记 [snipped] |
+| L3 | `micro_compact` | tool_results 数量 > 3 | 旧 tool_result 替换为 placeholder |
+| L4 | `compact_history` | `estimate_size > CONTEXT_LIMIT` | LLM 生成摘要替换全部历史 |
+
+[UML]
+@startuml
+start
+
+partition "L1: tool_result_budget" {
+  :检查最后一条 user 消息;
+  if (tool_results 总字节 > 200KB?) then (yes)
+    :按大小降序排列 results;
+    :大输出 → persist_large_output();
+    note right
+      写入 .task_outputs/tool-results/{id}.txt
+      替换为 <persisted-output> 预览
+    end note
+  endif
+}
+
+partition "L2: snip_compact" {
+  if (len(messages) > 50?) then (yes)
+    :保留 messages[:3];
+    :插入 "[snipped N messages]";
+    :保留 messages[-47:];
+  endif
+}
+
+partition "L3: micro_compact" {
+  :收集所有 tool_results;
+  if (数量 > KEEP_RECENT_TOOL_RESULTS?) then (yes)
+    :旧 results (除最近3个) 替换为:
+    "[Earlier tool result compacted]";
+  endif
+}
+
+partition "L4: compact_history (条件触发)" {
+  if (estimate_size(messages) > CONTEXT_LIMIT?) then (yes)
+    :write_transcript(messages) 保存原始记录;
+    :summarize_history(messages) 调用 LLM;
+    :messages = [{role:user, content:"[Compacted]\\n{summary}"}];
+  endif
+}
+
+stop
+@enduml
+
+[Detail]
+压缩管道的设计哲学是"**渐进式降级**"：L1 只影响单个大输出；L2 只裁剪中间消息；L3 只模糊旧 tool_result 内容；L4 是最激进的——调用 LLM 生成摘要替换全部历史。每一层都尽量保留最近的信息（"recency bias"），因为最近的工具结果对当前任务最相关。`write_transcript` 确保原始对话永不丢失。
+
+------------------------------------------------------------
+[Example]
+后台任务通知流
+
+[Description]
+后台任务（Background Tasks）的数据流：
+
+```
+tool_use(bash, run_in_background) → start_background_task → worker thread
+                                         ↓ (placeholder)
+                                    agent_loop 继续
+                                         ...
+worker thread 完成 → background_results[bg_id] = output
+                                         ...
+下一轮 agent_loop → collect_background_results → task_notification → messages
+```
+
+[UML]
+@startuml
+participant "agent_loop" as loop
+participant "background_tasks\n(dict)" as tasks
+participant "Worker Thread" as worker
+participant "background_results\n(dict)" as results
+participant "messages" as msgs
+
+== 启动后台任务 ==
+loop -> tasks : background_tasks[bg_id] = {status: "running"}
+loop -> worker : Thread(target=worker).start()
+loop -> msgs : tool_result = "[Background task bg_0001 started]"
+note right: agent_loop 继续运行\n不等待后台完成
+
+== Worker 执行 ==
+worker -> worker : handler(**args)
+worker -> results : background_results[bg_id] = output
+worker -> tasks : background_tasks[bg_id]["status"] = "completed"
+note right: 通过 background_lock 保护
+
+== 下一轮循环注入 ==
+loop -> loop : inject_background_notifications()
+loop -> tasks : 检查 status == "completed"
+loop -> results : 取出 output
+loop -> msgs : messages.append(<task_notification>)
+note right
+  包含: task_id, status,
+  command, summary (前200字符)
+end note
+@enduml
+
+[Detail]
+后台任务通知流的关键设计：(1) **立即返回 placeholder** — Agent 不阻塞等待慢操作完成；(2) **下一轮注入** — 通知在 `inject_background_notifications()` 或 `build_user_content()` 中被注入，确保 LLM 能看到结果；(3) **summary 截断** — 只发送前 200 字符，避免通知消息膨胀上下文。通知格式使用 XML 标签包裹，方便 LLM 解析。
+
+------------------------------------------------------------
+[Example]
+MCP 工具池动态变化
+
+[Description]
+MCP 连接改变工具池的数据流：
+
+```
+connect_mcp("docs") → MCPClient("docs") → mcp_clients["docs"]
+  → assemble_tool_pool() → tools + handlers 合并
+  → LLM 在下一轮看到新工具
+```
+
+工具命名规则：`mcp__{server}__{tool}`
+- `mcp__docs__search`
+- `mcp__docs__get_version`
+- `mcp__deploy__trigger`
+- `mcp__deploy__status`
+
+[UML]
+@startuml
+state "初始状态" as init {
+  state "BUILTIN_TOOLS (27)" as bt
+  state "BUILTIN_HANDLERS (27)" as bh
+  state "mcp_clients = {}" as mc
+}
+
+state "连接 MCP 后" as after {
+  state "tools = BUILTIN + MCP" as at
+  state "handlers = BUILTIN + MCP" as ah
+  state "mcp_clients = {docs: MCPClient}" as mc2
+}
+
+init --> after : connect_mcp("docs")
+
+note right of after
+  assemble_tool_pool() 每轮重建:
+  
+  tools = list(BUILTIN_TOOLS)
+  for server in mcp_clients:
+    for tool in server.tools:
+      tools.append({
+        name: "mcp__docs__search",
+        ...
+      })
+      handlers["mcp__docs__search"] = lambda
+end note
+@enduml
+
+[Detail]
+工具池的动态特性是 s20 的重要设计——`assemble_tool_pool()` 在 `agent_loop` 每轮循环中调用，这意味着如果 Agent 在循环中连接了新的 MCP 服务器，下一轮 LLM 就能使用新发现的工具。`normalize_mcp_name()` 确保服务器/工具名中的特殊字符被替换为下划线，满足 API 对工具名的约束。

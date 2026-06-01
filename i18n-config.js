@@ -2,7 +2,7 @@
 
 	(function exposeI18n(root) {
 	const MODE_KEY = "plantuml-docs-lang";
-	const defaultMode = "zh";
+	const defaultMode = "en";
 
 	const dictionaries = {
 		zh: Object.assign({}, root.__DOCS_I18N_ZH__ || {}, { demoExamples: root.__DOCS_I18N_ZH_DEMO_EXAMPLES__ || {} }),

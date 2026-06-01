@@ -1,0 +1,323 @@
+Title: 关键代码解析
+Describe: 深入解析 agent_loop 核心循环、permission_hook 权限管道、compact 压缩管道、error recovery 恢复策略的关键代码片段。
+------------------------------------------------------------
+[Example]
+agent_loop 核心循环代码
+
+[Description]
+`agent_loop` 函数（第 1901-2004 行）是整个系统的心脏。以下是简化后的核心结构：
+
+```python
+def agent_loop(messages: list, context: dict):
+    global rounds_since_todo
+    tools, handlers = assemble_tool_pool()
+    state = RecoveryState()
+    max_tokens = DEFAULT_MAX_TOKENS
+
+    while True:
+        # 1. Cron & Background 注入
+        fired = consume_cron_queue()
+        for job in fired:
+            messages.append({"role": "user",
+                             "content": f"[Scheduled] {job.prompt}"})
+        inject_background_notifications(messages)
+
+        # 2. 上下文预算管理
+        prepare_context(messages)
+        context = update_context(context, messages)
+        tools, handlers = assemble_tool_pool()
+
+        # 3. LLM 调用 + 错误恢复
+        try:
+            response = call_llm(messages, context, tools, state, max_tokens)
+        except Exception as e:
+            if is_prompt_too_long_error(e):
+                messages[:] = reactive_compact(messages)
+                continue
+            return
+
+        # 4. 工具分发
+        messages.append({"role": "assistant", "content": response.content})
+        if not has_tool_use(response.content):
+            trigger_hooks("Stop", messages)
+            return
+
+        results = []
+        for block in response.content:
+            if block.type != "tool_use": continue
+            # Hook → Background → Normal dispatch
+            ...
+        messages.append({"role": "user", "content": build_user_content(results)})
+```
+
+[UML]
+@startuml
+start
+:tools, handlers = assemble_tool_pool();
+:state = RecoveryState();
+:max_tokens = DEFAULT_MAX_TOKENS;
+
+repeat
+  :--- 注入阶段 ---;
+  :fired = consume_cron_queue();
+  :inject_background_notifications(messages);
+  
+  :--- 预算阶段 ---;
+  :prepare_context(messages);
+  :context = update_context(context, messages);
+  :tools, handlers = assemble_tool_pool();
+  
+  :--- 调用阶段 ---;
+  :response = call_llm(...);
+  
+  :--- 分发阶段 ---;
+  :messages.append(assistant);
+  if (has_tool_use?) then (no)
+    :trigger_hooks("Stop");
+    stop
+  endif
+  
+  :遍历 blocks → results;
+  :messages.append(build_user_content(results));
+repeat while (True)
+@enduml
+
+[Detail]
+代码的关键设计选择：(1) `messages[:]` 原地赋值——`prepare_context` 和 `reactive_compact` 都直接修改传入的 list，确保调用者看到变化；(2) `assemble_tool_pool()` 每轮重建——虽然性能不优，但确保 MCP 动态连接后立刻生效；(3) `while True` + `return` 控制流——循环只通过 `return`（正常结束或不可恢复错误）退出。
+
+------------------------------------------------------------
+[Example]
+permission_hook 权限检查代码
+
+[Description]
+权限钩子（第 879-904 行）是安全层的核心实现：
+
+```python
+def permission_hook(block):
+    if block.name == "bash":
+        command = block.input.get("command", "")
+        # 1. 绝对禁止列表
+        for pattern in DENY_LIST:  # ["rm -rf /", "sudo", ...]
+            if pattern in command:
+                return f"Permission denied: '{pattern}' is on the deny list"
+        # 2. 危险命令需用户确认
+        if any(token in command for token in DESTRUCTIVE):
+            choice = input("  Allow? [y/N] ").strip().lower()
+            if choice not in ("y", "yes"):
+                return "Permission denied by user"
+
+    if block.name in ("write_file", "edit_file"):
+        # 3. 路径逃逸检查
+        path = block.input.get("path", "")
+        try:
+            safe_path(path)
+        except Exception:
+            return f"Permission denied: path escapes workspace: {path}"
+
+    if block.name.startswith("mcp__") and "deploy" in block.name:
+        # 4. MCP 破坏性工具确认
+        choice = input("  Allow? [y/N] ").strip().lower()
+        if choice not in ("y", "yes"):
+            return "Permission denied by user"
+
+    return None  # 允许执行
+```
+
+[UML]
+@startuml
+start
+
+if (tool == bash?) then (yes)
+  :command = block.input["command"];
+  if (DENY_LIST 中任何模式匹配?) then (yes)
+    :return "Permission denied: deny list";
+    stop
+  endif
+  if (DESTRUCTIVE 关键词匹配?) then (yes)
+    :询问用户 "Allow? [y/N]";
+    if (用户拒绝?) then (yes)
+      :return "Permission denied by user";
+      stop
+    endif
+  endif
+elseif (tool == write_file/edit_file?) then (yes)
+  :path = block.input["path"];
+  :safe_path(path) 检查;
+  if (路径逃逸?) then (yes)
+    :return "Permission denied: escapes workspace";
+    stop
+  endif
+elseif (tool == mcp__*deploy*?) then (yes)
+  :询问用户 "Allow? [y/N]";
+  if (用户拒绝?) then (yes)
+    :return "Permission denied by user";
+    stop
+  endif
+endif
+
+:return None (允许);
+stop
+@enduml
+
+[Detail]
+权限系统的三级策略：(1) **硬拒绝**——`DENY_LIST` 中的命令永远不执行，无需用户确认（`rm -rf /`, `sudo` 等）；(2) **软确认**——`DESTRUCTIVE` 命令和 MCP deploy 工具弹出 y/N 提示；(3) **路径约束**——`safe_path()` 使用 `Path.resolve().is_relative_to(base)` 防止符号链接和 `../` 逃逸。返回 `None` 表示允许，返回字符串表示拒绝原因。
+
+------------------------------------------------------------
+[Example]
+compact 压缩管道代码
+
+[Description]
+上下文压缩的核心代码（第 1068-1148 行）：
+
+```python
+def tool_result_budget(messages, max_bytes=200_000):
+    """L1: 大 tool_result 持久化到磁盘"""
+    last = messages[-1]
+    blocks = [b for b in last["content"] if b["type"] == "tool_result"]
+    total = sum(len(str(b["content"])) for b in blocks)
+    if total <= max_bytes: return messages
+    # 按大小降序处理
+    for block in sorted(blocks, key=lambda b: len(str(b["content"])), reverse=True):
+        block["content"] = persist_large_output(block["tool_use_id"], text)
+    return messages
+
+def snip_compact(messages, max_messages=50):
+    """L2: 消息数量超限时裁剪中间部分"""
+    if len(messages) <= max_messages: return messages
+    keep_head, keep_tail = 3, max_messages - 3
+    snipped = len(messages) - keep_head - keep_tail
+    return messages[:keep_head] + [snipped_marker] + messages[-keep_tail:]
+
+def micro_compact(messages):
+    """L3: 旧 tool_result 内容替换为占位符"""
+    tool_results = collect_tool_results(messages)
+    for _, _, block in tool_results[:-KEEP_RECENT_TOOL_RESULTS]:
+        block["content"] = "[Earlier tool result compacted.]"
+    return messages
+
+def compact_history(messages):
+    """L4: LLM 摘要替换全部历史"""
+    transcript = write_transcript(messages)
+    summary = summarize_history(messages)
+    return [{"role": "user", "content": f"[Compacted]\n\n{summary}"}]
+```
+
+[UML]
+@startuml
+start
+
+partition "prepare_context(messages)" {
+  :messages[:] = tool_result_budget(messages);
+  note right
+    max_bytes = 200,000
+    persist_large_output → 磁盘文件
+    保留前 2000 字符预览
+  end note
+  
+  :messages[:] = snip_compact(messages);
+  note right
+    max_messages = 50
+    head=3, tail=47
+    中间插入 [snipped N]
+  end note
+  
+  :messages[:] = micro_compact(messages);
+  note right
+    KEEP_RECENT_TOOL_RESULTS = 3
+    旧结果 → placeholder
+    len > 120 才压缩
+  end note
+  
+  if (estimate_size(messages) > 50000?) then (yes)
+    :messages[:] = compact_history(messages);
+    note right
+      write_transcript → .transcripts/
+      summarize_history → LLM 调用
+      全部替换为摘要
+    end note
+  endif
+}
+
+stop
+@enduml
+
+[Detail]
+压缩管道的代码设计体现了"**先便宜后昂贵**"原则：L1-L3 是纯本地操作（O(n) 遍历 + 磁盘写入），不调用 LLM；只有 L4 需要额外的 LLM 调用。`persist_large_output` 使用 `tool_use_id` 作为文件名——即使同一个工具输出在多轮压缩中被处理，也不会重复写入磁盘（因为路径已存在则跳过）。
+
+------------------------------------------------------------
+[Example]
+with_retry 错误恢复代码
+
+[Description]
+重试机制的核心实现（第 1167-1194 行）：
+
+```python
+def with_retry(fn, state: RecoveryState):
+    for attempt in range(MAX_RETRIES):  # MAX_RETRIES = 3
+        try:
+            result = fn()
+            state.consecutive_529 = 0  # 成功时重置
+            return result
+        except Exception as e:
+            name = type(e).__name__.lower()
+            msg = str(e).lower()
+            if "ratelimit" in name or "429" in msg:
+                delay = retry_delay(attempt)  # 指数退避
+                time.sleep(delay)
+                continue
+            if "overloaded" in name or "529" in msg:
+                state.consecutive_529 += 1
+                if state.consecutive_529 >= MAX_CONSECUTIVE_529:
+                    state.current_model = FALLBACK_MODEL  # 模型降级
+                    state.consecutive_529 = 0
+                delay = retry_delay(attempt)
+                time.sleep(delay)
+                continue
+            raise  # 其他错误直接抛出
+    raise RuntimeError(f"Max retries exceeded")
+
+def retry_delay(attempt: int) -> float:
+    base = min(BASE_DELAY_MS * (2 ** attempt), 32000) / 1000
+    return base + random.uniform(0, base * 0.25)  # 加抖动
+```
+
+[UML]
+@startuml
+start
+
+:attempt = 0;
+
+repeat
+  :result = fn() 调用 LLM;
+  if (成功?) then (yes)
+    :state.consecutive_529 = 0;
+    :return result;
+    stop
+  endif
+  
+  if (429 rate limit?) then (yes)
+    :delay = BASE_DELAY_MS * 2^attempt;
+    :delay += random jitter (25%);
+    :delay = min(delay, 32s);
+    :time.sleep(delay);
+  elseif (529 overloaded?) then (yes)
+    :state.consecutive_529 += 1;
+    if (consecutive_529 >= 2?) then (yes)
+      :state.current_model = FALLBACK_MODEL;
+      :state.consecutive_529 = 0;
+    endif
+    :time.sleep(delay);
+  else (其他错误)
+    :raise (不重试);
+    stop
+  endif
+  
+  :attempt += 1;
+repeat while (attempt < MAX_RETRIES?)
+
+:raise RuntimeError("Max retries exceeded");
+stop
+@enduml
+
+[Detail]
+`with_retry` 的设计亮点：(1) **状态外置** — `RecoveryState` 不在 retry 内部创建，而是从 `agent_loop` 传入，使得连续 529 计数能跨多次 `with_retry` 调用累积；(2) **抖动因子** — `random.uniform(0, base*0.25)` 防止多客户端同时重试导致的"惊群效应"；(3) **模型降级是全局性的** — 一旦切换 `FALLBACK_MODEL`，后续所有调用都使用降级模型，直到循环结束。

@@ -1,0 +1,281 @@
+Title: 核心类与函数
+Describe: 文件定义了 6 个 dataclass/类和 50+ 个函数，核心对象包括 Task、MessageBus、MCPClient、CronJob、RecoveryState、ProtocolState，以及关键函数 agent_loop、spawn_teammate_thread 等。
+------------------------------------------------------------
+[Example]
+Task 数据类
+
+[Description]
+**位置**: 第 78-87 行
+**职责**: 表示一个可追踪的工作单元，支持依赖、所有权、worktree 绑定
+
+```python
+@dataclass
+class Task:
+    id: str                    # task_{timestamp}_{random}
+    subject: str               # 任务标题
+    description: str           # 详细描述
+    status: str                # pending | in_progress | completed
+    owner: str | None          # 认领者名称
+    blockedBy: list[str]       # 依赖的 task id 列表
+    worktree: str | None       # 绑定的 worktree 名称
+```
+
+**关联函数**: `create_task`, `save_task`, `load_task`, `list_tasks`, `can_start`, `claim_task`, `complete_task`
+
+[UML]
+@startuml
+class Task <<dataclass>> {
+  +id: str
+  +subject: str
+  +description: str
+  +status: str
+  +owner: str | None
+  +blockedBy: list[str]
+  +worktree: str | None
+}
+
+class "Task CRUD" as TaskOps {
+  +create_task(subject, description, blockedBy): Task
+  +save_task(task): void
+  +load_task(task_id): Task
+  +list_tasks(): list[Task]
+  +can_start(task_id): bool
+  +claim_task(task_id, owner): str
+  +complete_task(task_id): str
+}
+
+TaskOps --> Task : 操作
+Task ..> "TASKS_DIR/*.json" : 持久化
+@enduml
+
+[Detail]
+Task 采用 JSON 文件持久化（每个 Task 一个 `.json` 文件），依赖检查 `can_start()` 遍历 `blockedBy` 列表验证所有依赖是否已 completed。`claim_task` 是原子操作：检查状态 + 设置 owner + 更新 status，但不使用文件锁（教学简化）。
+
+------------------------------------------------------------
+[Example]
+MessageBus 类
+
+[Description]
+**位置**: 第 479-498 行
+**职责**: 提供 Agent 间的异步通信能力，使用 append-only JSONL 文件作为信箱
+
+```python
+class MessageBus:
+    def send(self, from_agent, to_agent, content, msg_type, metadata)
+    def read_inbox(self, agent) -> list[dict]
+```
+
+**设计特点**:
+- 每个 agent 一个 `.jsonl` 文件（`MAILBOX_DIR/{agent}.jsonl`）
+- `read_inbox` 读后即删（destructive read）
+- 支持 metadata 携带 `request_id` 等协议字段
+
+[UML]
+@startuml
+class MessageBus {
+  +send(from_agent: str, to_agent: str,\n     content: str, msg_type: str,\n     metadata: dict): void
+  +read_inbox(agent: str): list[dict]
+}
+
+class "Message" as Msg <<dict>> {
+  from: str
+  to: str
+  content: str
+  type: str
+  ts: float
+  metadata: dict
+}
+
+MessageBus --> Msg : 发送/接收
+MessageBus ..> ".mailboxes/{agent}.jsonl" : 存储
+
+note right of MessageBus
+  BUS = MessageBus()  (全局单例)
+  read_inbox 是破坏性读取：
+  读取后删除 .jsonl 文件
+end note
+@enduml
+
+[Detail]
+MessageBus 是团队通信的基础设施。Lead Agent 和 Teammate 通过 `BUS.send()` / `BUS.read_inbox()` 交换消息。消息类型包括 `message`（普通消息）、`plan_approval_request`/`plan_approval_response`（计划审批）、`shutdown_request`/`shutdown_response`（关闭协议）、`result`（任务结果）。
+
+------------------------------------------------------------
+[Example]
+MCPClient 类
+
+[Description]
+**位置**: 第 1480-1500 行
+**职责**: 封装一个 MCP 服务器的工具发现与调用能力
+
+```python
+class MCPClient:
+    def __init__(self, name: str)
+    def register(self, tool_defs: list[dict], handlers: dict)
+    def call_tool(self, tool_name: str, args: dict) -> str
+```
+
+**Mock 服务器**:
+- `docs` — 提供 `search` 和 `get_version` 工具
+- `deploy` — 提供 `trigger` 和 `status` 工具
+
+**全局注册**: `mcp_clients: dict[str, MCPClient]`
+
+[UML]
+@startuml
+class MCPClient {
+  +name: str
+  +tools: list[dict]
+  -_handlers: dict[str, callable]
+  +register(tool_defs, handlers): void
+  +call_tool(tool_name: str, args: dict): str
+}
+
+class "Mock Servers" as Mocks {
+  +_mock_server_docs(): MCPClient
+  +_mock_server_deploy(): MCPClient
+}
+
+class "assemble_tool_pool()" as Pool {
+  合并 BUILTIN_TOOLS + MCP tools
+  前缀: mcp__{server}__{tool}
+}
+
+MCPClient "0..*" <-- "mcp_clients" : 注册
+Mocks --> MCPClient : 创建
+Pool --> MCPClient : 遍历
+@enduml
+
+[Detail]
+MCP 系统采用"延迟绑定"设计：只有 Agent 主动调用 `connect_mcp("docs")` 后，docs 服务器的工具才会被发现并注入工具池。`assemble_tool_pool()` 每轮循环重建，将 MCP 工具以 `mcp__docs__search` 这种命名空间前缀合并到统一的工具列表中。
+
+------------------------------------------------------------
+[Example]
+CronJob 与 RecoveryState
+
+[Description]
+**CronJob**（第 1282-1288 行）— 表示一个定时任务：
+```python
+@dataclass
+class CronJob:
+    id: str          # cron_{random}
+    cron: str        # 5字段 cron 表达式
+    prompt: str      # 触发时注入的提示
+    recurring: bool  # 是否重复执行
+    durable: bool    # 是否持久化到磁盘
+```
+
+**RecoveryState**（第 1153-1159 行）— 错误恢复状态机：
+```python
+class RecoveryState:
+    has_escalated: bool = False
+    recovery_count: int = 0
+    consecutive_529: int = 0
+    has_attempted_reactive_compact: bool = False
+    current_model: str = PRIMARY_MODEL
+```
+
+**ProtocolState**（第 507-514 行）— 协议请求追踪：
+```python
+@dataclass
+class ProtocolState:
+    request_id: str
+    type: str        # "shutdown" | "plan_approval"
+    sender: str
+    target: str
+    status: str      # "pending" | "approved" | "rejected"
+    payload: str
+    created_at: float
+```
+
+[UML]
+@startuml
+class CronJob <<dataclass>> {
+  +id: str
+  +cron: str
+  +prompt: str
+  +recurring: bool
+  +durable: bool
+}
+
+class RecoveryState {
+  +has_escalated: bool
+  +recovery_count: int
+  +consecutive_529: int
+  +has_attempted_reactive_compact: bool
+  +current_model: str
+}
+
+class ProtocolState <<dataclass>> {
+  +request_id: str
+  +type: str
+  +sender: str
+  +target: str
+  +status: str
+  +payload: str
+  +created_at: float
+}
+
+CronJob ..> ".scheduled_tasks.json" : durable 持久化
+RecoveryState --> "agent_loop" : 每次循环创建
+ProtocolState --> "pending_requests" : 全局字典
+@enduml
+
+[Detail]
+这三个状态类分别服务于不同子系统：CronJob 由 `cron_scheduler_loop` 守护线程匹配并放入 `cron_queue`；RecoveryState 在 `agent_loop` 入口创建，跟踪当前循环的重试/降级/压缩状态；ProtocolState 通过 `request_id` 实现请求-响应配对，确保 plan_approval_response 不会错误匹配到 shutdown_request。
+
+------------------------------------------------------------
+[Example]
+关键函数：agent_loop 与 spawn_teammate_thread
+
+[Description]
+**agent_loop(messages, context)**（第 1901-2004 行）
+- 主 Agent 循环的核心函数
+- 每一轮：cron inject → background notify → context prepare → LLM call → tool dispatch → results
+- 循环终止条件：model 返回无 tool_use、或不可恢复错误
+
+**spawn_teammate_thread(name, role, prompt)**（第 605-809 行）
+- 创建一个持久运行的 Teammate 线程
+- 内部有独立的工具集（bash, read_file, write_file 等）
+- 支持 Plan Approval Gate：submit_plan 后阻塞等待 lead 审批
+- 空闲时进入 idle_poll 等待任务或消息
+
+**spawn_subagent(description)**（第 1004-1033 行）
+- 一次性子代理：执行任务后返回文本摘要
+- 最多 30 轮工具调用
+- 使用相同的 Hook 管道（PreToolUse/PostToolUse）
+
+[UML]
+@startuml
+class "agent_loop()" as AgentLoop {
+  参数: messages: list, context: dict
+  --
+  创建 RecoveryState
+  每轮: cron → bg → prepare → LLM → dispatch
+  终止: 无 tool_use 或错误
+}
+
+class "spawn_teammate_thread()" as Teammate {
+  参数: name, role, prompt
+  --
+  启动 daemon Thread
+  内部独立 messages/tools
+  支持 plan_approval gate
+  空闲时 idle_poll
+}
+
+class "spawn_subagent()" as Subagent {
+  参数: description: str
+  --
+  同步执行最多 30 轮
+  返回文本摘要
+  使用 Hook 管道
+}
+
+AgentLoop --> Teammate : spawn_teammate tool
+AgentLoop --> Subagent : task tool
+Teammate --> "MessageBus" : 通信
+Teammate --> "idle_poll()" : 等待工作
+@enduml
+
+[Detail]
+三种执行模式的对比：`agent_loop` 是主线程同步循环；`spawn_teammate_thread` 是后台持久线程（有自己的 LLM 对话）；`spawn_subagent` 是同步一次性执行。Teammate 的 Plan Approval Gate 是关键协议机制——提交计划后线程会在 `while protocol_ctx["waiting_plan"]` 循环中轮询，直到 lead 通过 `review_plan` 批准或拒绝。

@@ -1,0 +1,209 @@
+Title: 整体架构
+Describe: s20 将 19 种机制组织为 5 个架构层：执行层（Agent Loop）、工具层（Tool Pool）、服务层（Task/Cron/Background/MCP）、协作层（Team/Protocol）、安全层（Hook/Permission），通过 messages 列表和 context 字典作为核心数据通道连接。
+------------------------------------------------------------
+[Example]
+系统分层架构
+
+[Description]
+从外到内的 5 层架构：
+
+1. **CLI 入口层** — `__main__` REPL + cron_autorun_loop
+2. **Agent 执行层** — `agent_loop` + `prepare_context` + `call_llm`
+3. **工具调度层** — `assemble_tool_pool` + `BUILTIN_HANDLERS` + MCP handlers
+4. **服务层** — Task / Worktree / Cron / Background / MCP / Skill / Memory
+5. **安全 & 扩展层** — Hooks + Permission Pipeline
+
+数据流向：用户输入 → messages → LLM → tool_use → handler → tool_result → messages → LLM ...
+
+[UML]
+@startuml
+package "CLI 入口层" {
+  [__main__ REPL]
+  [cron_autorun_loop]
+}
+
+package "Agent 执行层" {
+  [agent_loop]
+  [prepare_context]
+  [call_llm / with_retry]
+  [error recovery]
+}
+
+package "工具调度层" {
+  [assemble_tool_pool]
+  [BUILTIN_HANDLERS (27)]
+  [MCP handlers]
+  [tool dispatch]
+}
+
+package "服务层" {
+  [Task System]
+  [Worktree System]
+  [Cron Scheduler]
+  [Background Tasks]
+  [MCP System]
+  [Skill Loading]
+  [Context Compaction]
+  [Subagent]
+  [Teammate Thread]
+}
+
+package "安全 & 扩展层" {
+  [Hook Pipeline]
+  [Permission Check]
+  [Prompt Assembly]
+}
+
+[__main__ REPL] --> [agent_loop]
+[cron_autorun_loop] --> [agent_loop]
+[agent_loop] --> [prepare_context]
+[agent_loop] --> [call_llm / with_retry]
+[agent_loop] --> [tool dispatch]
+[tool dispatch] --> [assemble_tool_pool]
+[tool dispatch] --> [Hook Pipeline]
+[assemble_tool_pool] --> [BUILTIN_HANDLERS (27)]
+[assemble_tool_pool] --> [MCP handlers]
+[BUILTIN_HANDLERS (27)] --> [Task System]
+[BUILTIN_HANDLERS (27)] --> [Worktree System]
+[BUILTIN_HANDLERS (27)] --> [Cron Scheduler]
+[BUILTIN_HANDLERS (27)] --> [Subagent]
+[BUILTIN_HANDLERS (27)] --> [Teammate Thread]
+[BUILTIN_HANDLERS (27)] --> [Skill Loading]
+[agent_loop] --> [error recovery]
+[prepare_context] --> [Context Compaction]
+@enduml
+
+[Detail]
+分层的核心原则是**关注点分离**：Agent Loop 不知道具体工具实现细节，只通过 `handlers[name](**args)` 分发；工具 handler 不知道上下文管理策略；Hook 管道可以拦截任何工具而不修改工具代码。这种解耦使得添加新工具只需在 `BUILTIN_TOOLS` 和 `BUILTIN_HANDLERS` 各加一条记录。
+
+------------------------------------------------------------
+[Example]
+线程模型
+
+[Description]
+s20 运行时共有 4 类线程：
+
+| 线程 | 类型 | 生命周期 | 作用 |
+|------|------|---------|------|
+| Main Thread | 主线程 | 进程生命周期 | REPL + agent_loop |
+| cron_scheduler_loop | daemon | 持久 | 每秒检查 cron 表达式 |
+| cron_autorun_loop | daemon | 持久 | 无人值守时执行 fired jobs |
+| Teammate threads | daemon | 按需创建 | 独立 LLM 对话循环 |
+| Background workers | daemon | 短命 | 执行慢操作 |
+
+**线程安全措施**:
+- `agent_lock` — 保护 `agent_loop` 不被主线程和 autorun 并发调用
+- `background_lock` — 保护 `background_tasks` / `background_results` 字典
+- `cron_lock` — 保护 `scheduled_jobs` / `cron_queue`
+
+[UML]
+@startuml
+concurrency
+
+rectangle "Main Thread" as main {
+  (REPL Loop)
+  (agent_loop)
+}
+
+rectangle "Cron Scheduler\n(daemon)" as cronThread {
+  (cron_scheduler_loop)
+  (每秒扫描 scheduled_jobs)
+}
+
+rectangle "Cron Autorun\n(daemon)" as autoThread {
+  (cron_autorun_loop)
+  (consume_cron_queue → agent_loop)
+}
+
+rectangle "Teammate\n(daemon, N个)" as tmThread {
+  (独立 LLM 循环)
+  (idle_poll 等待)
+}
+
+rectangle "Background Worker\n(daemon, 短命)" as bgThread {
+  (执行慢操作)
+  (结果写入 background_results)
+}
+
+database "共享状态" as shared {
+  (history: list)
+  (scheduled_jobs: dict)
+  (cron_queue: list)
+  (background_tasks: dict)
+  (active_teammates: dict)
+}
+
+main --> shared : agent_lock
+cronThread --> shared : cron_lock
+autoThread --> shared : agent_lock
+bgThread --> shared : background_lock
+tmThread --> shared : MessageBus (文件)
+@enduml
+
+[Detail]
+线程模型的设计权衡：(1) 用 `threading.Lock` 而非 `asyncio`——保持代码同步风格，对教学更友好；(2) Teammate 通过文件信箱（MessageBus）而非内存队列通信——更接近生产系统的进程间通信模式；(3) Background worker 是 fire-and-forget 模式，结果通过 `collect_background_results()` 在下一轮 LLM 调用前注入。
+
+------------------------------------------------------------
+[Example]
+子系统连接关系
+
+[Description]
+19 个子系统之间的核心依赖关系：
+
+- **Agent Loop** 依赖所有其他系统（是最终的编排者）
+- **Tool Pool** 合并 Builtin + MCP 工具
+- **Teammate** 依赖 Task（claim/complete）、MessageBus（通信）、Worktree（工作目录）
+- **Cron** 依赖 Agent Loop（注入 fired jobs 后执行）
+- **Background** 依赖 Tool Handlers（实际执行）+ Agent Loop（结果通知）
+- **Error Recovery** 依赖 Context Compaction（reactive compact）
+- **Permission** 拦截所有工具调用（PreToolUse hook）
+
+[UML]
+@startuml
+component [Agent Loop] as loop #Gold
+component [Tool Pool] as pool
+component [Task System] as task
+component [Worktree] as wt
+component [Cron Scheduler] as cron
+component [Background Tasks] as bg
+component [Teammate Thread] as tm
+component [MessageBus] as bus
+component [Protocol State] as proto
+component [Hook Pipeline] as hooks
+component [Context Compaction] as compact
+component [Error Recovery] as recovery
+component [MCP System] as mcp
+component [Skill Loading] as skill
+component [Prompt Assembly] as prompt
+component [Subagent] as sub
+
+loop --> pool : 获取工具
+loop --> compact : prepare_context
+loop --> recovery : with_retry
+loop --> cron : consume_cron_queue
+loop --> bg : collect_background_results
+loop --> hooks : PreToolUse / PostToolUse
+loop --> prompt : assemble_system_prompt
+
+pool --> mcp : 合并 MCP 工具
+pool --> task : handler
+pool --> wt : handler
+pool --> tm : handler
+pool --> sub : handler
+pool --> skill : handler
+pool --> cron : handler
+pool --> bg : should_run_background
+
+tm --> bus : send / read_inbox
+tm --> task : claim / complete
+tm --> wt : cwd 切换
+tm --> proto : submit_plan
+
+hooks --> pool : 拦截调用
+recovery --> compact : reactive_compact
+prompt --> skill : list_skills
+prompt --> mcp : 连接状态
+@enduml
+
+[Detail]
+这张依赖图展示了 s20 的"星型"架构——`agent_loop` 在中心，所有子系统围绕它运作。关键的设计决策是**不使用依赖注入框架**，而是通过全局变量（如 `mcp_clients`、`scheduled_jobs`、`active_teammates`）和函数调用实现连接。这是教学代码的有意简化，生产系统会引入依赖注入容器。

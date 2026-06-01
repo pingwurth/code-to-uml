@@ -1,0 +1,190 @@
+Title: 文件概览与定位
+Describe: s20_comprehensive.py 是 learn-claude-code 教学项目的终章（第20章），将前19章分别讲解的 Agent 机制整合为一个完整可运行的 Agent 循环系统。
+------------------------------------------------------------
+[Example]
+文件用途与目标
+
+[Description]
+**文件**: `agents/s20_comprehensive.py`
+**行数**: 2069 行
+**定位**: Learn Claude Code 系列教学项目的"毕业设计"——将分散在 s01~s19 的所有机制合并到一个统一的 `agent_loop` 中运行。
+
+核心目标：
+- 证明 19 种机制可以**共存**于一个事件循环而不冲突
+- 提供一个**可直接运行**的 CLI Agent（`python s20_comprehensive.py`）
+- 作为读者理解"harness 如何组装"的参考实现
+
+[UML]
+@startuml
+@startmindmap
+* s20_comprehensive.py
+** 教学定位
+*** 第20章 · 终章
+*** 合并 19 种机制
+*** 可独立运行的 CLI Agent
+** 核心能力
+*** 工具调度 (27个内置工具)
+*** 团队协作 (teammate + protocol)
+*** 后台任务 & Cron 调度
+*** 上下文压缩 & 错误恢复
+*** MCP 插件系统
+*** Git Worktree 隔离
+** 运行方式
+*** python agents/s20_comprehensive.py
+*** 需要 ANTHROPIC_API_KEY
+*** 交互式 REPL 循环
+@endmindmap
+@enduml
+
+[Detail]
+该文件是整个 learn-claude-code 教学项目的**集大成之作**。每一章（s01~s19）单独教授一种 Agent 机制，而 s20 把它们全部组装起来，形成一个完整的 Agent 系统。运行后用户通过命令行输入问题，Agent 调用 LLM、执行工具、管理任务、调度 Cron、协调 Teammate，所有机制协同工作。
+
+------------------------------------------------------------
+[Example]
+在项目中的角色
+
+[Description]
+该文件在 learn-claude-code 20 章教学体系中的位置：
+
+| 章节范围 | 主题 | 代表文件 |
+|---------|------|---------|
+| s01~s02 | Agent 循环 & 工具调度 | 基础架构 |
+| s03~s04 | 权限 & Hook 系统 | 安全层 |
+| s05~s07 | Todo/Subagent/Skill | 任务扩展 |
+| s08~s09 | 上下文压缩 & 记忆 | 上下文管理 |
+| s10~s11 | Prompt 组装 & 错误恢复 | 鲁棒性 |
+| s12~s14 | Task/Background/Cron | 持久化调度 |
+| s15~s18 | 团队/协议/自治/Worktree | 多Agent协作 |
+| s19 | MCP 插件 | 外部工具扩展 |
+| **s20** | **全部整合** | **本文件** |
+
+[UML]
+@startuml
+@startmindmap
+* Learn Claude Code
+** 基础层 (s01-s02)
+*** Agent Loop
+*** Tool Dispatch
+** 安全层 (s03-s04)
+*** Permission
+*** Hooks
+** 任务扩展 (s05-s07)
+*** Todo Write
+*** Subagent
+*** Skill Loading
+** 上下文管理 (s08-s09)
+*** Context Compaction
+*** Memory System
+** 鲁棒性 (s10-s11)
+*** Prompt Assembly
+*** Error Recovery
+** 持久化调度 (s12-s14)
+*** Task System
+*** Background Tasks
+*** Cron Scheduler
+** 多Agent协作 (s15-s18)
+*** Agent Teams
+*** Team Protocols
+*** Autonomous Agents
+*** Worktree Isolation
+** 外部扩展 (s19)
+*** MCP Plugin
+** 终章 (s20)
+*** <b>Comprehensive Agent</b>
+@endmindmap
+@enduml
+
+[Detail]
+每一章在 `agents/` 目录下有对应的 Python 文件（如 `s01_agent_loop.py`, `s02_tool_use.py` 等），它们是独立可运行的教学示例。s20 是唯一将所有机制合并运行的文件，适合作为"最终参考实现"来阅读。
+
+------------------------------------------------------------
+[Example]
+解决的核心问题
+
+[Description]
+s20 回答了一个关键问题：**19 种独立讲解的机制如何在同一个事件循环中协同工作？**
+
+具体挑战：
+1. **工具池动态变化** — MCP 连接后新工具注入，需要每轮重新组装
+2. **多线程协调** — Teammate 线程、Background 线程、Cron 线程并发访问共享状态
+3. **上下文膨胀** — 工具输出累积，需要分层压缩策略
+4. **错误恢复** — 429/529 重试、模型降级、prompt-too-long 响应式压缩
+5. **团队协议** — Plan Approval 阻塞门控、Shutdown 请求/响应匹配
+
+[UML]
+@startuml
+@startmindmap
+* 解决的问题
+** 工具池动态组装
+*** MCP 连接后实时合并
+*** assemble_tool_pool() 每轮重建
+** 多线程并发
+*** agent_lock 保护主循环
+*** background_lock 保护后台任务
+*** cron_lock 保护调度器
+** 上下文膨胀控制
+*** tool_result_budget (大输出持久化)
+*** snip_compact (消息数量裁剪)
+*** micro_compact (旧结果压缩)
+*** compact_history (LLM 摘要)
+** 错误弹性
+*** 429 指数退避重试
+*** 529 模型降级
+*** prompt-too-long 响应式压缩
+** 团队协调
+*** MessageBus (JSONL 信箱)
+*** ProtocolState (请求/响应匹配)
+*** Plan Approval Gate (阻塞等待)
+@endmindmap
+@enduml
+
+[Detail]
+s20 的设计哲学是"harness 负责编排，model 负责决策"。所有机制都在 harness 层（Python 代码）实现，LLM 只看到工具 schema 和系统提示。这种分离使得每种机制可以独立测试、独立演进，最终在 s20 中无缝组合。
+
+------------------------------------------------------------
+[Example]
+边界与范围
+
+[Description]
+**包含在 s20 范围内的：**
+- 完整的 Agent 主循环 (`agent_loop`)
+- 27 个内置工具的 schema + handler
+- Task/Worktree/Cron/Background 的持久化系统
+- MCP 工具的延迟发现与动态注入
+- Teammate 线程的生命周期管理
+- Hook/Permission 的事件管道
+
+**不在 s20 范围内的：**
+- 实际的 Memory 存储引擎（仅读取 `.memory/MEMORY.md`）
+- 真实的 MCP 服务器连接（使用 mock server）
+- Web UI 或 HTTP API 接口
+- 多进程 / 分布式部署
+- 生产级错误监控和日志系统
+
+[UML]
+@startuml
+@startmindmap
+* s20 范围边界
+** 包含
+*** agent_loop 主循环
+*** 27 个工具 schema/handler
+*** Task CRUD 与依赖检查
+*** Git Worktree 隔离
+*** Cron 调度器
+*** 后台任务管理
+*** MCP Mock 集成
+*** Teammate 线程
+*** Hook/Permission 管道
+*** 4 层上下文压缩
+*** 3 级错误恢复
+** 不包含
+*** 真实 Memory 引擎
+*** 真实 MCP 服务器
+*** Web/HTTP 接口
+*** 分布式部署
+*** 生产监控
+@endmindmap
+@enduml
+
+[Detail]
+理解边界有助于读者聚焦：s20 是一个**教学级完整实现**，而非生产级系统。它的价值在于展示"所有机制如何组装"，而非提供可直接部署的 Agent 框架。Mock MCP 服务器和简化的 Memory 读取都是有意为之的教学简化。

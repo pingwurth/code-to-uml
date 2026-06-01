@@ -1,0 +1,233 @@
+Title: 主循环执行流程
+Describe: agent_loop 是系统心脏，每轮循环依次执行：Cron 注入 → 后台通知 → Todo 提醒 → 上下文准备 → LLM 调用 → 工具分发 → 结果收集，直到 model 返回纯文本（无 tool_use）。
+------------------------------------------------------------
+[Example]
+Agent Loop 主流程
+
+[Description]
+`agent_loop(messages, context)` 的完整执行流程（第 1901-2004 行）：
+
+每一轮循环（while True）：
+1. **Cron 注入** — `consume_cron_queue()` 取出 fired jobs，添加到 messages
+2. **后台通知** — `inject_background_notifications()` 收集已完成的后台任务结果
+3. **Todo 提醒** — 每 3 轮无 todo_write 时注入提醒消息
+4. **上下文准备** — `prepare_context(messages)` 执行 4 层压缩
+5. **Context 更新** — `update_context()` 刷新 memory/mcp/teammates 信息
+6. **工具池重建** — `assemble_tool_pool()` 合并 builtin + MCP
+7. **LLM 调用** — `call_llm()` 经过 `with_retry` 重试封装
+8. **错误处理** — prompt-too-long → reactive_compact; max_tokens → escalate
+9. **工具分发** — 遍历 tool_use blocks，经 Hook → handler → result
+10. **结果收集** — `build_user_content(results)` 合并后台通知 + tool_results
+
+[UML]
+@startuml
+start
+
+:consume_cron_queue();
+note right: 取出已触发的 Cron 任务
+
+:inject_background_notifications();
+note right: 收集已完成的后台任务结果
+
+if (rounds_since_todo >= 3?) then (yes)
+  :注入 todo 提醒;
+  :rounds_since_todo = 0;
+endif
+
+:prepare_context(messages);
+note right
+  tool_result_budget()
+  snip_compact()
+  micro_compact()
+  compact_history() if > CONTEXT_LIMIT
+end note
+
+:update_context() 刷新上下文;
+:assemble_tool_pool() 重建工具池;
+
+:call_llm(messages, context, tools, state, max_tokens);
+
+if (异常?) then (yes)
+  if (prompt_too_long?) then (yes)
+    :reactive_compact(messages);
+    :continue;
+    stop
+  else (no)
+    :记录错误并返回;
+    stop
+  endif
+endif
+
+if (stop_reason == max_tokens?) then (yes)
+  if (未升级?) then (yes)
+    :max_tokens = 16000;
+    :continue;
+    stop
+  else (已升级)
+    :尝试 continuation;
+    stop
+  endif
+endif
+
+:messages.append(assistant response);
+
+if (has_tool_use?) then (no)
+  :trigger_hooks("Stop");
+  stop
+endif
+
+:遍历 tool_use blocks;
+:对每个 block 执行 dispatch;
+:messages.append(tool_results);
+:继续下一轮循环;
+
+stop
+@enduml
+
+[Detail]
+Agent Loop 的核心设计原则是"**每轮循环做尽可能少的事**"——一轮只处理一批 tool_use，不会递归或嵌套。Cron 和 Background 的结果通过"注入"方式加入 messages，确保 LLM 在下一轮能看到这些信息。`prepare_context` 确保 messages 始终不超过预算，是 Agent 能长时间运行的关键。
+
+------------------------------------------------------------
+[Example]
+工具分发流程
+
+[Description]
+`agent_loop` 中对每个 `tool_use` block 的处理逻辑（第 1958-2004 行）：
+
+```
+for block in response.content:
+    if block.type != "tool_use": continue
+    
+    1. 特殊处理: compact → compact_history + break
+    2. PreToolUse Hook → 可能被拒绝
+    3. Background 检测 → 可能转为后台任务
+    4. 正常执行: handler(**args) → output
+    5. PostToolUse Hook → 可能记录/告警
+    6. 计数: todo_write 重置计数器
+    7. 收集 tool_result
+```
+
+[UML]
+@startuml
+start
+
+:遍历 response.content 中的 tool_use blocks;
+
+repeat
+  :取出 block (tool_use);
+
+  if (block.name == "compact"?) then (yes)
+    :compact_history(messages);
+    :注入 "[Compacted]" 消息;
+    :compacted_now = True;
+    :break;
+    stop
+  endif
+
+  :result = trigger_hooks("PreToolUse", block);
+  if (被 Hook 拒绝?) then (yes)
+    :tool_result = blocked message;
+  else (允许)
+    if (should_run_background?) then (yes)
+      :start_background_task(block);
+      :tool_result = "[Background started]";
+    else (同步执行)
+      :handler = handlers[block.name];
+      :output = handler(**block.input);
+      :trigger_hooks("PostToolUse", block, output);
+      :tool_result = output;
+    endif
+  endif
+
+  :results.append(tool_result);
+
+  if (block.name == "todo_write"?) then (yes)
+    :rounds_since_todo = 0;
+  else
+    :rounds_since_todo += 1;
+  endif
+
+repeat while (还有 tool_use blocks?)
+
+:messages.append(build_user_content(results));
+
+stop
+@enduml
+
+[Detail]
+工具分发的优先级顺序很重要：(1) `compact` 最优先——立即压缩并跳出，因为后续工具在压缩后的上下文中可能无意义；(2) Hook 拦截次之——被拒绝的工具不会执行；(3) Background 检测第三——慢操作不阻塞主循环；(4) 正常执行最后。`build_user_content` 将后台通知放在 tool_results 前面，确保 LLM 先看到异步完成的结果。
+
+------------------------------------------------------------
+[Example]
+错误恢复流程
+
+[Description]
+`agent_loop` 中的三级错误恢复策略：
+
+**第一级：重试** — `with_retry()` 处理 429 (rate limit) 和 529 (overloaded)
+- 429: 指数退避重试（0.5s, 1s, 2s...最大32s）
+- 529: 连续 2 次后切换到 FALLBACK_MODEL
+
+**第二级：升级** — `max_tokens` hit 处理
+- 首次：8000 → 16000
+- 再次：注入 CONTINUATION_PROMPT 继续（最多 2 次）
+
+**第三级：压缩** — prompt-too-long 处理
+- 触发 `reactive_compact(messages)` 保留最近 5 条消息
+- 只尝试一次（`has_attempted_reactive_compact` 标记）
+
+[UML]
+@startuml
+start
+
+:call_llm() 调用 LLM;
+
+if (抛出异常?) then (yes)
+  if (429 rate limit?) then (yes)
+    :计算退避时间;
+    :time.sleep(delay);
+    :重试 (最多 3 次);
+    stop
+  elseif (529 overloaded?) then (yes)
+    :consecutive_529 += 1;
+    if (consecutive_529 >= 2?) then (yes)
+      :切换到 FALLBACK_MODEL;
+    endif
+    :重试;
+    stop
+  elseif (prompt too long?) then (yes)
+    if (未尝试过 reactive compact?) then (yes)
+      :reactive_compact(messages);
+      :has_attempted_reactive_compact = True;
+      :continue 重新循环;
+    else (已尝试过)
+      :记录错误并退出;
+    endif
+    stop
+  else (其他错误)
+    :记录错误并退出;
+    stop
+  endif
+elseif (stop_reason == max_tokens?) then (yes)
+  if (未升级 max_tokens?) then (yes)
+    :max_tokens = ESCALATED_MAX_TOKENS;
+    :continue 重试;
+    stop
+  elseif (recovery_count < 2?) then (yes)
+    :注入 CONTINUATION_PROMPT;
+    :recovery_count += 1;
+    :continue;
+    stop
+  else (exhausted)
+    :退出循环;
+    stop
+  endif
+else (正常响应)
+  :继续正常流程;
+endif
+
+stop
+@enduml
+
+[Detail]
+三级恢复策略的设计哲学是"**能恢复就恢复，不能恢复就优雅退出**"。`RecoveryState` 类追踪所有恢复尝试状态，确保不会无限重试。关键的 `reactive_compact` 与 `compact_history` 的区别：前者保留最近 5 条消息（保持上下文连续性），后者完全重写为摘要（用于主动压缩）。
