@@ -1,0 +1,158 @@
+Title: 桌面端与服务端交互架构
+Describe: Desktop UI 的 REST/WebSocket 双通道通信、Zustand 状态管理与 Tauri 集成
+------------------------------------------------------------
+[Example]
+桌面端服务交互时序
+
+[Description]
+Desktop 通过 `api/client.ts` 发起 REST 请求，通过 `api/websocket.ts` 维护实时 WebSocket 连接，实现双通道通信。
+
+[UML]
+@startuml
+!theme plain
+skinparam backgroundColor #1a1a2e
+skinparam defaultFontColor #FFFFFF
+skinparam participantBackgroundColor #2a2a4e
+skinparam participantBorderColor #FF7A00
+skinparam arrowColor #4A9EFF
+
+participant "React Page" as page
+participant "Zustand Store" as store
+participant "api/client.ts" as client
+participant "api/websocket.ts" as ws_client
+participant "Server REST API" as api
+participant "Server WebSocket" as ws_server
+
+== 初始化 ==
+page -> store : 挂载页面
+store -> client : getBaseUrl()
+store -> ws_client : connect(sessionId)
+ws_client -> ws_server : WebSocket 握手
+
+== REST 数据加载 ==
+page -> store : 触发数据加载
+store -> client : fetchSessions()
+client -> api : GET /api/sessions
+api --> client : JSON response
+client --> store : 更新 sessions state
+store --> page : 重渲染
+
+== 实时对话 ==
+page -> store : 发送消息
+store -> ws_client : send({type: "user_message"})
+ws_client -> ws_server : WebSocket frame
+
+ws_server --> ws_client : {type: "content_start"}
+ws_client --> store : onMessage callback
+store --> page : 流式渲染开始
+
+ws_server --> ws_client : {type: "content_delta", text}
+ws_client --> store : 增量更新
+store --> page : 流式文本追加
+
+ws_server --> ws_client : {type: "message_complete"}
+ws_client --> store : 完成状态
+store --> page : 显示完成
+
+== 权限交互 ==
+ws_server --> ws_client : {type: "permission_request"}
+ws_client --> store : 弹出权限对话框
+page -> store : 用户选择
+store -> ws_client : send({type: "permission_response"})
+ws_client -> ws_server : 授权响应
+
+@enduml
+
+[Detail]
+**Desktop API 客户端模块（`desktop/src/api/`）：**
+
+| 文件 | 职责 |
+|------|------|
+| `client.ts` | HTTP 请求基类，封装 baseUrl + auth token |
+| `websocket.ts` | WebSocket 连接管理，自动重连 + 心跳 |
+| `sessions.ts` | 会话 CRUD 操作 |
+| `providers.ts` | Provider/模型配置 |
+| `teams.ts` | 团队管理 API |
+| `adapters.ts` | IM 适配器状态 |
+| `mcp.ts` | MCP 服务器配置 |
+| `skills.ts` | 技能管理 |
+| `terminal.ts` | 终端命令执行 |
+| `diagnostics.ts` | 系统诊断 |
+
+**WebSocketManager 设计要点：**
+- 单例模式管理所有 sessionId 的连接
+- 自动重连策略：指数退避，最多尝试直到 intentionalClose
+- 消息缓冲：连接断开时暂存消息，重连后自动发送
+- 心跳机制：定时 ping/pong 保活
+
+------------------------------------------------------------
+[Example]
+Tauri 桌面架构集成
+
+[Description]
+Desktop 使用 Tauri 2.x 架构，Rust 后端提供原生能力，前端 React 通过 IPC 与 Rust 通信。服务端作为 Sidecar 启动。
+
+[UML]
+@startuml
+!theme plain
+skinparam backgroundColor #1a1a2e
+skinparam defaultFontColor #FFFFFF
+skinparam componentBackgroundColor #2a2a4e
+skinparam componentBorderColor #FF7A00
+skinparam arrowColor #4A9EFF
+
+package "Tauri Desktop App" {
+  component "Rust Backend\n(src-tauri/)" as rust {
+    [main.rs] as main_rs
+    [Capabilities] as caps
+    [Commands] as cmds
+  }
+  
+  component "Web Frontend\n(Vite + React)" as web {
+    [pages/] as pages
+    [components/] as comps
+    [stores/] as stores
+    [hooks/] as hooks
+  }
+  
+  component "Sidecars" as sidecar {
+    [claude-sidecar.ts] as cs
+    [launcherRouting.ts] as lr
+  }
+}
+
+component "Local Server\n(src/server/)" as server
+
+web --> rust : Tauri IPC\n(invoke commands)
+rust --> web : Event emission
+sidecar --> server : 启动并管理\nserver 进程
+web --> server : HTTP + WebSocket\n(localhost:3456)
+
+note right of sidecar
+  Sidecar 职责：
+  1. 启动 local server
+  2. 路由 CLI 命令
+  3. 管理进程生命周期
+end note
+
+note bottom of web
+  前端技术栈：
+  - React 18 + TypeScript
+  - Zustand (42 stores)
+  - Vite 构建
+  - Vitest 测试
+  - lucide-react 图标
+end note
+
+@enduml
+
+[Detail]
+**Tauri 集成关键点：**
+
+1. **Sidecar 模式**：`desktop/sidecars/claude-sidecar.ts` 负责启动和管理本地服务器进程
+2. **Launcher Routing**：`launcherRouting.ts` 处理 CLI 命令到 Desktop 的路由逻辑
+3. **Capabilities**：`desktop/src-tauri/capabilities/` 定义 Tauri 权限能力
+4. **Store 规模**：`desktop/src/stores/` 包含 42 个 Zustand store 文件，管理各模块状态
+5. **API 层隔离**：所有服务端通信通过 `desktop/src/api/` 层中转，UI 层不直接调用网络
+
+------------------------------------------------------------

@@ -1,0 +1,307 @@
+Title: 核心对象与函数
+Describe: QueryEngine、Tool、StreamingToolExecutor、AppState、QueryGuard 等核心类的职责、参数、返回值与调用关系。
+------------------------------------------------------------
+[Example]
+QueryEngine — 会话生命周期管理器
+
+[Description]
+**文件**: `src/QueryEngine.ts` (1365 行)
+**职责**: 拥有一个完整对话的查询生命周期和会话状态
+
+`QueryEngine` 是 Claude Code 的**核心编排器**，每次 `submitMessage()` 调用开启一个新的 turn，状态（messages、文件缓存、usage 等）跨 turn 持久化。
+
+关键配置类型 `QueryEngineConfig` 包含 25+ 个字段，覆盖工具、权限、模型、预算、MCP 等所有运行时依赖。
+
+[UML]
+@startuml
+class QueryEngine {
+  - config: QueryEngineConfig
+  - mutableMessages: Message[]
+  - abortController: AbortController
+  - permissionDenials: SDKPermissionDenial[]
+  - totalUsage: NonNullableUsage
+  - readFileState: FileStateCache
+  - discoveredSkillNames: Set<string>
+  --
+  + constructor(config: QueryEngineConfig)
+  + submitMessage(prompt, options): AsyncGenerator<SDKMessage>
+  + abort(): void
+  + getMessages(): Message[]
+  + getTotalUsage(): NonNullableUsage
+}
+
+class QueryEngineConfig {
+  + cwd: string
+  + tools: Tools
+  + commands: Command[]
+  + mcpClients: MCPServerConnection[]
+  + agents: AgentDefinition[]
+  + canUseTool: CanUseToolFn
+  + getAppState: () => AppState
+  + setAppState: (f) => void
+  + initialMessages?: Message[]
+  + readFileCache: FileStateCache
+  + customSystemPrompt?: string
+  + maxTurns?: number
+  + maxBudgetUsd?: number
+  + thinkingConfig?: ThinkingConfig
+  + jsonSchema?: Record<string, unknown>
+  + snipReplay?: Function
+}
+
+QueryEngine --> QueryEngineConfig
+QueryEngine --> Message : manages
+QueryEngine --> Tools : uses
+@enduml
+
+[Detail]
+**submitMessage() 的核心流程**：
+
+1. 清理上一轮的 discoveredSkillNames 和 permissionDenials
+2. 设置 CWD（工作目录）
+3. 包装 canUseTool 函数以跟踪权限拒绝
+4. 构建用户上下文（attachments、memory、skill prefetch）
+5. 调用内部的 query 循环（处理 API 调用 + 工具执行）
+6. 处理自动压缩（auto-compact）和 token 预算
+7. yield 每个 SDKMessage 给调用方
+
+**为什么用 AsyncGenerator？**
+`submitMessage()` 返回 `AsyncGenerator<SDKMessage>` 而非 `Promise`，因为它需要在 turn 执行过程中**流式地** yield 中间结果（进度消息、工具结果、部分响应）给调用方。这使得 REPL 可以实时更新 UI，SDK 可以流式处理事件。
+
+------------------------------------------------------------
+[Example]
+Tool — 工具接口定义
+
+[Description]
+**文件**: `src/Tool.ts` (813 行)
+**职责**: 定义所有工具的统一接口
+
+`Tool<Input, Output, Progress>` 是一个泛型接口，60+ 个内置工具都实现此接口。它定义了工具的完整生命周期：schema 定义、执行、权限检查、进度报告。
+
+[UML]
+@startuml
+class "Tool<I,O,P>" as Tool {
+  + name : string
+  + aliases : string[]
+  + searchHint : string
+  + inputSchema : ZodSchema
+  + inputJSONSchema : JSONSchema
+  + outputSchema : ZodSchema
+  + call(args, context, canUseTool, parentMsg, onProgress) : ToolResult
+  + description(input, options) : string
+  + isEnabled() : boolean
+  + isReadOnly(input) : boolean
+  + isDestructive(input) : boolean
+  + isConcurrencySafe(input) : boolean
+  + userInputCancellationBehavior : string
+}
+
+class BashTool implements Tool {
+  + name = "Bash"
+  + isReadOnly(): false
+  + isConcurrencySafe(): depends on input
+}
+
+class FileReadTool implements Tool {
+  + name = "Read"
+  + isReadOnly(): true
+  + isConcurrencySafe(): true
+}
+
+class AgentTool implements Tool {
+  + name = "Agent"
+  + isConcurrencySafe(): false
+}
+
+Tool <|.. BashTool
+Tool <|.. FileReadTool
+Tool <|.. AgentTool
+@enduml
+
+[Detail]
+**Tool 接口的关键设计决策**：
+
+1. **`isReadOnly()`**: 区分只读工具（Read/Grep/Glob）和写入工具（Edit/Write/Bash），用于权限系统的自动批准
+2. **`isConcurrencySafe()`**: 标记工具是否可以与其他工具并行执行。Read/Glob 是并发安全的，Bash 取决于具体命令
+3. **`isDestructive()`**: 标记不可逆操作（删除、覆盖、发送），需要额外的用户确认
+4. **`userInputCancellationBehavior`**: 当用户在工具执行期间提交新消息时的行为——`'cancel'` 停止工具，`'block'` 让新消息等待
+5. **`searchHint`**: 延迟工具加载的关键词匹配，帮助模型通过语义搜索发现工具
+
+------------------------------------------------------------
+[Example]
+StreamingToolExecutor — 流式工具并发执行器
+
+[Description]
+**文件**: `src/services/tools/StreamingToolExecutor.ts`
+**职责**: 在 API 流式响应到达时即时执行工具，带并发控制
+
+核心设计：
+- **并发安全工具**可以并行执行（如多个 Read）
+- **非并发工具**必须独占执行（如 Bash、Agent）
+- 结果按工具接收顺序缓冲和发射
+
+[UML]
+@startuml
+class StreamingToolExecutor {
+  - tools: TrackedTool[]
+  - toolUseContext: ToolUseContext
+  - hasErrored: boolean
+  - siblingAbortController: AbortController
+  - discarded: boolean
+  --
+  + constructor(toolDefinitions, canUseTool, toolUseContext)
+  + addTool(block, assistantMessage): void
+  + discard(): void
+  + getRemainingResults(): AsyncGenerator<Message>
+}
+
+class TrackedTool {
+  + id: string
+  + block: ToolUseBlock
+  + assistantMessage: AssistantMessage
+  + status: ToolStatus
+  + isConcurrencySafe: boolean
+  + promise?: Promise<void>
+  + results?: Message[]
+  + pendingProgress: Message[]
+}
+
+enum ToolStatus {
+  queued
+  executing
+  completed
+  yielded
+}
+
+StreamingToolExecutor --> TrackedTool : manages
+TrackedTool --> ToolStatus
+@enduml
+
+[Detail]
+**并发控制的实现逻辑**：
+
+当 `addTool()` 被调用时：
+1. 检查是否有正在运行的非并发工具 → 如果有，将新工具加入队列
+2. 如果新工具是非并发的 → 等待所有正在运行的并发工具完成
+3. 如果新工具是并发安全的 → 立即开始执行
+
+**`discard()` 的重要性**：
+当 API 调用失败需要重试时（streaming fallback），必须丢弃当前执行器的所有待处理和进行中工具。否则重复的工具结果会泄漏内存。`discard()` 会 abort 所有子进程（如 Bash spawn），清空工具数组，释放 AbortController 引用。
+
+------------------------------------------------------------
+[Example]
+AppState 与 Store — 状态管理
+
+[Description]
+**文件**: `src/state/store.ts` (34 行), `src/state/AppStateStore.ts`, `src/bootstrap/state.ts`
+**职责**: 应用全局状态管理
+
+项目使用**自实现的 Zustand 风格 store**，仅 34 行代码，提供 `getState`、`setState`、`subscribe` 三个核心方法。
+
+状态分为两层：
+1. **AppStateStore** (UI 状态): messages、tools、permissions、MCP 连接等
+2. **bootstrap/state.ts** (会话全局): session ID、CWD、token 计数、模型覆盖等
+
+[UML]
+@startuml
+class "Store<T>" {
+  + getState(): T
+  + setState(updater: (prev: T) => T): void
+  + subscribe(listener: Listener): () => void
+}
+
+class AppState {
+  + messages: Message[]
+  + tools: Tools
+  + permissionMode: PermissionMode
+  + mcpClients: MCPServerConnection[]
+  + isStreaming: boolean
+  + inputValue: string
+}
+
+class SessionState {
+  + sessionId: SessionId
+  + cwd: string
+  + projectRoot: string
+  + totalCostUSD: number
+  + modelUsage: Record<string, ModelUsage>
+  + mainLoopModelOverride: ModelSetting
+  + clientType: string
+}
+
+Store --> AppState : manages UI state
+SessionState ..> Store : module-level singletons
+@enduml
+
+[Detail]
+**Store 的简洁实现**（34 行）：
+
+```typescript
+export function createStore<T>(initialState: T, onChange?): Store<T> {
+  let state = initialState
+  const listeners = new Set<Listener>()
+  return {
+    getState: () => state,
+    setState: (updater) => {
+      const prev = state
+      const next = updater(prev)
+      if (Object.is(next, prev)) return  // 浅比较优化
+      state = next
+      onChange?.({ newState: next, oldState: prev })
+      for (const l of listeners) l()
+    },
+    subscribe: (listener) => {
+      listeners.add(listener)
+      return () => listeners.delete(listener)
+    },
+  }
+}
+```
+
+**为什么不用 Redux 或 Zustand 库？**
+这个 store 只需要 34 行就能满足需求，引入外部库会增加 bundle 大小和依赖复杂度。`Object.is` 浅比较确保了引用不变的对象不会触发更新。
+
+------------------------------------------------------------
+[Example]
+QueryGuard — 查询并发控制状态机
+
+[Description]
+**文件**: `src/utils/QueryGuard.ts`
+**职责**: 防止并发查询冲突
+
+`QueryGuard` 实现了一个三状态状态机：`idle → dispatching → running`，确保同一时间只有一个查询在执行。
+
+[UML]
+@startuml
+state "QueryGuard 状态机" as qg {
+  idle : 空闲状态
+  idle : 可接受 reserve() 或 tryStart()
+
+  dispatching : 调度中
+  dispatching : 已 reserve，等待确认
+  dispatching : 可 cancelReservation() 回到 idle
+
+  running : 执行中
+  running : 查询正在运行
+  running : 新的 reserve/tryStart 被拒绝
+}
+
+idle --> dispatching : reserve()
+dispatching --> idle : cancelReservation()
+dispatching --> running : tryStart()
+idle --> running : tryStart() (直接提交)
+running --> idle : end(generation)
+@enduml
+
+[Detail]
+**状态转换详解**：
+
+| 方法 | 前置状态 | 后置状态 | 返回值 |
+|------|---------|---------|--------|
+| `reserve()` | idle | dispatching | true（成功）/ false（非 idle） |
+| `cancelReservation()` | dispatching | idle | void |
+| `tryStart()` | idle 或 dispatching | running | generation number / null |
+| `end(gen)` | running | idle | true（当前 generation）/ false（已过期） |
+
+**Generation 机制**：
+每次 `tryStart()` 成功时递增 generation number。`end(gen)` 检查传入的 generation 是否与当前匹配——如果不匹配，说明更新的查询已经开始，旧的 finally 块应该跳过清理。这防止了"幽灵清理"问题。

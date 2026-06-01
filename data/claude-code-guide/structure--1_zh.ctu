@@ -1,0 +1,196 @@
+Title: 顶层结构与模块组织
+Describe: 入口文件链（cli.tsx → main.tsx → REPL）、目录结构、Feature Flag 系统、构建管线、workspace packages 的顶层分析。
+------------------------------------------------------------
+[Example]
+入口文件链与启动路径
+
+[Description]
+Claude Code 的启动是一个**多阶段懒加载**过程，每一阶段都通过动态 `import()` 按需加载模块，以最小化冷启动时间。
+
+**入口链**: `cli.tsx` → `main.tsx` → `init.ts` → `REPL.tsx`
+
+`cli.tsx` 的 `main()` 函数通过命令行参数匹配不同的快速路径，只有默认路径才会加载完整的 CLI。
+
+[UML]
+@startuml
+start
+:cli.tsx main();
+:解析 process.argv;
+
+if (--version?) then (yes)
+  :打印 MACRO.VERSION;
+  stop
+endif
+
+if (--dump-system-prompt?) then (yes)
+  :加载 config + model + prompts;
+  :输出 system prompt;
+  stop
+endif
+
+if (--computer-use-mcp?) then (yes)
+  :启动 Computer Use MCP Server;
+  stop
+endif
+
+if (--daemon-worker?) then (yes)
+  :启动 Daemon Worker;
+  stop
+endif
+
+if (remote-control/rc/bridge?) then (yes)
+  :启动 Bridge 模式;
+  stop
+endif
+
+:加载 main.tsx;
+:Commander.js 解析命令;
+:preAction hook → init();
+:分发到子命令或默认 REPL;
+stop
+@enduml
+
+[Detail]
+**快速路径设计的关键洞察**：
+
+`cli.tsx` 的核心设计原则是**零模块加载**——`--version` 命令不需要加载任何额外模块，直接打印内联的 `MACRO.VERSION`。这是因为 Claude Code 的完整模块图非常庞大（600+ chunks），即使只是打印版本号也会产生显著的启动开销。
+
+每个快速路径通过 `feature()` flag 进行门控：
+- `DUMP_SYSTEM_PROMPT` — 仅内部构建
+- `CHICAGO_MCP` — Computer Use 功能
+- `DAEMON` — 守护进程模式
+- `BRIDGE_MODE` — 远程控制
+- `BG_SESSIONS` — 后台会话
+
+------------------------------------------------------------
+[Example]
+目录结构与职责划分
+
+[Description]
+项目的目录结构遵循**功能分层**原则，每个目录对应一个明确的职责域：
+
+| 目录 | 职责 | 关键文件 |
+|------|------|---------|
+| `src/entrypoints/` | 启动入口 | cli.tsx, init.ts, sdk/ |
+| `src/` (根) | 核心引擎 | main.tsx, query.ts, QueryEngine.ts, Tool.ts, tools.ts |
+| `src/screens/` | UI 屏幕 | REPL.tsx (6541 行) |
+| `src/components/` | UI 组件 | 149 个组件目录/文件 |
+| `src/services/` | 服务层 | api/, mcp/, compact/, analytics/, langfuse/ |
+| `src/state/` | 状态管理 | AppState.tsx, store.ts, selectors.ts |
+| `src/utils/` | 工具函数 | 100+ 工具模块 |
+| `src/types/` | 类型定义 | message.ts, permissions.ts, tools.ts |
+| `src/constants/` | 常量 | prompts.ts, tools.ts, system.ts |
+| `src/commands/` | CLI 子命令 | poor/, schedule/ 等 |
+| `src/hooks/` | React Hooks | useCanUseTool.ts, useTurnDiffs.ts |
+| `src/bridge/` | 远程控制 | bridgeMain.ts, JWT 认证 |
+| `src/daemon/` | 守护进程 | main.ts, workerRegistry.ts |
+| `packages/` | Workspace 包 | 17 个独立包 |
+
+[UML]
+@startuml
+package "src/" {
+  package "entrypoints/" as ep
+  package "screens/" as scr
+  package "components/" as comp
+  package "services/" as svc
+  package "state/" as st
+  package "utils/" as util
+  package "types/" as typ
+  package "constants/" as cnst
+  package "commands/" as cmd
+  package "hooks/" as hk
+  package "bridge/" as br
+  package "daemon/" as dm
+}
+
+package "packages/" {
+  package "@ant/ink" as ink
+  package "builtin-tools" as bt
+  package "agent-tools" as at
+  package "mcp-client" as mc
+  package "remote-control-server" as rcs
+  package "@ant/model-provider" as mp
+}
+
+ep --> scr
+scr --> comp
+scr --> st
+svc --> util
+st --> typ
+cmd --> svc
+hk --> svc
+bt --> typ
+@enduml
+
+[Detail]
+**关键目录深度解读**：
+
+1. **`src/services/api/`** — API 调用层，含 `claude.ts`（3558 行）核心客户端 + 4 个第三方 Provider 兼容层（openai/, gemini/, grok/）
+2. **`packages/builtin-tools/`** — 60 个工具的完整实现，通过 `@claude-code-best/builtin-tools` 包导出
+3. **`packages/@ant/ink/`** — Fork 的 Ink 框架，包含组件、hooks、keybindings、theme 系统
+4. **`src/utils/`** — 100+ 工具模块，涵盖 git 操作、文件缓存、权限管理、模型选择、搜索等
+
+------------------------------------------------------------
+[Example]
+Feature Flag 系统
+
+[Description]
+Feature Flag 是 Claude Code 的核心架构机制，控制着 65+ 个功能特性的运行时启用/禁用。
+
+**启用方式**: 环境变量 `FEATURE_<FLAG_NAME>=1`
+
+**代码模式**:
+```typescript
+import { feature } from 'bun:bundle'
+if (feature('FLAG_NAME')) {
+  // 功能代码
+}
+```
+
+**关键约束**: `feature()` 只能直接用在 `if` 条件或三元表达式中，不能赋值给变量。
+
+[UML]
+@startmindmap
+* Feature Flag 分类
+** 基础功能
+*** BUDDY
+*** TRANSCRIPT_CLASSIFIER
+*** BRIDGE_MODE
+*** VOICE_MODE
+** P0 本地
+*** AGENT_TRIGGERS
+*** ULTRATHINK
+*** BUILTIN_EXPLORE_PLAN_AGENTS
+*** LODESTONE
+** P1 API 依赖
+*** EXTRACT_MEMORIES
+*** VERIFICATION_AGENT
+*** KAIROS_BRIEF
+*** ULTRAPLAN
+** P2 高级
+*** DAEMON
+*** ACP
+** 工作流
+*** WORKFLOW_SCRIPTS
+*** HISTORY_SNIP
+*** MONITOR_TOOL
+*** KAIROS
+** 多 Worker
+*** COORDINATOR_MODE
+*** BG_SESSIONS
+*** TEMPLATES
+** 已禁用
+*** CONTEXT_COLLAPSE
+*** FORK_SUBAGENT
+*** UDS_INBOX
+@endmindmap
+
+[Detail]
+**Feature Flag 的三层启用策略**：
+
+1. **Build time** (`build.ts`): `DEFAULT_BUILD_FEATURES` 数组定义构建时默认启用的 flag，通过 `Bun.build({ define })` 注入
+2. **Dev mode** (`scripts/dev.ts`): 默认启用全部 feature
+3. **Runtime** (环境变量): `FEATURE_<NAME>=1` 运行时覆盖
+
+**为什么 `feature()` 不能赋值给变量？**
+这是 Bun 编译器的限制——`feature()` 在构建时被替换为布尔字面量（如 `true` 或 `false`），如果赋值给变量，替换后的代码会变成 `const x = true`，失去了 tree-shaking 的能力。只有直接用在 `if` 条件中，Bun 才能在构建时消除死代码分支。

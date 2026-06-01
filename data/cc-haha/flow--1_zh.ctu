@@ -1,0 +1,137 @@
+Title: 核心执行流程
+Describe: 请求处理全链路、Agent 运行循环与 WebSocket 通信流程
+------------------------------------------------------------
+[Example]
+用户消息处理全链路
+
+[Description]
+从用户在桌面端发送消息，到 Agent 执行工具并返回结果的完整数据流。
+
+[UML]
+@startuml
+!theme plain
+skinparam backgroundColor #1a1a2e
+skinparam defaultFontColor #FFFFFF
+skinparam participantBackgroundColor #2a2a4e
+skinparam participantBorderColor #FF7A00
+skinparam arrowColor #4A9EFF
+skinparam sequenceLifeLineBorderColor #4A9EFF
+
+actor "用户" as user
+participant "Desktop UI\n(React)" as ui
+participant "WebSocket\nManager" as wsmgr
+participant "Server\nws/handler.ts" as ws
+participant "Session\nManager" as sess
+participant "Query Engine\n(query.ts)" as qe
+participant "LLM Provider\n(Claude API)" as llm
+participant "Tool\nExecution" as tool
+
+user -> ui : 输入消息
+ui -> wsmgr : send({type: "user_message"})
+wsmgr -> ws : WebSocket frame
+ws -> sess : getOrCreateSession()
+
+sess -> qe : query(messages, tools)
+qe -> llm : API 请求\n(system prompt + messages)
+llm --> qe : StreamEvent\n(content_delta / tool_use)
+
+qe --> ws : content_start
+ws --> wsmgr : ServerMessage
+wsmgr --> ui : 实时渲染
+
+alt 模型请求工具调用
+  qe -> tool : executeTool(name, input)
+  tool --> qe : ToolResult
+  qe -> llm : 附加 tool_result\n继续对话
+  llm --> qe : 最终回复
+end
+
+qe --> ws : message_complete
+ws --> wsmgr : {type: "message_complete", usage}
+wsmgr --> ui : 显示完成状态
+
+@enduml
+
+[Detail]
+**流程关键节点：**
+
+1. **WebSocket 事件类型**（`src/server/ws/events.ts`）：
+   - Client -> Server：`user_message`, `permission_response`, `stop_generation`, `ping`
+   - Server -> Client：`content_start`, `content_delta`, `tool_use_complete`, `tool_result`, `permission_request`, `message_complete`
+
+2. **Query Engine** 是 AI 对话的核心循环，负责：
+   - 构建 system prompt（分层缓存策略）
+   - 管理消息历史（含压缩/tombstone）
+   - 流式处理 LLM 响应
+   - 编排工具执行
+
+3. **权限拦截**：工具执行前检查权限规则，需要用户授权时发送 `permission_request`
+
+------------------------------------------------------------
+[Example]
+Agent 核心运行循环
+
+[Description]
+`runAgent.ts` 实现的 Agent 核心循环是一个 AsyncGenerator 状态机，持续处理 LLM 响应直到任务完成。
+
+[UML]
+@startuml
+!theme plain
+skinparam backgroundColor #1a1a2e
+skinparam defaultFontColor #FFFFFF
+skinparam activityBackgroundColor #2a2a4e
+skinparam activityBorderColor #FF7A00
+skinparam arrowColor #4A9EFF
+
+start
+:初始化 Agent 上下文;
+:组装 Tool Pool;
+:构建 System Prompt;
+:设置 CacheSafeParams;
+
+repeat
+  :调用 query() 发送消息到 LLM;
+  
+  :处理 StreamEvent 流;
+  
+  if (收到 tool_use?) then (是)
+    :权限检查;
+    if (需要用户授权?) then (是)
+      :暂停等待 permission_response;
+    else (否)
+    endif
+    :执行工具;
+    :收集 tool_result;
+    :追加到消息历史;
+  else (否)
+    :收到纯文本回复;
+    :任务可能完成;
+  endif
+  
+  if (达到停止条件?) then (是)
+    :结束循环;
+  else (否)
+    if (需要上下文压缩?) then (是)
+      :执行 compact 压缩;
+    else (否)
+    endif
+  endif
+  
+repeat while (继续循环)
+
+:生成 Agent 摘要;
+:清理资源;
+stop
+
+@enduml
+
+[Detail]
+**循环控制机制：**
+
+- **停止条件**：模型返回 `end_turn`、用户中断（AbortController）、达到最大轮次
+- **上下文压缩**：当 token 消耗接近限制时，触发 `compact` 服务将旧消息摘要化
+- **进度追踪**：通过 `ProgressTracker` 实时更新 token 消耗和活动描述
+- **错误恢复**：内建 6 种恢复策略，包括自动重试、模型降级、速率限制等待
+- **自动后台化**：超过 `AUTO_BACKGROUND_MS`（120s）的前台 Agent 自动转为后台任务
+
+------------------------------------------------------------

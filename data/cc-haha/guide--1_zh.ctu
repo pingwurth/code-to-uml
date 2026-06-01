@@ -1,0 +1,176 @@
+Title: 开发环境搭建与调试指南
+Describe: 环境搭建、常用命令、调试技巧与代码阅读路径
+------------------------------------------------------------
+[Example]
+开发环境搭建流程
+
+[Description]
+从零开始搭建 Claude Code Haha 的本地开发环境，包括依赖安装、服务启动和各模块验证。
+
+[UML]
+@startuml
+!theme plain
+skinparam backgroundColor #1a1a2e
+skinparam defaultFontColor #FFFFFF
+skinparam activityBackgroundColor #2a2a4e
+skinparam activityBorderColor #FF7A00
+skinparam arrowColor #4A9EFF
+
+start
+
+:安装 Bun 运行时;
+note right: curl -fsSL https://bun.sh/install | bash
+
+:克隆仓库;
+:bun install (根目录);
+
+fork
+  :CLI 开发;
+  :./bin/claude-haha;
+  note right
+    直接运行 CLI
+    支持 --help 查看命令
+  end note
+fork again
+  :Server 开发;
+  :SERVER_PORT=3456\nbun run src/server/index.ts;
+  note right
+    启动本地 API 服务
+    默认监听 127.0.0.1:3456
+  end note
+fork again
+  :Desktop 开发;
+  :cd desktop && bun install;
+  :bun run dev;
+  note right
+    Vite 开发服务器
+    热重载前端代码
+  end note
+fork again
+  :Adapter 开发;
+  :cd adapters && bun install;
+  :配置 IM 凭证;
+  :bun run adapters/telegram/index.ts;
+  note right
+    需要对应平台的
+    Bot Token / App Secret
+  end note
+end fork
+
+:验证环境;
+:bun run verify;
+
+stop
+
+@enduml
+
+[Detail]
+**环境要求：**
+
+| 依赖 | 版本要求 | 用途 |
+|------|----------|------|
+| **Bun** | 最新版 | 运行时 + 包管理器 |
+| **Node.js** | 22+ | 文档构建（VitePress） |
+| **Rust/Cargo** | 最新 stable | Tauri 原生构建 |
+| **Git** | 2.x+ | 版本控制 + Worktree |
+
+**常用开发命令：**
+
+```
+# CLI 运行
+./bin/claude-haha
+bun run start
+
+# 服务器
+SERVER_PORT=3456 bun run src/server/index.ts
+
+# 桌面端
+cd desktop && bun run dev      # 开发模式
+cd desktop && bun run build    # 生产构建
+cd desktop && bun run test     # 运行测试
+
+# 适配器
+cd adapters && bun run test           # 全部测试
+cd adapters && bun run test:telegram  # 单平台
+
+# 文档
+bun run docs:dev    # 本地预览
+bun run docs:build  # 生产构建
+
+# 质量检查
+bun run verify              # 完整验证
+bun run check:desktop       # 桌面端检查
+bun run check:server        # 服务端检查
+bun run check:adapters      # 适配器检查
+bun run check:impact        # 变更影响分析
+```
+
+------------------------------------------------------------
+[Example]
+代码阅读推荐路径
+
+[Description]
+为新加入项目的开发者提供结构化的代码阅读路径，由浅入深理解系统。
+
+[UML]
+@startwbs
+!theme plain
+skinparam backgroundColor #1a1a2e
+skinparam defaultFontColor #FFFFFF
+skinparam wbsBorderColor #FF7A00
+
+* 代码阅读路径
+** 第一阶段：入口理解
+*** bin/claude-haha (入口脚本)
+*** src/entrypoints/cli.tsx (CLI 主入口)
+*** src/main.tsx (Ink 渲染入口)
+** 第二阶段：核心循环
+*** src/query.ts (Query Engine)
+*** src/Tool.ts (工具接口定义)
+*** src/tools.ts (工具注册表)
+*** src/tools/AgentTool/runAgent.ts (Agent 循环)
+** 第三阶段：服务层
+*** src/server/index.ts (服务启动)
+*** src/server/router.ts (API 路由)
+*** src/server/ws/handler.ts (WebSocket 核心)
+*** src/server/ws/events.ts (消息类型)
+** 第四阶段：子系统
+*** src/tasks/ (任务引擎)
+*** src/services/mcp/ (MCP 集成)
+*** src/services/compact/ (上下文压缩)
+*** src/utils/permissions/ (权限系统)
+** 第五阶段：扩展层
+*** adapters/common/ws-bridge.ts (适配器核心)
+*** desktop/src/api/ (桌面 API 层)
+*** src/tools/AgentTool/loadAgentsDir.ts (自定义 Agent)
+*** src/skills/ (技能系统)
+@endwbs
+
+[Detail]
+**调试技巧：**
+
+1. **日志调试**：
+   - `logForDebugging()` 函数用于开发时日志输出
+   - `CLAUDE_CODE_DEBUG=1` 环境变量开启详细日志
+
+2. **测试隔离**：
+   - 每个工具目录包含独立测试文件
+   - `bun test <file>` 运行单文件测试
+   - Desktop 使用 Vitest：`cd desktop && bun run test`
+
+3. **变更验证**：
+   - `bun run check:impact` 打印变更影响面
+   - 根据影响面选择对应的 check 命令
+   - PR 前必须 `bun run verify` 通过
+
+4. **WebSocket 调试**：
+   - `src/server/ws/events.ts` 定义了所有消息类型
+   - 可用浏览器 DevTools 的 WS 面板查看消息流
+   - Server 端 `serverLog.ts` 记录连接事件
+
+5. **Agent 调试**：
+   - `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=1` 禁用后台任务
+   - `agentToolUtils.test.ts` 提供 Agent 工具单测参考
+   - `src/services/api/dumpPrompts.js` 可导出完整 prompt
+
+------------------------------------------------------------

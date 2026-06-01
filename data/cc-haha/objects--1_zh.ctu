@@ -1,0 +1,141 @@
+Title: 工具池系统与权限机制
+Describe: 三层过滤管道、工具注册机制、权限规则匹配与同步
+------------------------------------------------------------
+[Example]
+工具池三层过滤管道
+
+[Description]
+Tool Pool System 通过三层过滤确定每个 Agent 可用的工具集：全局注册 -> Agent 定义过滤 -> 运行时权限过滤。
+
+[UML]
+@startuml
+!theme plain
+skinparam backgroundColor #1a1a2e
+skinparam defaultFontColor #FFFFFF
+skinparam activityBackgroundColor #2a2a4e
+skinparam activityBorderColor #FF7A00
+skinparam arrowColor #4A9EFF
+
+start
+
+:第一层：全局工具注册;
+note right
+  src/tools.ts 中注册所有可用工具：
+  - AgentTool, BashTool, FileEditTool...
+  - 条件编译：feature gate 控制
+  - MCP 动态工具：运行时加载
+end note
+
+:assembleToolPool();
+
+:第二层：Agent 定义过滤;
+note right
+  AgentDefinition.tools (allowlist)
+  AgentDefinition.disallowedTools (denylist)
+  常量定义：
+  - ALL_AGENT_DISALLOWED_TOOLS
+  - ASYNC_AGENT_ALLOWED_TOOLS
+  - CUSTOM_AGENT_DISALLOWED_TOOLS
+  - IN_PROCESS_TEAMMATE_ALLOWED_TOOLS
+end note
+
+:filterByAgentDefinition();
+
+:第三层：运行时权限过滤;
+note right
+  Permission Rules:
+  - settings.json 全局规则
+  - .claude/settings.json 项目规则
+  - filterDeniedAgents()
+  - getDenyRuleForAgent()
+  - hasRequiredMcpServers()
+end note
+
+:finalToolPool;
+
+stop
+
+@enduml
+
+[Detail]
+**过滤层详解：**
+
+| 层级 | 职责 | 关键代码 |
+|------|------|----------|
+| **全局注册** | 声明所有可用工具 | `src/tools.ts`（391 行），含 Feature Gate 条件编译 |
+| **Agent 过滤** | 按代理类型裁剪 | `agentToolUtils.ts` 中的 `ALL_AGENT_DISALLOWED_TOOLS` 等常量 |
+| **权限过滤** | 安全规则匹配 | `src/utils/permissions/` 目录，基于 glob 模式匹配 |
+
+**Feature Gate 机制**：使用 `bun:bundle` 的 `feature()` 函数实现编译时死代码消除：
+- `feature('PROACTIVE')` → 定时任务工具
+- `feature('KAIROS')` → 推送通知工具
+- `feature('AGENT_TRIGGERS')` → Cron 调度工具
+
+------------------------------------------------------------
+[Example]
+权限系统分层模型
+
+[Description]
+权限系统采用分层模型：全局设置 > 项目设置 > 运行时模式 > 工具级别许可。
+
+[UML]
+@startuml
+!theme plain
+skinparam backgroundColor #1a1a2e
+skinparam defaultFontColor #FFFFFF
+skinparam classBackgroundColor #2a2a4e
+skinparam classBorderColor #FF7A00
+skinparam arrowColor #4A9EFF
+
+package "权限层次" {
+  class "全局设置" as global {
+    file: ~/.claude/settings.json
+    rules: allow/deny patterns
+    scope: 所有项目
+  }
+  
+  class "项目设置" as project {
+    file: .claude/settings.json
+    rules: 项目级 allow/deny
+    scope: 当前项目
+  }
+  
+  class "运行时模式" as runtime {
+    modes: plan/default/bypassPermissions
+    propagation: 父级向子级传播
+    override: mode 参数覆盖
+  }
+  
+  class "工具级许可" as tool_perm {
+    canUseTool(): CanUseToolFn
+    PermissionResult: allow/deny/ask
+    PermissionMode schema
+  }
+}
+
+global --> project : 继承 + 覆盖
+project --> runtime : 应用模式
+runtime --> tool_perm : 最终判定
+
+note bottom of tool_perm
+  判定结果：
+  - allow: 直接执行
+  - deny: 拒绝并返回错误
+  - ask: 发送 permission_request
+    等待用户响应
+end note
+
+@enduml
+
+[Detail]
+**权限同步机制：**
+
+1. **Team 级别同步**：Leader Agent 的 permission mode 自动传播给所有 Teammate
+2. **Bubble 模式**：子 Agent 的权限请求向上冒泡到父级（或最终到用户）
+3. **Rule Pattern**：基于 glob 模式匹配文件路径和工具名称
+4. **Permission Mode**：
+   - `default`：正常模式，按规则判定
+   - `plan`：只读模式，仅允许读取类工具
+   - `bypassPermissions`：跳过所有权限检查（危险）
+
+------------------------------------------------------------

@@ -1,0 +1,178 @@
+Title: 调用关系
+Describe: cli.tsx→main.tsx→REPL→QueryEngine→query→API 的调用链、工具执行链、权限检查链的时序图。
+------------------------------------------------------------
+[Example]
+主调用链：从用户输入到 API 响应
+
+[Description]
+用户在 REPL 输入消息后，调用链经过 6 个核心模块：
+
+`REPL.tsx` → `QueryEngine.submitMessage()` → `query.ts` → `claude.ts` (API) → `StreamingToolExecutor` → `Tool.call()`
+
+每个模块有明确的职责边界，通过 AsyncGenerator 实现流式数据传递。
+
+[UML]
+@startuml
+participant "REPL.tsx" as REPL
+participant "QueryEngine" as QE
+participant "query.ts" as Q
+participant "claude.ts" as API
+participant "Anthropic API" as ANT
+participant "StreamingToolExecutor" as STE
+participant "Tool" as Tool
+
+REPL -> QE: submitMessage(prompt)
+activate QE
+
+QE -> QE: 构建用户上下文
+QE -> Q: 内部 query 调用
+activate Q
+
+Q -> Q: 组装 system prompt
+Q -> Q: normalizeMessagesForAPI
+Q -> API: queryModelStream(messages, tools)
+activate API
+
+API -> ANT: POST /messages (streaming)
+activate ANT
+
+loop 流式事件
+  ANT --> API: SSE event (text/tool_use)
+  API --> Q: StreamEvent
+
+  alt tool_use block
+    Q -> STE: addTool(block, assistantMsg)
+    activate STE
+    STE -> Tool: call(args, context)
+    activate Tool
+    Tool --> STE: ToolResult
+    deactivate Tool
+    STE --> Q: 工具结果 Message
+    deactivate STE
+  end
+end
+
+ANT --> API: stop_reason: end_turn
+deactivate ANT
+API --> Q: AssistantMessage
+deactivate API
+
+Q --> QE: yield SDKMessage
+deactivate Q
+QE --> REPL: AsyncGenerator yield
+deactivate QE
+REPL -> REPL: 更新 UI 显示
+@enduml
+
+[Detail]
+**调用链的关键转折点**：
+
+1. **REPL → QueryEngine**: REPL 通过 `submitMessage()` 将用户输入交给 QueryEngine，返回 AsyncGenerator 用于流式接收结果
+2. **QueryEngine → query.ts**: QueryEngine 负责会话状态管理，query.ts 负责单次 turn 的执行逻辑
+3. **query.ts → claude.ts**: 组装完整的 API 请求（system prompt + messages + tools + betas）
+4. **claude.ts → Anthropic API**: 使用 Anthropic SDK 的 streaming 接口
+5. **query.ts → StreamingToolExecutor**: 在流式响应中检测到 tool_use 时立即开始执行
+6. **StreamingToolExecutor → Tool**: 调用具体工具的 `call()` 方法
+
+------------------------------------------------------------
+[Example]
+权限检查链
+
+[Description]
+每次工具执行前都经过权限检查管道，确保用户对工具操作有明确授权：
+
+`canUseTool()` → 权限模式判断 → 工具特定检查 → 用户确认（如需要） → 执行/拒绝
+
+[UML]
+@startuml
+participant "QueryEngine" as QE
+participant "canUseTool" as CUT
+participant "PermissionMode" as PM
+participant "Tool.isReadOnly" as RO
+participant "Hook Pipeline" as HP
+participant "User Dialog" as UD
+
+QE -> CUT: canUseTool(tool, input, context)
+activate CUT
+
+CUT -> PM: 获取当前权限模式
+PM --> CUT: mode (auto/plan/default)
+
+CUT -> RO: tool.isReadOnly(input)?
+alt 只读工具
+  RO --> CUT: true
+  CUT --> QE: allow
+else 写入工具
+  RO --> CUT: false
+
+  CUT -> HP: 执行 PreToolUse hooks
+  HP --> CUT: hook 结果
+
+  alt auto 模式 + 非 destructive
+    CUT --> QE: allow
+  else 需要用户确认
+    CUT -> UD: 显示权限对话框
+    UD --> CUT: 用户选择 (allow/deny/always)
+    CUT --> QE: allow/deny
+  end
+end
+
+deactivate CUT
+@enduml
+
+[Detail]
+**权限模式**：
+
+| 模式 | 行为 | 适用场景 |
+|------|------|---------|
+| `default` | 写入操作需确认，只读自动通过 | 日常开发 |
+| `auto` | 除 destructive 外全部自动通过 | 信任的自动化 |
+| `plan` | 所有操作需确认 | 高风险操作 |
+
+**Hook 管道的影响**：
+PreToolUse hooks 可以：
+- 修改工具参数（如添加安全标志）
+- 阻止工具执行（返回 deny）
+- 注入额外上下文
+
+**`isDestructive()` 的特殊处理**：
+标记为 destructive 的工具（如删除文件、发送消息）即使在 auto 模式下也需要用户确认。
+
+------------------------------------------------------------
+[Example]
+MCP 工具发现与调用链
+
+[Description]
+MCP (Model Context Protocol) 工具的发现和调用链路：
+
+[UML]
+@startuml
+participant "REPL" as REPL
+participant "MCP Client" as MC
+participant "MCP Server" as MS
+participant "QueryEngine" as QE
+participant "Tool" as T
+
+== 启动阶段 ==
+REPL -> MC: 连接 MCP Server
+MC -> MS: initialize + tools/list
+MS --> MC: 工具 schema 列表
+MC -> MC: 转换为 Tool 接口
+MC -> QE: 注入到 tools 数组
+
+== 运行时调用 ==
+QE -> T: tool.call(args)
+T -> MC: 转发到 MCP Server
+MC -> MS: tools/call
+MS --> MC: 结果
+MC --> T: ToolResult
+T --> QE: 返回结果
+@enduml
+
+[Detail]
+**MCP 工具的特殊性**：
+
+1. **Schema 格式**: MCP 工具使用 JSON Schema 而非 Zod，通过 `inputJSONSchema` 字段传入
+2. **权限继承**: MCP 工具继承其所属 MCP Server 的权限设置
+3. **错误处理**: MCP 工具的 `-32042` 错误码触发 URL elicitation（需要用户完成认证流程）
+4. **动态性**: MCP Server 可以在运行时添加/移除工具，工具列表是动态的

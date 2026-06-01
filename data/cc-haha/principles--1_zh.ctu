@@ -1,0 +1,191 @@
+Title: 核心设计原理与模式
+Describe: 关键设计模式、CacheSafeParams 优化、上下文压缩策略
+------------------------------------------------------------
+[Example]
+CacheSafeParams 缓存优化
+
+[Description]
+Fork Agent 通过 `CacheSafeParams` 确保 API 请求前缀的字节级一致性，最大化 prompt cache 命中率。
+
+[UML]
+@startuml
+!theme plain
+skinparam backgroundColor #1a1a2e
+skinparam defaultFontColor #FFFFFF
+skinparam activityBackgroundColor #2a2a4e
+skinparam activityBorderColor #FF7A00
+skinparam arrowColor #4A9EFF
+
+start
+
+:父 Agent 运行中;
+:积累了完整对话上下文;
+
+:触发 Fork 子代理;
+
+:buildForkedMessages();
+note right
+  从父级消息历史中提取：
+  - system prompt (不变)
+  - 前 N 条消息 (不变)
+  = **cache boundary**
+end note
+
+:创建 CacheSafeParams;
+note right
+  保证以下字段字节级一致：
+  - system prompt 内容
+  - 消息前缀序列
+  - 模型参数
+  确保 Claude API 的
+  prompt_caching 可以复用
+end note
+
+:子 Agent 继承 cache 前缀;
+:仅追加新的用户消息;
+
+:API 请求发出;
+note right
+  Claude API 识别 cache hit：
+  - cache_read_tokens > 0
+  - 减少 cache_creation_tokens
+  - 降低成本，加速响应
+end note
+
+stop
+
+@enduml
+
+[Detail]
+**CacheSafeParams 的设计动机：**
+
+Claude API 的 prompt caching 机制要求请求前缀字节级完全一致才能命中缓存。`CacheSafeParams`（定义于 `src/utils/forkedAgent.ts`）确保：
+
+1. **System Prompt 冻结**：子代理使用与父级完全相同的 system prompt 文本
+2. **消息前缀不变**：父级已发送的消息序列作为前缀原封不动传递
+3. **参数一致性**：模型名称、temperature 等参数保持一致
+
+**性能收益**：
+- 对于大型上下文的 Fork 操作，可以节省 80%+ 的 input token 成本
+- 响应延迟从 cold start 的 5-10s 降低到 cache hit 的 1-3s
+
+------------------------------------------------------------
+[Example]
+上下文四级渐进压缩
+
+[Description]
+当对话上下文接近 token 限制时，系统使用四级渐进策略进行压缩，在保留关键信息的同时控制成本。
+
+[UML]
+@startuml
+!theme plain
+skinparam backgroundColor #1a1a2e
+skinparam defaultFontColor #FFFFFF
+skinparam stateBackgroundColor #2a2a4e
+skinparam stateBorderColor #FF7A00
+skinparam arrowColor #4A9EFF
+
+state "Level 0: 正常模式" as L0 {
+  state "完整上下文" as full
+}
+
+state "Level 1: 工具结果摘要" as L1 {
+  state "toolUseSummary" as tus
+  note right of tus
+    将大型 tool_result 
+    替换为简短摘要
+    保留关键输出信息
+  end note
+}
+
+state "Level 2: 系统上下文折叠" as L2 {
+  state "contextCollapse" as cc
+  note right of cc
+    折叠早期对话轮次
+    保留最近 N 轮完整
+    插入 SystemCompactBoundary
+  end note
+}
+
+state "Level 3: 全量 Compact" as L3 {
+  state "compact service" as cs
+  note right of cs
+    调用 LLM 生成摘要
+    替换所有旧消息
+    插入 TombstoneMessage
+    重置上下文窗口
+  end note
+}
+
+L0 --> L1 : token > threshold_1
+L1 --> L2 : token > threshold_2
+L2 --> L3 : token > threshold_3
+L3 --> L0 : 重置后恢复
+
+@enduml
+
+[Detail]
+**压缩策略对应代码：**
+
+| 级别 | 服务模块 | 策略 |
+|------|----------|------|
+| Level 1 | `src/services/toolUseSummary/` | 工具结果精简，保留关键输出 |
+| Level 2 | `src/services/contextCollapse/` | 早期对话折叠，插入边界标记 |
+| Level 3 | `src/services/compact/`（17 文件） | LLM 驱动全量摘要生成 |
+
+**消息类型支持**（`src/types/message.ts`）：
+- `TombstoneMessage`：标记已被压缩删除的消息位置
+- `SystemCompactBoundaryMessage`：上下文折叠的分界标记
+- `ToolUseSummaryMessage`：工具结果的摘要替代
+
+**压缩触发条件**：
+- 基于 `tokenEstimation.ts` 实时估算当前上下文 token 数
+- 阈值定义在服务配置中，通常为模型最大上下文的 70%/85%/95%
+
+------------------------------------------------------------
+[Example]
+关键设计模式汇总
+
+[Description]
+项目中应用了多种经典设计模式，使系统具有良好的可扩展性和维护性。
+
+[UML]
+@startmindmap
+!theme plain
+skinparam backgroundColor #1a1a2e
+skinparam defaultFontColor #FFFFFF
+skinparam nodeBorderColor #FF7A00
+
+* 设计模式
+** 创建型
+*** 工厂方法: buildTool() 构建工具实例
+*** 单例: WebSocketManager, ProviderService
+*** 建造者: System Prompt 分层构建
+** 结构型
+*** 适配器: WsBridge 统一 IM 接口
+*** 代理: server/proxy 转发 LLM 请求
+*** 组合: Ink 组件树 (CLI TUI)
+*** 外观: api/client.ts 封装 REST
+** 行为型
+*** 策略: AgentDefinition 工具池选择
+*** 观察者: WebSocket 事件分发
+*** 状态机: Task 生命周期管理
+*** 命令: Commands 斜杠命令系统
+*** 中介者: SessionManager 协调通信
+*** 迭代器: AsyncGenerator Agent 循环
+** 架构型
+*** 分层: CLI/Server/Desktop 隔离
+*** 事件驱动: WebSocket 消息总线
+*** 插件: Skills/Plugins/MCP 扩展
+*** CQRS: REST 读 + WS 写分离
+@endmindmap
+
+[Detail]
+**核心模式深度分析：**
+
+1. **AsyncGenerator 状态机**：Agent 核心循环使用 `async function*` 实现，每次 yield 暂停等待外部输入
+2. **Feature Gate 编译优化**：`bun:bundle` 的 `feature()` 实现编译时条件消除，生产构建不包含未启用功能代码
+3. **Lazy Schema**：`lazySchema()` 延迟 Zod schema 实例化，避免模块加载时的循环依赖
+4. **Event Sourcing 思想**：消息历史是不可变追加序列，压缩通过 Tombstone 标记而非删除
+
+------------------------------------------------------------

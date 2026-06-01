@@ -1,0 +1,211 @@
+Title: 背景任务引擎与适配器层
+Describe: 任务生命周期管理、IM 适配器共享架构与差异化实现
+------------------------------------------------------------
+[Example]
+背景任务引擎状态机
+
+[Description]
+`LocalAgentTask` 是后台任务的核心状态管理器，追踪 Agent 从注册到完成/失败的完整生命周期。
+
+[UML]
+@startuml
+!theme plain
+skinparam backgroundColor #1a1a2e
+skinparam defaultFontColor #FFFFFF
+skinparam stateBackgroundColor #2a2a4e
+skinparam stateBorderColor #FF7A00
+skinparam arrowColor #4A9EFF
+
+state "pending" as pending
+state "running" as running
+state "completed" as completed
+state "failed" as failed
+state "killed" as killed
+
+[*] --> pending : registerAsyncAgent()
+
+pending --> running : Agent 开始执行
+running --> running : updateAgentProgress()\n更新 token/活动描述
+
+running --> completed : completeAgentTask()\n正常完成
+running --> failed : failAgentTask()\n异常终止
+running --> killed : killAsyncAgent()\n用户中断
+
+completed --> [*] : enqueueAgentNotification()\n通知父级
+failed --> [*] : enqueueAgentNotification()\n通知父级
+
+note right of running
+  进度追踪：
+  - ProgressTracker
+  - token 消耗实时更新
+  - ActivityDescription 动态生成
+  - AUTO_BACKGROUND_MS 超时检测
+end note
+
+note left of pending
+  7 种任务类型：
+  - LocalAgentTask
+  - LocalShellTask
+  - RemoteAgentTask
+  - InProcessTeammateTask
+  - LocalWorkflowTask
+  - MonitorMcpTask
+  - DreamTask
+end note
+
+@enduml
+
+[Detail]
+**任务引擎关键接口（`src/tasks/LocalAgentTask/LocalAgentTask.ts`）：**
+
+| 函数 | 职责 |
+|------|------|
+| `registerAsyncAgent()` | 注册新后台任务，初始化进度追踪器 |
+| `registerAgentForeground()` | 注册前台任务（可后续转后台） |
+| `updateAgentProgress()` | 更新 token 消耗和活动描述 |
+| `createProgressTracker()` | 创建进度追踪器实例 |
+| `completeAgentTask()` | 标记任务完成，触发通知 |
+| `failAgentTask()` | 标记任务失败，记录错误信息 |
+| `killAsyncAgent()` | 强制终止任务（用户中断） |
+| `enqueueAgentNotification()` | 将完成通知加入队列 |
+| `getProgressUpdate()` | 获取当前进度快照 |
+
+**DreamTask**：特殊的自动记忆整合任务，后台定期运行，用于将会话中的重要信息提取并存入长期记忆（MemDir）。
+
+------------------------------------------------------------
+[Example]
+IM 适配器共享架构
+
+[Description]
+四个 IM 适配器共享 `adapters/common/` 层的核心组件，在此基础上各自实现平台特定逻辑。
+
+[UML]
+@startuml
+!theme plain
+skinparam backgroundColor #1a1a2e
+skinparam defaultFontColor #FFFFFF
+skinparam classBackgroundColor #2a2a4e
+skinparam classBorderColor #FF7A00
+skinparam arrowColor #4A9EFF
+
+package "adapters/common/" as common {
+  class "WsBridge" as bridge {
+    -sessions: Map
+    -handlers: Map
+    +connect(chatId, sessionId)
+    +send(chatId, msg)
+    +onMessage(chatId, handler)
+  }
+  
+  class "MessageDedup" as dedup {
+    +isDuplicate(msgId): boolean
+  }
+  
+  class "MessageBuffer" as buffer {
+    +append(text)
+    +flush(): string
+  }
+  
+  class "SessionStore" as store {
+    +get(chatId): sessionId
+    +set(chatId, sessionId)
+  }
+  
+  class "AdapterHttpClient" as http {
+    +listProjects(): Project[]
+    +getSessionStatus(): Status
+  }
+  
+  class "AttachmentStore" as attach {
+    +save(file): ref
+    +gc(): cleanup
+  }
+  
+  class "config.ts" as config {
+    +loadConfig(): AdapterConfig
+    +getConfiguredWorkDir()
+  }
+  
+  class "pairing.ts" as pair {
+    +isAllowedUser()
+    +tryPair()
+  }
+  
+  class "permission.ts" as perm {
+    +parsePermissionCommand()
+    +formatPermissionRequest()
+  }
+}
+
+package "平台实现" {
+  class "Telegram" as tg {
+    sdk: grammy Bot
+    特点: InlineKeyboard 权限按钮
+    限制: 4000字符/消息
+  }
+  
+  class "Feishu" as fs {
+    sdk: @larksuiteoapi/node-sdk
+    特点: CardKit 流式卡片
+    特点: Markdown 优化渲染
+  }
+  
+  class "DingTalk" as dt {
+    sdk: dingtalk-stream
+    特点: AI Card 交互卡片
+    特点: Stream 长连接
+  }
+  
+  class "WeChat" as wc {
+    protocol: HTTP 轮询
+    特点: Typing 控制器
+    限制: 3500字符/消息
+  }
+}
+
+tg --> bridge
+tg --> dedup
+tg --> store
+tg --> http
+tg --> buffer
+
+fs --> bridge
+fs --> dedup
+fs --> store
+fs --> http
+fs --> attach
+
+dt --> bridge
+dt --> dedup
+dt --> store
+dt --> http
+dt --> attach
+
+wc --> bridge
+wc --> dedup
+wc --> store
+wc --> http
+wc --> attach
+
+@enduml
+
+[Detail]
+**适配器设计差异对比：**
+
+| 特性 | Telegram | 飞书 | 钉钉 | 微信 |
+|------|----------|------|------|------|
+| **SDK** | grammy | @larksuiteoapi/node-sdk | dingtalk-stream | 自研 HTTP 协议 |
+| **连接方式** | Long Polling | WebSocket 事件订阅 | Stream 长连接 | HTTP 轮询 |
+| **流式响应** | EditMessage 更新 | CardKit 流式卡片 | AI Card 渐进更新 | 分段发送 |
+| **权限交互** | InlineKeyboard 按钮 | 卡片回调 | Permission Card | 文本命令 |
+| **附件支持** | getFile API | 上传/下载 API | 媒体 API | 媒体 API |
+| **消息限制** | 4000 字符 | 无明确限制 | 无明确限制 | 3500 字符 |
+| **代码行数** | ~847 行 | ~1320 行 | ~707 行 | ~626 行 |
+
+**共同设计模式**：
+1. **Adapter Pattern**：统一接口 (WsBridge) 适配不同平台 SDK
+2. **Deduplication**：消息去重防止重复处理
+3. **Session Recovery**：断线后自动恢复会话绑定
+4. **Permission Delegation**：统一权限命令解析与转发
+
+------------------------------------------------------------

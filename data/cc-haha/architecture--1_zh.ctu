@@ -1,0 +1,203 @@
+Title: 多代理系统架构设计
+Describe: Multi-Agent 系统的 4 种生成路径、6 种内建代理与团队协作机制
+------------------------------------------------------------
+[Example]
+Agent 生成四路径决策树
+
+[Description]
+AgentTool 支持四种 Agent 生成路径：同步（Sync）、异步（Async）、Fork 和 Teammate。选择哪条路径取决于参数配置和运行时上下文。
+
+[UML]
+@startuml
+!theme plain
+skinparam backgroundColor #1a1a2e
+skinparam defaultFontColor #FFFFFF
+skinparam activityBackgroundColor #2a2a4e
+skinparam activityBorderColor #FF7A00
+skinparam arrowColor #4A9EFF
+
+start
+
+:AgentTool 收到调用;
+
+if (isolation == "remote"?) then (yes)
+  :Remote Agent 路径;
+  :注册 RemoteAgentTask;
+  :teleportToRemote();
+  stop
+else (no)
+  if (run_in_background == true?) then (yes)
+    :Async Agent 路径;
+    :registerAsyncAgent();
+    :后台执行 runAgent();
+    :完成后 enqueueAgentNotification();
+    stop
+  else (no)
+    if (isForkSubagentEnabled?) then (yes)
+      :Fork Agent 路径;
+      :buildForkedMessages();
+      :共享父级 prompt cache;
+      :byte-level 一致性优化;
+      stop
+    else (no)
+      if (isTeammate && name?) then (yes)
+        :Teammate 路径;
+        :spawnTeammate();
+        :Mailbox 通信;
+        stop
+      else (no)
+        :Sync Agent 路径;
+        :直接 runAgent();
+        :阻塞等待完成;
+        stop
+      endif
+    endif
+  endif
+endif
+
+@enduml
+
+[Detail]
+**四条路径详解：**
+
+| 路径 | 触发条件 | 特点 |
+|------|----------|------|
+| **Sync** | 默认路径 | 阻塞父 Agent 直到子代理完成 |
+| **Async** | `run_in_background: true` | 后台执行，通过 `LocalAgentTask` 跟踪进度 |
+| **Fork** | 环境变量启用 + 非 Teammate | 继承父级完整上下文，共享 prompt cache 前缀 |
+| **Remote** | `isolation: "remote"` | 在远程 CCR 环境执行，总是后台运行 |
+| **Teammate** | Swarm 模式 + 提供 name | 作为团队成员通过 Mailbox 异步通信 |
+
+核心入口文件：`src/tools/AgentTool/AgentTool.tsx`（1396 行）
+
+------------------------------------------------------------
+[Example]
+六种内建代理类型
+
+[Description]
+系统预定义了 6 种内建代理，覆盖通用任务、探索、规划、验证、代码指南和状态栏配置场景。
+
+[UML]
+@startuml
+!theme plain
+skinparam backgroundColor #1a1a2e
+skinparam defaultFontColor #FFFFFF
+skinparam classBackgroundColor #2a2a4e
+skinparam classBorderColor #FF7A00
+skinparam arrowColor #4A9EFF
+
+abstract class "AgentDefinition" as AD {
+  +agentType: string
+  +whenToUse: string
+  +tools?: string[]
+  +disallowedTools?: string[]
+  +model?: ModelAlias
+  +systemPrompt?: string
+}
+
+class "GeneralPurpose" as GP {
+  agentType = "general-purpose"
+  whenToUse = "通用任务"
+  tools = All
+}
+
+class "Explore" as EX {
+  agentType = "explore"
+  whenToUse = "代码库探索"
+  tools = 只读工具集
+}
+
+class "Plan" as PL {
+  agentType = "plan"
+  whenToUse = "设计与规划"
+  tools = 只读 + 计划工具
+}
+
+class "Verification" as VR {
+  agentType = "verification"
+  whenToUse = "测试与验证"
+  tools = Bash + Read + Glob + Grep
+}
+
+class "ClaudeCodeGuide" as CG {
+  agentType = "claude-code-guide"
+  whenToUse = "Claude Code 使用指南"
+  tools = 无外部工具
+}
+
+class "StatuslineSetup" as SS {
+  agentType = "statusline-setup"
+  whenToUse = "状态栏配置"
+  tools = Bash + FileEdit + FileRead
+}
+
+AD <|-- GP
+AD <|-- EX
+AD <|-- PL
+AD <|-- VR
+AD <|-- CG
+AD <|-- SS
+
+@enduml
+
+[Detail]
+**设计模式分析：**
+
+- 使用**策略模式**：每种 Agent 类型定义不同的工具池（tools/disallowedTools）和系统提示词
+- `AgentDefinition` 接口定义了 Agent 的元数据契约
+- `loadAgentsDir.ts`（25.6KB）负责从用户自定义目录 `.claude/agents/` 加载额外 Agent 定义
+- `builtInAgents.ts` 注册内建代理，运行时通过 `subagent_type` 参数选择
+- **权限继承**：子代理默认继承父级权限模式，可通过 `mode` 参数覆盖
+
+------------------------------------------------------------
+[Example]
+Agent Teams 协作拓扑
+
+[Description]
+Agent Teams 支持多个 Teammate 通过文件系统 Mailbox 进行异步消息通信，实现分布式协作。
+
+[UML]
+@startuml
+!theme plain
+skinparam backgroundColor #1a1a2e
+skinparam defaultFontColor #FFFFFF
+skinparam actorBorderColor #FF7A00
+skinparam participantBackgroundColor #2a2a4e
+skinparam participantBorderColor #FF7A00
+skinparam arrowColor #4A9EFF
+
+actor "Leader Agent" as leader
+participant "TeamFile\n(.claude/team-*.json)" as tf
+participant "Mailbox\n(~/.claude/mailbox/)" as mb
+participant "Teammate A" as ta
+participant "Teammate B" as tb
+
+leader -> tf : TeamCreateTool\n创建团队配置
+leader -> ta : spawnTeammate()\n(InProcessTeammate)
+leader -> tb : spawnTeammate()\n(InProcessTeammate)
+
+leader -> mb : SendMessageTool\n发送任务指令
+mb -> ta : inbox polling\n接收消息
+ta -> mb : SendMessageTool\n返回结果
+mb -> leader : inbox polling\n读取结果
+
+ta -> mb : SendMessageTool\n请求协作
+mb -> tb : inbox polling\n接收协作请求
+tb -> mb : SendMessageTool\n返回协作结果
+mb -> ta : inbox polling\n读取协作结果
+
+leader -> tf : TeamDeleteTool\n清理团队
+
+@enduml
+
+[Detail]
+**Teams 实现要点：**
+
+1. **TeamFile**：JSON 配置文件存储成员列表和权限（`src/tools/TeamCreateTool/`）
+2. **Mailbox 系统**：基于文件系统的消息队列，每个 Agent 有独立 inbox
+3. **InProcessTeammateTask**：团队成员的任务状态类型，追踪 running/idle/completed/error
+4. **权限传播**：Leader 的 permission mode 向下传播给所有 Teammate
+5. **Swarm 模式**：通过 `isAgentSwarmsEnabled()` 特性门控启用
+6. **消息路由**：`SendMessageTool` 支持按 name 寻址，将消息写入目标 inbox
+
+------------------------------------------------------------

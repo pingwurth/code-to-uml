@@ -1,0 +1,185 @@
+Title: 数据流与状态流
+Describe: Message 生命周期、Token 计数流、状态管理流、Context 组装管道、MCP 工具发现流的数据流图。
+------------------------------------------------------------
+[Example]
+Message 生命周期
+
+[Description]
+Message 是 Claude Code 中最核心的数据结构，贯穿整个系统。每个 Message 有明确的类型和生命周期阶段：
+
+**类型层次**:
+- `UserMessage` — 用户输入
+- `AssistantMessage` — 模型响应（含 text + tool_use）
+- `SystemMessage` — 系统消息（compact 摘要等）
+- `ProgressMessage<T>` — 工具执行进度
+- `AttachmentMessage` — 附件（图片、文件）
+
+[UML]
+@startuml
+(*) --> "用户输入"
+"用户输入" --> "UserMessage"
+"UserMessage" --> "normalizeForAPI"
+"normalizeForAPI" --> "API 请求格式"
+
+"API 请求格式" --> "Anthropic API"
+"Anthropic API" --> "流式事件 SSE"
+
+"流式事件 SSE" --> "AssistantMessage"
+"AssistantMessage" --> "解析内容块"
+
+"解析内容块" --> "TextBlock" : 文本
+"解析内容块" --> "ToolUseBlock" : 工具调用
+
+"ToolUseBlock" --> "StreamingToolExecutor"
+"StreamingToolExecutor" --> "Tool call"
+"Tool call" --> "ToolResult"
+"ToolResult" --> "ToolResultMessage"
+
+"ToolResultMessage" --> "追加到 messages"
+"追加到 messages" --> "下一轮 API 调用"
+
+"TextBlock" --> "显示给用户"
+"TextBlock" --> "检查 stop_reason"
+"检查 stop_reason" --> "end_turn" : 结束
+"检查 stop_reason" --> "tool_use" : 继续
+
+"end_turn" --> (*)
+@enduml
+
+[Detail]
+**Message 类型的 TypeScript 定义**（`src/types/message.ts`）：
+
+```typescript
+type Message =
+  | UserMessage        // { type: 'user', message: { role: 'user', content } }
+  | AssistantMessage   // { type: 'assistant', message: { role: 'assistant', content } }
+  | SystemMessage      // { type: 'system', content: string }
+  | ProgressMessage<T> // { type: 'progress', data: T }
+  | AttachmentMessage  // { type: 'attachment', ... }
+```
+
+**normalizeMessagesForAPI() 的作用**：
+将内部 Message 格式转为 Anthropic API 要求的格式，处理：
+- 合并连续的同角色消息
+- 去除内部元数据
+- 处理 tool_result 与 tool_use 的配对
+- 截断过长的内容块
+
+------------------------------------------------------------
+[Example]
+Token 计数与预算流
+
+[Description]
+Token 计数贯穿整个对话生命周期，用于控制成本和触发压缩：
+
+[UML]
+@startuml
+rectangle "输入侧" {
+  [system prompt tokens] as sp
+  [messages tokens] as msg
+  [tool definitions tokens] as td
+  [合计: input tokens] as inp
+}
+
+rectangle "输出侧" {
+  [completion tokens] as comp
+  [tool_use tokens] as tu
+  [合计: output tokens] as out
+}
+
+rectangle "累计" {
+  [totalUsage] as total
+  [modelUsage] as mu
+  [totalCostUSD] as cost
+}
+
+sp --> inp
+msg --> inp
+td --> inp
+
+comp --> out
+tu --> out
+
+inp --> total
+out --> total
+total --> mu
+mu --> cost
+
+rectangle "预算检查" {
+  [maxBudgetUsd] as budget
+  [maxTurns] as turns
+  [auto-compact 阈值] as threshold
+}
+
+cost --> budget : 超过?
+total --> turns : 超过?
+inp --> threshold : 接近?
+@enduml
+
+[Detail]
+**Token 预算的三层控制**：
+
+1. **Turn 级别**: 每个 turn 结束后检查 `maxTurns` 限制
+2. **USD 级别**: 累计 `totalCostUSD` 超过 `maxBudgetUsd` 时停止
+3. **上下文级别**: input tokens 接近模型的上下文窗口限制时触发 auto-compact
+
+**模型价格查找**：
+不同模型有不同的 input/output token 价格，`modelUsage` 按模型名分类统计，`totalCostUSD` 通过价格表计算累计费用。
+
+------------------------------------------------------------
+[Example]
+Context 组装管道
+
+[Description]
+每次 API 调用前，system prompt 由多个来源组装而成：
+
+[UML]
+@startuml
+start
+:getCLISyspromptPrefix();
+:获取 CLI 通用前缀;
+
+:getMainLoopModel();
+:确定当前模型;
+
+:getSystemPrompt([], model);
+:基础 system prompt;
+
+:appendSystemContext();
+:追加系统上下文;
+
+fork
+  :Git 状态 (getGitStatus);
+fork again
+  :CLAUDE.md 内容 (getClaudeMds);
+fork again
+  :Memory 文件 (getMemoryFiles);
+fork again
+  :日期时间 (getLocalISODate);
+fork again
+  :当前工作目录;
+end fork
+
+:prependUserContext();
+:prependUserAttachments();
+
+:splitSysPromptPrefix();
+:分离缓存前缀;
+
+:最终 system prompt 数组;
+stop
+@enduml
+
+[Detail]
+**System Prompt 的组成**（从上到下）：
+
+1. **CLI 前缀**: 归属信息、模型信息、工具描述前缀
+2. **基础 prompt**: 定义 Claude Code 的行为准则（~5000 token）
+3. **Git 状态**: 当前分支、modified/staged 文件（限制 1000 字符）
+4. **CLAUDE.md**: 项目级和用户级指令文件（可能有多个层级）
+5. **Memory 文件**: 持久化的记忆文件（`.claude/projects/*/memory/`）
+6. **日期时间**: 当前日期（让模型知道时间上下文）
+7. **用户自定义**: `customSystemPrompt` 和 `appendSystemPrompt`
+
+**缓存优化**：
+`splitSysPromptPrefix()` 将 system prompt 分为可缓存前缀和动态后缀。Anthropic API 支持 prompt caching，静态前缀可以跨请求复用，减少 token 计费。

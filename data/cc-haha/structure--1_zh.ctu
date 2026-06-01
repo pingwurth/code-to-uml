@@ -1,0 +1,154 @@
+Title: 核心模块结构与职责
+Describe: 各子系统的模块边界、核心文件与依赖方向
+------------------------------------------------------------
+[Example]
+src/ 目录核心模块关系
+
+[Description]
+`src/` 是 CLI/运行时的主体代码，包含 58+ 工具目录、300+ 工具函数文件、服务层、任务引擎等核心子系统。
+
+[UML]
+@startuml
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontColor #333333
+skinparam packageBorderColor #FF7A00
+skinparam arrowColor #2563EB
+skinparam classBackgroundColor #FFF8F0
+skinparam classBorderColor #FF7A00
+skinparam classFontColor #333333
+
+package "src/" {
+  package "entrypoints/" {
+    class "cli.tsx" as cli
+    class "init.ts" as init
+    class "mcp.ts" as mcp_entry
+  }
+
+  package "tools/" {
+    class "AgentTool/" as agent_tool
+    class "BashTool/" as bash_tool
+    class "FileEditTool/" as edit_tool
+    class "FileReadTool/" as read_tool
+    class "SendMessageTool/" as msg_tool
+    class "TeamCreateTool/" as team_tool
+    class "SkillTool/" as skill_tool
+    class "WebSearchTool/" as web_tool
+  }
+
+  package "services/" {
+    class "mcp/" as mcp_svc
+    class "oauth/" as oauth_svc
+    class "compact/" as compact_svc
+    class "analytics/" as analytics
+    class "skillSearch/" as skill_search
+  }
+
+  package "tasks/" {
+    class "LocalAgentTask/" as local_task
+    class "LocalShellTask/" as shell_task
+    class "DreamTask/" as dream_task
+    class "RemoteAgentTask/" as remote_task
+  }
+
+  package "server/" {
+    class "api/" as server_api
+    class "ws/" as server_ws
+    class "proxy/" as server_proxy
+    class "services/" as server_svc
+  }
+
+  package "utils/" {
+    class "permissions/" as perms
+    class "forkedAgent.ts" as fork
+    class "worktree.ts" as worktree
+    class "systemPrompt.ts" as sys_prompt
+  }
+}
+
+cli --> agent_tool : 调用
+agent_tool --> local_task : 管理生命周期
+agent_tool --> fork : CacheSafeParams
+agent_tool --> perms : 权限检查
+agent_tool --> msg_tool : 团队通信
+
+mcp_svc --> mcp_entry
+server_ws --> local_task : 事件推送
+server_api --> server_svc
+
+@enduml
+
+[Detail]
+**模块职责划分：**
+
+| 模块 | 职责 | 关键文件 |
+|------|------|----------|
+| `entrypoints/` | 启动入口路由 | `cli.tsx`（Ink TUI 主入口）、`init.ts`（首次配置） |
+| `tools/` | 58 个工具目录 | 每个工具独立目录，含实现、测试、prompt |
+| `services/` | 业务服务层 | MCP 客户端、OAuth 鉴权、压缩、分析埋点 |
+| `tasks/` | 任务引擎 | 7 种任务类型的状态管理与生命周期 |
+| `server/` | HTTP/WS 服务 | REST 路由、WebSocket 处理、代理转发 |
+| `utils/` | 工具函数库 | 323+ 文件，覆盖权限、Fork、Worktree 等 |
+
+------------------------------------------------------------
+[Example]
+desktop/ 与 adapters/ 模块关系
+
+[Description]
+桌面端和 IM 适配器各自独立，均通过 server 层的 WebSocket 接口与核心运行时通信。
+
+[UML]
+@startuml
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontColor #333333
+skinparam componentBackgroundColor #F0F7FF
+skinparam componentBorderColor #FF7A00
+skinparam arrowColor #2563EB
+skinparam componentFontColor #333333
+
+component "desktop/src/" as desktop {
+  [pages/] as pages
+  [components/] as comps
+  [stores/] as stores
+  [api/] as api_client
+  [hooks/] as hooks
+}
+
+component "src/server/" as server {
+  [REST API (router.ts)] as rest
+  [WebSocket (ws/handler.ts)] as ws
+  [Session Manager] as sess
+}
+
+component "adapters/" as adapters {
+  [common/ws-bridge.ts] as bridge
+  [telegram/index.ts] as tg
+  [feishu/index.ts] as fs
+  [dingtalk/index.ts] as dt
+  [wechat/index.ts] as wc
+}
+
+api_client --> rest : HTTP fetch
+stores --> api_client
+pages --> stores
+hooks --> stores
+
+bridge --> ws : WebSocket 连接
+tg --> bridge
+fs --> bridge
+dt --> bridge
+wc --> bridge
+
+ws --> sess : 会话管理
+rest --> sess
+
+@enduml
+
+[Detail]
+**通信架构要点：**
+
+1. **桌面端** `desktop/src/api/client.ts` 封装了到服务端的 HTTP 请求基类，`websocket.ts` 管理 WebSocket 连接
+2. **IM 适配器** 全部通过 `adapters/common/ws-bridge.ts` 建立 WebSocket 长连接
+3. **服务端** `src/server/ws/handler.ts`（72KB）是 WebSocket 协议的核心处理逻辑
+4. **会话隔离**：每个 chatId 对应一个独立 sessionId，通过 `SessionStore` 管理映射
+
+------------------------------------------------------------

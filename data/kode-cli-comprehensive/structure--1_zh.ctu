@@ -1,0 +1,170 @@
+Title: 顶层结构
+Describe: 目录分层、启动链、命令/工具/插件注册结构。重点回答“改一个需求应该先看哪里”。
+------------------------------------------------------------
+[Example]
+顶层结构：目录分层与依赖方向
+
+[Description]
+项目的顶层目录有明确职责：
+
+- `src/entrypoints/`：进程入口和协议外壳，包括 CLI、MCP server、ACP。
+- `src/app/`：对话运行核心，`query.ts` 和 `ask.ts` 是所有模式复用的主路径。
+- `src/core/`：不应依赖 UI 的核心抽象和安全逻辑，例如 Tool 接口、权限引擎。
+- `src/services/`：模型、MCP、插件、系统提示词、上下文、认证、telemetry 等外部或跨域服务。
+- `src/tools/`：内置工具实现，以及 MCP 工具包装。
+- `src/ui/`：Ink TUI 的屏幕、组件和 hooks。
+- `src/utils/`：消息、会话、配置、权限设置、文件系统等通用能力。
+- `tests/`：unit/integration/e2e，覆盖工具调度、权限、stream-json、MCP、插件等关键路径。
+
+[UML]
+@startuml
+skinparam packageStyle rectangle
+
+package "src/entrypoints\n协议和进程入口" as Entrypoints
+package "src/app\n对话运行内核" as App
+package "src/core\n核心契约和安全逻辑" as Core
+package "src/services\n模型、MCP、插件、上下文" as Services
+package "src/tools\n内置工具和 MCP 工具包装" as Tools
+package "src/ui\nInk 交互界面" as UI
+package "src/utils\n消息、会话、配置、文件系统" as Utils
+package "tests\n单元、集成、端到端验证" as Tests
+
+Entrypoints --> App
+Entrypoints --> Services
+Entrypoints --> UI
+App --> Core
+App --> Services
+App --> Tools
+App --> Utils
+Tools --> Core
+Tools --> Services
+Tools --> Utils
+UI --> App
+UI --> Core
+UI --> Utils
+Services --> Utils
+Tests ..> App
+Tests ..> Core
+Tests ..> Services
+Tests ..> Tools
+Tests ..> UI
+@enduml
+
+[Detail]
+依赖方向的关键点是：
+
+- `src/core` 是底层契约层，尤其 Tool 和 permission 相关代码应避免反向依赖 UI。
+- `src/app/query.ts` 是协作中心，但不应承担每个工具的业务细节。
+- `src/services` 是“适配层”，对接模型供应商、MCP server、插件目录、系统上下文等变化点。
+- `src/ui` 主要消费 runtime 产出的流式消息和权限请求，不应该成为业务状态唯一来源。
+
+开发判断口诀：**入口决定模式，app 推进对话，core 定义边界，services 适配外部，tools 执行动作，ui 呈现状态。**
+
+------------------------------------------------------------
+[Example]
+CLI 启动链：从 bin 到 REPL 或 print
+
+[Description]
+`src/entrypoints/cli.tsx` 做最小 bootstrap：清理环境、初始化 Sentry、确认打包运行时、安装进程级 handler，然后调用 `runCli()`。
+
+`src/entrypoints/cli/runCli.tsx` 才是 CLI 编排中心。它负责：
+
+- 初始化 debug logger、启用配置、修复 GPT-5 profile。
+- 读取 stdin、处理 `/dev/tty`。
+- 用 commander 定义所有 CLI flags 和子命令。
+- 执行 `setup`、`setupScreens`、插件配置、MCP client 连接。
+- 根据 `--print`、resume/continue/fork、默认交互等路径进入不同运行模式。
+
+[UML]
+@startuml
+start
+:bin shim 启动 Node 或 standalone binary;
+:执行 src/entrypoints/cli.tsx;
+:清理环境并初始化 Sentry;
+:ensure packaged runtime、env、yoga wasm;
+:安装 process handlers;
+:调用 runCli;
+:初始化 debug、配置、GPT5 profile repair;
+:读取 stdin 和 tty 状态;
+:commander 注册 flags 与子命令;
+if (配置解析错误?) then (是)
+  :显示 InvalidConfigDialog;
+  stop
+else (否)
+  :执行 setup 和 setupScreens;
+endif
+:配置插件、MCP clients、commands、tools;
+if (--print?) then (是)
+  :进入 runPrintMode;
+  stop
+else (否)
+  if (resume selector?) then (是)
+    :渲染 ResumeConversation;
+    stop
+  else (否)
+    :渲染 REPL;
+    stop
+  endif
+endif
+@enduml
+
+[Detail]
+这张活动图说明 `runCli` 的职责是“把进程状态归一化成 runtime 参数”，而不是直接执行 agent 逻辑。真正的 LLM 调用和工具循环不会在 CLI 参数解析层完成，而是下沉到 `runPrintMode`、`REPL` 和 `query`。
+
+维护时要特别注意 `runCli` 中的延迟 import：`ask`、`getTools`、`getCommands`、`getClients` 等在 setup 之后才加载，既减少启动早期副作用，也让配置、cwd、插件上下文先就位。
+
+------------------------------------------------------------
+[Example]
+命令、工具、插件注册：能力从静态列表扩展为运行时集合
+
+[Description]
+工具和命令都不是纯静态的：
+
+- `src/tools/index.ts` 先列出内置工具，再通过 `getMCPTools()` 合并 MCP tool，最后按 `isEnabled()` 过滤。
+- `src/commands/index.ts` 组合内置命令、MCP commands 和 custom commands。
+- `src/services/plugins/pluginRuntime.ts` 会解析 `.kode-plugin/plugin.json` 或 legacy `.claude-plugin/plugin.json`，把 commands、skills、agents、output styles、hooks、MCP server 目录纳入会话。
+- SlashCommandTool 和 SkillTool 都把 markdown/frontmatter 型 prompt 变成 agent 可调用能力。
+
+[UML]
+@startuml
+left to right direction
+
+package "静态内置能力" {
+  component "内置 Tools\nBash Read Edit Write Grep Glob Task Todo..." as BuiltinTools
+  component "内置 Commands\nhelp config login..." as BuiltinCommands
+}
+
+package "项目和用户扩展" {
+  component "customCommands.ts\nMarkdown commands" as CustomCommands
+  component "SkillTool\nskills as tools" as Skills
+  component "pluginRuntime.ts\nsession plugins" as Plugins
+  component "MCP client tools" as MCPTools
+}
+
+component "getTools()" as GetTools
+component "getCommands()" as GetCommands
+component "query runtime" as Query
+component "Permission Engine" as Perm
+
+BuiltinTools --> GetTools
+MCPTools --> GetTools
+BuiltinCommands --> GetCommands
+CustomCommands --> GetCommands
+Plugins --> CustomCommands
+Plugins --> MCPTools
+Skills --> GetTools
+GetTools --> Query
+GetCommands --> Query
+Query --> Perm
+@enduml
+
+[Detail]
+这张图说明 Kode 的扩展模式是“注册时合并、执行时统一走 Tool/Permission 契约”：
+
+- 外部 MCP tool 最终被包装成 Kode Tool，因此仍进入权限和消息循环。
+- 自定义 slash command 和 skill 本质上是 prompt/上下文修改器，不应该绕过系统消息和权限边界。
+- 插件 runtime 的价值在于把多个目录和 manifest 归一化成当前会话的能力集合。
+
+开发新能力时优先问两个问题：**它是 Tool、Command、Skill、Hook、MCP server，还是 UI 功能？它进入 query 循环时是否仍能被权限和日志系统看见？**
+
+------------------------------------------------------------

@@ -1,0 +1,264 @@
+Title: 核心设计原理
+Describe: Harness vs Model 分离、流式工具执行、延迟工具加载、多 Provider 兼容层、Feature Flag 驱动开发等核心设计思想。
+------------------------------------------------------------
+[Example]
+原理一：Harness 与 Model 分离
+
+[Description]
+Claude Code 的核心架构原则是 **Harness（外壳）与 Model（模型）的严格分离**：
+
+- **Harness 负责**: 工具调度、权限管理、状态维护、UI 渲染、错误恢复
+- **Model 负责**: 理解用户意图、生成代码、决定工具调用、推理逻辑
+
+两者通过 Anthropic API 的 `tool_use` 协议连接——Harness 提供工具 schema，Model 决定何时调用哪个工具、传什么参数。
+
+[UML]
+@startmindmap
+* Harness vs Model 分离
+** Harness (外壳) 职责
+*** 工具注册与调度
+*** 权限检查管道
+*** 状态管理 (messages, usage)
+*** UI 渲染 (Ink 组件)
+*** 错误恢复 (retry, fallback)
+*** Context 组装 (system prompt)
+*** 自动压缩 (compact)
+*** MCP 工具发现
+** Model (模型) 职责
+*** 理解自然语言
+*** 生成代码
+*** 决定工具调用
+*** 推理逻辑链
+*** 处理多步骤任务
+** 连接协议
+*** Anthropic API tool_use
+*** Zod schema 定义工具输入
+*** 流式 SSE 传输
+*** tool_result 反馈
+@endmindmap
+
+[Detail]
+**为什么这种分离如此重要？**
+
+1. **可替换性**: Model 可以从 Claude 切换到 GPT/Gemini/Grok，Harness 不变
+2. **可测试性**: Harness 的逻辑（权限、状态、工具调度）可以独立于 Model 测试
+3. **安全性**: 所有文件系统和 shell 操作都经过 Harness 的权限管道，Model 无法绕过
+4. **可扩展性**: 新工具只需实现 Tool 接口，自动获得权限检查、进度报告、错误处理
+
+**反模式警示**：
+如果把工具执行逻辑放在 Model 侧（如让 Model 直接执行 shell 命令），会失去安全控制和可审计性。Claude Code 的设计确保 Model 只能"请求"工具执行，Harness 决定是否允许。
+
+------------------------------------------------------------
+[Example]
+原理二：流式处理优先
+
+[Description]
+Claude Code 的所有关键路径都采用**流式处理**：
+
+1. **API 响应流式**: SSE (Server-Sent Events) 逐 token 传输
+2. **工具流式执行**: `StreamingToolExecutor` 在收到 tool_use block 时立即执行
+3. **UI 流式更新**: Ink 组件实时渲染新内容
+4. **进度流式报告**: 工具通过 `onProgress` 回调实时报告状态
+
+**核心优势**: 用户感知的延迟从"等待完整响应"降低到"看到第一个 token"。
+
+[UML]
+@startuml
+|API 层|
+:SSE 流开始;
+:收到 text delta;
+:立即渲染到 UI;
+
+:收到 tool_use block 完成;
+:立即提交给 StreamingToolExecutor;
+
+|工具层|
+:开始执行工具 (不等待流结束);
+:实时报告进度 (onProgress);
+
+|UI 层|
+:显示工具执行进度;
+:工具完成时立即显示结果;
+
+|API 层|
+:继续接收下一个 block;
+:所有 block 处理完毕;
+:检查 stop_reason;
+@enduml
+
+[Detail]
+**流式处理的技术实现**：
+
+**StreamingToolExecutor** 是流式处理的核心：
+- 维护一个 `TrackedTool[]` 队列
+- `addTool()` 在流式响应中被调用，不等待整个响应完成
+- 并发安全的工具立即开始执行
+- 非并发工具等待独占条件
+- `getRemainingResults()` 返回一个 AsyncGenerator，yield 完成的工具结果
+
+**为什么不用 Promise.all？**
+`Promise.all` 需要所有 Promise 就绪后才能开始——但在流式场景中，工具调用是逐个到达的。StreamingToolExecutor 实现了"边到达边执行"的管道模式。
+
+------------------------------------------------------------
+[Example]
+原理三：延迟工具加载 (Deferred Tool Loading)
+
+[Description]
+60+ 个工具的完整 schema 会消耗大量 token。Claude Code 通过**延迟加载**机制优化：
+
+- **CORE_TOOLS** (38 个): 始终加载，覆盖文件操作、shell、搜索等基础能力
+- **Deferred Tools** (~25 个): 标记为延迟，模型通过 `SearchExtraTools` 按需发现
+
+**效果**: 初始工具 token 从 ~50k 降低到 ~15k，显著减少 API 成本和首 token 延迟。
+
+[UML]
+@startuml
+rectangle "初始工具列表 (38 CORE_TOOLS)" {
+  [BashTool]
+  [FileReadTool]
+  [FileEditTool]
+  [GrepTool]
+  [GlobTool]
+  [AgentTool]
+  [WebFetchTool]
+  [SearchExtraToolsTool]
+  [其他核心工具]
+}
+
+rectangle "延迟工具池 (~25 工具)" {
+  [MonitorTool]
+  [WorkflowTool]
+  [CronTools]
+  [SleepTool]
+  [PushNotificationTool]
+  [其他延迟工具]
+}
+
+[BashTool] --> [SearchExtraToolsTool] : 模型发现需要更多工具
+[SearchExtraToolsTool] --> [延迟工具池] : 语义搜索
+[延迟工具池] --> [注入到工具列表] : 动态添加
+
+note right of SearchExtraToolsTool
+  TF-IDF 语义搜索
+  searchHint 关键词匹配
+  缓存搜索结果
+end note
+@enduml
+
+[Detail]
+**SearchExtraTools 的工作原理**：
+
+1. **TF-IDF 索引**: 为所有延迟工具的 `searchHint` 和 `description` 建立倒排索引
+2. **语义搜索**: 模型生成搜索查询（如 "monitor log file"），SearchExtraTools 返回匹配的工具
+3. **动态注入**: 匹配的工具 schema 被注入到当前 turn 的工具列表中
+4. **缓存**: 搜索结果被缓存，避免重复计算
+
+**searchHint 设计**：
+每个延迟工具提供 3-10 个词的能力描述（如 "jupyter notebook cell editing"），帮助 TF-IDF 匹配。hint 不应与工具名重复，而应补充工具名无法表达的能力关键词。
+
+------------------------------------------------------------
+[Example]
+原理四：多 Provider 兼容层（流适配器模式）
+
+[Description]
+所有第三方 API Provider 都通过**流适配器模式**接入：
+
+1. 将 Anthropic 格式的请求转为第三方格式
+2. 将第三方的流式响应转为 Anthropic 内部格式
+3. 下游代码（query.ts、QueryEngine、REPL）完全不改
+
+**核心价值**: 一次实现的工具系统、权限管道、UI 组件可以跨所有 Provider 复用。
+
+[UML]
+@startuml
+package "下游 (不感知 Provider)" {
+  [QueryEngine]
+  [query.ts]
+  [StreamingToolExecutor]
+  [REPL.tsx]
+}
+
+package "适配器层" {
+  [Anthropic 直连] as ant
+  [OpenAI 适配器] as oai
+  [Gemini 适配器] as gem
+  [Grok 适配器] as grok
+}
+
+cloud "Anthropic API" as api1
+cloud "OpenAI API" as api2
+cloud "Gemini API" as api3
+cloud "Grok API" as api4
+
+QueryEngine --> ant
+QueryEngine --> oai
+QueryEngine --> gem
+QueryEngine --> grok
+
+ant --> api1
+oai --> api2
+gem --> api3
+grok --> api4
+@enduml
+
+[Detail]
+**每个适配器做三件事**：
+
+1. **请求转换**: `messages` 格式、`tools` schema、`system` prompt 的格式转换
+2. **流适配**: 将第三方的 SSE/JSON 流事件转为 `BetaRawMessageStreamEvent` 类型
+3. **响应标准化**: 确保返回的 `AssistantMessage` 结构一致
+
+**OpenAI 适配器的特殊处理**：
+- DeepSeek thinking mode: 解析 `<think>` 标签中的推理内容，转为 thinking block
+- function calling 格式差异: OpenAI 用 `function_call`，Anthropic 用 `tool_use`
+- 流式格式差异: OpenAI 用 `data: [DONE]` 结束，Anthropic 用 `message_stop` 事件
+
+------------------------------------------------------------
+[Example]
+原理五：Feature Flag 驱动开发
+
+[Description]
+65+ 个 Feature Flag 控制着整个项目的功能矩阵，支持：
+
+- **构建时选择**: 不同构建配置启用不同 flag 集合
+- **运行时覆盖**: `FEATURE_<NAME>=1` 环境变量
+- **渐进发布**: 新功能默认关闭，逐步放量
+- **A/B 测试**: 通过 GrowthBook 集成
+
+[UML]
+@startmindmap
+* Feature Flag 三层架构
+** Build Time
+*** build.ts DEFAULT_BUILD_FEATURES
+*** Bun.build({ define })
+*** 死代码消除 (tree-shaking)
+** Dev Time
+*** scripts/dev.ts
+*** 全部 flag 启用
+*** 快速迭代
+** Runtime
+*** 环境变量 FEATURE_<NAME>=1
+*** GrowthBook 远程配置
+*** 按用户/团队灰度
+@endmindmap
+
+[Detail]
+**Feature Flag 的工程实践**：
+
+1. **条件导入**: 使用 `require()` 替代 `import` 实现条件加载，避免 tree-shaking 无法消除的静态导入
+   ```typescript
+   const MonitorTool = feature('MONITOR_TOOL')
+     ? require('.../MonitorTool.js').MonitorTool
+     : null
+   ```
+
+2. **类型安全**: `feature()` 返回 `boolean`，TypeScript 可以进行类型收窄
+   ```typescript
+   if (feature('DAEMON')) {
+     // 此作用域内 DAEMON 相关代码的类型是确定的
+   }
+   ```
+
+3. **测试隔离**: `bun:test` 中 `feature()` 返回 `false`，需要测试的 feature 通过 mock 控制
+
+4. **构建产物差异**: 不同的构建目标（CLI、SDK、browser）使用不同的 feature 集合

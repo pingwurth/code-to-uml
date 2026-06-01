@@ -1,0 +1,129 @@
+Title: 项目概览与定位
+Describe: Claude Code 是 Anthropic 官方的 CLI 编程助手，本仓库为逆向工程还原版本。核心技术栈为 TypeScript + Bun，包含 60+ 内置工具、7 个 API Provider、完整的 Agent 系统。
+------------------------------------------------------------
+[Example]
+项目定位与核心能力
+
+[Description]
+**项目**: Claude Code CLI（逆向工程还原版）
+**技术栈**: TypeScript + Bun + React/Ink（终端 UI）
+**规模**: 核心文件 20,000+ 行，60+ 内置工具，17 个 workspace packages
+**版本**: 2.2.1（当前）
+
+Claude Code 是一个**终端内的 AI 编程助手**，它能让 Claude 模型直接操作用户的文件系统、执行 shell 命令、搜索代码、编辑文件，并通过对话式交互完成复杂的编程任务。
+
+[UML]
+@startmindmap
+* Claude Code CLI
+** 核心能力
+*** 60+ 内置工具
+**** 文件操作 (Read/Edit/Write/Glob/Grep)
+**** Shell 执行 (Bash/PowerShell/REPL)
+**** Agent 系统 (子代理/任务管理/工作流)
+**** Web 能力 (Fetch/Search)
+**** MCP 协议 (外部工具扩展)
+**** 规划模式 (Plan/Verify)
+*** 7 个 API Provider
+**** Anthropic (firstParty)
+**** AWS Bedrock
+**** Google Vertex
+**** Azure Foundry
+**** OpenAI 兼容
+**** Gemini 兼容
+**** Grok (xAI) 兼容
+*** 终端 UI
+**** React + Ink 框架
+**** 149 个 UI 组件
+**** 设计系统 (Dialog/FuzzyPicker/ProgressBar)
+*** 扩展系统
+**** MCP Server 连接
+**** Plugin 系统
+**** Skill 搜索
+**** Agent 定义 (agents/ 目录)
+** 运行环境
+*** Bun 运行时 (非 Node.js)
+*** ESM 模块系统
+*** TypeScript 严格模式
+*** Biome lint/format
+@endmindmap
+
+[Detail]
+Claude Code 的核心设计理念是 **Harness（外壳）与 Model（模型）分离**：外壳负责工具调度、权限管理、状态维护；模型负责理解用户意图、生成代码、决定工具调用。两者通过 Anthropic API 的 tool_use 协议连接。
+
+这个还原版本保留了完整的功能链路：
+- **交互式 REPL**: 基于 React/Ink 的终端 UI，支持键盘快捷键、权限确认、工具进度显示
+- **Headless/SDK 模式**: 无交互的编程接口，用于自动化和集成
+- **Remote Control**: 通过 WebSocket 的远程控制能力，含 Web UI 控制面板
+- **ACP 协议**: Agent Client Protocol，支持外部 Agent 接入
+
+------------------------------------------------------------
+[Example]
+技术栈与依赖
+
+[Description]
+核心技术栈选型及其原因：
+
+| 技术 | 用途 | 选型原因 |
+|------|------|---------|
+| Bun | 运行时 + 构建 | 比 Node.js 更快的启动速度，内置 bundler |
+| TypeScript (strict) | 类型安全 | 大型项目必需，decompiled 代码更需要类型约束 |
+| React + Ink | 终端 UI | 声明式 UI，组件复用，React Compiler 优化 |
+| Commander.js | CLI 框架 | 成熟的命令行参数解析 |
+| Zustand (自实现) | 状态管理 | 轻量级 store，34 行实现 |
+| Zod | 输入验证 | Tool 输入 schema 定义与验证 |
+| Anthropic SDK | API 调用 | 官方 SDK，支持 streaming + tool_use |
+| Biome | Lint/Format | 比 ESLint + Prettier 更快 |
+
+[UML]
+@startuml
+package "运行时" {
+  [Bun Runtime] as bun
+  [ESM Modules] as esm
+  [TypeScript Strict] as ts
+}
+
+package "构建" {
+  [Bun.build()] as build
+  [Vite (备选)] as vite
+  [scripts/defines.ts] as defines
+}
+
+package "UI 框架" {
+  [React 19] as react
+  [Ink (forked)] as ink
+  [React Compiler] as compiler
+}
+
+package "核心依赖" {
+  [Commander.js] as cmd
+  [Anthropic SDK] as sdk
+  [Zod] as zod
+  [Biome] as biome
+}
+
+package "扩展" {
+  [MCP SDK] as mcp
+  [OpenTelemetry] as otel
+  [Langfuse] as langfuse
+}
+
+bun --> build
+bun --> react
+react --> ink
+build --> defines
+cmd --> bun
+sdk --> bun
+@enduml
+
+[Detail]
+**为什么选择 Bun 而非 Node.js？**
+1. **启动速度**: Bun 的 JIT 编译比 V8 更快启动，`--version` 命令只需 35MB RSS
+2. **内置 bundler**: `Bun.build()` 支持 code splitting，无需额外的 webpack/rollup
+3. **bun:test**: 内置测试框架，无需 jest/vitest
+4. **bun:bundle**: 内置的 `feature()` 函数用于 feature flag
+
+**为什么 fork Ink？**
+原版 Ink 不支持某些终端特性（keybindings、theme 系统、selection），项目在 `packages/@ant/ink/` 维护了自定义版本。
+
+**构建产物为什么必须代码分割？**
+Bun/JSC 会全量解析单个大 JS 文件的 bytecode，单文件 17MB 产物导致 RSS 暴涨至 ~1GB。代码分割为 600+ 小 chunk 后按需加载，`--version` RSS 从 966MB 降至 35MB。

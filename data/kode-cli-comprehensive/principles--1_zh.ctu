@@ -1,0 +1,191 @@
+Title: 核心原理
+Describe: 设计思想、运行机制、模式取舍、风险与改进建议。重点回答“为什么这样设计，有哪些风险”。
+------------------------------------------------------------
+[Example]
+核心原理说明：async generator 是 runtime 协议
+
+[Description]
+Kode CLI 大量使用 async generator：`query`、`queryCore`、`Tool.call` 都可以边执行边 yield。这样做的原因是 agent runtime 不是一个单次函数调用，而是一个流式协议：
+
+- assistant 可能先返回文本，再返回 tool_use。
+- 工具可能长时间运行，需要 progress。
+- 权限可能暂停等待用户。
+- 工具结果可能触发下一轮模型调用。
+- UI、stdio、ACP 都需要逐步消费事件，而不是等最终结果。
+
+[UML]
+@startuml
+left to right direction
+component "query async iterator" as Query
+component "assistant message" as Assistant
+component "tool_use" as ToolUse
+component "progress" as Progress
+component "tool_result" as Result
+component "context modifier" as Modifier
+component "next query round" as Next
+
+Query --> Assistant : yield
+Assistant --> ToolUse : 包含工具调用
+ToolUse --> Progress : 工具执行中 yield
+Progress --> Result : 工具完成
+Result --> Modifier : 可修改上下文
+Result --> Next : 作为下一轮 user message
+Next --> Query : 递归
+@enduml
+
+[Detail]
+这个机制的优势：
+
+- UI 响应快，长工具不阻塞整个界面。
+- stream-json 能自然映射每个事件。
+- 工具可以表达更多中间状态，不只是最终字符串。
+- 递归循环和工具执行共享同一种“产出消息”的方式。
+
+代价：
+
+- 控制流比普通 promise 难读。
+- 错误处理和 abort 必须覆盖多个 yield 点。
+- 输出顺序、并发安全、context modifier 合并都需要显式设计。
+
+复盘时可以说：**async generator 是 Kode 的内部事件总线，query 和 tool 都通过它把长流程拆成可观察的消息片段。**
+
+------------------------------------------------------------
+[Example]
+核心原理说明：工具安全采用多层防线
+
+[Description]
+工具安全不是单点权限开关，而是分层防线：
+
+1. Zod schema 限制输入结构。
+2. Tool validate 限制业务语义。
+3. Permission Engine 限制本地风险。
+4. Safe mode 和 bypass safety floor 防止危险路径。
+5. Hooks 提供组织级或插件级策略扩展。
+6. Read-before-write、mtime freshness、sandbox、safe bash command 等工具专属规则。
+7. Session logs 和 progress 让行为可追踪。
+
+[UML]
+@startuml
+skinparam componentStyle rectangle
+component "模型 tool_use" as Model
+component "Zod schema\n结构防线" as Schema
+component "Tool.validateInput\n语义防线" as Validate
+component "PreToolUse hooks\n策略防线" as Hooks
+component "Permission Engine\n权限防线" as Permission
+component "工具专属规则\nmtime sandbox path" as ToolRules
+component "Tool.call\n执行副作用" as Execute
+component "Post hooks and logs\n审计防线" as Audit
+
+Model --> Schema
+Schema --> Validate
+Validate --> Hooks
+Hooks --> Permission
+Permission --> ToolRules
+ToolRules --> Execute
+Execute --> Audit
+@enduml
+
+[Detail]
+这张图是安全面试的核心答案。不要把 Kode 的安全说成“有一个权限弹窗”。弹窗只是 UI 表现，真正的安全设计是多层防线组合。
+
+具体例子：
+
+- BashTool 有 safe commands、sandbox plan、LLM safety gate、timeout/background。
+- FileEditTool 有 read-before-write、mtime freshness、old_string 唯一性。
+- WebFetch/WebSearch 有域名和工具规则。
+- MCP tool 进入统一命名空间后仍经过权限规则。
+
+风险是多层防线也会带来复杂性：规则来源过多、用户难以理解为什么被拒绝、print 模式无法交互时失败体验较硬。因此错误消息和 permission result 必须保持清晰。
+
+------------------------------------------------------------
+[Example]
+风险与改进建议：复杂度热点和演进方向
+
+[Description]
+基于当前源码结构，主要风险和改进方向如下：
+
+- `src/app/query.ts` 承载 query loop、tool queue、hooks、auto-compact、错误处理等多种职责，改动影响面大。建议保持强测试覆盖，必要时把纯状态机逻辑与 side effects 拆得更清楚。
+- `src/services/ai/llm.ts` 体量大，provider 分支复杂。建议继续收敛到 adapter 层，让 usage/cost/tool schema/stream parsing 的 provider 差异更可测试。
+- 权限规则来源多，用户/项目/local/CLI/runtime 叠加后不易排查。建议提供调试输出或解释器，能说明某次 permission decision 命中了哪条规则。
+- 插件、custom commands、skills、MCP 都会注入能力。建议强化 manifest 校验和冲突诊断，尤其是工具/命令同名、scope 覆盖和禁用策略。
+- stream-json、ACP、REPL 共用消息，但输出映射不同。建议关键消息类型新增 golden tests，避免协议漂移。
+
+[UML]
+@startwbs
+* 风险与改进建议
+** query.ts 复杂度热点
+*** 风险：所有外壳共享，回归面大
+*** 改进：状态机和副作用边界更清楚
+*** 验证：tool scheduler、abort、hooks、auto compact 测试
+** llm.ts provider 分支
+*** 风险：Responses、Chat、Anthropic 流式差异
+*** 改进：adapter 层扩大覆盖
+*** 验证：usage、cost、tool_use delta golden cases
+** 权限规则叠加
+*** 风险：决策原因不透明
+*** 改进：permission decision trace
+*** 验证：Bash、File、Web、MCP 分支矩阵
+** 扩展系统
+*** 风险：插件、MCP、skills 命名冲突
+*** 改进：manifest 和冲突诊断
+*** 验证：plugin runtime 集成测试
+** 多协议输出
+*** 风险：REPL、stream-json、ACP 字段漂移
+*** 改进：消息映射 golden tests
+*** 验证：SDK protocol 回归用例
+@endwbs
+
+[Detail]
+这不是“泛泛可优化”，而是按影响面排序的风险清单：
+
+- 最高风险是共享 runtime 中心的复杂度，因为任何改动都会影响多种外壳。
+- 第二是 provider 适配，外部 API 变化频繁且字段差异细。
+- 第三是权限可解释性，安全系统越强，越需要可调试。
+- 第四是扩展系统，因为能力来源越多，冲突和复现问题越多。
+- 第五是协议映射，尤其 CLI 外部协议有兼容性要求。
+
+开发时可以把这个清单作为 PR review checklist。
+
+------------------------------------------------------------
+[Example]
+核心原理说明：扩展能力进入统一 runtime，而不是散落执行
+
+[Description]
+MCP、插件、commands、skills 看起来是不同系统，但它们的原则相同：**扩展可以增加能力，但不能绕过 runtime 的约束。**
+
+实现上表现为：
+
+- MCP server 通过 client/discovery 连接，再包装成 MCPTool。
+- Slash command 和 Skill 通过 markdown/frontmatter 生成 prompt 和 context modifier。
+- Plugin runtime 只配置会话能力集合，不直接插手模型循环。
+- Hooks 可以观察和影响执行，但仍在 query gateway 内运行。
+
+[UML]
+@startuml
+left to right direction
+actor "插件作者" as Author
+component "Manifest / Markdown / MCP config" as Config
+component "services 层解析" as Services
+component "Tool / Command / Hook" as RuntimeShape
+component "query gateway" as Gateway
+component "Permission and logs" as Constraints
+component "实际执行" as Execute
+
+Author --> Config
+Config --> Services
+Services --> RuntimeShape
+RuntimeShape --> Gateway
+Gateway --> Constraints
+Constraints --> Execute
+@enduml
+
+[Detail]
+这个原则让扩展系统保持可维护：
+
+- 新扩展只需要适配到已有 runtime shape。
+- 权限、日志、hooks、session 仍然统一。
+- 面向模型的工具列表仍可集中生成。
+
+不建议的方向是让某个插件或 MCP 能力直接调用本地副作用而不进入 Tool/Permission/Message 系统。那会破坏审计、权限和多协议输出一致性。
+
+------------------------------------------------------------

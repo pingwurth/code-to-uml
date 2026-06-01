@@ -1,0 +1,238 @@
+Title: 核心对象
+Describe: Tool 契约、消息队列、REPL/ACP 会话状态等核心对象/函数说明。重点回答“运行时有哪些稳定抽象”。
+------------------------------------------------------------
+[Example]
+核心对象/函数说明：Tool 与 ToolUseContext
+
+[Description]
+`src/core/tools/tool.ts` 是工具系统的契约中心。每个工具都暴露：
+
+- `name`、`description`、`prompt`：告诉模型和 UI 工具是什么。
+- `inputSchema`：用 zod 定义参数结构，之后也会转换成模型工具 schema。
+- `isEnabled`、`isReadOnly`、`isConcurrencySafe`、`needsPermissions`、`requiresUserInteraction`：把运行约束显式化。
+- `validateInput`：工具自己的语义校验。
+- `render`：给 UI 渲染工具进度。
+- `call`：异步生成器，产出 `tool_result`、progress、context modifier 或新消息。
+
+`ToolUseContext` 则把执行工具需要的上下文注入进来，包括 abort signal、权限上下文、MCP clients、cwd、sessionId、permissionMode、readFileTimestamps 等。
+
+[UML]
+@startuml
+interface Tool {
+  +name: string
+  +description(): Promise<string>
+  +prompt(): Promise<string>
+  +inputSchema: ZodSchema
+  +isEnabled(): Promise<boolean>
+  +isReadOnly(): boolean
+  +isConcurrencySafe(): boolean
+  +needsPermissions(input): boolean
+  +requiresUserInteraction(input): boolean
+  +validateInput(input, context): Promise<Result>
+  +render(input, context): ReactNode
+  +call(input, context): AsyncGenerator
+}
+
+class ToolUseContext {
+  +abortController
+  +options
+  +readFileTimestamps
+  +mcpClients
+  +permissionContext
+  +toolPermissionContext
+  +sessionId
+  +messageId
+  +agentId
+  +permissionMode
+  +shouldAvoidPermissionPrompts
+}
+
+class BashTool
+class FileReadTool
+class FileEditTool
+class TaskTool
+class SlashCommandTool
+class SkillTool
+class MCPTool
+
+BashTool ..|> Tool
+FileReadTool ..|> Tool
+FileEditTool ..|> Tool
+TaskTool ..|> Tool
+SlashCommandTool ..|> Tool
+SkillTool ..|> Tool
+MCPTool ..|> Tool
+Tool --> ToolUseContext : call 使用
+Tool --> ToolUseContext : validateInput 使用
+@enduml
+
+[Detail]
+Tool 契约是项目最重要的“稳定面”。模型可以提出任意 `tool_use`，但 runtime 只接受符合 Tool schema、通过 validate、通过权限检查的调用。
+
+面试可这样解释：**Tool 把 LLM 的非确定性输出变成受类型、权限、上下文和异步协议约束的本地动作。**
+
+开发新工具时要同时考虑：
+
+- 是否只读，决定在不同 permission mode 下能否自动放行。
+- 是否并发安全，决定 ToolUseQueue 能否并行执行。
+- 是否需要用户交互，决定 print 模式和 background agent 中是否允许调用。
+- call 产出的内容是否能被消息系统、UI 和 session log 正确消费。
+
+------------------------------------------------------------
+[Example]
+消息与工具队列：query 循环的内部对象
+
+[Description]
+`src/app/query.ts` 定义了 query runtime 里的关键对象：
+
+- `AssistantMessage`、`UserMessage`、`ProgressMessage`、`ToolResult` 等消息类型把模型回复、用户输入、进度、工具结果统一成可流式 yield 的消息。
+- `ToolQueueEntry` 保存一次工具调用的输入、工具实例、状态、结果、错误、context modifier 等。
+- `ToolUseQueue` 管理 queued/executing/completed/yielded 四类状态，负责并发安全、进度消息、错误传播、兄弟工具中止和输出顺序。
+- `query` 负责持久化当前轮用户消息并调用 `queryCore`。
+- `queryCore` 是递归主循环：构造 prompt、调用模型、解析 tool_use、执行工具、收集 tool_result，然后进入下一轮。
+
+[UML]
+@startuml
+class Message {
+  +uuid
+  +type
+  +message
+  +timestamp
+}
+
+class AssistantMessage {
+  +message.content
+  +costUSD
+  +usage
+  +responseId
+}
+
+class UserMessage {
+  +message.content
+  +toolUseResult
+}
+
+class ProgressMessage {
+  +toolUseID
+  +content
+}
+
+class ToolQueueEntry {
+  +id
+  +tool
+  +input
+  +state
+  +result
+  +error
+  +contextModifier
+}
+
+class ToolUseQueue {
+  -queued
+  -executing
+  -completed
+  -yielded
+  +enqueue(entry)
+  +run()
+  +yieldCompleted()
+  +abortSiblings()
+}
+
+class query
+class queryCore
+class runToolUse
+class checkPermissionsAndCallTool
+
+Message <|-- AssistantMessage
+Message <|-- UserMessage
+Message <|-- ProgressMessage
+ToolUseQueue o-- ToolQueueEntry
+query --> queryCore
+queryCore --> ToolUseQueue
+ToolUseQueue --> runToolUse
+runToolUse --> checkPermissionsAndCallTool
+@enduml
+
+[Detail]
+`ToolUseQueue` 是理解 `query.ts` 的关键。模型一次 assistant message 里可能包含多个 tool_use，runtime 必须决定哪些可以并行、哪些必须串行、错误时是否中止同轮其他工具、何时把 progress 和 tool_result yield 给 UI/stdio。
+
+这也是为什么 `Tool.call` 被设计成 async generator：工具不只是返回一个最终字符串，它还可能产生进度、上下文修改器、新消息或中途错误。
+
+维护风险集中在三点：
+
+- 工具结果顺序变化会影响模型后续上下文。
+- 并发工具共享 cwd、权限上下文、文件时间戳时需要保证隔离。
+- 递归 query 需要正确处理 abort、auto-compact、hooks 和 stop hooks。
+
+------------------------------------------------------------
+[Example]
+会话外壳对象：REPL、ACP 和 PermissionContext
+
+[Description]
+交互 TUI 与 ACP 都持有会话级状态，但它们的职责不同：
+
+- `REPL.tsx` 管理 Ink UI 状态：messages、loading、toolJSX、permissionConfirmations、abortController、输入模式、费用对话框等。
+- `PermissionContext.tsx` 管理当前会话的 permission mode、toolPermissionContext，并把 allow/deny/ask/directories 更新落到设置。
+- `KodeAcpAgent.SessionState` 管理 ACP 会话：session id、cwd、MCP clients、tools、commands、systemPrompt、context、messages、readFileTimestamps、responseState、当前模式和工具调用映射。
+
+[UML]
+@startuml
+class REPLState {
+  +messages
+  +loading
+  +toolJSX
+  +permissionConfirmations
+  +abortController
+  +inputMode
+  +binaryFeedback
+  +onInit()
+  +onQuery()
+}
+
+class PermissionContext {
+  +mode
+  +toolPermissionContext
+  +setMode()
+  +cycleMode()
+  +applyToolPermissionContextUpdates()
+}
+
+class AcpSessionState {
+  +session
+  +cwd
+  +mcpClients
+  +commands
+  +tools
+  +systemPrompt
+  +context
+  +messages
+  +readFileTimestamps
+  +responseState
+  +currentMode
+  +toolCalls
+}
+
+class query
+class hasPermissionsToUseTool
+class createAcpCanUseTool
+class useCanUseTool
+
+REPLState --> query : onInit 和 onQuery
+REPLState --> useCanUseTool
+useCanUseTool --> hasPermissionsToUseTool
+PermissionContext --> hasPermissionsToUseTool
+AcpSessionState --> query : handleSessionPrompt
+AcpSessionState --> createAcpCanUseTool
+createAcpCanUseTool --> hasPermissionsToUseTool
+@enduml
+
+[Detail]
+这张类图说明“同一个 permission engine 可以被多个外壳消费”：
+
+- TUI 通过 `useCanUseTool` 显示 `PermissionRequest`。
+- ACP 通过 `session/request_permission` 向客户端请求授权。
+- print 模式在 `shouldAvoidPermissionPrompts` 时会选择提前拒绝或要求显式传入权限参数。
+
+因此权限逻辑不应散落到 UI 或 ACP 中。UI/ACP 只负责展示和接收决策，真正的规则匹配和安全兜底在 `src/core/permissions/engine/index.ts`。
+
+------------------------------------------------------------

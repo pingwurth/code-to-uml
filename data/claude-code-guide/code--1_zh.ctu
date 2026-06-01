@@ -1,0 +1,204 @@
+Title: 关键代码片段解析
+Describe: Feature Flag 系统、Tool 接口设计、Store 实现、QueryGuard 状态机、cli.tsx 快速路径等核心代码的深度解析。
+------------------------------------------------------------
+[Example]
+cli.tsx — 零加载快速路径
+
+[Description]
+`cli.tsx` 的 `main()` 函数展示了极致的启动优化——`--version` 命令不需要加载任何模块：
+
+```typescript
+async function main(): Promise<void> {
+  const args = process.argv.slice(2)
+
+  // --version: 零模块加载
+  if (args.length === 1 &&
+      (args[0] === '--version' || args[0] === '-v')) {
+    console.log(`${MACRO.VERSION} (Claude Code)`)
+    return  // 直接返回，不加载任何模块
+  }
+
+  // 其他路径才加载启动 profiler
+  const { profileCheckpoint } =
+    await import('../utils/startupProfiler.js')
+  profileCheckpoint('cli_entry')
+  // ... 后续路径
+}
+```
+
+**设计意图**: `MACRO.VERSION` 在构建时被替换为字面量（如 `"2.2.1"`），运行时没有任何模块导入开销。
+
+[UML]
+@startuml
+start
+:process.argv.slice(2);
+
+if (args == ['--version']?) then (yes)
+  :console.log(MACRO.VERSION);
+  note right: 构建时内联，零模块加载
+  stop
+endif
+
+:动态 import startupProfiler;
+:profileCheckpoint('cli_entry');
+
+if (args == ['--dump-system-prompt']?) then (yes)
+  :动态 import config + model + prompts;
+  :输出 system prompt;
+  stop
+endif
+
+:动态 import main.tsx;
+:Commander.js 处理;
+stop
+@enduml
+
+[Detail]
+**为什么动态 import 如此重要？**
+
+Claude Code 的完整模块图包含 600+ chunks，即使只是 `import` 一个模块，也会触发其依赖链的评估。通过 `await import()` 按需加载：
+- `--version`: 0 个额外模块，~1ms
+- `--dump-system-prompt`: 3 个额外模块
+- 完整 REPL: 全部模块，~135ms
+
+**profileCheckpoint()** 在每个关键路径记录时间戳，用于诊断启动性能瓶颈。这些数据在 `startupProfiler.ts` 中收集。
+
+------------------------------------------------------------
+[Example]
+createStore — 34 行的 Zustand 风格 Store
+
+[Description]
+`src/state/store.ts` 是整个状态管理的核心，仅 34 行：
+
+```typescript
+type Listener = () => void
+type OnChange<T> = (args: {newState: T; oldState: T}) => void
+
+export type Store<T> = {
+  getState: () => T
+  setState: (updater: (prev: T) => T) => void
+  subscribe: (listener: Listener) => () => void
+}
+
+export function createStore<T>(
+  initialState: T, onChange?: OnChange<T>
+): Store<T> {
+  let state = initialState
+  const listeners = new Set<Listener>()
+  return {
+    getState: () => state,
+    setState: (updater) => {
+      const prev = state
+      const next = updater(prev)
+      if (Object.is(next, prev)) return  // 浅比较
+      state = next
+      onChange?.({ newState: next, oldState: prev })
+      for (const l of listeners) l()
+    },
+    subscribe: (listener) => {
+      listeners.add(listener)
+      return () => listeners.delete(listener)
+    },
+  }
+}
+```
+
+[UML]
+@startuml
+object "Store<AppState>" as store {
+  state = AppState
+  listeners = Set<Listener>
+}
+
+object "getState()" as get {
+  返回当前 state 引用
+}
+
+object "setState(updater)" as set {
+  1. 调用 updater(prev)
+  2. Object.is 浅比较
+  3. 不同则更新 + 通知
+}
+
+object "subscribe(listener)" as sub {
+  添加到 listeners Set
+  返回 unsubscribe 函数
+}
+
+store --> get
+store --> set
+store --> sub
+@enduml
+
+[Detail]
+**设计精妙之处**：
+
+1. **函数式更新**: `setState` 接受 `(prev: T) => T` 函数而非直接值，避免闭包捕获过期状态
+2. **浅比较优化**: `Object.is(next, prev)` 确保引用不变时不触发更新，减少不必要的重渲染
+3. **onChange 回调**: 可选的副作用钩子，用于日志、分析或跨 store 同步
+4. **自动清理**: `subscribe` 返回 unsubscribe 函数，防止内存泄漏
+
+**与 React 的集成**：
+Ink 组件通过 `useSyncExternalStore` hook 订阅 store 变化，实现声明式 UI 更新。
+
+------------------------------------------------------------
+[Example]
+Tool.call() — 工具执行的标准接口
+
+[Description]
+每个工具必须实现的 `call()` 方法签名：
+
+```typescript
+call(
+  args: z.infer<Input>,           // Zod 验证后的输入
+  context: ToolUseContext,         // 执行上下文 (CWD, 权限, 缓存等)
+  canUseTool: CanUseToolFn,       // 权限检查回调
+  parentMessage: AssistantMessage, // 触发此工具调用的模型消息
+  onProgress?: ToolCallProgress<P>, // 进度报告回调
+): Promise<ToolResult<Output>>
+```
+
+**ToolUseContext** 包含：
+- `cwd`: 当前工作目录
+- `abortController`: 取消信号
+- `readFileState`: 文件状态缓存
+- `langfuseTrace`: 可观测性追踪
+- `handleElicitation`: MCP URL 认证处理
+
+[UML]
+@startuml
+participant "QueryEngine" as QE
+participant "StreamingToolExecutor" as STE
+participant "BashTool" as BT
+participant "权限系统" as PS
+
+QE -> STE: addTool(block)
+STE -> STE: 检查并发条件
+STE -> BT: call(args, context, canUseTool, msg, onProgress)
+activate BT
+
+BT -> PS: canUseTool(tool, input, context)
+PS --> BT: {behavior: 'allow'}
+
+BT -> BT: 执行 shell 命令
+BT -> BT: 收集 stdout/stderr
+BT --> STE: ToolResult {output, messages}
+deactivate BT
+@enduml
+
+[Detail]
+**ToolResult 的结构**：
+
+```typescript
+type ToolResult<Output> = {
+  output: Output                    // 工具的结构化输出
+  messages?: Message[]              // 附加消息（进度、附件等）
+}
+```
+
+**onProgress 回调**：
+工具在执行过程中可以多次调用 `onProgress` 报告进度，如 Bash 工具报告实时输出、Agent 工具报告子代理状态。这些进度消息会立即 yield 给调用方，实现流式 UI 更新。
+
+**canUseTool 的双重用途**：
+1. 在 `call()` 开始前检查权限（由 StreamingToolExecutor 调用）
+2. 在 `call()` 内部可以再次调用（如 Agent 工具为子工具检查权限）

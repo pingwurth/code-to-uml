@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<!-- [EDIT] Page title shown in the browser tab. -->
+	<title>Claude Code Haha — 架构与开发手册</title>
+	<!-- [FIXED] Keep the following two links unchanged -->
+	<link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+	<link rel="stylesheet" href="../main.css">
+</head>
+
+<body class="demo-page" data-dir="cc-haha">
+	<!-- [FIXED] Top navigation structure. -->
+	<header class="demo-topbar">
+		<a class="demo-topbar-logo" href="../index.html" aria-label="Code-To-UML Home">
+			<img src="../favicon.svg" alt="" />
+			<!-- [EDIT] Brand name -->
+			<span>Code-To-UML</span>
+		</a>
+	</header>
+
+	<!-- [FIXED] page-shell layout container -->
+	<div class="page-shell demo-shell">
+
+		<!-- [FIXED] main.content primary content area -->
+		<main class="content">
+
+			<!-- [EDIT] Section: Page Introduction -->
+			<section class="intro">
+				<h1>Claude Code Haha — 架构分析与开发手册</h1>
+				<p>基于源码的深度架构分析，覆盖多代理系统、工具池、任务引擎、IM 适配器、桌面端交互等核心子系统。为开发者提供全面的学习指南和技术参考。</p>
+			</section>
+
+			<!-- [CONFIG] Section: Category Tabs -->
+			<nav class="demo-tabs" aria-label="Report Categories">
+				<button class="demo-tab is-active" type="button" data-diagram="overview">项目概览</button>
+				<button class="demo-tab" type="button" data-diagram="structure">模块结构</button>
+				<button class="demo-tab" type="button" data-diagram="architecture">多代理架构</button>
+				<button class="demo-tab" type="button" data-diagram="flow">核心流程</button>
+				<button class="demo-tab" type="button" data-diagram="objects">工具池与权限</button>
+				<button class="demo-tab" type="button" data-diagram="dataflow">任务引擎与适配器</button>
+				<button class="demo-tab" type="button" data-diagram="calls">桌面端交互</button>
+				<button class="demo-tab" type="button" data-diagram="principles">设计原理</button>
+				<button class="demo-tab" type="button" data-diagram="guide">开发指南</button>
+			</nav>
+
+			<!-- Section: Content Display Panel -->
+			<section class="doc-section demo-panel">
+				<h2 id="demo-title">项目概览</h2>
+				<p class="demo-section-overview is-active" data-diagram-overview="overview">项目顶层架构、模块边界与技术栈全景</p>
+				<p class="demo-section-overview" data-diagram-overview="structure" hidden>各子系统的模块边界、核心文件与依赖方向</p>
+				<p class="demo-section-overview" data-diagram-overview="architecture" hidden>Multi-Agent 系统的 4 种生成路径、6 种内建代理与团队协作机制</p>
+				<p class="demo-section-overview" data-diagram-overview="flow" hidden>请求处理全链路、Agent 运行循环与 WebSocket 通信流程</p>
+				<p class="demo-section-overview" data-diagram-overview="objects" hidden>三层过滤管道、工具注册机制、权限规则匹配与同步</p>
+				<p class="demo-section-overview" data-diagram-overview="dataflow" hidden>任务生命周期管理、IM 适配器共享架构与差异化实现</p>
+				<p class="demo-section-overview" data-diagram-overview="calls" hidden>Desktop UI 的 REST/WebSocket 双通道通信、Zustand 状态管理与 Tauri 集成</p>
+				<p class="demo-section-overview" data-diagram-overview="principles" hidden>关键设计模式、CacheSafeParams 优化、上下文压缩策略</p>
+				<p class="demo-section-overview" data-diagram-overview="guide" hidden>环境搭建、常用命令、调试技巧与代码阅读路径</p>
+				<div class="demo-examples" data-examples></div>
+			</section>
+
+		</main>
+		<!-- [FIXED] Sidebar TOC container -->
+		<aside data-demo-toc></aside>
+	</div>
+
+	<!-- [FIXED] Script dependencies -->
+	<script src="../js/viz-global.js"></script>
+	<script src="../js/plantuml.js"></script>
+	<script src="../component/docs-page-core.js"></script>
+	<script src="../component/render-failure-common.js"></script>
+	<script src="../component/toc-component.js"></script>
+	<script src="../js/markdown-it.js"></script>
+	<script src="../component/demo-example-component.js"></script>
+	<script src="../demo.js"></script>
+</body>
+
+</html>

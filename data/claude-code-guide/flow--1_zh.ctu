@@ -1,0 +1,179 @@
+Title: 核心流程
+Describe: CLI 启动流程、用户输入→API 调用→工具执行→结果返回的完整主循环、自动压缩流程的活动图。
+------------------------------------------------------------
+[Example]
+CLI 启动到 REPL 就绪的完整流程
+
+[Description]
+从用户输入 `claude` 命令到 REPL 就绪，经历 5 个阶段：
+
+1. **cli.tsx** — 快速路径检查 + 动态导入 main.tsx
+2. **main.tsx** — Commander.js 解析参数 + preAction hook
+3. **init.ts** — 配置启用、环境变量、遥测初始化、Trust 对话框
+4. **REPL.tsx** — UI 初始化、MCP 连接、工具加载
+5. **就绪** — 等待用户输入
+
+[UML]
+@startuml
+|用户|
+start
+:输入 claude 命令;
+
+|cli.tsx|
+:解析 process.argv;
+:检查快速路径 (--version等);
+:动态导入 main.tsx;
+
+|main.tsx|
+:Commander.js 解析参数;
+:preAction hook 触发;
+
+|init.ts|
+:enableConfigs();
+:applySafeConfigEnvironmentVariables();
+:setupGracefulShutdown();
+:initialize1PEventLogging();
+:显示 Trust 对话框 (首次);
+:applyFullConfigEnvironmentVariables();
+
+|main.tsx|
+:检查认证状态;
+:加载 MCP Server;
+:解析模型设置;
+
+|REPL.tsx|
+:创建 AppState Store;
+:初始化 MCP 连接;
+:加载工具列表;
+:渲染 Ink UI;
+:显示输入提示符;
+
+|用户|
+:REPL 就绪，等待输入;
+stop
+@enduml
+
+[Detail]
+**性能关键路径**：
+
+启动时间优化是核心关注点：
+- `--version` 路径：零模块加载，直接输出内联版本号
+- `profileCheckpoint()` 在每个关键阶段记录时间戳，用于诊断启动性能
+- MDM 设置和 Keychain 预取在模块评估阶段异步启动，`preAction` 中 await 确保完成
+- `init()` 使用 `memoize()` 确保只执行一次
+
+**Trust 对话框**：
+首次运行时显示安全提示，用户确认后才启用完整的环境变量和文件系统访问权限。这确保用户了解 Claude Code 的能力边界。
+
+------------------------------------------------------------
+[Example]
+主循环：用户输入 → API → 工具执行 → 响应
+
+[Description]
+Claude Code 的核心是一个**对话循环**，每次用户输入触发一个 turn，每个 turn 包含：
+1. 构建 system prompt + context
+2. 调用 Anthropic API
+3. 处理响应（文本输出 + 工具调用）
+4. 执行工具并收集结果
+5. 将工具结果发送回 API
+6. 重复 2-5 直到模型停止调用工具
+
+[UML]
+@startuml
+start
+:用户输入消息;
+
+:QueryEngine.submitMessage();
+:构建用户上下文 (attachments, memory);
+
+:进入 query 循环;
+
+repeat
+  :组装 system prompt;
+  :prependUserContext + appendSystemContext;
+  :normalizeMessagesForAPI;
+
+  :调用 Anthropic API (streaming);
+  :处理流式事件;
+
+  if (响应包含 tool_use?) then (yes)
+    :StreamingToolExecutor.addTool();
+    :并发执行工具;
+    :收集工具结果 (tool_result);
+    :将结果追加到 messages;
+  else (纯文本响应)
+    :输出文本给用户;
+    :检查 token 预算;
+    if (需要自动压缩?) then (yes)
+      :执行 auto-compact;
+      :重建 messages;
+    endif
+  endif
+
+  :检查 maxTurns / maxBudgetUsd;
+repeat while (还有未处理的工具调用?)
+
+:turn 结束;
+:更新 usage 统计;
+:保存会话历史;
+stop
+@enduml
+
+[Detail]
+**query 循环的关键细节**：
+
+1. **流式处理**: API 响应是流式的（SSE），`StreamingToolExecutor` 在收到 `tool_use` block 时立即开始执行，不等待整个响应完成
+2. **并发工具执行**: 多个并发安全的工具（如多个 Read）可以并行执行，非并发工具（如 Bash）独占执行
+3. **自动压缩**: 当 token 使用接近上下文窗口限制时，自动触发 compact，将旧消息压缩为摘要
+4. **预算控制**: `maxTurns` 和 `maxBudgetUsd` 限制 turn 数量和 API 费用
+
+**错误恢复**：
+- API 超时/限流：通过 `withRetry` 自动重试
+- 工具执行失败：将错误作为 `tool_result` 返回给模型，让模型决定下一步
+- Prompt too long：触发紧急压缩或提示用户
+
+------------------------------------------------------------
+[Example]
+自动压缩 (Auto-Compact) 流程
+
+[Description]
+当对话接近上下文窗口限制时，自动压缩旧消息以释放 token 空间。这是长对话能够持续运行的关键机制。
+
+[UML]
+@startuml
+start
+:检测 token 使用量;
+
+:calculateTokenWarningState();
+:estimateMaxTurnGrowth();
+
+if (超过阈值?) then (yes)
+  :getMessagesAfterCompactBoundary();
+  :提取需要保留的最近消息;
+
+  :buildPostCompactMessages();
+  :调用 Haiku 模型生成摘要;
+  :将旧消息替换为摘要消息;
+
+  :清理 FileStateCache;
+  :重置 token 计数;
+
+  :继续 query 循环;
+else (否)
+  :继续正常流程;
+endif
+stop
+@enduml
+
+[Detail]
+**压缩策略的三个层级**：
+
+1. **Auto-Compact** (默认): 当 token 使用达到上下文窗口的 ~80% 时自动触发，使用 Haiku 模型生成摘要
+2. **Reactive Compact** (feature-gated): 实时监控 token 增长率，在对话进行中动态压缩
+3. **Context Collapse** (feature-gated, 已禁用): 更激进的压缩策略，将整个对话历史折叠
+
+**压缩后的行为**：
+- 摘要消息插入到 messages 中作为新的起点
+- FileStateCache 被清理（文件状态可能已变化）
+- 最近的几条消息保持完整，确保上下文连续性
+- 模型的 system prompt 不受影响

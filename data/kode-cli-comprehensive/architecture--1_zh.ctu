@@ -1,0 +1,226 @@
+Title: 架构图
+Describe: 整体架构图、AI provider 适配、MCP/插件扩展架构。重点回答“系统怎样分层，变化点在哪里”。
+------------------------------------------------------------
+[Example]
+整体架构图：从入口到工具执行的六层结构
+
+[Description]
+Kode CLI 可以看成六层：
+
+1. **入口和协议层**：CLI、ACP、MCP server。
+2. **表现层**：Ink REPL、stdio JSON/stream-json、ACP/MCP 协议输出。
+3. **应用编排层**：`ask.ts`、`query.ts`、print session、ACP agent。
+4. **服务适配层**：LLM providers、MCP clients、plugins、context/system prompt、auth/telemetry。
+5. **核心约束层**：Tool 契约、Permission Engine、message normalization、session/auto-compact。
+6. **执行能力层**：Bash/File/Search/Task/MCP/Slash/Skill 等工具。
+
+[UML]
+@startuml
+skinparam componentStyle rectangle
+top to bottom direction
+
+package "1 入口和协议层" {
+  component "cli.tsx / runCli.tsx" as CLI
+  component "acp.ts" as ACP
+  component "mcp.ts" as MCPServer
+}
+
+package "2 表现层" {
+  component "REPL.tsx\nInk TUI" as REPL
+  component "printMode.ts\ntext/json/stream-json" as Print
+  component "KodeAcpAgent\nJSON-RPC updates" as ACPAgent
+}
+
+package "3 应用编排层" {
+  component "ask.ts\nprint text helper" as Ask
+  component "query.ts\nrecursive agent loop" as Query
+  component "ToolUseQueue\nscheduler" as Queue
+}
+
+package "4 服务适配层" {
+  component "llm.ts\nAnthropic/OpenAI/Responses" as LLM
+  component "mcp/client.ts\nexternal servers" as MCPClient
+  component "pluginRuntime.ts\nplugins" as Plugins
+  component "systemPrompt.ts\ncontext prompt" as Prompt
+}
+
+package "5 核心约束层" {
+  component "Tool interface" as ToolContract
+  component "Permission Engine" as Perm
+  component "messages/core.ts" as Msg
+  component "autoCompactCore.ts" as Compact
+}
+
+package "6 执行能力层" {
+  component "BashTool" as Bash
+  component "FileRead/Edit/Write" as FS
+  component "Grep/Glob/Search" as Search
+  component "TaskTool" as Task
+  component "MCPTool" as MCPTool
+  component "SlashCommandTool/SkillTool" as PromptTools
+}
+
+CLI --> REPL
+CLI --> Print
+ACP --> ACPAgent
+MCPServer --> ToolContract
+REPL --> Query
+Print --> Ask
+Print --> Query
+ACPAgent --> Query
+Ask --> Query
+Query --> Queue
+Query --> LLM
+Query --> Prompt
+Query --> Msg
+Query --> Compact
+Queue --> ToolContract
+Queue --> Perm
+ToolContract --> Bash
+ToolContract --> FS
+ToolContract --> Search
+ToolContract --> Task
+ToolContract --> MCPTool
+ToolContract --> PromptTools
+MCPClient --> MCPTool
+Plugins --> MCPClient
+Plugins --> PromptTools
+Perm --> ToolContract
+@enduml
+
+[Detail]
+这个图是整份手册的核心架构图。它揭示三个维护原则：
+
+- **入口层不应复制 agent 内核**：不同协议最终都进入 `query` 或 Tool 契约。
+- **服务适配层隔离外部变化**：模型 API、MCP transport、插件 manifest 都在 services 中收敛。
+- **核心约束层保护执行能力层**：即使工具实现很强，也必须经过 schema、validate、permission、hooks 和消息归一化。
+
+当你需要定位问题时，先问“它破坏的是哪一层的契约”。例如 stream-json 输出异常通常先看 `printMode.ts` 和消息映射；工具安全绕过风险先看 `checkPermissionsAndCallTool` 与 permission engine；模型调用异常先看 `llm.ts` 的 provider 分支和 adapter。
+
+------------------------------------------------------------
+[Example]
+AI provider 架构：统一 queryLLM，分支适配不同 API
+
+[Description]
+`src/services/ai/llm.ts` 是最大、最复杂的服务文件之一。它把上层 `queryCore` 的“给定 prompt/messages/tools，返回 assistant message”请求适配到不同 provider：
+
+- `queryLLM` 解析模型指针、response state、VCR 记录、prompt caching 包装。
+- `queryLLMWithPromptCaching` 根据模型类型选择 Anthropic native 或 OpenAI 兼容路径。
+- Anthropic path 会处理 SDK client、工具 schema、cache breakpoint、streaming delta、tool_use JSON delta、cost。
+- OpenAI path 会处理 Chat Completions、Responses API、GPT-5 变体、usage/cost、responseId。
+- `ModelAdapterFactory` 决定某个模型是否走 Responses API 或 Chat Completions。
+
+[UML]
+@startuml
+left to right direction
+
+component "queryCore" as QueryCore
+component "queryLLM" as QueryLLM
+component "queryLLMWithPromptCaching" as PromptCache
+component "queryAnthropicNative" as Anthropic
+component "queryOpenAI" as OpenAI
+component "ModelAdapterFactory" as Factory
+component "ResponsesAPI adapter" as Responses
+component "ChatCompletions adapter" as Chat
+component "buildAssistantMessageFromUnifiedResponse" as BuildMsg
+database "responseStateManager" as ResponseState
+database "cost and usage\nnormalization" as Cost
+
+QueryCore --> QueryLLM
+QueryLLM --> ResponseState
+QueryLLM --> PromptCache
+PromptCache --> Anthropic : Anthropic-like model
+PromptCache --> OpenAI : OpenAI-compatible model
+OpenAI --> Factory
+Factory --> Responses
+Factory --> Chat
+Responses --> BuildMsg
+Chat --> BuildMsg
+Anthropic --> BuildMsg
+BuildMsg --> Cost
+Cost --> QueryCore
+@enduml
+
+[Detail]
+这里的设计目标是让 `queryCore` 不关心 provider 细节。上层只需要 assistant message、tool_use、usage、cost、response id 等统一结果。
+
+风险点也很清楚：
+
+- provider 的 streaming 事件结构不同，tool_use 增量解析容易出错。
+- Responses API 和 Chat Completions 的 response id、usage 字段、tool schema 差异会影响 session continuation。
+- prompt caching、VCR、retry 和 cost logging 是横切能力，改动时要确认不会只覆盖某一个 provider。
+
+开发面试回答可以强调：**模型适配层的难点不是发 HTTP 请求，而是把多 provider 的消息、工具、流式事件、usage 和错误都归一化成 query runtime 能理解的稳定消息。**
+
+------------------------------------------------------------
+[Example]
+扩展架构：MCP、插件、命令和技能怎样接入
+
+[Description]
+Kode 同时支持外部 MCP server、项目/用户插件、markdown custom commands 和 skills。它们的共同目标是把外部能力转换成 runtime 可消费的 Tool、Command、Hook 或上下文修改器。
+
+关键文件：
+
+- `src/services/mcp/client.ts`：连接 stdio、SSE、HTTP、WS 类型 server，处理超时和 fallback。
+- `src/services/mcp/tools-integration.ts`：列出 MCP tools，命名为 `mcp__server__tool`，包装成 Kode Tool。
+- `src/services/plugins/pluginRuntime.ts`：加载 plugin manifest，配置 session plugins。
+- `src/services/plugins/customCommands.ts`：解析 markdown frontmatter、宏和文件引用。
+- `src/tools/interaction/SlashCommandTool/SlashCommandTool.tsx` 与 `src/tools/ai/SkillTool/SkillTool.tsx`：把命令和技能变成 agent 可用工具。
+
+[UML]
+@startuml
+skinparam componentStyle rectangle
+
+package "外部配置来源" {
+  component ".mcp.json / .mcprc\nproject and global MCP" as MCPConfig
+  component ".kode-plugin/plugin.json\nplugin manifest" as PluginManifest
+  component "markdown command files" as Markdown
+  component "marketplace sources" as Marketplace
+}
+
+package "解析和加载" {
+  component "mcp/discovery.ts" as Discovery
+  component "mcp/client.ts" as Client
+  component "pluginRuntime.ts" as Runtime
+  component "customCommands.ts" as Commands
+  component "skillMarketplace.ts" as SkillsMarket
+}
+
+package "运行时能力" {
+  component "MCPTool" as MCPTool
+  component "SlashCommandTool" as SlashTool
+  component "SkillTool" as SkillTool
+  component "Hooks" as Hooks
+  component "Agents and output styles" as Agents
+}
+
+component "query runtime" as Query
+component "Permission Engine" as Perm
+
+MCPConfig --> Discovery
+Discovery --> Client
+Client --> MCPTool
+PluginManifest --> Runtime
+Marketplace --> SkillsMarket
+Runtime --> Commands
+Runtime --> Client
+Runtime --> Hooks
+Runtime --> Agents
+Markdown --> Commands
+Commands --> SlashTool
+Commands --> SkillTool
+MCPTool --> Query
+SlashTool --> Query
+SkillTool --> Query
+Query --> Perm
+@enduml
+
+[Detail]
+扩展系统有两个值得复盘的设计取舍：
+
+- **扩展入口很多，但执行入口收敛**：MCP、Skill、SlashCommand 最终还是 Tool 或 prompt modifier，能被 query 和权限系统观察。
+- **配置来源按 scope 合并**：user/project/local/plugin 目录都可能贡献能力，开发时必须明确当前会话的配置来源，避免“本机有效、CI 不可复现”。
+
+面试可追问：如果要新增一种外部工具协议，应该接到哪里？合理答案是先实现 services 层的 discovery/client，再包装成 Tool，而不是让 `queryCore` 直接认识新的协议。
+
+------------------------------------------------------------

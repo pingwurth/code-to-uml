@@ -1,0 +1,189 @@
+Title: 整体架构
+Describe: 6 层分层架构、运行时进程模型、API Provider 抽象层、工具系统的组装与分发机制。
+------------------------------------------------------------
+[Example]
+6 层分层架构
+
+[Description]
+Claude Code 的架构分为 6 个清晰的层次，从底层运行时到顶层用户交互，每层只依赖下层：
+
+1. **运行时层** — Bun + ESM + TypeScript
+2. **基础设施层** — 配置、日志、遥测、Feature Flag
+3. **服务层** — API 调用、MCP 客户端、工具执行、压缩
+4. **引擎层** — QueryEngine、query 循环、权限系统
+5. **UI 层** — React/Ink 组件、REPL 屏幕
+6. **入口层** — CLI 解析、子命令分发
+
+[UML]
+@startuml
+package "入口层" {
+  [cli.tsx] as cli
+  [main.tsx - Commander] as main
+  [子命令] as subcmd
+}
+
+package "UI 层" {
+  [REPL.tsx] as repl
+  [149 个组件] as comp
+  [设计系统] as ds
+}
+
+package "引擎层" {
+  [QueryEngine] as qe
+  [query.ts 循环] as query
+  [权限系统] as perm
+  [QueryGuard] as qg
+}
+
+package "服务层" {
+  [API Client - claude.ts] as api
+  [Provider 兼容层] as providers
+  [StreamingToolExecutor] as ste
+  [MCP Client] as mcp
+  [压缩服务] as compact
+  [工具执行] as toolExec
+}
+
+package "基础设施层" {
+  [配置系统] as config
+  [日志 - log/debug] as log
+  [Feature Flag] as ff
+  [遥测/Analytics] as analytics
+  [Git 工具] as git
+}
+
+package "运行时层" {
+  [Bun Runtime] as bun
+  [ESM Modules] as esm
+  [TypeScript] as ts
+  [React/Ink] as ink
+}
+
+cli --> main
+main --> subcmd
+subcmd --> repl
+repl --> qe
+qe --> query
+query --> api
+query --> ste
+api --> providers
+ste --> toolExec
+toolExec --> mcp
+query --> compact
+qe --> perm
+qe --> qg
+repl --> comp
+comp --> ds
+api --> config
+query --> log
+tools --> ff
+@enduml
+
+[Detail]
+**层间通信规则**：
+- 上层可以直接调用下层
+- 下层通过回调/事件/Generator 向上层传递数据
+- 跨层调用严格禁止（如 UI 层不能直接调用 API 层）
+- `bootstrap/state.ts` 作为全局状态被多层共享，是唯一的"跨层"例外
+
+------------------------------------------------------------
+[Example]
+API Provider 抽象层
+
+[Description]
+项目支持 7 个 API Provider，通过**流适配器模式**统一：将第三方 API 格式转为 Anthropic 内部格式，下游代码完全不改。
+
+| Provider | 环境变量 | 文件位置 |
+|----------|---------|---------|
+| Anthropic (firstParty) | 默认 | src/services/api/claude.ts |
+| AWS Bedrock | `CLAUDE_CODE_USE_BEDROCK=1` | 内嵌于 claude.ts |
+| Google Vertex | `CLAUDE_CODE_USE_VERTEX=1` | 内嵌于 claude.ts |
+| Azure Foundry | 环境变量 | 内嵌于 claude.ts |
+| OpenAI 兼容 | `CLAUDE_CODE_USE_OPENAI=1` | src/services/api/openai/ |
+| Gemini 兼容 | `CLAUDE_CODE_USE_GEMINI=1` | src/services/api/gemini/ |
+| Grok (xAI) | `CLAUDE_CODE_USE_GROK=1` | src/services/api/grok/ |
+
+[UML]
+@startuml
+package "API 抽象层" {
+  [统一查询接口] as iface
+
+  package "Anthropic 直连" {
+    [claude.ts - 3558行] as claude
+  }
+
+  package "第三方兼容层" {
+    [openai-client] as oai
+    [gemini-client] as gem
+    [grok-client] as grok
+  }
+}
+
+cloud "Anthropic API" as ant_api
+cloud "OpenAI/Ollama/DeepSeek" as oai_api
+cloud "Google Gemini" as gem_api
+cloud "xAI Grok" as grok_api
+cloud "AWS Bedrock" as aws
+cloud "Google Vertex" as vtx
+
+claude --> ant_api
+claude --> aws
+claude --> vtx
+oai --> oai_api
+gem --> gem_api
+grok --> grok_api
+
+iface <|.. claude
+iface <|.. oai
+iface <|.. gem
+iface <|.. grok
+@enduml
+
+[Detail]
+**流适配器模式的实现**：
+
+每个兼容层做三件事：
+1. **请求转换**: 将 Anthropic 格式的 messages/tools 转为第三方格式
+2. **流适配**: 将第三方的 SSE/WebSocket 流转为 Anthropic 的 `BetaRawMessageStreamEvent` 格式
+3. **响应标准化**: 确保返回的 `AssistantMessage` 类型一致
+
+**Provider 选择优先级**: `modelType` 参数 > 环境变量 > 默认 firstParty
+
+**OpenAI 兼容层的特殊能力**：支持 DeepSeek thinking mode，可以处理 `<think>` 标签中的推理内容。
+
+------------------------------------------------------------
+[Example]
+工具系统组装
+
+[Description]
+`src/tools.ts` 负责组装完整的工具池，过程分为 4 步：
+
+1. **基础工具**: 静态导入的核心工具（Agent、Bash、FileEdit、FileRead 等）
+2. **条件工具**: 通过 `feature()` flag 门控的工具（Cron、Monitor、Sleep 等）
+3. **MCP 工具**: 从 MCP Server 动态发现的工具
+4. **延迟工具**: 通过 SearchExtraTools 按需加载的工具
+
+[UML]
+@startuml
+start
+:getAllBaseTools();
+:收集静态导入的工具 (Agent, Bash, FileEdit, Read, Write, Glob, Grep, WebFetch, WebSearch, TaskCreate, TodoWrite, Skill, PlanMode etc.);
+:收集 feature-gated 工具 (Cron, Monitor, Sleep, PushNotification);
+
+:getMergedTools();
+:合并 MCP 工具;
+
+:assembleToolPool();
+:应用 CORE_TOOLS 白名单 (38个);
+:标记延迟工具 (非核心工具 deferred);
+
+:最终 Tools 数组;
+stop
+@enduml
+
+[Detail]
+**CORE_TOOLS 白名单**（`src/constants/tools.ts`）：
+38 个核心工具名，这些工具始终加载到模型的工具列表中。非核心工具（如 MonitorTool、WorkflowTool 等）被标记为延迟加载，只有当模型通过 SearchExtraTools 工具搜索到它们时才动态注入。
+
+**延迟工具加载的价值**：
+60+ 个工具的完整 schema 会消耗大量 token（每个工具约 500-2000 token）。如果全部加载，工具定义本身就可能占用 50,000+ token。延迟加载将初始工具 token 从 ~50k 降低到 ~15k，显著减少了 API 成本和延迟。

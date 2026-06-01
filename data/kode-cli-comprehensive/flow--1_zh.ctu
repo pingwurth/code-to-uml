@@ -1,0 +1,199 @@
+Title: 核心流程
+Describe: 交互模式、print 模式和权限判定的核心流程图。重点回答“主循环怎样推进、在哪里分支、失败怎样处理”。
+------------------------------------------------------------
+[Example]
+核心流程图：queryCore 的递归 agent 循环
+
+[Description]
+`queryCore` 是 Kode CLI 最重要的运行流程。它会：
+
+1. 准备上下文：请求状态、auto-compact、background shell 通知、hooks、system prompt。
+2. 调用 `queryLLM` 获得 assistant message。
+3. 如果没有 tool_use，运行 stop hooks，yield assistant，结束本轮。
+4. 如果有 tool_use，先 yield assistant，再把工具调用放入 `ToolUseQueue`。
+5. 队列执行工具，产出 progress、tool_result、context modifier。
+6. 把工具结果作为新的 user message 追加，递归进入下一轮。
+
+[UML]
+@startuml
+start
+:接收 messages、systemPrompt、context、tools、options;
+:设置 request status;
+if (需要 auto compact?) then (是)
+  :压缩历史并恢复必要上下文;
+else (否)
+  :保留当前消息;
+endif
+:刷新 background shell 通知;
+:运行 UserPromptSubmit hooks;
+if (hook 阻断?) then (是)
+  :yield hook 决策消息;
+  stop
+else (否)
+  :拼接 system prompt、项目上下文、reminders;
+endif
+:调用 queryLLM;
+if (abort 或 API error?) then (是)
+  :yield 错误或中止消息;
+  stop
+else (否)
+  :得到 assistant message;
+endif
+if (assistant 含 tool_use?) then (否)
+  :运行 stop hooks;
+  :yield assistant message;
+  stop
+else (是)
+  :yield assistant message;
+  :enqueue tool_use 到 ToolUseQueue;
+  repeat
+    :执行可运行工具;
+    :yield progress 或 tool_result;
+    :收集 context modifier 和新消息;
+  repeat while (队列仍有未完成工具?) is (是)
+  :把 tool_result 组装成下一轮 user message;
+  :递归调用 queryCore;
+  stop
+endif
+@enduml
+
+[Detail]
+这张流程图说明 `queryCore` 的本质是“assistant -> tool_use -> tool_result -> user message -> assistant”的递归闭环。
+
+几个关键失败路径：
+
+- hooks 可以在 prompt submit 时阻断或修改输入。
+- 模型调用可能 abort、API error、返回无 tool。
+- 工具 schema 或 validate 失败会转成 `tool_result`，让模型看到错误。
+- 权限拒绝也以工具结果形式进入下一轮，除非外壳要求避免 prompt。
+- auto-compact 在 token 压力下改变历史消息，需要保证关键上下文被恢复。
+
+------------------------------------------------------------
+[Example]
+print/stream-json 流程：脚本友好但权限更严格
+
+[Description]
+`src/entrypoints/cli/printMode.ts` 负责非交互运行。它比 REPL 更强调协议稳定和权限可预期：
+
+- 校验 `--output-format`、`--input-format`、`--permission-prompt-tool` 的组合。
+- 文本输出直接调用 `ask`。
+- JSON/stream-json 路径会构造 system prompt、context、tools、MCP clients、permission context。
+- stream-json 会发送 SDK init、assistant、tool_use、tool_result、result 等协议消息。
+- 为避免脚本卡住，`shouldAvoidPermissionPrompts` 会影响工具权限请求。
+
+[UML]
+@startuml
+start
+:进入 runPrintMode;
+:校验 output/input format 和 prompt 约束;
+if (输入为空且非 stream-json?) then (是)
+  :返回输入错误;
+  stop
+else (否)
+  :按 --tools 过滤工具;
+endif
+if (output-format 是 text?) then (是)
+  :调用 ask;
+  :stdout 输出最终文本;
+  stop
+else (否)
+  :加载 system prompt、context、model、session;
+  :构造 printOptions 和 permission context;
+  :发送 SDK init;
+endif
+if (input-format 是 stream-json?) then (是)
+  :建立 stdio control handler;
+  :运行 runPrintModeStreamJsonSession;
+  :持续处理多轮输入和中断;
+  stop
+else (否)
+  :创建单轮 user message;
+  :调用 query;
+  :把 Kode messages 映射为 SDK messages;
+  :校验结构化输出;
+  :输出 JSON result;
+  stop
+endif
+@enduml
+
+[Detail]
+print 模式的关键不是“少一个 UI”，而是多了协议约束：
+
+- stdout/stderr 边界必须稳定，尤其 stream-json 不能混入普通日志。
+- 权限 prompt 不能随意阻塞自动化脚本。
+- `--allowedTools`、`--disallowedTools`、`--permission-mode`、`--add-dir` 等参数会直接影响 ToolPermissionContext。
+- JSON schema 结构化输出还会引入 AJV 校验路径。
+
+测试时优先看 `tests` 中的 stream-json、tool scheduler、permission 相关用例，而不是只手工跑交互 REPL。
+
+------------------------------------------------------------
+[Example]
+权限判定流程：规则匹配、safe mode 与用户确认
+
+[Description]
+`src/core/permissions/engine/index.ts` 的 `hasPermissionsToUseTool` 是所有高风险工具调用的核心网关。它会综合：
+
+- 当前 permission mode。
+- 工具是否只读、是否需要用户交互、是否能跳过权限。
+- safe mode、bypassPermissions 的安全下限。
+- allow/deny/ask 规则，包含 Bash、Read/Glob/Grep、Edit/Write、WebFetch、WebSearch、MCP 等分支。
+- `dontAsk` 和 `shouldAvoidPermissionPrompts`。
+- UI 或 ACP 提供的 `canUseTool` 回调。
+
+[UML]
+@startuml
+start
+:收到工具、输入、权限上下文;
+if (permission mode 直接允许?) then (是)
+  :检查 safe mode 安全下限;
+else (否)
+  :继续规则判定;
+endif
+if (工具不需要权限?) then (是)
+  :允许执行;
+  stop
+else (否)
+  :加载 allow deny ask directories 规则;
+endif
+if (工具是 Bash?) then (是)
+  :检查 safe command、sandbox、bash rules;
+elseif (工具是文件读搜索?) then (是)
+  :检查路径目录和 ask/deny 规则;
+elseif (工具是文件写编辑?) then (是)
+  :检查写路径、symlink、acceptEdits、ask/deny;
+elseif (工具是 Web 或 MCP?) then (是)
+  :检查域名或 mcp wildcard 规则;
+else (其他)
+  :检查默认工具规则;
+endif
+if (规则明确拒绝?) then (是)
+  :返回 denied;
+  stop
+else (否)
+  if (规则明确允许?) then (是)
+    :返回 allowed;
+    stop
+  else (需要询问)
+    if (dontAsk 或避免 prompt?) then (是)
+      :返回 denied no prompt;
+      stop
+    else (否)
+      :请求 UI 或 ACP 用户确认;
+      :持久化可选 allow always 更新;
+      stop
+    endif
+  endif
+endif
+@enduml
+
+[Detail]
+权限流程的设计目标是“把风险在执行前显式化”。注意它不是单一 allowlist：
+
+- Bash 有命令级规则和 sandbox plan。
+- 文件读写有路径、目录、symlink、读前写入、mtime freshness 等配套约束。
+- MCP 工具通过命名空间和 wildcard 做规则匹配。
+- print/ACP/REPL 的询问方式不同，但最终都要落到统一 permission result。
+
+风险复盘时最重要的问题是：**是否存在某条路径绕过了 schema、validate、permission 或 hook？** 这也是 `checkPermissionsAndCallTool` 必须保持集中化的原因。
+
+------------------------------------------------------------

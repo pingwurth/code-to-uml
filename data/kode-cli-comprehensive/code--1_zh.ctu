@@ -1,0 +1,301 @@
+Title: 代码解析
+Describe: 关键代码片段解析。片段均为缩写版，用来解释设计意图、问题边界和使用注意事项。
+------------------------------------------------------------
+[Example]
+关键代码片段解析：Tool 契约是能力边界
+
+[Description]
+`src/core/tools/tool.ts` 的接口定义是整个工具系统的入口。下面是压缩后的结构，重点看每个方法为什么存在。
+
+```ts
+export interface Tool<TInput, TResult> {
+  name: string
+  description(): Promise<string>
+  prompt(): Promise<string>
+  inputSchema: z.ZodType<TInput>
+  isEnabled(): Promise<boolean>
+  isReadOnly(): boolean
+  isConcurrencySafe(): boolean
+  needsPermissions(input: TInput): boolean
+  requiresUserInteraction(input: TInput): boolean
+  validateInput(input: TInput, context: ToolUseContext): Promise<Result<void>>
+  render(input: TInput, context: ToolUseContext): React.ReactNode
+  call(input: TInput, context: ToolUseContext): AsyncGenerator<ToolYield<TResult>>
+}
+```
+
+[UML]
+@startuml
+start
+:模型提出 tool_use;
+:按 Tool.name 查找工具;
+:用 inputSchema 解析参数;
+:调用 validateInput;
+:检查 isEnabled、isReadOnly、needsPermissions;
+:根据 isConcurrencySafe 调度执行;
+:call async generator 产出结果;
+:render 或协议层展示状态;
+stop
+@enduml
+
+[Detail]
+这个接口把工具分成三类信息：
+
+- **给模型看的信息**：description、prompt、schema。
+- **给 runtime 看的约束**：enabled、read-only、concurrency、permission、interaction。
+- **给执行和 UI 看的行为**：validate、render、call。
+
+设计意图是让新增工具不用改 `queryCore`。只要实现 Tool 契约，并通过 `getTools()` 注册，就能进入统一的模型 schema、权限、调度和消息系统。
+
+使用注意：不要把“是否允许执行”的逻辑只写在 `call` 里。`call` 是最后一步，权限和输入校验应该在执行前就被 runtime 看见。
+
+------------------------------------------------------------
+[Example]
+关键代码片段解析：getTools 统一合并内置和 MCP 工具
+
+[Description]
+`src/tools/index.ts` 的结构很小，但它定义了工具集合的来源。压缩后类似：
+
+```ts
+const tools = [
+  TaskTool,
+  BashTool,
+  GlobTool,
+  GrepTool,
+  FileReadTool,
+  FileEditTool,
+  FileWriteTool,
+  TodoWriteTool,
+  SlashCommandTool,
+  SkillTool,
+]
+
+export async function getTools() {
+  const mcpTools = await getMCPTools()
+  return [...tools, ...mcpTools].filter(tool => tool.isEnabled())
+}
+```
+
+[UML]
+@startuml
+left to right direction
+component "内置 tools array" as Builtin
+component "getMCPTools()" as MCP
+component "getTools()" as GetTools
+component "tool.isEnabled()" as Enabled
+component "query options.tools" as QueryTools
+
+Builtin --> GetTools
+MCP --> GetTools
+GetTools --> Enabled
+Enabled --> QueryTools : 过滤后集合
+@enduml
+
+[Detail]
+这个片段的意义在于“所有工具集合在进入 query 前归一化”。MCP 工具虽然来自外部 server，但仍被包装为 Kode Tool，因此后续执行链不会区别对待。
+
+开发注意：
+
+- 新增内置工具时要加入此列表，并考虑 read-only、并发和权限。
+- MCP tools 的命名需要避免和内置工具冲突，项目使用 `mcp__server__tool` 风格。
+- `isEnabled()` 可能依赖环境、配置或平台，测试要覆盖禁用路径。
+
+------------------------------------------------------------
+[Example]
+关键代码片段解析：queryCore 的主循环骨架
+
+[Description]
+`src/app/query.ts` 的 `queryCore` 很长，但骨架可以压缩为：
+
+```ts
+async function* queryCore(messages, systemPrompt, context, tools, options) {
+  const compacted = await maybeAutoCompact(messages, context, options)
+  const fullPrompt = await formatSystemPromptWithContext(systemPrompt, context)
+  const assistant = await queryLLM(fullPrompt, compacted, tools, options)
+
+  yield assistant
+
+  const toolUses = extractToolUses(assistant)
+  if (toolUses.length === 0) {
+    await runStopHooks()
+    return
+  }
+
+  const queue = new ToolUseQueue(toolUses, tools, options)
+  for await (const item of queue.run()) {
+    yield item
+  }
+
+  const nextMessages = appendToolResults(messages, queue.results)
+  yield* queryCore(nextMessages, systemPrompt, context, tools, options)
+}
+```
+
+[UML]
+@startuml
+start
+:maybeAutoCompact;
+:formatSystemPromptWithContext;
+:queryLLM;
+:yield assistant;
+if (无 tool_use?) then (是)
+  :runStopHooks;
+  stop
+else (否)
+  :创建 ToolUseQueue;
+  :for await queue.run;
+  :yield progress 和 result;
+  :appendToolResults;
+  :递归 queryCore;
+  stop
+endif
+@enduml
+
+[Detail]
+这段骨架帮助理解复杂实现：`queryCore` 是一个 async generator，不是普通 promise。它的产物会被 REPL、print 和 ACP 分别映射到不同输出。
+
+设计意图：
+
+- 支持模型边想边调工具的多轮递归。
+- 支持 UI/协议层尽早看到 assistant、progress、tool_result。
+- 支持 auto-compact、hooks、reminders 等横切逻辑插入循环。
+
+使用注意：任何在 `queryCore` 中新增的副作用，都可能影响所有外壳。改这里必须用交互、print/stream-json、ACP 或至少对应测试覆盖关键路径。
+
+------------------------------------------------------------
+[Example]
+关键代码片段解析：checkPermissionsAndCallTool 是安全网关
+
+[Description]
+工具真正执行前会进入 `checkPermissionsAndCallTool`。压缩骨架：
+
+```ts
+async function* checkPermissionsAndCallTool(tool, input, context) {
+  const parsed = tool.inputSchema.safeParse(input)
+  if (!parsed.success) return yield validationError(parsed.error)
+
+  const valid = await tool.validateInput(parsed.data, context)
+  if (!valid.ok) return yield toolError(valid.error)
+
+  const hookResult = await runPreToolUseHooks(tool, parsed.data, context)
+  if (hookResult.blocked) return yield hookDenied(hookResult)
+
+  const permission = await context.canUseTool(tool, hookResult.input, context)
+  if (!permission.allowed) return yield permissionDenied(permission)
+
+  for await (const output of tool.call(hookResult.input, context)) {
+    yield output
+  }
+
+  await runPostToolUseHooks(tool, output, context)
+}
+```
+
+[UML]
+@startuml
+start
+:schema parse;
+if (schema invalid?) then (是)
+  :yield validation error;
+  stop
+else (否)
+  :tool.validateInput;
+endif
+if (validate failed?) then (是)
+  :yield tool error;
+  stop
+else (否)
+  :run pre tool hooks;
+endif
+if (hook blocked?) then (是)
+  :yield hook denied;
+  stop
+else (否)
+  :hasPermissionsToUseTool;
+endif
+if (permission denied?) then (是)
+  :yield permission denied;
+  stop
+else (否)
+  :execute tool.call;
+  :yield outputs;
+  :run post tool hooks;
+  stop
+endif
+@enduml
+
+[Detail]
+这个片段体现项目的安全分层：schema 防结构错误，validate 防工具语义错误，hooks 允许策略扩展，permission engine 控制本地风险，tool.call 才执行实际副作用。
+
+开发注意：
+
+- pre-hook 改写 input 后要继续按同样强度验证。
+- 权限拒绝也应变成模型可理解的结果，而不是静默失败。
+- post-hook 失败不应掩盖工具本身的关键结果，除非策略明确要求阻断。
+
+------------------------------------------------------------
+[Example]
+关键代码片段解析：FileEditTool 的读前写入约束
+
+[Description]
+`FileEditTool` 的核心不是字符串替换，而是编辑前置条件。压缩骨架：
+
+```ts
+async function validateEdit(input, context) {
+  if (input.old_string === input.new_string) return error("no-op")
+  if (!fileExists(input.file_path)) return error("missing file")
+  if (isNotebook(input.file_path)) return error("use NotebookEdit")
+
+  const readTime = context.readFileTimestamps[input.file_path]
+  if (!readTime) return error("read file before editing")
+
+  const currentMtime = await getMtime(input.file_path)
+  if (currentMtime !== readTime) return error("file changed, read again")
+
+  const matches = countOccurrences(input.old_string)
+  if (matches !== 1) return error("old_string must be unique")
+}
+```
+
+[UML]
+@startuml
+start
+:收到 Edit 输入;
+if (old_string 等于 new_string?) then (是)
+  :拒绝 no-op;
+  stop
+else (否)
+  :检查文件存在和类型;
+endif
+if (未记录 Read mtime?) then (是)
+  :拒绝，要求先 Read;
+  stop
+else (否)
+  :比较当前 mtime;
+endif
+if (mtime 不一致?) then (是)
+  :拒绝，要求重新 Read;
+  stop
+else (否)
+  :检查 old_string 唯一;
+endif
+if (old_string 不唯一或不存在?) then (是)
+  :拒绝并提示修正;
+  stop
+else (否)
+  :应用编辑，保留编码和换行;
+  :返回 patch/snippet;
+  stop
+endif
+@enduml
+
+[Detail]
+这个片段是项目“安全操作本地文件”的典型样板。它把模型的编辑动作限制在“模型确实读过、文件未变化、替换目标唯一”的范围内。
+
+维护注意：
+
+- `readFileTimestamps` 是跨工具共享状态，TaskTool/ACP/print 都要传对 context。
+- 如果新增批量编辑工具，应复用同类 freshness 思路。
+- 不要为了简化测试而移除 mtime 检查，这会直接增加覆盖用户改动的风险。
+
+------------------------------------------------------------

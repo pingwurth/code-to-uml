@@ -1,0 +1,152 @@
+Title: Claude Code Haha — 项目整体概览
+Describe: 项目顶层架构、模块边界与技术栈全景
+------------------------------------------------------------
+[Example]
+项目架构全景图
+
+[Description]
+Claude Code Haha 是一个基于 Bun 运行时的 AI 编程助手产品，包含 CLI、本地服务器、桌面应用（Tauri + React）、IM 适配器（飞书/钉钉/Telegram/微信）和文档站。核心能力是多代理协作（Multi-Agent）编排系统。
+
+[UML]
+@startuml
+skinparam packageStyle rectangle
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontColor #333333
+skinparam packageBorderColor #FF7A00
+skinparam arrowColor #2563EB
+skinparam packageFontColor #333333
+
+package "CLI 入口层" as CLI #FFF8F0 {
+  [bin/claude-haha] as BIN
+  [src/entrypoints/cli.tsx] as ENTRY
+  [src/entrypoints/init.ts] as INIT
+}
+
+package "Agent 运行时核心" as CORE #F0F7FF {
+  [AgentTool] as AGENT
+  [Tool Pool System] as TOOLS
+  [Task Engine] as TASKS
+  [Query Engine] as QUERY
+  [Permission System] as PERM
+}
+
+package "本地服务层" as SERVER #F0FFF4 {
+  [HTTP/REST API] as API
+  [WebSocket Handler] as WS
+  [Session Manager] as SESSION
+  [Provider Service] as PROVIDER
+}
+
+package "桌面应用 (Tauri)" as DESKTOP #FFF0F5 {
+  [React UI] as UI
+  [API Client] as CLIENT
+  [WebSocket Manager] as WSMGR
+  [Zustand Stores] as STORES
+}
+
+package "IM 适配器" as ADAPTERS #FFFFF0 {
+  [Telegram Bot] as TG
+  [Feishu Bot] as FS
+  [DingTalk Bot] as DT
+  [WeChat Bot] as WC
+  [Common Layer] as COMMON
+}
+
+package "共享基础设施" as INFRA #F5F0FF {
+  [MCP Integration] as MCP
+  [OAuth Service] as OAUTH
+  [Memory/MemDir] as MEM
+  [Skills/Plugins] as SKILLS
+}
+
+BIN --> ENTRY
+ENTRY --> AGENT
+AGENT --> TOOLS
+AGENT --> TASKS
+AGENT --> QUERY
+TOOLS --> PERM
+
+API --> SESSION
+WS --> SESSION
+SESSION --> QUERY
+
+UI --> CLIENT
+CLIENT --> API
+WSMGR --> WS
+
+TG --> COMMON
+FS --> COMMON
+DT --> COMMON
+WC --> COMMON
+COMMON --> WS
+
+QUERY --> MCP
+QUERY --> PROVIDER
+SKILLS --> AGENT
+@enduml
+
+[Detail]
+**核心层次说明：**
+
+- **CLI 入口层**：`bin/claude-haha` 是可执行文件入口，路由到 `src/entrypoints/cli.tsx`（Ink TUI）或 `src/entrypoints/init.ts`（初始化流程）
+- **Agent 运行时核心**：以 `AgentTool` 为枢纽，协调工具池、任务引擎、查询引擎和权限系统
+- **本地服务层**：为桌面端提供 HTTP REST + WebSocket 双通道通信，管理会话生命周期
+- **桌面应用**：基于 Tauri（Rust） + React + Zustand 的跨平台桌面 UI
+- **IM 适配器**：各平台 Bot 通过 `WsBridge` 统一接入服务端 WebSocket
+- **共享基础设施**：MCP 协议集成、OAuth 鉴权、记忆系统、技能/插件生态
+
+------------------------------------------------------------
+[Example]
+技术栈概览
+
+[Description]
+该项目的核心技术选型涵盖前后端及构建工具链。
+
+[UML]
+@startmindmap
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontColor #333333
+skinparam nodeBorderColor #FF7A00
+skinparam nodeBackgroundColor #FFF8F0
+
+* Claude Code Haha
+** 运行时
+*** Bun (TypeScript)
+*** Node.js 兼容
+** 前端
+*** React 18
+*** Zustand (状态管理)
+*** Vite (构建)
+*** Ink (CLI TUI)
+** 桌面
+*** Tauri 2.x (Rust)
+*** 跨平台打包
+** 后端服务
+*** Bun HTTP Server
+*** WebSocket (ws)
+*** REST API
+** IM 集成
+*** grammy (Telegram)
+*** larksuiteoapi/node-sdk (Feishu)
+*** dingtalk-stream (DingTalk)
+*** 轮询协议 (WeChat)
+** AI/LLM
+*** Claude API
+*** OpenAI API
+*** 多 Provider 路由
+** 构建/CI
+*** Bun Bundle
+*** GitHub Actions
+*** VitePress (文档)
+@endmindmap
+
+[Detail]
+**关键技术特点：**
+
+1. **Bun 优先**：使用 `bun:bundle` 特性标记进行死代码消除，运行时性能优越
+2. **TypeScript 全栈**：CLI、服务器、桌面 UI、适配器全部使用 TypeScript
+3. **Tauri 2.x**：Rust 后端 + Web 前端的混合桌面架构
+4. **多通道接入**：CLI / Desktop / IM 三类入口共享同一 Agent 运行时
+5. **Ink TUI**：使用 React 渲染终端 UI，组件化 CLI 界面
+
+------------------------------------------------------------

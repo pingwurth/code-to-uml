@@ -1,0 +1,160 @@
+Title: 调用关系
+Describe: REPL、LLM、工具执行、ACP/MCP 的重要调用链。重点回答“谁调用谁，结果怎样返回”。
+------------------------------------------------------------
+[Example]
+调用关系图：REPL 用户输入到工具结果回显
+
+[Description]
+交互模式下，用户输入从 `PromptInput` 进入 `REPL.onQuery`。`REPL` 负责把输入加工成 user messages，并把 `query` 的 async iterator 产出追加到 UI 消息列表。权限请求经 `useCanUseTool` 显示为 `PermissionRequest`，用户决策再返回 permission engine。
+
+[UML]
+@startuml
+actor 用户 as User
+participant "PromptInput" as PromptInput
+participant "REPL.onQuery" as REPL
+participant "processUserInput" as Input
+participant "query" as Query
+participant "queryCore" as Core
+participant "queryLLM" as LLM
+participant "ToolUseQueue" as Queue
+participant "useCanUseTool" as CanUse
+participant "PermissionRequest" as PermissionUI
+participant "Tool.call" as Tool
+
+User -> PromptInput : 输入 prompt
+PromptInput -> REPL : submit
+REPL -> Input : 处理 slash、bash、mentions、images
+Input --> REPL : user messages
+REPL -> Query : for await message
+Query -> Core : 进入递归循环
+Core -> LLM : 请求 assistant
+LLM --> Core : assistant text 和 tool_use
+Core --> REPL : yield assistant
+Core -> Queue : enqueue tool_use
+Queue -> CanUse : canUseTool
+CanUse -> PermissionUI : 需要用户确认
+PermissionUI --> CanUse : allow 或 deny
+CanUse --> Queue : permission result
+Queue -> Tool : call async generator
+Tool --> Queue : progress 和 tool_result
+Queue --> Core : tool_result messages
+Core --> REPL : yield progress/tool_result
+Core -> Core : 递归下一轮
+@enduml
+
+[Detail]
+这条时序链说明 REPL 的职责是“消费并展示流式消息”，而不是同步等待一个最终结果。任何工具调用都可能让 UI 看到：
+
+- assistant 文本或 thinking。
+- tool_use 结构。
+- permission request。
+- progress message。
+- tool_result。
+- 下一轮 assistant。
+
+因此 UI bug 排查时要先确认是 `query` 没有产出消息，还是 REPL 的消息归一化、排序、静态渲染或 pending 工具状态计算出了问题。
+
+------------------------------------------------------------
+[Example]
+调用关系图：工具执行网关 checkPermissionsAndCallTool
+
+[Description]
+一次工具调用不会直接进入工具实现。`queryCore` 先把 tool_use 交给 `ToolUseQueue`，队列调用 `runToolUse`。`runToolUse` 做工具查找、alias 处理、输入预处理后，进入 `checkPermissionsAndCallTool`。
+
+`checkPermissionsAndCallTool` 负责 schema validation、`validateInput`、pre-tool hooks、permission、真正的 `tool.call`、post-tool hooks 和异常包装。这个函数是工具安全和可观测性的主网关。
+
+[UML]
+@startuml
+participant "queryCore" as Core
+participant "ToolUseQueue" as Queue
+participant "runToolUse" as RunTool
+participant "normalizeToolInput" as Normalize
+participant "preprocessToolInput" as Preprocess
+participant "checkPermissionsAndCallTool" as Gateway
+participant "Zod schema" as Schema
+participant "Tool.validateInput" as Validate
+participant "PreToolUse hooks" as PreHook
+participant "Permission Engine" as Perm
+participant "Tool.call" as Call
+participant "PostToolUse hooks" as PostHook
+participant "queryCore next round" as Next
+
+Core -> Queue : tool_use entries
+Queue -> RunTool : execute entry
+RunTool -> Normalize : Bash 等特殊归一化
+RunTool -> Preprocess : alias、timeout 等预处理
+RunTool -> Gateway : tool, input, context
+Gateway -> Schema : parse input
+Schema --> Gateway : valid 或 error
+Gateway -> Validate : 语义校验
+Validate --> Gateway : valid 或 error
+Gateway -> PreHook : 可修改 input 或阻断
+PreHook --> Gateway : hook decision
+Gateway -> Perm : hasPermissionsToUseTool
+Perm --> Gateway : allow/deny/ask result
+Gateway -> Call : 执行 async generator
+Call --> Gateway : tool_result/progress/context
+Gateway -> PostHook : 记录和二次处理
+Gateway --> Queue : normalized result
+Queue --> Next : tool_result user message
+@enduml
+
+[Detail]
+这条调用链解释了为什么新增工具时不应该在工具内部自行处理所有安全逻辑。工具内部只做本工具特有的 validate 和执行，通用的 schema、hooks、permission、错误包装应集中在 gateway。
+
+重要维护点：
+
+- pre-hook 修改 input 后必须重新验证，防止 hook 注入非法结构。
+- permission check 应发生在真正执行之前，并且要考虑 `shouldAvoidPermissionPrompts`。
+- 工具异常要包装成 `tool_result`，让模型和外壳都能看到失败原因，而不是让循环直接崩溃。
+
+------------------------------------------------------------
+[Example]
+调用关系图：ACP 会话如何复用 query runtime
+
+[Description]
+ACP 模式不是另一套 agent。`src/entrypoints/acp.ts` 只负责启动 JsonRpcPeer 和 `KodeAcpAgent`。`KodeAcpAgent` 在 `handleSessionNew` 或 `handleSessionLoad` 时创建会话状态，在 `handleSessionPrompt` 中把 ACP prompt blocks 转换成 Kode user message，然后调用同一个 `query`。
+
+ACP 特有的工作是：把 Kode messages 映射为 ACP updates，把权限请求发送为 `session/request_permission`，并在编辑工具完成后附带文件 diff。
+
+[UML]
+@startuml
+actor "ACP Client" as Client
+participant "acp.ts" as ACPEntry
+participant "JsonRpcPeer" as Peer
+participant "KodeAcpAgent" as Agent
+participant "handleSessionNew" as New
+participant "handleSessionPrompt" as Prompt
+participant "query" as Query
+participant "createAcpCanUseTool" as CanUse
+participant "Permission Engine" as Perm
+participant "handleKodeMessage" as Mapper
+
+Client -> ACPEntry : 启动 kode-acp
+ACPEntry -> Peer : StdioTransport
+Peer -> Agent : register handlers
+Client -> Agent : session/new
+Agent -> New : 设置 cwd、tools、commands、context、MCP
+New --> Client : session created
+Client -> Agent : session/prompt
+Agent -> Prompt : blocks 转 user message
+Prompt -> Query : 调用共享 query runtime
+Query -> CanUse : 工具权限检查
+CanUse -> Perm : 规则判定
+CanUse --> Client : request_permission
+Client --> CanUse : allow/deny
+Query --> Mapper : Kode messages
+Mapper --> Client : agent/tool updates 和 diff
+@enduml
+
+[Detail]
+ACP 的价值在于把 Kode 的 agent runtime 暴露给外部编辑器或客户端，而不是复制终端 UI。对维护者来说，ACP 的关键是协议映射：
+
+- 输入 blocks 到 Kode user message。
+- Kode assistant/thinking/tool_use/progress/tool_result 到 ACP updates。
+- PermissionRequest 到 ACP permission request。
+- Edit 类工具输出到文件 diff。
+
+如果 ACP 和 CLI 行为不一致，应优先检查 session 初始化参数、工具集合、permission context 和消息映射，而不是怀疑 `query` 有两套逻辑。
+
+------------------------------------------------------------

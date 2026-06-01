@@ -1,0 +1,237 @@
+Title: 上手指南
+Describe: 开发上手指南、Q&A / 复盘问答清单、维护者速查表。用于新成员 onboarding、日常开发定位和面试准备。
+------------------------------------------------------------
+[Example]
+开发上手指南：阅读顺序、调试点和验证命令
+
+[Description]
+推荐阅读顺序：
+
+1. `src/entrypoints/cli.tsx`：确认 bootstrap 边界。
+2. `src/entrypoints/cli/runCli.tsx`：理解 CLI 参数、setup、插件和模式分流。
+3. `src/app/query.ts`：理解 queryCore、ToolUseQueue、runToolUse、checkPermissionsAndCallTool。
+4. `src/core/tools/tool.ts` 和 `src/tools/index.ts`：理解工具契约和注册。
+5. `src/core/permissions/engine/index.ts`：理解权限规则。
+6. 按方向深入：AI 看 `services/ai/llm.ts`，MCP 看 `services/mcp/*`，插件看 `services/plugins/*`，UI 看 `ui/screens/REPL.tsx`，ACP 看 `acp/kodeAcpAgent.ts`。
+
+常用验证命令来自项目 AGENTS：
+
+```bash
+bun run typecheck
+bun run lint
+bun test
+bun run build:npm
+```
+
+本次报告未改源码，因此这些命令不是报告生成的必要 gate；真正需要验证的是 Code-To-UML 产物、UML 和本地页面/API。
+
+[UML]
+@startwbs
+* 开发上手指南
+** 阅读顺序
+*** 入口 bootstrap
+*** CLI runCli 分流
+*** query runtime
+*** Tool 契约和注册
+*** Permission Engine
+*** AI / MCP / Plugin / UI / ACP 分支
+** 调试入口
+*** CLI flags 和 cwd
+*** system prompt 与 context
+*** messages 和 session JSONL
+*** tool_use / tool_result 对齐
+*** permission decision
+*** provider response 和 usage
+** 验证命令
+*** bun run typecheck
+*** bun run lint
+*** bun test
+*** bun run build:npm
+** 扩展点
+*** 新 Tool
+*** 新 MCP transport 或 tool 包装
+*** 新 Slash command 或 Skill
+*** 新 provider adapter
+*** 新 UI 状态展示
+@endwbs
+
+[Detail]
+新需求定位建议：
+
+- CLI 参数或协议输出：先看 `runCli.tsx`、`printMode.ts`，再看 tests 中 stream-json 或 help 相关用例。
+- 工具行为：先看具体 Tool，再看 Tool 契约、权限引擎和 ToolUseQueue。
+- 模型输出异常：先看 `llm.ts` provider 分支，再看消息 normalization。
+- 插件/命令不可见：先看 plugin runtime、custom command parser 和 `getCommands()`。
+- UI 卡住：先区分 query 没有 yield、工具等待权限、还是 Ink 状态渲染问题。
+
+------------------------------------------------------------
+[Example]
+Q&A / 复盘问答清单
+
+[Description]
+下面的问题可用于面试、代码评审或新成员复盘。重点不是背答案，而是能指出源码路径和设计理由。
+
+[UML]
+@startwbs
+* Q&A / 复盘问答清单
+** 架构类
+*** 为什么 REPL、print、ACP 都复用 query
+*** 入口层和 runtime 内核的边界在哪里
+*** services 与 core 的区别是什么
+** 工具类
+*** Tool 接口为什么需要 isReadOnly 和 isConcurrencySafe
+*** Tool.call 为什么是 async generator
+*** 新增工具时要修改哪些文件
+** 权限类
+*** permission mode 和 allow/deny/ask 规则怎样叠加
+*** Bash 与 FileEdit 的安全策略有什么不同
+*** print 模式为什么要避免权限 prompt
+** 模型类
+*** Anthropic native 和 OpenAI 兼容路径怎样归一化
+*** Responses API 与 Chat Completions 的差异由谁处理
+*** usage、cost、responseId 为什么重要
+** 数据类
+*** tool_use 和 tool_result 怎样对齐
+*** auto-compact 可能丢什么信息
+*** session resume 和 fork 有什么区别
+** 扩展类
+*** MCP tool 怎样进入 getTools
+*** Slash command 和 Skill 的本质是什么
+*** 插件 manifest 影响哪些 runtime 能力
+@endwbs
+
+[Detail]
+参考回答要点：
+
+- **为什么复用 query**：因为 query 是消息、模型、工具、权限和持久化的统一 runtime；外壳只负责输入输出映射。
+- **Tool.call 为什么是 async generator**：工具可能长时间运行、产生 progress、context modifier 或多段结果，stream-json/REPL/ACP 都需要流式消费。
+- **新增工具改哪里**：实现 Tool，加入 `src/tools/index.ts`，补权限/validate/render/call，按风险补 unit/integration tests。
+- **权限怎样叠加**：settings/project/local/CLI/runtime permission context 加上 permission mode 和工具分支规则共同决定，必要时由 UI/ACP 询问。
+- **MCP tool 怎样进入 runtime**：MCP client 列工具，`tools-integration.ts` 包装成 MCPTool，`getTools()` 合并后进入 query。
+- **auto-compact 风险**：摘要可能丢失局部细节，必须保留任务目标、关键文件、工具结果和未完成决策。
+
+------------------------------------------------------------
+[Example]
+维护者速查表：核心文件、符号和行号索引
+
+[Description]
+以下行号来自当前源码快照，用于快速定位。后续源码变动后行号可能漂移，应以 CodeGraph 或编辑器跳转为准。
+
+| 主题 | 文件/符号 | 参考位置 |
+|---|---|---|
+| CLI bootstrap | `src/entrypoints/cli.tsx` | 1-18 |
+| CLI 主编排 | `src/entrypoints/cli/runCli.tsx` `runCli` | 97-691 |
+| CLI setup | `src/entrypoints/cli/setup.ts` | 8-45 |
+| 首次启动/信任/MCP 审批 | `src/entrypoints/cli/setupScreens.tsx` | 24-71 |
+| print 模式校验 | `src/entrypoints/cli/printMode.ts` | 47-172 |
+| print JSON/stream-json | `src/entrypoints/cli/printMode.ts` | 214-617 |
+| text ask helper | `src/app/ask.ts` | 27-102 |
+| ToolUseQueue | `src/app/query.ts` | 184-437 |
+| query 包装 | `src/app/query.ts` | 477-520 |
+| queryCore | `src/app/query.ts` | 522-826 |
+| runToolUse | `src/app/query.ts` | 828-916 |
+| checkPermissionsAndCallTool | `src/app/query.ts` | 979-1248 |
+| Tool 契约 | `src/core/tools/tool.ts` | 13-111 |
+| 工具注册 | `src/tools/index.ts` | 28-67 |
+| 权限引擎 | `src/core/permissions/engine/index.ts` | 113-723 |
+| Bash 权限规则 | `src/core/permissions/rules/bash.ts` | 9-238 |
+| 权限设置持久化 | `src/utils/permissions/toolPermissionSettings.ts` | 59-239 |
+| PermissionContext | `src/context/PermissionContext.tsx` | 88-255 |
+| REPL 状态和 onQuery | `src/ui/screens/REPL.tsx` | 99-720 |
+| useCanUseTool | `src/ui/hooks/useCanUseTool.ts` | 18-118 |
+| queryLLM/provider 分支 | `src/services/ai/llm.ts` | 869-2063 |
+| ModelAdapterFactory | `src/services/ai/modelAdapterFactory.ts` | 8-49 |
+| MCP client | `src/services/mcp/client.ts` | 28-283 |
+| MCP tools integration | `src/services/mcp/tools-integration.ts` | 80-324 |
+| ACP entry | `src/entrypoints/acp.ts` | 1-30 |
+| ACP agent session/prompt | `src/acp/kodeAcpAgent.ts` | 37-1217 |
+| MCP server entry | `src/entrypoints/mcp.ts` | 34-157 |
+| Plugin runtime | `src/services/plugins/pluginRuntime.ts` | 关键 manifest/session plugin 逻辑 |
+| Custom commands | `src/services/plugins/customCommands.ts` | frontmatter、宏、文件引用 |
+| System prompt | `src/constants/prompts.ts` | getSystemPrompt/getEnvInfo |
+| Context gathering | `src/context/index.ts` | getContext/getProjectDocsForCwd |
+| Message normalization | `src/utils/messages/core.ts` | 100-132、483-560 |
+| User input parsing | `src/utils/messages/userInput.tsx` | 20-241 |
+| Auto compact | `src/utils/session/autoCompactCore.ts` | 68-207 |
+| npm build | `scripts/build.mjs` | 36-139 |
+| binary build | `scripts/build-binary.mjs` | Bun compile path |
+| reference parity | `scripts/reference-parity-check.mjs` | offline parity matrix |
+
+[UML]
+@startuml
+left to right direction
+component "入口\ncli/runCli/print/acp/mcp" as Entry
+component "运行内核\nask/query/ToolUseQueue" as Runtime
+component "安全边界\nTool/Permission" as Safety
+component "服务适配\nAI/MCP/Plugin/Context" as Services
+component "外壳\nREPL/ACP/stdio" as Shells
+component "验证\nscripts/tests/parity" as Verify
+
+Entry --> Runtime
+Runtime --> Safety
+Runtime --> Services
+Runtime --> Shells
+Verify ..> Entry
+Verify ..> Runtime
+Verify ..> Safety
+Verify ..> Services
+Verify ..> Shells
+@enduml
+
+[Detail]
+这张速查表是维护入口：
+
+- **先定位层，再定位文件**，避免直接在大文件中搜索症状。
+- 行号用于当前快照，重构后以 CodeGraph 的 symbol location 为准。
+- 测试优先级按影响面选择：共享 runtime 改动要覆盖多外壳，工具改动要覆盖权限和错误结果，协议改动要覆盖 golden output。
+
+------------------------------------------------------------
+[Example]
+面试复盘模板：三分钟讲清 Kode CLI
+
+[Description]
+如果需要在面试或复盘中快速说明这个项目，可以按以下结构：
+
+1. **一句话定位**：Kode CLI 是一个多协议终端 agent runtime，支持交互 TUI、print/stream-json、ACP、MCP server。
+2. **主链路**：CLI 入口完成配置和模式分流，REPL/print/ACP 都调用 `query`；`queryCore` 调模型，解析 tool_use，用 ToolUseQueue 执行工具，再把 tool_result 送回下一轮。
+3. **安全边界**：Tool 契约、zod schema、validate、permission engine、hooks、工具专属规则共同约束本地副作用。
+4. **扩展机制**：MCP、plugins、custom commands、skills 都被适配成 Tool/Command/Hook/context modifier，而不是绕过 runtime。
+5. **工程风险**：query 和 llm 是复杂度热点；权限规则来源多；多协议输出容易漂移；需要用 typecheck、lint、unit/integration/e2e 和 build gate 兜底。
+
+[UML]
+@startmindmap
+* 三分钟讲清 Kode CLI
+** 定位
+*** 多协议终端 agent runtime
+*** CLI / print / ACP / MCP
+** 主链路
+*** runCli 分流
+*** queryCore 调模型
+*** ToolUseQueue 执行工具
+*** tool_result 进入下一轮
+** 安全
+*** Tool schema
+*** validateInput
+*** Permission Engine
+*** hooks
+*** 工具专属规则
+** 扩展
+*** MCP tools
+*** plugins
+*** slash commands
+*** skills
+** 风险
+*** query.ts 复杂
+*** llm.ts provider 差异
+*** permission 可解释性
+*** 多协议输出漂移
+@endmindmap
+
+[Detail]
+这份模板适合面试最后总结，也适合给新成员讲项目全貌。关键是避免只说“这是一个 CLI 调模型工具”，而要突出：
+
+- 它是 runtime，不只是命令行包装。
+- 它把模型、工具、权限、上下文、扩展和 UI 统一到消息循环。
+- 它的安全和可维护性来自契约收敛，而不是每条路径临时处理。
+
+------------------------------------------------------------
