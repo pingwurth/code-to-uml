@@ -36,6 +36,15 @@
 			.replace(/\r?\n/g, "<br>");
 	}
 
+	function setDetailMessage(message, detail) {
+		const html = renderMarkdown(detail);
+		message.dataset.detail = detail;
+		message.dataset.detailHtml = html;
+		if (!message.dataset.state || message.dataset.state === "") {
+			message.innerHTML = html;
+		}
+	}
+
 	function applyExampleLocale(wrapper, item, index, mode) {
 		const titleI18n = item && item.titleI18n && typeof item.titleI18n === "object" ? item.titleI18n : null;
 		const descI18n = item && item.descriptionI18n && typeof item.descriptionI18n === "object" ? item.descriptionI18n : null;
@@ -66,10 +75,7 @@
 		const message = wrapper.querySelector("[data-example-message]");
 		if (message) {
 			const detail = detailForMode(item, mode);
-			message.dataset.detail = detail;
-			if (!message.dataset.state || message.dataset.state === "") {
-				message.textContent = detail;
-			}
+			setDetailMessage(message, detail);
 		}
 	}
 
@@ -117,14 +123,13 @@
 		const previewNode = grid.querySelector("[data-preview]");
 		previewNode.id = `demo-preview-${safeDiagramKey}-${index + 1}`;
 
-		const message = document.createElement("p");
+		const message = document.createElement("div");
 		message.className = "example-message";
 		message.setAttribute("data-example-message", "");
 		const mode = root.DocsI18n && typeof root.DocsI18n.getMode === "function" ? root.DocsI18n.getMode() : "zh";
 		const initialDetail = detailForMode(exampleItem, mode);
 		if (initialDetail) {
-			message.dataset.detail = initialDetail;
-			message.textContent = initialDetail;
+			setDetailMessage(message, initialDetail);
 		}
 		wrapper.appendChild(message);
 

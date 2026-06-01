@@ -1,0 +1,4 @@
+interface:
+  display_name: "Code UML Report"
+  short_description: "Analyze code and generate consistent UML-backed HTML reports."
+  default_prompt: "Analyze the specified project, module, class, or function and generate a detailed UML graphic report using the project template."

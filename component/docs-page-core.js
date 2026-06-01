@@ -65,6 +65,12 @@
 			return;
 		}
 		const detail = String(messageNode.dataset.detail || "");
+		const detailHtml = String(messageNode.dataset.detailHtml || "");
+		if (detailHtml) {
+			messageNode.innerHTML = detailHtml;
+			messageNode.dataset.state = "";
+			return;
+		}
 		setExampleMessage(example, detail, "");
 	}
 

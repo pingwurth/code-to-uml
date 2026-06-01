@@ -13,11 +13,12 @@
 	const examplesContainer = document.querySelector("[data-examples]");
 	const sideToc = document.querySelector("[data-demo-toc]");
 	const DEMO_EXAMPLES_API_PATH = "/api/demo-examples";
+	const dataDir = document.body.getAttribute("data-dir") || "";
 	const RENDER_WAIT_MS = 2500;
 	const UNKNOWN_RECHECK_DELAY_MS = 800;
 	const RUNTIME_ERROR_WINDOW_MS = 3000;
 	let diagramExamples = {};
-	let activeDiagram = "Sequence";
+	let activeDiagram = tabs.find(tab => tab.classList.contains("is-active"))?.dataset.diagram || "Sequence";
 	const renderTimers = new Map();
 	let renderChain = Promise.resolve();
 	let renderGeneration = 0;
@@ -63,6 +64,13 @@
 		if (!i18n || typeof i18n.t !== "function") return String(diagramKey || "");
 		const label = i18n.t(`demoPage.diagramLabels.${toDiagramKey(diagramKey)}`, mode);
 		return label || String(diagramKey || "");
+	}
+
+	function diagramTitle(diagramKey, mode) {
+		if (i18n && typeof i18n.t === "function") return diagramLabel(diagramKey, mode);
+		const normalized = toDiagramKey(diagramKey);
+		const tab = tabs.find(item => toDiagramKey(item.dataset.diagram) === normalized);
+		return tab ? tab.textContent : String(diagramKey || "");
 	}
 
 	function exampleTitleForMode(example, index, mode) {
@@ -136,29 +144,39 @@
 	});
 
 	async function bootstrapDemo() {
-		diagramExamples = await loadDiagramExamples();
-		if (!diagramExamples || typeof diagramExamples !== "object") {
-			throw new Error("Invalid demo examples payload");
-		}
-		const resolvedInitial = resolveDiagramDataKey(activeDiagram);
-		if (resolvedInitial) {
-			activeDiagram = resolvedInitial;
-		} else {
-			const firstKey = Object.keys(diagramExamples)[0];
-			if (firstKey) {
-				activeDiagram = firstKey;
-			}
-		}
-		applyDemoI18n();
 		bindTabs();
 		initToc();
 		bindTocActiveSync();
+		try {
+			diagramExamples = await loadDiagramExamples();
+			if (!diagramExamples || typeof diagramExamples !== "object") {
+				throw new Error("Invalid demo examples payload");
+			}
+			const resolvedInitial = resolveDiagramDataKey(activeDiagram);
+			if (resolvedInitial) {
+				activeDiagram = resolvedInitial;
+			} else {
+				const firstKey = Object.keys(diagramExamples)[0];
+				if (firstKey) {
+					activeDiagram = firstKey;
+				}
+			}
+		} catch (err) {
+			console.error("Failed to load demo examples:", err);
+			if (examplesContainer) {
+				examplesContainer.innerHTML = '<p class="example-message" data-state="error">示例配置加载失败，请检查 data 目录及 .ctu 文件。</p>';
+			}
+		}
+		applyDemoI18n();
 		loadDiagram(activeDiagram);
 	}
 
 	async function loadDiagramExamples() {
 		const mode = i18n && typeof i18n.getMode === "function" ? i18n.getMode() : "zh";
-		const response = await fetch(`${DEMO_EXAMPLES_API_PATH}?lang=${encodeURIComponent(mode)}`, { cache: "no-store" });
+		const apiUrl = dataDir
+			? `${DEMO_EXAMPLES_API_PATH}?lang=${encodeURIComponent(mode)}&dir=${encodeURIComponent(dataDir)}`
+			: `${DEMO_EXAMPLES_API_PATH}?lang=${encodeURIComponent(mode)}`;
+		const response = await fetch(apiUrl, { cache: "no-store" });
 		if (!response.ok) {
 			throw new Error(`Failed to load ${DEMO_EXAMPLES_API_PATH}: ${response.status}`);
 		}
@@ -169,9 +187,7 @@
 	function bindTabs() {
 		for (const tab of tabs) {
 			tab.addEventListener("click", () => {
-				const key = resolveDiagramDataKey(tab.dataset.diagram);
-				if (!key) return;
-				switchDiagram(key);
+				switchDiagram(tab.dataset.diagram);
 			});
 		}
 	}
@@ -180,17 +196,21 @@
 		if (!toc || typeof toc.render !== "function" || !sideToc) return;
 		toc.render({
 			sideContainer: sideToc,
-			titleText: diagramLabel(activeDiagram),
+			titleText: diagramTitle(activeDiagram),
 			items: []
 		});
 	}
 
 	function switchDiagram(key) {
-		const resolvedKey = resolveDiagramDataKey(key);
-		if (!resolvedKey) return;
+		if (!key) return;
 		renderGeneration += 1;
 		renderChain = Promise.resolve();
-		setActiveTab(resolvedKey);
+		setActiveTab(key);
+		const resolvedKey = resolveDiagramDataKey(key);
+		if (!resolvedKey) {
+			loadDiagram(key, renderGeneration);
+			return;
+		}
 		loadDiagram(resolvedKey, renderGeneration);
 	}
 
@@ -201,7 +221,17 @@
 		for (const tab of tabs) {
 			tab.classList.toggle("is-active", toDiagramKey(tab.dataset.diagram) === activeNormalized);
 		}
-		title.textContent = diagramLabel(key, mode);
+		setActiveOverview(key);
+		title.textContent = diagramTitle(key, mode);
+	}
+
+	function setActiveOverview(key) {
+		const activeNormalized = toDiagramKey(key);
+		for (const overview of document.querySelectorAll("[data-diagram-overview]")) {
+			const isActive = toDiagramKey(overview.dataset.diagramOverview) === activeNormalized;
+			overview.hidden = !isActive;
+			overview.classList.toggle("is-active", isActive);
+		}
 	}
 
 	function loadDiagram(key, generation = renderGeneration) {
@@ -268,7 +298,7 @@
 		if (!toc || typeof toc.render !== "function" || !sideToc) return;
 		toc.render({
 			sideContainer: sideToc,
-			titleText: diagramLabel(activeDiagram),
+			titleText: diagramTitle(activeDiagram),
 			items
 		});
 	}
@@ -403,7 +433,7 @@
 			}
 
 			console.error("Render failed after fallback:", err, errorMeta);
-			preview.textContent = tr("renderFailedShort");
+			preview.textContent = message || tr("renderFailedShort");
 			core.setExampleMessage(example, tr("renderFailed"), "error");
 		}
 	}
@@ -694,22 +724,30 @@
 
 	function applyDemoI18n() {
 		const mode = i18n && typeof i18n.getMode === "function" ? i18n.getMode() : "zh";
-		document.documentElement.lang = i18n && i18n.getMode() === "en" ? "en" : "zh-CN";
-		document.title = tr("pageTitle") || document.title;
-		const pageHeading = document.querySelector(".intro h1");
-		if (pageHeading) pageHeading.textContent = tr("pageTitle");
-		const intro = document.querySelector(".intro > p");
-		if (intro) intro.textContent = tr("introText");
-		const tabs = document.querySelector(".demo-tabs");
-		if (tabs) tabs.setAttribute("aria-label", tr("tabsAria"));
-		const sectionOverview = document.getElementById("demo-section-overview");
-		if (sectionOverview) sectionOverview.textContent = tr("sectionOverview");
-		for (const tab of document.querySelectorAll(".demo-tab[data-diagram]")) {
-			tab.textContent = diagramLabel(tab.dataset.diagram, mode);
+		const hasI18n = i18n && typeof i18n.t === "function";
+		if (hasI18n) {
+			document.documentElement.lang = i18n && i18n.getMode() === "en" ? "en" : "zh-CN";
+			document.title = tr("pageTitle") || document.title;
+			const pageHeading = document.querySelector(".intro h1");
+			if (pageHeading) pageHeading.textContent = tr("pageTitle");
+			const intro = document.querySelector(".intro > p");
+			if (intro) intro.textContent = tr("introText");
+			const tabs = document.querySelector(".demo-tabs");
+			if (tabs) tabs.setAttribute("aria-label", tr("tabsAria"));
+			for (const sectionOverview of document.querySelectorAll("[data-diagram-overview]")) {
+				const label = diagramLabel(sectionOverview.dataset.diagramOverview, mode);
+				sectionOverview.textContent = label ? `${label} ${tr("sectionOverview")}` : tr("sectionOverview");
+			}
+			for (const tab of document.querySelectorAll(".demo-tab[data-diagram]")) {
+				tab.textContent = diagramLabel(tab.dataset.diagram, mode);
+			}
 		}
-		if (title) title.textContent = diagramLabel(activeDiagram, mode);
-		for (const actions of document.querySelectorAll('[data-i18n-role="example-actions"]')) {
-			actions.setAttribute("aria-label", tr("exampleActions"));
+		if (title) title.textContent = diagramTitle(activeDiagram, mode);
+		setActiveOverview(activeDiagram);
+		if (hasI18n) {
+			for (const actions of document.querySelectorAll('[data-i18n-role="example-actions"]')) {
+				actions.setAttribute("aria-label", tr("exampleActions"));
+			}
 		}
 		if (demoExample && typeof demoExample.applyExampleLocale === "function") {
 			const examples = diagramExamples[activeDiagram] || [];
@@ -720,17 +758,19 @@
 				}
 			}
 		}
-		for (const button of document.querySelectorAll('.icon-button[data-action="copy-source"]')) {
-			button.setAttribute("aria-label", tr("copySource"));
-			button.dataset.tooltip = tr("copySource");
-		}
-		for (const button of document.querySelectorAll('.icon-button[data-action="copy-svg"]')) {
-			button.setAttribute("aria-label", tr("copySvg"));
-			button.dataset.tooltip = tr("copySvg");
-		}
-		for (const button of document.querySelectorAll('.icon-button[data-action="download-svg"]')) {
-			button.setAttribute("aria-label", tr("downloadSvg"));
-			button.dataset.tooltip = tr("downloadSvg");
+		if (hasI18n) {
+			for (const button of document.querySelectorAll('.icon-button[data-action="copy-source"]')) {
+				button.setAttribute("aria-label", tr("copySource"));
+				button.dataset.tooltip = tr("copySource");
+			}
+			for (const button of document.querySelectorAll('.icon-button[data-action="copy-svg"]')) {
+				button.setAttribute("aria-label", tr("copySvg"));
+				button.dataset.tooltip = tr("copySvg");
+			}
+			for (const button of document.querySelectorAll('.icon-button[data-action="download-svg"]')) {
+				button.setAttribute("aria-label", tr("downloadSvg"));
+				button.dataset.tooltip = tr("downloadSvg");
+			}
 		}
 	}
 

@@ -123,6 +123,12 @@
 		return Boolean(preview.querySelector("svg"));
 	}
 
+	function showPreviewError(preview, err) {
+		if (!preview) return;
+		const message = err && err.message ? err.message : String(err || "");
+		preview.textContent = message || "Render failed.";
+	}
+
 	function isLargeDiagramFailure(text) {
 		const msg = String(text || "").toLowerCase();
 		return msg.includes("diagram too large for browser rendering");
@@ -216,7 +222,13 @@
 			}
 		}
 
-		const fallbackSvg = await requestJarFallbackSvg(source, { endpoint: fallbackEndpoint });
+		let fallbackSvg = "";
+		try {
+			fallbackSvg = await requestJarFallbackSvg(source, { endpoint: fallbackEndpoint });
+		} catch (err) {
+			showPreviewError(preview, err);
+			throw err;
+		}
 		const applied = applyFallbackSvg(preview, fallbackSvg);
 		if (!applied) {
 			throw new Error("Fallback SVG could not be inserted into preview.");

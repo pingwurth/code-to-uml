@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Code-To-UML Cache Index</title>
+	<link rel="icon" href="favicon.svg" type="image/svg+xml" />
+	<style>
+		:root {
+			color-scheme: light;
+			--bg: #ffffff;
+			--fg: #1f2328;
+			--muted: #59636e;
+			--line: #d8dee4;
+			--soft-line: #eaeef2;
+			--surface: #f6f8fa;
+			--accent: #1f6feb;
+			--accent-soft: #ddf4ff;
+			--error: #cf222e;
+		}
+
+		* {
+			box-sizing: border-box;
+		}
+
+		body {
+			margin: 0;
+			background: var(--bg);
+			color: var(--fg);
+			font: 15px/1.55 Arial, Helvetica, sans-serif;
+		}
+
+		a {
+			color: var(--accent);
+			text-decoration: none;
+		}
+
+		a:hover {
+			text-decoration: underline;
+		}
+
+		.topbar {
+			position: sticky;
+			top: 0;
+			z-index: 10;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 1rem;
+			padding: 0.65rem 1rem;
+			background: color-mix(in srgb, #fff 93%, var(--surface));
+			border-bottom: 1px solid var(--soft-line);
+		}
+
+		.logo {
+			display: inline-flex;
+			align-items: center;
+			gap: 0.45rem;
+			color: var(--fg);
+			font-weight: 700;
+		}
+
+		.logo img {
+			width: 1.4rem;
+			height: 1.4rem;
+		}
+
+		.nav-link {
+			font-weight: 600;
+		}
+
+		.intro-heading {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 1rem;
+			margin: 0 0 0.45rem;
+		}
+
+		.intro-actions {
+			display: inline-flex;
+			align-items: center;
+			justify-content: flex-end;
+			flex: 0 0 auto;
+		}
+
+		button {
+			font: inherit;
+		}
+
+		.action-button {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			min-height: 2rem;
+			padding: 0.35rem 0.7rem;
+			border: 1px solid var(--line);
+			border-radius: 6px;
+			background: #fff;
+			color: var(--fg);
+			cursor: pointer;
+			font-weight: 600;
+		}
+
+		.action-button:hover:not(:disabled),
+		.action-button:focus-visible {
+			border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
+			outline: none;
+		}
+
+		.action-button:disabled {
+			cursor: not-allowed;
+			opacity: 0.55;
+		}
+
+		.action-button[data-variant="danger"] {
+			border-color: color-mix(in srgb, var(--error) 45%, var(--line));
+			color: var(--error);
+		}
+
+		.shell {
+			width: min(100%, 980px);
+			margin: 0 auto;
+			padding: 1.5rem 1rem 3rem;
+		}
+
+		.intro {
+			padding-bottom: 1rem;
+			border-bottom: 1px solid var(--soft-line);
+		}
+
+		.intro h1 {
+			min-width: 0;
+			margin: 0;
+			font-size: 2rem;
+			line-height: 1.15;
+		}
+
+		.intro p {
+			margin: 0;
+			color: var(--muted);
+		}
+
+		.status {
+			margin: 1rem 0;
+			padding: 0.75rem 0.9rem;
+			border: 1px solid var(--line);
+			background: var(--surface);
+			color: var(--muted);
+		}
+
+		.status[data-state="error"] {
+			border-color: color-mix(in srgb, var(--error) 40%, var(--line));
+			color: var(--error);
+			background: color-mix(in srgb, #fff 88%, var(--error));
+		}
+
+		.index-list {
+			display: grid;
+			gap: 0;
+			margin: 1rem 0 0;
+			padding: 0;
+			list-style: none;
+			border-top: 1px solid var(--soft-line);
+		}
+
+		.index-item {
+			display: grid;
+			grid-template-columns: minmax(0, 1fr) auto;
+			gap: 1rem;
+			align-items: start;
+			border-bottom: 1px solid var(--soft-line);
+		}
+
+		.index-link {
+			display: grid;
+			grid-template-columns: minmax(0, 1fr) auto;
+			gap: 0.35rem 1rem;
+			padding: 0.85rem 0.25rem;
+			color: var(--fg);
+		}
+
+		.index-link:hover {
+			background: var(--surface);
+			text-decoration: none;
+		}
+
+		.file-name {
+			min-width: 0;
+			overflow-wrap: anywhere;
+			font-weight: 700;
+		}
+
+		.file-path,
+		.file-meta {
+			color: var(--muted);
+			font-size: 0.88rem;
+		}
+
+		.file-path {
+			grid-column: 1 / -1;
+			overflow-wrap: anywhere;
+		}
+
+		.delete-button {
+			justify-self: end;
+			margin: 0.85rem 0.25rem 0 0;
+		}
+
+		@media (max-width: 640px) {
+			.topbar {
+				align-items: flex-start;
+				flex-direction: column;
+			}
+
+			.intro h1 {
+				font-size: 1.65rem;
+			}
+
+			.index-link {
+				grid-template-columns: minmax(0, 1fr);
+			}
+
+			.index-item {
+				grid-template-columns: minmax(0, 1fr);
+				gap: 0;
+			}
+
+			.delete-button {
+				justify-self: end;
+				margin: 0 0.25rem 0.85rem;
+			}
+		}
+	</style>
+</head>
+
+<body>
+	<header class="topbar">
+		<a class="logo" href="index.html" aria-label="Code-To-UML Cache Index">
+			<img src="favicon.svg" alt="" />
+			<span>Code-To-UML</span>
+		</a>
+		<a class="nav-link" href="demo.html">Demo</a>
+	</header>
+
+	<main class="shell">
+		<section class="intro">
+			<div class="intro-heading">
+				<h1>Cache Index</h1>
+				<div class="intro-actions">
+					<button class="action-button" data-variant="danger" type="button" data-clear-cache>Clear</button>
+				</div>
+			</div>
+			<p data-summary>正在扫描 cache/ 下的 HTML 文件...</p>
+		</section>
+
+		<div class="status" data-status>加载中...</div>
+		<ul class="index-list" data-index-list aria-label="cache HTML 文件"></ul>
+	</main>
+
+	<script>
+		"use strict";
+
+		(function initCacheIndex() {
+			const status = document.querySelector("[data-status]");
+			const summary = document.querySelector("[data-summary]");
+			const list = document.querySelector("[data-index-list]");
+			const clearButton = document.querySelector("[data-clear-cache]");
+			let currentFiles = [];
+
+			function formatBytes(size) {
+				const bytes = Number(size) || 0;
+				if (bytes < 1024) return `${bytes} B`;
+				if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+				return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+			}
+
+			function setStatus(message, state) {
+				status.hidden = false;
+				status.dataset.state = state || "";
+				status.textContent = message;
+			}
+
+			function requestJson(url, options) {
+				return fetch(url, options || {})
+					.then(response => {
+						return response.json()
+							.catch(() => ({}))
+							.then(payload => {
+								if (!response.ok) {
+									throw new Error(payload && payload.error ? payload.error : `HTTP ${response.status}`);
+								}
+								return payload;
+							});
+					});
+			}
+
+			function renderFiles(files) {
+				currentFiles = files;
+				list.textContent = "";
+				if (!files.length) {
+					setStatus("cache/ 下暂无 HTML 文件。");
+					summary.textContent = "未找到可跳转的 HTML 页面。";
+					clearButton.disabled = false;
+					return;
+				}
+
+				status.hidden = true;
+				clearButton.disabled = false;
+				summary.textContent = `A total of ${files.length} HTML files were found. Click on an entry to open the corresponding page.`;
+				for (const file of files) {
+					const item = document.createElement("li");
+					item.className = "index-item";
+
+					const link = document.createElement("a");
+					link.className = "index-link";
+					link.href = file.href;
+
+					const name = document.createElement("span");
+					name.className = "file-name";
+					name.textContent = file.name || file.path;
+
+					const meta = document.createElement("span");
+					meta.className = "file-meta";
+					meta.textContent = formatBytes(file.size);
+
+					const deleteButton = document.createElement("button");
+					deleteButton.className = "action-button delete-button";
+					deleteButton.dataset.variant = "danger";
+					deleteButton.type = "button";
+					deleteButton.textContent = "Delete";
+					deleteButton.addEventListener("click", event => {
+						event.preventDefault();
+						event.stopPropagation();
+						deleteFile(file);
+					});
+
+					const filePath = document.createElement("span");
+					filePath.className = "file-path";
+					filePath.textContent = file.path;
+
+					link.append(name, meta, filePath);
+					item.append(link, deleteButton);
+					list.appendChild(item);
+				}
+			}
+
+			function loadFiles() {
+				clearButton.disabled = true;
+				setStatus("加载中...");
+				return requestJson("/api/cache-html")
+					.then(payload => {
+						const files = Array.isArray(payload && payload.files) ? payload.files : [];
+						renderFiles(files);
+					})
+					.catch(err => {
+						currentFiles = [];
+						clearButton.disabled = true;
+						status.dataset.state = "error";
+						status.textContent = `扫描 cache/ 失败：${err.message}`;
+						summary.textContent = "请通过本项目的 Node 服务器访问 index.html。";
+					});
+			}
+
+			function deleteFile(file) {
+				if (!file || !file.path) return;
+				if (!window.confirm(`Delete ${file.path} and its matching data folder?`)) {
+					return;
+				}
+				setStatus(`正在删除 ${file.path}...`);
+				requestJson("/api/cache-html", {
+					method: "DELETE",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ path: file.path })
+				})
+					.then(() => loadFiles())
+					.catch(err => {
+						status.dataset.state = "error";
+						status.textContent = `删除失败：${err.message}`;
+					});
+			}
+
+			function clearCache() {
+				if (!window.confirm("Clear generated HTML files and non-demo data folders?")) {
+					return;
+				}
+				setStatus("正在清空生成文件...");
+				requestJson("/api/cache-html/all", { method: "DELETE" })
+					.then(() => loadFiles())
+					.catch(err => {
+						status.dataset.state = "error";
+						status.textContent = `清空失败：${err.message}`;
+					});
+			}
+
+			clearButton.addEventListener("click", clearCache);
+			loadFiles();
+		})();
+	</script>
+</body>
+
+</html>

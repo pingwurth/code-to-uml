@@ -1,23 +1,26 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
-	<meta charset="utf-8"/>
-	<meta name="viewport" content="width=device-width, initial-scale=1"/>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<title>Code-To-UML Template</title>
-	<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+	<link rel="icon" href="favicon.svg" type="image/svg+xml" />
 	<link rel="stylesheet" href="main.css">
 </head>
+
 <body class="demo-page">
-		<header class="demo-topbar">
-			<a class="demo-topbar-logo" href="demo.html" aria-label="Code-To-UML Home">
-				<img src="favicon.svg" alt="" />
-				<span>Code-To-UML</span>
-			</a>
-				<a class="demo-topbar-link" id="official-demo-link" href="plantuml-official-demo/zh/sequence-diagram_zh.html" target="_blank" rel="noopener noreferrer">
-					PlantUML Official Demo
-				</a>
-		</header>
-		<div class="page-shell demo-shell">
+	<header class="demo-topbar">
+		<a class="demo-topbar-logo" href="index.html" aria-label="Code-To-UML Home">
+			<img src="favicon.svg" alt="" />
+			<span>Code-To-UML</span>
+		</a>
+		<a class="demo-topbar-link" id="official-demo-link" href="plantuml-official-demo/zh/sequence-diagram_zh.html"
+			target="_blank" rel="noopener noreferrer">
+			PlantUML Official Demo
+		</a>
+	</header>
+	<div class="page-shell demo-shell">
 		<main class="content">
 			<section class="intro">
 				<h1>Code-To-UML Template</h1>
@@ -46,11 +49,29 @@
 				<button class="demo-tab" type="button" data-diagram="yaml">YAML</button>
 			</nav>
 
-				<section class="doc-section demo-panel">
-					<h2 id="demo-title">Sequence</h2>
-					<p id="demo-section-overview">章节概述</p>
-					<div class="demo-examples" data-examples></div>
-				</section>
+			<section class="doc-section demo-panel">
+				<h2 id="demo-title">Sequence</h2>
+				<p class="demo-section-overview is-active" data-diagram-overview="sequence">Sequence 章节概述</p>
+				<p class="demo-section-overview" data-diagram-overview="use-case" hidden>Use Case 章节概述</p>
+				<p class="demo-section-overview" data-diagram-overview="class" hidden>Class 章节概述</p>
+				<p class="demo-section-overview" data-diagram-overview="activity" hidden>Activity 章节概述</p>
+				<p class="demo-section-overview" data-diagram-overview="component" hidden>Component 章节概述</p>
+				<p class="demo-section-overview" data-diagram-overview="state" hidden>State 章节概述</p>
+				<p class="demo-section-overview" data-diagram-overview="object" hidden>Object 章节概述</p>
+				<p class="demo-section-overview" data-diagram-overview="deployment" hidden>Deployment 章节概述</p>
+				<p class="demo-section-overview" data-diagram-overview="timing" hidden>Timing 章节概述</p>
+				<p class="demo-section-overview" data-diagram-overview="regex" hidden>Regex 章节概述</p>
+				<p class="demo-section-overview" data-diagram-overview="network" hidden>Network 章节概述</p>
+				<p class="demo-section-overview" data-diagram-overview="wireframe" hidden>Wireframe 章节概述</p>
+				<p class="demo-section-overview" data-diagram-overview="archimate" hidden>Archimate 章节概述</p>
+				<p class="demo-section-overview" data-diagram-overview="gantt" hidden>Gantt 章节概述</p>
+				<p class="demo-section-overview" data-diagram-overview="mindmap" hidden>MindMap 章节概述</p>
+				<p class="demo-section-overview" data-diagram-overview="wbs" hidden>WBS 章节概述</p>
+				<p class="demo-section-overview" data-diagram-overview="ebnf" hidden>EBNF 章节概述</p>
+				<p class="demo-section-overview" data-diagram-overview="json" hidden>JSON 章节概述</p>
+				<p class="demo-section-overview" data-diagram-overview="yaml" hidden>YAML 章节概述</p>
+				<div class="demo-examples" data-examples></div>
+			</section>
 		</main>
 		<aside data-demo-toc></aside>
 	</div>
@@ -64,30 +85,31 @@
 	<script src="i18n-config.js"></script>
 	<script src="component/toc-component.js"></script>
 	<script src="js/markdown-it.js"></script>
-		<script src="component/demo-example-component.js"></script>
-		<script src="demo.js"></script>
-			<script>
-				(function initOfficialDemoLink() {
-					const link = document.getElementById("official-demo-link");
-					if (!link) return;
+	<script src="component/demo-example-component.js"></script>
+	<script src="demo.js"></script>
+	<script>
+		(function initOfficialDemoLink() {
+			const link = document.getElementById("official-demo-link");
+			if (!link) return;
 
-					function resolveLang() {
-						const mode = window.DocsI18n && typeof window.DocsI18n.getMode === "function"
-							? String(window.DocsI18n.getMode() || "")
-							: "";
-						const htmlLang = String(document.documentElement.lang || "").toLowerCase();
-						return (mode === "en" || htmlLang.startsWith("en")) ? "en" : "zh";
-					}
+			function resolveLang() {
+				const mode = window.DocsI18n && typeof window.DocsI18n.getMode === "function"
+					? String(window.DocsI18n.getMode() || "")
+					: "";
+				const htmlLang = String(document.documentElement.lang || "").toLowerCase();
+				return (mode === "en" || htmlLang.startsWith("en")) ? "en" : "zh";
+			}
 
-					function apply() {
-						const lang = resolveLang();
-						link.href = `plantuml-official-demo/${lang}/sequence-diagram_${lang}.html`;
-						link.textContent = lang === "en" ? "PlantUML Official Tutorial" : "PlantUML 官方教程";
-					}
+			function apply() {
+				const lang = resolveLang();
+				link.href = `plantuml-official-demo/${lang}/sequence-diagram_${lang}.html`;
+				link.textContent = lang === "en" ? "PlantUML Official Tutorial" : "PlantUML 官方教程";
+			}
 
-					apply();
-					document.addEventListener("docs:langchange", apply);
-				})();
-			</script>
+			apply();
+			document.addEventListener("docs:langchange", apply);
+		})();
+	</script>
 </body>
+
 </html>

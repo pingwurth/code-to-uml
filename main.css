@@ -205,7 +205,7 @@ a:hover {
 	margin: 0.55rem 0 0.9rem;
 }
 
-.doc-section code:not([data-source]) {
+.doc-section :not(pre) > code:not([data-source]) {
 	padding: 0.08rem 0.28rem;
 	border-radius: 4px;
 	background: var(--surface);
@@ -273,12 +273,35 @@ a:hover {
 	margin: 0.2rem 0;
 }
 
+.demo-example-desc pre {
+	display: block;
+	margin: 0 0 0.5rem;
+	padding: 0.65rem 0.75rem;
+	max-width: 100%;
+	overflow-x: auto;
+	border-radius: 6px;
+	background: var(--surface);
+	color: var(--fg);
+	line-height: 1.45;
+	tab-size: 4;
+	white-space: pre-wrap;
+}
+
 .demo-example-desc code {
 	padding: 0.08rem 0.26rem;
 	border-radius: 4px;
 	background: color-mix(in srgb, var(--surface) 88%, var(--line));
 	color: var(--fg);
 	font: 0.84em Consolas, Monaco, "Courier New", monospace;
+}
+
+.demo-example-desc pre code {
+	display: block;
+	padding: 0;
+	border-radius: 0;
+	background: var(--surface);
+	color: var(--fg);
+	white-space: pre-wrap;
 }
 
 .demo-example-desc a {
@@ -527,6 +550,29 @@ textarea[data-source]:focus {
 	padding: 0.25rem 0;
 	color: var(--muted);
 	font-size: 0.82rem;
+}
+
+.example-message pre {
+	display: block;
+	margin: 0.25rem 0;
+	padding: 0.65rem 0.75rem;
+	max-width: 100%;
+	overflow-x: auto;
+	border-radius: 6px;
+	background: var(--surface);
+	color: var(--fg);
+	line-height: 1.45;
+	tab-size: 4;
+	white-space: pre-wrap;
+}
+
+.example-message pre code {
+	display: block;
+	padding: 0;
+	background: var(--surface);
+	color: var(--fg);
+	font: 0.92em Consolas, Monaco, "Courier New", monospace;
+	white-space: pre-wrap;
 }
 
 .example-message[data-state="success"] {

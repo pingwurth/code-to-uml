@@ -1,0 +1,45 @@
+Title: Your Section Title Here
+Describe: A brief overview of this group of examples (or "None" if not needed)
+------------------------------------------------------------
+[Example]
+Example Title 1 (or "None" to hide the title)
+
+[Description]
+A short explanation of what this diagram demonstrates.
+You can use **markdown** formatting here.
+Write "None" if no description is needed.
+
+[UML]
+@startuml
+' === Your PlantUML code here ===
+Alice -> Bob: Hello
+Bob --> Alice: Hi there
+@enduml
+
+[Detail]
+A detailed walkthrough of the UML diagram above.
+Use this section to explain the **key elements**, **arrows**, and **relationships**
+so readers can fully understand the diagram.
+You can use **markdown** formatting here.
+Write "None" or leave empty to skip.
+
+------------------------------------------------------------
+[Example]
+Example Title 2
+
+[Description]
+Description for the second example.
+
+[UML]
+@startuml
+' === Another diagram ===
+participant User
+participant System
+User -> System: Request
+System --> User: Response
+@enduml
+
+[Detail]
+None
+
+------------------------------------------------------------

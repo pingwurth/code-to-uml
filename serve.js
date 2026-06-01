@@ -177,8 +177,133 @@ function localizeValue(byLang, lang, separator) {
 	return zh || en;
 }
 
-async function loadDemoExamplesFromData(lang) {
-	const demoDir = path.join(ROOT_DIR, "data", "demo");
+function toUrlPath(relativePath) {
+	return `/${String(relativePath || "")
+		.split("/")
+		.map(segment => encodeURIComponent(segment))
+		.join("/")}`;
+}
+
+function createHttpError(statusCode, message) {
+	const err = new Error(message);
+	err.statusCode = statusCode;
+	return err;
+}
+
+function resolveCacheHtmlTarget(rootDir, requestedPath) {
+	const relativeInput = String(requestedPath || "").replace(/\\/g, "/");
+	if (!relativeInput || relativeInput.startsWith("/") || relativeInput.includes("\0")) {
+		throw createHttpError(400, "Invalid cache HTML path");
+	}
+
+	const cacheDir = path.join(rootDir, "cache");
+	const absPath = path.resolve(rootDir, relativeInput);
+	if (!isPathInside(cacheDir, absPath)) {
+		throw createHttpError(400, "Cache HTML path must be inside cache/");
+	}
+	if (path.extname(absPath).toLowerCase() !== ".html") {
+		throw createHttpError(400, "Cache path must point to an HTML file");
+	}
+	if (path.basename(absPath) === "_TEMPLATE.html") {
+		throw createHttpError(400, "Cannot delete _TEMPLATE.html");
+	}
+
+	const relativePath = path.relative(rootDir, absPath).split(path.sep).join("/");
+	const dataName = path.basename(absPath, ".html");
+	const dataDir = dataName === "demo" ? null : path.join(rootDir, "data", dataName);
+	return { absPath, relativePath, dataDir, dataName };
+}
+
+async function listCacheHtmlFiles(rootDir = ROOT_DIR) {
+	const cacheDir = path.join(rootDir, "cache");
+	const files = [];
+
+	async function walk(dir) {
+		let entries = [];
+		try {
+			entries = await fs.promises.readdir(dir, { withFileTypes: true });
+		} catch (err) {
+			if (err && err.code === "ENOENT" && dir === cacheDir) {
+				return;
+			}
+			throw err;
+		}
+
+		for (const entry of entries) {
+			const absPath = path.join(dir, entry.name);
+			if (entry.isDirectory()) {
+				await walk(absPath);
+				continue;
+			}
+			if (!entry.isFile() || path.extname(entry.name).toLowerCase() !== ".html") {
+				continue;
+			}
+			if (entry.name === "_TEMPLATE.html") {
+				continue;
+			}
+
+			const stats = await fs.promises.stat(absPath);
+			const relativePath = path.relative(rootDir, absPath).split(path.sep).join("/");
+			files.push({
+				name: entry.name,
+				path: relativePath,
+				href: toUrlPath(relativePath),
+				size: stats.size,
+				modifiedMs: Math.round(stats.mtimeMs)
+			});
+		}
+	}
+
+	await walk(cacheDir);
+	files.sort((a, b) => a.path.localeCompare(b.path));
+	return files;
+}
+
+async function deleteCacheHtmlFile(rootDir, requestedPath) {
+	const target = resolveCacheHtmlTarget(rootDir, requestedPath);
+	await fs.promises.rm(target.absPath, { force: true });
+	if (target.dataDir) {
+		await fs.promises.rm(target.dataDir, { recursive: true, force: true });
+	}
+	return {
+		cachePath: target.relativePath,
+		dataDir: target.dataDir ? `data/${target.dataName}` : null
+	};
+}
+
+async function clearGeneratedCache(rootDir = ROOT_DIR) {
+	const deletedHtml = [];
+	const files = await listCacheHtmlFiles(rootDir);
+	for (const file of files) {
+		await fs.promises.rm(path.join(rootDir, file.path), { force: true });
+		deletedHtml.push(file.path);
+	}
+
+	const deletedDataDirs = [];
+	const dataDir = path.join(rootDir, "data");
+	let entries = [];
+	try {
+		entries = await fs.promises.readdir(dataDir, { withFileTypes: true });
+	} catch (err) {
+		if (!err || err.code !== "ENOENT") {
+			throw err;
+		}
+	}
+
+	for (const entry of entries) {
+		if (!entry.isDirectory() || entry.name === "demo") {
+			continue;
+		}
+		await fs.promises.rm(path.join(dataDir, entry.name), { recursive: true, force: true });
+		deletedDataDirs.push(`data/${entry.name}`);
+	}
+
+	return { deletedHtml, deletedDataDirs };
+}
+
+async function loadDemoExamplesFromData(lang, dataSubdir) {
+	const safeDir = String(dataSubdir || "demo").replace(/[^a-zA-Z0-9_-]/g, "");
+	const demoDir = path.join(ROOT_DIR, "data", safeDir);
 	let filenames = [];
 	try {
 		filenames = await fs.promises.readdir(demoDir);
@@ -282,7 +407,7 @@ function resolveStaticPath(urlPath) {
 		pathname = `/js${pathname}`;
 	}
 	if (pathname === "/") {
-		pathname = "/demo.html";
+		pathname = "/index.html";
 	}
 	const absPath = path.resolve(ROOT_DIR, `.${pathname}`);
 	if (!isPathInside(ROOT_DIR, absPath)) {
@@ -333,8 +458,9 @@ const server = http.createServer(async (req, res) => {
 
 			if (method === "GET" && requestUrl.pathname === "/api/demo-examples") {
 				const lang = requestUrl.searchParams.get("lang") || "zh";
+				const dir = requestUrl.searchParams.get("dir") || "demo";
 				try {
-					const payload = await loadDemoExamplesFromData(lang);
+					const payload = await loadDemoExamplesFromData(lang, dir);
 					sendJson(res, 200, payload);
 				} catch (err) {
 					console.error("Failed to load demo examples from data directory:", err);
@@ -369,9 +495,53 @@ const server = http.createServer(async (req, res) => {
 			return;
 		}
 
+		if (method === "GET" && requestUrl.pathname === "/api/cache-html") {
+			try {
+				const files = await listCacheHtmlFiles(ROOT_DIR);
+				sendJson(res, 200, { files });
+			} catch (err) {
+				console.error("Failed to list cache HTML files:", err);
+				sendJson(res, 500, { error: err && err.message ? err.message : String(err) });
+			}
+			return;
+		}
+
+		if (method === "DELETE" && requestUrl.pathname === "/api/cache-html") {
+			try {
+				const bodyRaw = await readRequestBody(req);
+				let body = null;
+				try {
+					body = bodyRaw ? JSON.parse(bodyRaw) : {};
+				} catch {
+					sendJson(res, 400, { error: "Invalid JSON body" });
+					return;
+				}
+				const result = await deleteCacheHtmlFile(ROOT_DIR, body && body.path);
+				sendJson(res, 200, result);
+			} catch (err) {
+				const statusCode = err && err.statusCode ? err.statusCode : 500;
+				if (statusCode >= 500) {
+					console.error("Failed to delete cache HTML file:", err);
+				}
+				sendJson(res, statusCode, { error: err && err.message ? err.message : String(err) });
+			}
+			return;
+		}
+
+		if (method === "DELETE" && requestUrl.pathname === "/api/cache-html/all") {
+			try {
+				const result = await clearGeneratedCache(ROOT_DIR);
+				sendJson(res, 200, result);
+			} catch (err) {
+				console.error("Failed to clear generated cache files:", err);
+				sendJson(res, 500, { error: err && err.message ? err.message : String(err) });
+			}
+			return;
+		}
+
 		if (method !== "GET" && method !== "HEAD") {
 			res.statusCode = 405;
-			res.setHeader("Allow", "GET, HEAD, POST");
+			res.setHeader("Allow", "GET, HEAD, POST, DELETE");
 			res.end("Method Not Allowed");
 			return;
 		}
