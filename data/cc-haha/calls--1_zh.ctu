@@ -9,12 +9,12 @@ Desktop 通过 `api/client.ts` 发起 REST 请求，通过 `api/websocket.ts` �
 
 [UML]
 @startuml
-!theme plain
-skinparam backgroundColor #1a1a2e
-skinparam defaultFontColor #FFFFFF
-skinparam participantBackgroundColor #2a2a4e
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontColor #333333
+skinparam participantBackgroundColor #FFF8F0
 skinparam participantBorderColor #FF7A00
-skinparam arrowColor #4A9EFF
+skinparam arrowColor #2563EB
+skinparam participantFontColor #333333
 
 participant "React Page" as page
 participant "Zustand Store" as store
@@ -94,12 +94,14 @@ Desktop 使用 Tauri 2.x 架构，Rust 后端提供原生能力，前端 React �
 
 [UML]
 @startuml
-!theme plain
-skinparam backgroundColor #1a1a2e
-skinparam defaultFontColor #FFFFFF
-skinparam componentBackgroundColor #2a2a4e
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontColor #333333
+skinparam componentBackgroundColor #F0F7FF
 skinparam componentBorderColor #FF7A00
-skinparam arrowColor #4A9EFF
+skinparam arrowColor #2563EB
+skinparam componentFontColor #333333
+skinparam noteBorderColor #2563EB
+skinparam noteBackgroundColor #FFFFF0
 
 package "Tauri Desktop App" {
   component "Rust Backend\n(src-tauri/)" as rust {

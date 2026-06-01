@@ -9,13 +9,13 @@ Describe: 请求处理全链路、Agent 运行循环与 WebSocket 通信流程
 
 [UML]
 @startuml
-!theme plain
-skinparam backgroundColor #1a1a2e
-skinparam defaultFontColor #FFFFFF
-skinparam participantBackgroundColor #2a2a4e
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontColor #333333
+skinparam participantBackgroundColor #FFF8F0
 skinparam participantBorderColor #FF7A00
-skinparam arrowColor #4A9EFF
-skinparam sequenceLifeLineBorderColor #4A9EFF
+skinparam arrowColor #2563EB
+skinparam sequenceLifeLineBorderColor #999999
+skinparam participantFontColor #333333
 
 actor "用户" as user
 participant "Desktop UI\n(React)" as ui
@@ -76,12 +76,12 @@ Agent 核心运行循环
 
 [UML]
 @startuml
-!theme plain
-skinparam backgroundColor #1a1a2e
-skinparam defaultFontColor #FFFFFF
-skinparam activityBackgroundColor #2a2a4e
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontColor #333333
+skinparam activityBackgroundColor #F0F7FF
 skinparam activityBorderColor #FF7A00
-skinparam arrowColor #4A9EFF
+skinparam arrowColor #2563EB
+skinparam activityFontColor #333333
 
 start
 :初始化 Agent 上下文;

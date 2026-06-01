@@ -9,12 +9,14 @@ Describe: 任务生命周期管理、IM 适配器共享架构与差异化实现
 
 [UML]
 @startuml
-!theme plain
-skinparam backgroundColor #1a1a2e
-skinparam defaultFontColor #FFFFFF
-skinparam stateBackgroundColor #2a2a4e
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontColor #333333
+skinparam stateBackgroundColor #FFF8F0
 skinparam stateBorderColor #FF7A00
-skinparam arrowColor #4A9EFF
+skinparam arrowColor #2563EB
+skinparam stateFontColor #333333
+skinparam noteBorderColor #2563EB
+skinparam noteBackgroundColor #F0F7FF
 
 state "pending" as pending
 state "running" as running
@@ -81,12 +83,13 @@ IM 适配器共享架构
 
 [UML]
 @startuml
-!theme plain
-skinparam backgroundColor #1a1a2e
-skinparam defaultFontColor #FFFFFF
-skinparam classBackgroundColor #2a2a4e
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontColor #333333
+skinparam classBackgroundColor #F0F7FF
 skinparam classBorderColor #FF7A00
-skinparam arrowColor #4A9EFF
+skinparam arrowColor #2563EB
+skinparam classFontColor #333333
+skinparam packageBorderColor #FF7A00
 
 package "adapters/common/" as common {
   class "WsBridge" as bridge {
@@ -120,46 +123,31 @@ package "adapters/common/" as common {
     +save(file): ref
     +gc(): cleanup
   }
-  
-  class "config.ts" as config {
-    +loadConfig(): AdapterConfig
-    +getConfiguredWorkDir()
-  }
-  
-  class "pairing.ts" as pair {
-    +isAllowedUser()
-    +tryPair()
-  }
-  
-  class "permission.ts" as perm {
-    +parsePermissionCommand()
-    +formatPermissionRequest()
-  }
 }
 
 package "平台实现" {
   class "Telegram" as tg {
     sdk: grammy Bot
-    特点: InlineKeyboard 权限按钮
-    限制: 4000字符/消息
+    特点: InlineKeyboard
+    限制: 4000字符
   }
   
   class "Feishu" as fs {
-    sdk: @larksuiteoapi/node-sdk
+    sdk: larksuiteoapi
     特点: CardKit 流式卡片
-    特点: Markdown 优化渲染
+    特点: Markdown 优化
   }
   
   class "DingTalk" as dt {
     sdk: dingtalk-stream
-    特点: AI Card 交互卡片
+    特点: AI Card 卡片
     特点: Stream 长连接
   }
   
   class "WeChat" as wc {
     protocol: HTTP 轮询
     特点: Typing 控制器
-    限制: 3500字符/消息
+    限制: 3500字符
   }
 }
 
@@ -167,25 +155,21 @@ tg --> bridge
 tg --> dedup
 tg --> store
 tg --> http
-tg --> buffer
 
 fs --> bridge
 fs --> dedup
 fs --> store
 fs --> http
-fs --> attach
 
 dt --> bridge
 dt --> dedup
 dt --> store
 dt --> http
-dt --> attach
 
 wc --> bridge
 wc --> dedup
 wc --> store
 wc --> http
-wc --> attach
 
 @enduml
 
@@ -200,7 +184,6 @@ wc --> attach
 | **权限交互** | InlineKeyboard 按钮 | 卡片回调 | Permission Card | 文本命令 |
 | **附件支持** | getFile API | 上传/下载 API | 媒体 API | 媒体 API |
 | **消息限制** | 4000 字符 | 无明确限制 | 无明确限制 | 3500 字符 |
-| **代码行数** | ~847 行 | ~1320 行 | ~707 行 | ~626 行 |
 
 **共同设计模式**：
 1. **Adapter Pattern**：统一接口 (WsBridge) 适配不同平台 SDK

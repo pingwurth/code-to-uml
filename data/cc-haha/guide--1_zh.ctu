@@ -9,12 +9,13 @@ Describe: 环境搭建、常用命令、调试技巧与代码阅读路径
 
 [UML]
 @startuml
-!theme plain
-skinparam backgroundColor #1a1a2e
-skinparam defaultFontColor #FFFFFF
-skinparam activityBackgroundColor #2a2a4e
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontColor #333333
+skinparam activityBackgroundColor #FFF8F0
 skinparam activityBorderColor #FF7A00
-skinparam arrowColor #4A9EFF
+skinparam arrowColor #2563EB
+skinparam noteBorderColor #2563EB
+skinparam noteBackgroundColor #F0F7FF
 
 start
 
@@ -114,10 +115,10 @@ bun run check:impact        # 变更影响分析
 
 [UML]
 @startwbs
-!theme plain
-skinparam backgroundColor #1a1a2e
-skinparam defaultFontColor #FFFFFF
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontColor #333333
 skinparam wbsBorderColor #FF7A00
+skinparam wbsBackgroundColor #FFF8F0
 
 * 代码阅读路径
 ** 第一阶段：入口理解
