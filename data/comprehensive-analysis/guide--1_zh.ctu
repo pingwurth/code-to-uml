@@ -1,0 +1,122 @@
+Title: 开发上手指南、Q&A 和维护者速查
+Describe: 阅读顺序从主循环开始，再回看工具池、状态存储和协议边界。
+------------------------------------------------------------
+[Example]
+S10_ONBOARDING_GUIDE: 阅读和调试路径
+
+[Description]
+建议阅读顺序：先看 `__main__` 和 `agent_loop`，理解用户输入如何进入模型循环；
+
+再看 `BUILTIN_TOOLS/BUILTIN_HANDLERS` 和 `assemble_tool_pool`，理解工具如何暴露；
+
+然后看 `permission_hook` 和基础工具；
+
+接着看任务、worktree、MessageBus、队友线程；
+
+最后看上下文压缩、错误恢复、background、cron 和 MCP。
+[UML]
+@startmindmap
+* s20_comprehensive.py 上手
+** 入口
+*** __main__
+*** agent_loop
+** 工具
+*** BUILTIN_TOOLS
+*** BUILTIN_HANDLERS
+*** assemble_tool_pool
+** 安全和状态
+*** permission_hook
+*** Task / MessageBus / ProtocolState
+*** safe_path / run_bash
+** 长任务和调度
+*** background_tasks
+*** CronJob
+*** cron_autorun_loop
+** 维护重点
+*** prepare_context
+*** with_retry
+*** MCPClient
+@endmindmap
+
+[Detail]
+这张 mindmap 是阅读路径，不是调用图。
+
+调试时可以从一个具体工具名反查：schema 在 `BUILTIN_TOOLS`，handler 在 `BUILTIN_HANDLERS`，权限在 `permission_hook`，执行在 `agent_loop` 的 tool_use 遍历分支。
+
+运行前需要 `.env` 或环境变量中提供 `MODEL_ID`，Anthropic API 配置由 `ANTHROPIC_BASE_URL` 和 SDK 默认认证处理。
+
+------------------------------------------------------------
+[Example]
+S12_REVIEWER_QUESTIONS: 复盘问答
+
+[Description]
+1. 问：为什么 `agent_loop` 每轮都调用 `assemble_tool_pool`？
+
+答：因为 MCP server 可以在运行中通过 `connect_mcp` 连接，工具池必须反映最新 `mcp_clients`。
+
+2. 问：为什么 permission hook 不写在 `run_bash` 内？
+
+答：hook 作用于 raw tool_use，可以在所有 handler 前统一裁决，也能覆盖 write/edit 和 MCP deploy 类工具。
+
+3. 问：队友计划审批如何阻止继续执行？
+
+答：`protocol_ctx["waiting_plan"]` 非空时，队友线程只轮询 inbox，不再调用模型，直到收到匹配 request id 的 approval response。
+
+4. 问：大工具输出如何避免撑爆上下文？
+
+答：`tool_result_budget` 会把超大输出写到 `.task_outputs/tool-results`，给模型返回路径和预览；
+
+`micro_compact` 进一步压缩较早工具结果。
+
+5. 问：worktree 的安全边界在哪里？
+
+答：名称先通过 `VALID_WT_NAME` 校验，然后 `git worktree add` 创建 `.worktrees/{name}`；
+
+队友 claim 绑定 worktree 后，文件工具 cwd 会切换到该目录。
+[UML]
+None
+
+[Detail]
+这些问题覆盖结构、流程、设计决策、风险和扩展边界。
+
+每个答案都对应本文件内的具体函数或状态变量，适合作为读完报告后的自查清单。
+
+------------------------------------------------------------
+[Example]
+S13_MAINTAINER_REFERENCE: 维护者速查表
+
+[Description]
+| 分类 | 关键符号 | 行号 | 维护用途 |
+| --- | --- | --- | --- |
+| 入口与主循环 | `__main__` | 2034-2068 | CLI 输入、history 初始化、cron autorun 线程启动 |
+| 入口与主循环 | `agent_loop` | 1901-2004 | 模型调用、工具执行、上下文压缩和停止条件 |
+| 入口与主循环 | `cron_autorun_loop` | 2017-2031 | 定时任务自动注入并串行进入主循环 |
+| 任务系统 | `Task` | 79-86 | `.tasks/task_*.json` 的持久记录结构 |
+| 任务系统 | `create_task` / `claim_task` / `complete_task` | 93-167 | 任务创建、依赖检查、领取和完成状态迁移 |
+| Worktree | `validate_worktree_name` | 180-188 | worktree 名称安全校验 |
+| Worktree | `create_worktree` / `remove_worktree` | 209-272 | git worktree 创建、移除和变更保护 |
+| 技能和 Prompt | `scan_skills` / `assemble_system_prompt` | 302-373 | 技能 registry 和每轮 system prompt 组装 |
+| 基础工具 | `safe_path` / `run_bash` / `run_read` / `run_write` / `run_edit` / `run_glob` | 378-447 | 本地工具执行和文件边界检查 |
+| 协作协议 | `MessageBus` / `ProtocolState` / `spawn_teammate_thread` | 479-809 | JSONL mailbox、请求状态和自主队友循环 |
+| 协作协议 | `_teammate_submit_plan` / `run_review_plan` | 812-852 | plan approval gate 的请求和回复 |
+| Hook | `HOOKS` / `trigger_hooks` / `permission_hook` | 859-904 | 工具执行前后的扩展点和权限裁决 |
+| 子代理 | `SUB_TOOLS` / `spawn_subagent` | 952-1033 | 同步子代理工具池和执行循环 |
+| 压缩和恢复 | `compact_history` / `reactive_compact` / `RecoveryState` / `with_retry` | 1133-1194 | 上下文压缩、prompt-too-long 恢复和 API 重试 |
+| 调度 | `start_background_task` / `CronJob` / `cron_matches` / `schedule_job` | 1230-1409 | 后台工具、cron 表达式和持久任务 |
+| MCP | `MCPClient` / `connect_mcp` / `assemble_tool_pool` | 1480-1590 | mock MCP 连接、工具发现和工具池合并 |
+| 工具表 | `BUILTIN_TOOLS` / `BUILTIN_HANDLERS` | 1670-1835 | schema 与 handler 的显式映射 |
+[UML]
+None
+
+[Detail]
+| 改动类型 | 必查位置 | 原因 |
+| --- | --- | --- |
+| 新增工具 | `BUILTIN_TOOLS`、`BUILTIN_HANDLERS`、`permission_hook` | schema、handler 和权限边界必须同步 |
+| 新增 MCP server | `MOCK_SERVERS`、`connect_mcp`、`assemble_tool_pool` | 工具名会被规范化并加 `mcp__server__tool` 前缀 |
+| 改任务状态 | `Task`、`claim_task`、`complete_task`、`scan_unclaimed_tasks` | 状态迁移和自动领取逻辑要保持一致 |
+| 改队友协议 | `MessageBus`、`ProtocolState`、`spawn_teammate_thread`、`run_review_plan` | request id 匹配和等待 gate 是协议正确性的核心 |
+| 改上下文预算 | `prepare_context`、`tool_result_budget`、`micro_compact`、`compact_history` | 这些函数会原地修改 `messages` |
+| 改长任务执行 | `should_run_background`、`start_background_task`、`collect_background_results` | 后台结果不是当前轮返回，而是下一轮通知 |
+| 改主循环 | `agent_loop`、`call_llm`、`with_retry`、`trigger_hooks` | 需要保证每个 tool_use 都有明确反馈或退出路径 |
+
+------------------------------------------------------------

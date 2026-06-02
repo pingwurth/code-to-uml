@@ -1,0 +1,90 @@
+Title: 文件/目标概览
+Describe: s20_comprehensive.py 是教学型综合 Agent harness，将 17 个子系统集成到单文件可运行循环中。
+------------------------------------------------------------
+[Example]
+S01_TARGET_OVERVIEW: 目标定位与范围
+
+[Description]
+`agents/s20_comprehensive.py` 是一个 2068 行的 Python 单文件，实现了一个教学型综合 Agent harness。
+
+它把前面章节中分散讲解的机制重新整合到同一个可运行循环中：
+- **任务系统**：文件持久化的 Task dataclass，支持依赖阻塞和 worktree 绑定
+- **权限管线**：PreToolUse hook 拦截危险命令，deny list + 用户确认
+- **Hook 系统**：UserPromptSubmit / PreToolUse / PostToolUse / Stop 四阶段
+- **Todo 管理**：会话级任务列表，周期性提醒更新
+- **子 Agent**：独立消息循环的 subagent，拥有自己的工具池
+- **Skills 目录**：从 `skills/` 扫描 SKILL.md，按需加载
+- **上下文压缩**：micro → snip → reactive → full 四层压缩策略
+- **记忆系统**：`.memory/MEMORY.md` 索引文件注入系统提示
+- **Prompt 装配**：每次循环重建 system prompt，注入实时上下文
+- **错误恢复**：429/529 重试、模型降级、prompt-too-long reactive compaction
+- **任务图**：带依赖阻塞的有向无环任务图
+- **后台任务**：慢操作异步执行，结果通过 task_notification 注入
+- **Cron 调度**：5 字段 cron 表达式，支持持久化和一次性触发
+- **团队通信**：MessageBus JSONL 邮箱 + ProtocolState 请求/响应匹配
+- **自治 Agent**：idle_poll 循环，自动认领未分配任务
+- **Git Worktree**：隔离工作目录，绑定到任务
+- **MCP 集成**：late-bound 工具合并，mcp__server__tool 命名
+
+运行入口在 `__main__` 分支（第 2034-2068 行）：初始化 `history` 和 `context`，启动 `cron_autorun_loop` 后进入交互式 CLI。
+
+模型调用依赖 `MODEL_ID` 环境变量，Anthropic 客户端在模块导入期创建（第 34 行）。
+[UML]
+None
+
+[Detail]
+报告范围限定为单个 Python 文件（`agents/s20_comprehensive.py`），不包含前端可视化文件，不修改被分析源码。
+
+该文件的核心价值不是生产级代码拆分，而是将多个 agent harness 机制并排放在一个教学样本里，方便读者追踪工具池、消息总线、任务图、计划审批和上下文预算如何共同驱动一次完整的模型循环。
+
+版本基线：git commit `8462599`，分析日期 2026-06-03。
+
+**复杂度评分**：
+
+| 维度 | 分数 | 说明 |
+|------|------|------|
+| 模块/边界数量 | 2 | 17 个子系统：Task、Worktree、Skill、Hook、MessageBus、Protocol、Subagent、Compaction、Error Recovery、Background、Cron、MCP、Team 等 |
+| 外部依赖 | 2 | Anthropic API、python-dotenv、subprocess、readline、threading |
+| 状态变更/生命周期 | 2 | 任务状态机、cron 作业生命周期、队友线程生命周期、后台任务状态 |
+| 并发/事务 | 2 | 线程化队友、cron 调度器、后台任务、threading.Lock 保护 |
+| 异常/回退路径 | 2 | 429/529 重试、模型降级、reactive compaction、prompt-too-long 恢复 |
+| 业务/路由规则 | 2 | 权限管线（deny list + 用户确认）、hook 管线、协议匹配 |
+| **总分** | **12/12** | **高复杂度，广泛使用图表辅助理解** |
+
+------------------------------------------------------------
+[Example]
+S01_TARGET_OVERVIEW: 持久化目录与副作用
+
+[Description]
+本文件在导入期或运行期创建以下持久化目录和文件：
+
+| 目录/文件 | 定义位置 | 用途 |
+|-----------|----------|------|
+| `.tasks/` | 第 74-75 行 | 任务 JSON 文件存储 |
+| `.worktrees/` | 第 174-175 行 | Git worktree 管理 |
+| `.mailboxes/` | 第 475-476 行 | 队友间消息队列 |
+| `.transcripts/` | 第 40 行 | 对话压缩前的转录备份 |
+| `.task_outputs/tool-results/` | 第 41 行 | 大型工具输出持久化 |
+| `.memory/MEMORY.md` | 第 1840-1841 行 | 记忆索引文件 |
+| `.scheduled_tasks.json` | 第 1279 行 | 持久化 cron 作业 |
+| `.memory/` | 第 1840 行 | 记忆目录 |
+
+文件直接触碰文件系统、git 命令、标准输入、Anthropic API 和本地 mock MCP 服务器。
+[UML]
+None
+
+[Detail]
+读者应将此文件理解为"单文件集成实验台"：同一份状态会被主 CLI 线程、后台任务线程、cron 调度线程和队友线程共同访问。
+
+报告后续章节会重点说明哪些状态有锁保护（如 `cron_lock`、`background_lock`），哪些状态只是教学简化（如 `active_teammates` 字典），以及哪些工具调用经过权限 hook 拦截。
+
+**导入期副作用**：
+- 第 29 行：`load_dotenv(override=True)` 加载 `.env` 文件
+- 第 30-31 行：如果设置了 `ANTHROPIC_BASE_URL`，清除 `ANTHROPIC_AUTH_TOKEN`
+- 第 34 行：创建全局 `Anthropic` 客户端
+- 第 75 行：`TASKS_DIR.mkdir(exist_ok=True)` 创建 `.tasks/` 目录
+- 第 175 行：`WORKTREES_DIR.mkdir(exist_ok=True)` 创建 `.worktrees/` 目录
+- 第 323 行：`scan_skills()` 在模块加载时扫描 `skills/` 目录
+- 第 936-940 行：注册 5 个默认 hook
+- 第 1472 行：`load_durable_jobs()` 加载持久化 cron 作业
+- 第 1473 行：启动 cron 调度器守护线程

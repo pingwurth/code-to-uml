@@ -1,0 +1,43 @@
+Title: 文件/目标概览
+Describe: agents/s20_comprehensive.py 是一个教学型综合 Agent harness，把前面章节的机制集中到一个可运行循环中。
+------------------------------------------------------------
+[Example]
+S01_TARGET_OVERVIEW: 目标定位
+
+[Description]
+`agents/s20_comprehensive.py` 的模块文档说明它是 "Comprehensive Agent"，把 dispatch、permission、hooks、todo、subagent、skills、compaction、memory、error recovery、task graph、background tasks、cron、teams、protocols、autonomous agents、worktrees 和 MCP 放回同一个 loop。
+
+源码证据在 `agents/s20_comprehensive.py:2-12`。
+
+运行入口在 `__main__` 分支：初始化 `history` 和 `context`，启动 `cron_autorun_loop` 后进入交互式 CLI。
+
+模型调用依赖 `MODEL_ID`，Anthropic 客户端在导入期创建，`load_dotenv(override=True)` 会读取环境变量。
+
+源码版本基线为 git commit `8462599`，生成日期为 2026-06-02。
+[UML]
+None
+
+[Detail]
+报告范围是单个 Python 文件，不包含前端可视化文件，也不修改被分析源码。
+
+该文件的价值不在于生产级拆分，而在于把多个 agent harness 机制并排放在一个教学样本里，方便读者追踪工具池、消息、任务、计划审批和上下文预算如何共同驱动一次模型循环。
+
+------------------------------------------------------------
+[Example]
+边界和读者预期
+
+[Description]
+本文件直接触碰文件系统、git、线程、标准输入、Anthropic API 和本地 mock MCP。
+
+重要持久化目录包括 `.tasks`、`.worktrees`、`.mailboxes`、`.transcripts`、`.task_outputs/tool-results`、`.memory/MEMORY.md` 和 `.scheduled_tasks.json`。
+
+这些目录由模块级常量定义并在导入期或运行期创建，见 `agents/s20_comprehensive.py:33-54`、`74-75`、`174-175`、`475-476`、`1279`、`1840-1841`。
+[UML]
+None
+
+[Detail]
+读者应把它理解为“单文件集成实验台”：同一份状态会被主 CLI、后台任务、cron 线程和队友线程共同访问。
+
+报告后续章节会重点说明哪些状态有锁保护，哪些状态只是教学简化，以及哪些工具调用经过权限 hook。
+
+------------------------------------------------------------

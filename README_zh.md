@@ -1,5 +1,9 @@
 # Code-To-UML
 
+<p align="center">
+  <img src="logo.png" alt="Code-To-UML logo" width="180">
+</p>
+
 > 将代码转化为交互式 UML 报告，浏览 100+ 双语图表示例 — 纯浏览器渲染，零构建工具。
 
 **[English Documentation](README.md)**

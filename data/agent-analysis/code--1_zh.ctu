@@ -1,0 +1,187 @@
+Title: 关键代码片段解析
+Describe: 5 个最具教学价值的代码片段分析。
+------------------------------------------------------------
+[Example]
+S08_CODE_SNIPPETS: 权限 hook 管线
+
+[Description]
+`permission_hook()`（第 879-904 行）是安全边界的核心，展示了如何在不修改工具处理器的情况下拦截危险操作。
+
+关键设计：hook 在工具执行之前运行，返回非 None 即阻止执行。
+[UML]
+None
+
+[Detail]
+```python
+# 第 879-904 行
+def permission_hook(block):
+    if block.name == "bash":
+        command = block.input.get("command", "")
+        for pattern in DENY_LIST:
+            if pattern in command:
+                return f"Permission denied: '{pattern}' is on the deny list"
+        if any(token in command for token in DESTRUCTIVE):
+            print(f"\n\033[33m[permission] destructive command\033[0m")
+            print(f"  {command}")
+            choice = input("  Allow? [y/N] ").strip().lower()
+            if choice not in ("y", "yes"):
+                return "Permission denied by user"
+    if block.name in ("write_file", "edit_file"):
+        path = block.input.get("path", "")
+        try:
+            safe_path(path)
+        except Exception:
+            return f"Permission denied: path escapes workspace: {path}"
+```
+
+**三层防护**：
+1. **DENY_LIST**（第 875 行）：`rm -rf /`、`sudo`、`shutdown` 等，直接拒绝无需确认
+2. **DESTRUCTIVE**（第 876 行）：`rm `、`> /etc/`、`chmod 777` 等，弹出用户确认
+3. **路径逃逸**：write/edit 工具通过 `safe_path()` 检查，防止写出工作区
+
+**MCP 工具的特殊处理**（第 899-903 行）：名称包含 `deploy` 的 MCP 工具也需要用户确认。这是一个简单的字符串匹配，生产系统应使用更精确的权限模型。
+
+------------------------------------------------------------
+[Example]
+S08_CODE_SNIPPETS: with_retry 重试引擎
+
+[Description]
+`with_retry()`（第 1167-1194 行）实现了指数退避重试，区分 429（限流）和 529（过载）两种错误类型，并在连续 529 时自动切换到降级模型。
+[UML]
+None
+
+[Detail]
+```python
+# 第 1167-1194 行
+def with_retry(fn, state: RecoveryState):
+    for attempt in range(MAX_RETRIES):
+        try:
+            result = fn()
+            state.consecutive_529 = 0
+            return result
+        except Exception as e:
+            name = type(e).__name__.lower()
+            msg = str(e).lower()
+            if "ratelimit" in name or "429" in msg:
+                delay = retry_delay(attempt)
+                time.sleep(delay)
+                continue
+            if "overloaded" in name or "529" in msg or "overloaded" in msg:
+                state.consecutive_529 += 1
+                if state.consecutive_529 >= MAX_CONSECUTIVE_529 and FALLBACK_MODEL:
+                    state.current_model = FALLBACK_MODEL
+                    state.consecutive_529 = 0
+                delay = retry_delay(attempt)
+                time.sleep(delay)
+                continue
+            raise
+    raise RuntimeError(f"Max retries ({MAX_RETRIES}) exceeded")
+```
+
+**设计要点**：
+- 429 错误：仅重试，不降级（限流是临时的）
+- 529 错误：连续 2 次后切换到 `FALLBACK_MODEL`（过载可能持续）
+- 成功后重置 `consecutive_529`（第 1171 行）
+- `retry_delay()`（第 1162-1164 行）使用指数退避 + 随机抖动
+
+**风险**：错误类型通过字符串匹配判断，不同 API 提供商的错误消息格式可能不同。
+
+------------------------------------------------------------
+[Example]
+S08_CODE_SNIPPETS: assemble_tool_pool 工具合并
+
+[Description]
+`assemble_tool_pool()`（第 1574-1590 行）将内置工具和所有已连接的 MCP 服务器工具合并为一个统一的工具池。这是 MCP late-bound 设计的核心实现。
+[UML]
+None
+
+[Detail]
+```python
+# 第 1574-1590 行
+def assemble_tool_pool() -> tuple[list[dict], dict]:
+    tools = list(BUILTIN_TOOLS)
+    handlers = dict(BUILTIN_HANDLERS)
+    for server_name, mcp_client in mcp_clients.items():
+        safe_server = normalize_mcp_name(server_name)
+        for tool_def in mcp_client.tools:
+            safe_tool = normalize_mcp_name(tool_def["name"])
+            prefixed = f"mcp__{safe_server}__{safe_tool}"
+            tools.append({
+                "name": prefixed,
+                "description": tool_def.get("description", ""),
+                "input_schema": tool_def.get("inputSchema", {}),
+            })
+            handlers[prefixed] = (
+                lambda *, c=mcp_client, t=tool_def["name"], **kw: c.call_tool(t, kw))
+    return tools, handlers
+```
+
+**命名空间隔离**：MCP 工具使用 `mcp__{server}__{tool}` 三段式命名，`normalize_mcp_name()`（第 1508-1510 行）清理非 `[a-zA-Z0-9_-]` 字符。
+
+**闭包陷阱的规避**：lambda 中使用 `c=mcp_client, t=tool_def["name"]` 默认参数绑定当前值，避免循环变量捕获问题。
+
+**每次循环重建**：`assemble_tool_pool()` 在 `agent_loop` 的每轮迭代中调用（第 1925 行），确保新连接的 MCP 服务器立即可用。
+
+------------------------------------------------------------
+[Example]
+S08_CODE_SNIPPETS: 协议匹配机制
+
+[Description]
+`match_response()`（第 524-534 行）通过 `request_id` 将协议响应路由到正确的待处理请求，防止消息错配。
+[UML]
+None
+
+[Detail]
+```python
+# 第 524-534 行
+def match_response(response_type: str, request_id: str, approve: bool):
+    state = pending_requests.get(request_id)
+    if not state:
+        return
+    if state.type == "shutdown" and response_type != "shutdown_response":
+        return
+    if state.type == "plan_approval" and response_type != "plan_approval_response":
+        return
+    state.status = "approved" if approve else "rejected"
+```
+
+**双重验证**：
+1. `request_id` 必须匹配（防止消息串台）
+2. `response_type` 必须与请求类型匹配（防止用 shutdown_response 回复 plan_approval）
+
+**状态修改是内存操作**：`pending_requests` 是模块级字典，没有持久化。如果进程重启，所有待处理协议丢失。
+
+**消费者如何知道结果**：teammate 轮询 `protocol_ctx["waiting_plan"]`，lead 通过 `run_review_plan()` 修改状态后，teammate 在下一次 inbox 检查中读取 response。
+
+------------------------------------------------------------
+[Example]
+S08_CODE_SNIPPETS: cron 表达式解析
+
+[Description]
+`cron_matches()`（第 1312-1331 行）实现了标准 5 字段 cron 表达式匹配，支持通配符、步进、范围和列表语法。
+[UML]
+None
+
+[Detail]
+```python
+# 第 1297-1309 行
+def _cron_field_matches(field: str, value: int) -> bool:
+    if field == "*":
+        return True
+    if field.startswith("*/"):
+        step = int(field[2:])
+        return step > 0 and value % step == 0
+    if "," in field:
+        return any(_cron_field_matches(part.strip(), value)
+                   for part in field.split(","))
+    if "-" in field:
+        lo, hi = field.split("-", 1)
+        return int(lo) <= value <= int(hi)
+    return value == int(field)
+```
+
+**解析策略**：递归下降——先检查通配符，再检查步进，再检查列表，再检查范围，最后是字面量。每个分支返回 bool。
+
+**dow 的特殊处理**（第 1317 行）：`(dt.weekday() + 1) % 7` 将 Python 的 weekday（0=Monday）转换为 cron 的 dow（0=Sunday）。
+
+**dom/dow 的 OR 语义**（第 1325-1331 行）：如果 dom 和 dow 都不是 `*`，则满足任一即可（OR 语义），这与某些 cron 实现的 AND 语义不同。

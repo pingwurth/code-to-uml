@@ -61,6 +61,7 @@ Use this table after checking `report-contract.md` for whether the section is re
 | `S07_DATA_OR_STATE_FLOW` | How do inputs become outputs, or how does state move? | Activity, state, object, or data-flow style component diagram | Transformation, ownership, persistence, cache, or lifecycle is non-trivial | Inputs and outputs are direct and stateless |
 | `S10_ONBOARDING_GUIDE` | What path should a maintainer follow first? | Mindmap/WBS | The reading or debugging path has multiple branches | A short ordered checklist is enough |
 | `S12_REVIEWER_QUESTIONS` | Which questions and answers help readers consolidate the analyzed target? | Mindmap/WBS | Q&A topics cluster around distinct learning areas such as structure, flow, design, risks, and extension paths | A question-answer checklist or table is more scannable |
+| `S13_MAINTAINER_REFERENCE` | Which symbols/files should a maintainer jump to quickly? | None | Do not add a diagram; this section is a reference index | Always use a Markdown table |
 
 ## Choose by Problem
 

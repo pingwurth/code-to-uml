@@ -24,7 +24,7 @@ assert.equal(
 	"demo page logo should link back to index.html"
 );
 
-for (const path of ["cache/_TEMPLATE.html", "cache/s20_comprehensive_analysis.html"]) {
+for (const path of ["cache/_TEMPLATE.html", "cache/comprehensive_analysis.html"]) {
 	assert.equal(
 		getClassLinkHref(read(path), "demo-topbar-logo"),
 		"../index.html",

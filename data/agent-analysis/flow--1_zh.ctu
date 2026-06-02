@@ -1,0 +1,181 @@
+Title: 核心流程图
+Describe: agent_loop 主循环和 teammate 线程的完整执行路径。
+------------------------------------------------------------
+[Example]
+S05_CORE_FLOW: agent_loop 主循环
+
+[Description]
+`agent_loop()`（第 1901-2005 行）是系统的核心执行循环。每次循环包含 6 个阶段：
+
+1. **注入定时/后台任务**：消费 cron_queue 和 background_results
+2. **上下文预算**：tool_result_budget → snip_compact → micro_compact → compact_history
+3. **调用 LLM**：带重试和降级的 API 调用
+4. **处理 max_tokens**：升级 token 上限或发送 continuation prompt
+5. **执行工具**：PreToolUse hook → 分发 → PostToolUse hook
+6. **处理 compact 工具**：触发 full compaction 并重启循环
+[UML]
+@startuml
+start
+:注入 cron_queue 定时任务;
+:注入 background 通知;
+:检查 todo 提醒 (每 3 轮);
+:prepare_context();
+if ("size > CONTEXT_LIMIT?") then (yes)
+  :compact_history();
+endif
+:update_context();
+:assemble_tool_pool();
+
+:call_llm() 带重试;
+if (异常?) then (yes)
+  if (prompt_too_long?) then (yes)
+    :reactive_compact();
+  else (其他异常)
+    :记录错误;
+  endif
+  stop
+endif
+
+if (stop_reason == max_tokens?) then (yes)
+  if (已升级?) then (yes)
+    if ("recovery_count < MAX?") then (yes)
+      :发送 CONTINUATION_PROMPT;
+      :recovery_count++;
+    endif
+  else (no)
+    :max_tokens = ESCALATED;
+    :has_escalated = true;
+  endif
+  :返回循环开始;
+  stop
+endif
+
+:重置 max_tokens 和 escalated;
+:append assistant response;
+
+if (有 tool_use?) then (no)
+  :trigger Stop hook;
+  stop
+endif
+
+:遍历 tool_use blocks;
+while (还有 block?) is (yes)
+  if (block.name == compact?) then (yes)
+    :compact_history();
+    :标记 compacted_now;
+    break
+  endif
+  :trigger PreToolUse hook;
+  if (被阻止?) then (yes)
+    :记录拒绝结果;
+  elseif (后台运行?) then (yes)
+    :start_background_task();
+    :记录占位结果;
+  else (no)
+    :call_tool_handler();
+    :trigger PostToolUse hook;
+  endif
+endwhile (no)
+
+:append tool_results;
+:返回循环开始;
+stop
+@enduml
+
+[Detail]
+**循环退出条件**：
+1. LLM 响应不包含 tool_use（正常结束）
+2. 发生不可恢复的异常
+3. max_tokens 且 recovery_count 耗尽
+
+**compacted_now 标志**（第 1959 行）：当 compact 工具被调用时，跳过后续的 tool_result 追加，直接重启循环。这是因为 compact 已经重写了 messages 列表。
+
+**上下文预算管线**（`prepare_context()`，第 1861-1868 行）：
+- `tool_result_budget()`：将超过 200KB 的 tool_result 持久化到文件
+- `snip_compact()`：超过 50 条消息时，保留前 3 条和后 47 条
+- `micro_compact()`：超过 3 个旧 tool_result 时，截断为摘要
+- `compact_history()`：超过 50KB 时，调用模型生成摘要
+
+------------------------------------------------------------
+[Example]
+S05_CORE_FLOW: Teammate 线程执行流
+
+[Description]
+每个 teammate 线程（`spawn_teammate_thread()`，第 605-809 行）运行独立的消息循环：
+
+1. 接收初始 prompt
+2. 循环：检查 inbox → 调用模型 → 执行工具 → 追加结果
+3. 特殊处理：`submit_plan` 触发协议门控，等待 lead 审批
+4. 退出条件：收到 shutdown_request、idle_poll 超时、无工具调用
+[UML]
+@startuml
+start
+:初始化 messages = [prompt];
+:注入 identity 消息;
+
+repeat
+  :检查 inbox (10 次);
+  if (收到 shutdown_request?) then (yes)
+    :发送 shutdown_response;
+    break
+  endif
+  if (等待计划审批?) then (yes)
+    :sleep IDLE_POLL_INTERVAL;
+    :返回 inbox 检查;
+  endif
+  if (有普通消息?) then (yes)
+    :追加到 messages;
+  endif
+
+  :调用 client.messages.create();
+  if (异常?) then (yes)
+    break
+  endif
+
+  :append assistant response;
+  if (无 tool_use?) then (yes)
+    break
+  endif
+
+  :遍历 tool_use blocks;
+  while (还有 block?) is (yes)
+    if (block.name == submit_plan?) then (yes)
+      :_teammate_submit_plan();
+      :设置 waiting_plan;
+      :中断后续 block;
+    else (no)
+      :调用对应 handler;
+    endif
+    :追加 tool_result;
+  endwhile (no)
+
+  if (等待计划审批?) then (yes)
+    :跳过 idle_poll;
+    :返回循环开始;
+  endif
+
+  :idle_poll();
+  if (shutdown 或 timeout?) then (yes)
+    break
+  endif
+repeat while (true)
+
+:提取最后一条 assistant 文本;
+:发送 result 到 lead inbox;
+:从 active_teammates 移除;
+stop
+@enduml
+
+[Detail]
+**计划审批门控**（`protocol_ctx["waiting_plan"]`）：
+- 当 teammate 调用 `submit_plan` 时，设置 `waiting_plan` 为请求 ID
+- 循环进入等待状态：只检查 inbox 中的 `plan_approval_response`
+- 不让模型继续执行工具，直到 lead 审批通过
+- 审批通过后，`waiting_plan` 清空，循环恢复
+
+**idle_poll() 优先级**（第 566-600 行）：
+1. 先检查 inbox（直接消息优先）
+2. 再扫描未认领任务（自动认领）
+3. 两者都没有则 sleep，直到超时
+
+**worktree 上下文传递**：当 teammate 认领带 worktree 的任务时，`wt_ctx["path"]` 被设置，后续所有文件工具（`_run_bash`、`_run_read`、`_run_write`）都透明地在该目录下执行。

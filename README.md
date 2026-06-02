@@ -1,5 +1,9 @@
 # Code-To-UML
 
+<p align="center">
+  <img src="logo.png" alt="Code-To-UML logo" width="180">
+</p>
+
 > Transform code into interactive UML reports and explore 100+ diagram examples — all in-browser, zero build tools.
 
 **[中文文档](README_zh.md)**

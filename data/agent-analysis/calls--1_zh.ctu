@@ -1,0 +1,116 @@
+Title: 调用关系图
+Describe: 工具调用从模型响应到执行的完整路径，包括 hook 管线和 MCP 合并。
+------------------------------------------------------------
+[Example]
+S06_CALL_RELATIONSHIPS: 工具调用全链路
+
+[Description]
+从模型返回 tool_use 到工具执行完成，经过 5 个阶段：
+
+1. **模型响应解析**：遍历 `response.content` 中的 `tool_use` block
+2. **compact 特殊处理**：如果工具名是 `compact`，直接触发压缩并重启循环
+3. **PreToolUse hook 管线**：permission_hook → log_hook，任一返回非 None 则阻止执行
+4. **后台任务判断**：`should_run_background()` 检查是否应异步执行
+5. **工具分发**：从 `handlers` 字典查找并调用，然后触发 PostToolUse hook
+[UML]
+@startuml
+participant "agent_loop" as LOOP
+participant "PreToolUse\nhooks" as PRE
+participant "permission_hook" as PERM
+participant "log_hook" as LOG
+participant "should_run_background" as SBG
+participant "start_background_task" as BGT
+participant "handlers\n(BUILTIN+MCP)" as HAND
+participant "PostToolUse\nhooks" as POST
+
+LOOP -> PRE: trigger_hooks("PreToolUse", block)
+PRE -> PERM: permission_hook(block)
+alt bash 命令在 deny list
+  PERM --> LOOP: "Permission denied"
+else bash 命令是 destructive
+  PERM -> PERM: input("Allow? [y/N]")
+  PERM --> LOOP: 允许/拒绝
+else write/edit 路径逃逸
+  PERM --> LOOP: "Permission denied"
+else 通过
+  PERM --> PRE: None
+end
+PRE -> LOG: log_hook(block)
+LOG --> PRE: None
+PRE --> LOOP: None (允许)
+
+LOOP -> SBG: should_run_background(block)
+alt run_in_background=True 或慢操作
+  SBG --> LOOP: True
+  LOOP -> BGT: start_background_task(block, handlers)
+  BGT --> LOOP: bg_id
+  LOOP --> LOOP: 记录占位结果
+else 同步执行
+  SBG --> LOOP: False
+  LOOP -> HAND: handlers[block.name](**block.input)
+  HAND --> LOOP: output
+  LOOP -> POST: trigger_hooks("PostToolUse", block, output)
+  POST --> LOOP: None
+  LOOP --> LOOP: 记录结果
+end
+@enduml
+
+[Detail]
+**hook 管线的短路特性**：`trigger_hooks()`（第 867-872 行）遍历 hook 列表，第一个返回非 None 的 hook 阻止执行。这使得 permission_hook 拒绝后，log_hook 不会被调用。
+
+**MCP 工具命名**：MCP 工具在 `assemble_tool_pool()`（第 1574-1590 行）中被重命名为 `mcp__{server}__{tool}` 格式，通过 `normalize_mcp_name()` 清理特殊字符。
+
+**后台任务决策**（`should_run_background()`，第 1224-1227 行）：
+- `run_in_background` 参数显式为 True
+- 或 `is_slow_operation()` 检测到关键词：install、build、test、deploy、compile 等
+
+------------------------------------------------------------
+[Example]
+S06_CALL_RELATIONSHIPS: Subagent 执行链
+
+[Description]
+`spawn_subagent()`（第 1004-1033 行）创建一个独立的模型调用循环，最多 30 轮：
+
+1. 使用 `SUB_SYSTEM` 系统提示和 `SUB_TOOLS` 工具定义
+2. 每轮：调用模型 → 遍历 tool_use → 触发 hooks → 调用 handlers → 追加结果
+3. 退出：无 tool_use 或达到 30 轮上限
+4. 返回最后一条 assistant 文本作为摘要
+[UML]
+@startuml
+participant "agent_loop\n(lead)" as LEAD
+participant "spawn_subagent" as SPAWN
+participant "Anthropic API" as API
+participant "SUB_HANDLERS" as HAND
+participant "hooks" as HOOK
+
+LEAD -> SPAWN: task(description)
+loop 30 rounds max
+  SPAWN -> API: messages.create(SUB_SYSTEM, SUB_TOOLS)
+  API --> SPAWN: response
+  SPAWN -> SPAWN: append assistant
+  SPAWN -> SPAWN: check tool_use
+  alt no tool_use
+    SPAWN --> LEAD: final text summary
+  else has tool_use
+    loop each tool_use block
+      SPAWN -> HOOK: trigger PreToolUse
+      HOOK --> SPAWN: allow/deny
+      SPAWN -> HAND: handlers[block.name](**input)
+      HAND --> SPAWN: output
+      SPAWN -> HOOK: trigger PostToolUse
+      SPAWN -> SPAWN: append tool_result
+    end
+  end
+end
+SPAWN --> LEAD: final text summary
+@enduml
+
+[Detail]
+**Subagent 与主循环的区别**：
+- Subagent 没有 cron 注入、background task、todo 提醒
+- Subagent 没有上下文压缩（固定 30 轮上限）
+- Subagent 的工具池更小：只有 bash、read_file、write_file、edit_file、glob
+- Subagent 不使用 `assemble_tool_pool()`，直接使用 `SUB_HANDLERS`
+- Subagent 的 PreToolUse hook 包含 permission_hook，保持安全边界
+
+**递归防护**：SUB_SYSTEM 提示明确要求"Do not spawn more agents"（第 948 行），防止无限递归。

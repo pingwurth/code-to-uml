@@ -109,7 +109,7 @@ function copyDirectory(source, target) {
 	}
 }
 
-function promptYesNo(question) {
+function promptOverwrite(question) {
 	process.stdout.write(question);
 	const chunks = [];
 	const buffer = Buffer.alloc(1);
@@ -128,6 +128,7 @@ function promptYesNo(question) {
 		chunks.push(char);
 	}
 	const answer = chunks.join("").trim().toLowerCase();
+	if (answer === "a" || answer === "all") return "all";
 	return answer === "y" || answer === "yes";
 }
 
@@ -135,7 +136,7 @@ function skillBaseDir(tool) {
 	return path.join(userDir(), ...TOOL_SKILL_DIRS[tool]);
 }
 
-function installSkill(tool) {
+function installSkill(tool, overwriteAll) {
 	if (!fs.existsSync(path.join(SKILL_SOURCE_DIR, "SKILL.md"))) {
 		throw new Error(`Bundled skill not found: ${SKILL_SOURCE_DIR}`);
 	}
@@ -144,23 +145,31 @@ function installSkill(tool) {
 	fs.mkdirSync(baseDir, { recursive: true });
 	if (fs.existsSync(target)) {
 		console.log(`Skill for ${tool} already exists at ${target}.`);
-		if (!promptYesNo("Overwrite? [y/N] ")) {
-			console.log(`Skipped ${SKILL_NAME} skill for ${tool}: ${target}`);
-			return false;
+		if (!overwriteAll) {
+			const answer = promptOverwrite("Overwrite? [y/N/A(All)] ");
+			if (!answer) {
+				console.log(`Skipped ${SKILL_NAME} skill for ${tool}: ${target}`);
+				return { overwritten: false, all: false };
+			}
+			if (answer === "all") {
+				overwriteAll = true;
+			}
 		}
 		fs.rmSync(target, { recursive: true, force: true });
 		copyDirectory(SKILL_SOURCE_DIR, target);
 		console.log(`Overwritten ${SKILL_NAME} skill for ${tool}: ${target}`);
-		return true;
+		return { overwritten: true, all: overwriteAll };
 	}
 	copyDirectory(SKILL_SOURCE_DIR, target);
 	console.log(`Installed ${SKILL_NAME} skill for ${tool}: ${target}`);
-	return true;
+	return { overwritten: true, all: overwriteAll };
 }
 
 function installSkills(tools) {
+	let overwriteAll = false;
 	for (const tool of tools) {
-		installSkill(tool);
+		const result = installSkill(tool, overwriteAll);
+		overwriteAll = result.all;
 	}
 }
 

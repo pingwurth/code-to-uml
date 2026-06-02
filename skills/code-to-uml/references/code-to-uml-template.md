@@ -16,7 +16,7 @@ This file owns only the HTML, `.ctu`, and runtime loading contract. For content 
 - Set `<body class="demo-page" data-dir="<report-slug>">` for custom report data.
 - Keep required selectors, script order, tabs, overviews, `.ctu` prefixes, and API keys aligned.
 - Use `None` only to mean "empty/hidden"; `[UML]` may be `None` for text-only cards. Handle `official-demo-link` deliberately.
-- Run `scripts/validate-report.js`, then verify page route, API payload, card counts, topbar behavior, and UML rendering.
+- Run `scripts/validate-report.js --strict`, then verify page route, API payload, card counts, topbar behavior, and UML rendering.
 
 ## Root Resolution
 
@@ -34,7 +34,7 @@ The HTML should be a thin data-driven shell. Report cards, diagrams, description
 - HTML report: `cache/<report-slug>.html`.
 - Data directory: `data/<report-slug>/`.
 - Data files: `{category}--{n}_{lang}.ctu`, for example `overview--1_zh.ctu`.
-- Supported language suffixes: `_zh` and `_en`; default to `_zh` unless requested otherwise.
+- Supported language suffixes: `_zh` and `_en`; the default language suffix follows the user's question language unless requested otherwise.
 - `report-slug` and `category`: lowercase kebab-case is recommended.
 - `n`: positive integer used for sorting.
 
@@ -127,12 +127,14 @@ Risk checklist
 
 [Description]
 Review risks that are clearer as text than as a diagram.
+Use a second line to separate scope, evidence, or reader guidance.
 
 [UML]
 None
 
 [Detail]
-No diagram is rendered for this card. The report content is carried by the description and detail text.
+No diagram is rendered for this card.
+The report content is carried by the description and detail text.
 ```
 
 Parser behavior to respect:
@@ -143,6 +145,8 @@ Parser behavior to respect:
 - A field containing only `None` is normalized to empty. This applies to card title, description, UML source, detail, `Title:`, and `Describe:`.
 - Empty `[UML]` or `[UML]` containing only `None` means the card is text-only and should not render a diagram.
 - UML syntax validation applies only to non-empty `[UML]` content after `None` normalization.
+- For generated report cards, every non-`None` `[Description]` and `[Detail]` must use Markdown text with line breaks chosen by content. Short content may stay on one line. Break lines when content contains sentence-ending punctuation such as periods and semicolons, or at meaningful bullet, numbered-step, or caveat boundaries so the UI renders readable text.
+- Organize `[Description]` and `[Detail]` with Markdown structures that match the content: paragraphs, bullet lists, numbered steps, indentation, and Markdown tables. Use lists for parallel points, numbered steps for ordered procedures, indentation for nested context, and tables for comparison or dense reference data.
 - Generated files should still include separators between cards, even though the parser can split on a later `[Example]`.
 
 If a card includes a diagram, `[Detail]` must explain the important nodes, arrows, relationships, and why the diagram matters.
@@ -177,10 +181,10 @@ API key: overview
 
 Use port `5401` unless the user specified another port.
 
-First run the bundled artifact validator from the skill directory:
+First run the bundled artifact validator from the skill directory. Set `--lang` to the report language suffix selected from the user's question language:
 
 ```text
-node <skill-dir>/scripts/validate-report.js --root <CTU_HOME> --html cache/<report-slug>.html --lang zh
+node <skill-dir>/scripts/validate-report.js --root <CTU_HOME> --html cache/<report-slug>.html --lang <zh|en> --strict
 ```
 
 Add `--render` when `plantuml.jar` exists in `<CTU_HOME>` and Java is available on `PATH`.
@@ -193,9 +197,9 @@ Start the server from `$CTU_HOME` and leave it running:
 
 Before claiming completion, verify:
 
-- `scripts/validate-report.js` returns zero errors. In `--strict` mode, it must also return zero warnings.
+- `scripts/validate-report.js --strict` returns zero errors and zero warnings.
 - `http://localhost:<PORT>/cache/<report-slug>.html` returns HTTP 200.
-- `http://localhost:<PORT>/api/demo-examples?lang=zh&dir=<report-slug>` returns all expected category keys.
+- `http://localhost:<PORT>/api/demo-examples?lang=<zh|en>&dir=<report-slug>` returns all expected category keys for the report language.
 - API category keys, `button[data-diagram]`, `p[data-diagram-overview]`, card counts, and `.ctu` blocks match.
 - Every `.ctu` filename matches `{category}--{n}_{lang}.ctu` and uses UTF-8 marker syntax.
 - Every non-empty UML block passes static checks; if `plantuml.jar` exists, extracted blocks render successfully. `[UML]` blocks normalized from `None` are text-only and are not sent to PlantUML.

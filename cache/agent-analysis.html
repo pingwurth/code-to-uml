@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>s20_comprehensive.py — 综合 Agent Harness 分析</title>
+	<link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+	<link rel="stylesheet" href="../main.css">
+</head>
+
+<body class="demo-page" data-dir="agent-analysis">
+	<header class="demo-topbar">
+		<a class="demo-topbar-logo" href="../index.html" aria-label="Code-To-UML Home">
+			<img src="../favicon.svg" alt="" />
+			<span>Code-To-UML</span>
+		</a>
+	</header>
+
+	<div class="page-shell demo-shell">
+
+		<main class="content">
+
+			<section class="intro">
+				<h1>s20_comprehensive.py — 综合 Agent Harness 分析</h1>
+				<p>2068 行教学型综合 Agent harness，将 17 个子系统（Task、Worktree、Skill、Hook、MessageBus、Protocol、Subagent、Compaction、Error Recovery、Background、Cron、MCP、Team 等）集成到单文件可运行循环中。复杂度评分 12/12（高）。</p>
+			</section>
+
+			<nav class="demo-tabs" aria-label="Demo Diagram Types">
+				<button class="demo-tab is-active" type="button" data-diagram="overview">概览</button>
+				<button class="demo-tab" type="button" data-diagram="structure">结构</button>
+				<button class="demo-tab" type="button" data-diagram="objects">核心对象</button>
+				<button class="demo-tab" type="button" data-diagram="architecture">架构</button>
+				<button class="demo-tab" type="button" data-diagram="flow">流程</button>
+				<button class="demo-tab" type="button" data-diagram="calls">调用</button>
+				<button class="demo-tab" type="button" data-diagram="dataflow">数据流</button>
+				<button class="demo-tab" type="button" data-diagram="code">代码</button>
+				<button class="demo-tab" type="button" data-diagram="principles">原理</button>
+				<button class="demo-tab" type="button" data-diagram="guide">指南</button>
+			</nav>
+
+			<section class="doc-section demo-panel">
+				<h2 id="demo-title">概览</h2>
+				<p class="demo-section-overview is-active" data-diagram-overview="overview">s20_comprehensive.py 的目标定位、范围边界和持久化副作用。</p>
+				<p class="demo-section-overview" data-diagram-overview="structure" hidden>文件由 17 个通过注释分隔的子系统组成，按依赖顺序从底向上排列。</p>
+				<p class="demo-section-overview" data-diagram-overview="objects" hidden>4 个 dataclass、1 个类和约 60 个函数，覆盖任务管理、消息传递、工具执行和模型调用。</p>
+				<p class="demo-section-overview" data-diagram-overview="architecture" hidden>6 层架构从存储层到交互层，4 种线程实现并发。</p>
+				<p class="demo-section-overview" data-diagram-overview="flow" hidden>agent_loop 主循环和 teammate 线程的完整执行路径。</p>
+				<p class="demo-section-overview" data-diagram-overview="calls" hidden>工具调用从模型响应到执行的完整路径，包括 hook 管线和 MCP 合并。</p>
+				<p class="demo-section-overview" data-diagram-overview="dataflow" hidden>任务状态机和上下文压缩管线。</p>
+				<p class="demo-section-overview" data-diagram-overview="code" hidden>5 个最具教学价值的代码片段分析。</p>
+				<p class="demo-section-overview" data-diagram-overview="principles" hidden>设计理念、工具池合并、协议匹配和分层压缩策略。</p>
+				<p class="demo-section-overview" data-diagram-overview="guide" hidden>推荐阅读顺序、学习复盘问答和维护者速查表。</p>
+				<div class="demo-examples" data-examples></div>
+			</section>
+
+		</main>
+		<aside data-demo-toc></aside>
+	</div>
+
+	<script src="../js/viz-global.js"></script>
+	<script src="../js/plantuml.js"></script>
+	<script src="../component/docs-page-core.js"></script>
+	<script src="../component/render-failure-common.js"></script>
+	<script src="../component/toc-component.js"></script>
+	<script src="../js/markdown-it.js"></script>
+	<script src="../component/demo-example-component.js"></script>
+	<script src="../demo.js"></script>
+</body>
+
+</html>

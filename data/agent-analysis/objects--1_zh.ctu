@@ -1,0 +1,158 @@
+Title: 核心对象/函数说明
+Describe: 4 个 dataclass、1 个类和约 60 个函数，覆盖任务管理、消息传递、工具执行和模型调用。
+------------------------------------------------------------
+[Example]
+S03_CORE_OBJECTS: 核心数据类
+
+[Description]
+文件定义了 4 个 dataclass 和 1 个类作为核心数据结构：
+
+| 类名 | 行 | 字段数 | 职责 |
+|------|-----|--------|------|
+| `Task` | 78-86 | 7 | 任务记录：id、subject、description、status、owner、blockedBy、worktree |
+| `CronJob` | 1283-1288 | 5 | 定时任务：id、cron、prompt、recurring、durable |
+| `ProtocolState` | 507-514 | 7 | 协议请求状态：request_id、type、sender、target、status、payload、created_at |
+| `MCPClient` | 1480-1500 | 3 | MCP 客户端：name、tools、_handlers |
+| `MessageBus` | 479-498 | 0 | 消息总线：send/read_inbox 方法，无持久状态 |
+| `RecoveryState` | 1153-1159 | 5 | 错误恢复状态：has_escalated、recovery_count、consecutive_529、has_attempted_reactive_compact、current_model |
+[UML]
+@startuml
+class Task {
+  +id: str
+  +subject: str
+  +description: str
+  +status: str
+  +owner: "str | None"
+  +blockedBy: "list[str]"
+  +worktree: "str | None"
+}
+
+class CronJob {
+  +id: str
+  +cron: str
+  +prompt: str
+  +recurring: bool
+  +durable: bool
+}
+
+class ProtocolState {
+  +request_id: str
+  +type: str
+  +sender: str
+  +target: str
+  +status: str
+  +payload: str
+  +created_at: float
+}
+
+class MCPClient {
+  +name: str
+  +tools: "list[dict]"
+  -_handlers: dict
+  +register(tool_defs, handlers)
+  +call_tool(tool_name, args): str
+}
+
+class MessageBus {
+  +send(from_agent, to_agent, content, msg_type, metadata)
+  +read_inbox(agent): "list[dict]"
+}
+
+class RecoveryState {
+  +has_escalated: bool
+  +recovery_count: int
+  +consecutive_529: int
+  +has_attempted_reactive_compact: bool
+  +current_model: str
+}
+
+Task "0..*" --> "0..*" Task : blockedBy
+Task "0..1" --> "0..1" Worktree : worktree
+CronJob --> "0..1" DurableStore : durable
+ProtocolState --> MessageBus : via BUS.send
+@enduml
+
+[Detail]
+**Task 状态机**：`pending` → `in_progress` → `completed`。状态转换由 `claim_task()`（第 134 行）和 `complete_task()`（第 155 行）控制。`can_start()`（第 122 行）检查所有 `blockedBy` 依赖是否已完成。
+
+**Task 持久化**：每个任务存储为 `.tasks/{task_id}.json`，通过 `save_task()`（第 105 行）和 `load_task()`（第 109 行）读写。任务 ID 格式为 `task_{timestamp}_{random4digits}`。
+
+**MCPClient 设计**：采用 mock 模式，`register()` 接受工具定义和处理器字典，`call_tool()` 按名称查找并调用。生产版本应替换为真实的 MCP 协议实现。
+
+**RecoveryState 生命周期**：每个 `agent_loop()` 调用创建一个新的 `RecoveryState` 实例（第 1904 行），在循环内跟踪重试和降级状态。
+
+------------------------------------------------------------
+[Example]
+S03_CORE_OBJECTS: 任务系统函数
+
+[Description]
+任务系统由 8 个函数组成，提供完整的任务 CRUD 和依赖管理：
+
+| 函数 | 行 | 职责 |
+|------|-----|------|
+| `create_task()` | 93-102 | 创建任务，生成唯一 ID，保存到磁盘 |
+| `save_task()` | 105-106 | 将 Task 序列化为 JSON 写入 `.tasks/` |
+| `load_task()` | 109-110 | 从磁盘读取并反序列化 Task |
+| `list_tasks()` | 113-115 | 列出所有任务，按文件名排序 |
+| `get_task_json()` | 118-119 | 返回任务的 JSON 字符串表示 |
+| `can_start()` | 122-131 | 检查所有 blockedBy 依赖是否完成 |
+| `claim_task()` | 134-152 | 认领任务：状态→in_progress，设置 owner |
+| `complete_task()` | 155-167 | 完成任务：状态→completed，报告解锁的任务 |
+
+调用关系：`claim_task()` → `load_task()` → `can_start()` → `load_task()`（递归检查依赖）
+[UML]
+None
+
+[Detail]
+**依赖检查逻辑**（`can_start()`，第 122-131 行）：
+1. 遍历 `task.blockedBy` 列表
+2. 对每个依赖 ID，检查文件是否存在
+3. 如果文件存在，加载任务并检查状态是否为 `completed`
+4. 所有依赖都完成时返回 `True`
+
+**认领失败原因**（`claim_task()`，第 134-152 行）：
+- 任务不在 `pending` 状态
+- 任务已有 owner
+- 依赖未完成（返回具体的阻塞依赖列表）
+
+**完成后的解锁通知**（`complete_task()`，第 155-167 行）：
+完成后扫描所有 `pending` 任务，找出因本次完成而解锁的任务，返回解锁列表。
+
+------------------------------------------------------------
+[Example]
+S03_CORE_OBJECTS: 工具处理器函数
+
+[Description]
+文件定义了约 20 个 `run_*` 工具处理器函数，每个对应一个模型可调用的工具：
+
+| 函数 | 行 | 对应工具 | 特殊行为 |
+|------|-----|----------|----------|
+| `run_bash()` | 388-397 | bash | 120s 超时，50KB 输出截断 |
+| `run_read()` | 400-411 | read_file | 支持 offset/limit |
+| `run_write()` | 414-420 | write_file | 自动创建父目录 |
+| `run_edit()` | 424-434 | edit_file | 仅替换第一次出现 |
+| `run_glob()` | 437-447 | glob | 路径逃逸检查 |
+| `run_todo_write()` | 459-468 | todo_write | 验证 status 枚举 |
+| `run_create_task()` | 1607-1612 | create_task | 彩色日志 |
+| `run_list_tasks()` | 1615-1622 | list_tasks | 显示 worktree 信息 |
+| `run_claim_task()` | 1631-1635 | claim_task | owner 固定为 "agent" |
+| `run_complete_task()` | 1637-1641 | complete_task | |
+| `run_schedule_cron()` | 1448-1453 | schedule_cron | |
+| `run_list_crons()` | 1456-1465 | list_crons | |
+| `run_cancel_cron()` | 1468-1469 | cancel_cron | |
+| `run_spawn_teammate()` | 1643-1644 | spawn_teammate | |
+| `run_send_message()` | 1646-1648 | send_message | 固定 from="lead" |
+| `run_check_inbox()` | 1650-1660 | check_inbox | 路由协议消息 |
+| `run_connect_mcp()` | 1662-1663 | connect_mcp | |
+| `run_create_worktree()` | 1595-1596 | create_worktree | |
+| `run_remove_worktree()` | 1598-1599 | remove_worktree | |
+| `run_keep_worktree()` | 1601-1602 | keep_worktree | |
+[UML]
+None
+
+[Detail]
+**safe_path() 安全边界**（第 378-385 行）：所有文件工具通过 `safe_path()` 解析路径，确保结果在 WORKDIR 内。如果路径逃逸，抛出 `ValueError`。Bash 不经过此检查，由权限 hook 控制。
+
+**call_tool_handler()**（第 450-456 行）：统一的工具调用入口，捕获 `TypeError`（参数不匹配）并返回错误字符串。这是所有工具调用的单点错误处理。
+
+**工具定义与处理器分离**：`BUILTIN_TOOLS`（第 1670-1814 行）定义模型看到的 JSON schema，`BUILTIN_HANDLERS`（第 1816-1835 行）映射到 Python 函数。两表必须保持同步。

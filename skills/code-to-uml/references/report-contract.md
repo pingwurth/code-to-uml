@@ -13,7 +13,7 @@ Use this reference whenever planning, generating, or validating Code-To-UML repo
 
 Use category-based `.ctu` files named `{category}--{n}_{lang}.ctu`.
 
-- Default language suffix: `_zh`, unless the user requested another language.
+- The language suffix must match the user's question language unless the user requested another report language. Use `_zh` for Chinese requests and `_en` for English requests.
 - Each `{category}` must match a tab button's `data-diagram` value and its `data-diagram-overview` entry.
 - The categories below are the canonical default for a full Code-To-UML source analysis report.
 - The template may use other category names when the user or target shape requires module-, method-, or principle-specific tabs. When using custom categories, still map every required section ID to a category and verify tab/data alignment.
@@ -50,7 +50,7 @@ Each standard category owns the primary content for these section IDs:
 
 ## Section Catalog
 
-Use stable section IDs in planning notes, validation, and summaries. Display titles may be localized or adapted. For Chinese reports, prefer the Chinese titles below.
+Use stable section IDs in planning notes, validation, and summaries. Display titles may be localized or adapted. Match display titles to the report language; for Chinese reports, prefer the Chinese titles below.
 
 | ID | Default title | Chinese title | Required content |
 | --- | --- | --- | --- |
@@ -66,7 +66,7 @@ Use stable section IDs in planning notes, validation, and summaries. Display tit
 | `S10_ONBOARDING_GUIDE` | Developer Onboarding Guide | 开发上手指南 | Reading order, run/debug steps, manual verification, extension points, and troubleshooting paths. |
 | `S11_RISKS_AND_IMPROVEMENTS` | Risks and Improvement Suggestions | 风险与改进建议 | Specific complexity, concurrency, security, performance, correctness, maintainability risks, and actionable improvements. |
 | `S12_REVIEWER_QUESTIONS` | Learning Review Questions with Answers | Q&A / 复盘问答清单 | Learning-oriented review questions and concrete answers about the analyzed project, module/package, file, class, or function, grounded in source evidence and written to help readers consolidate what they learned. |
-| `S13_MAINTAINER_REFERENCE` | Maintainer Quick Reference | 维护者速查表 | Function/class/file index with line numbers or symbol references whenever available. |
+| `S13_MAINTAINER_REFERENCE` | Maintainer Quick Reference | 维护者速查表 | Markdown table index of functions/classes/files with line numbers or symbol references whenever available. |
 
 ## Scope Applicability
 
@@ -103,7 +103,7 @@ Merge rule: if an `M` section would produce no more than two useful sentences or
 - `S09_CORE_PRINCIPLES` explains why the design works the way it does.
 - `S11_RISKS_AND_IMPROVEMENTS` explains where the design can fail and what should be changed.
 - `S12_REVIEWER_QUESTIONS` is a learning review Q&A, not a code-review checklist or generic FAQ. For the current analysis scope (project, module/package, file, class, or function), ask consolidation questions about purpose, structure, execution flow, design decisions, risks, debugging paths, and extension boundaries. Every question must include a concrete answer backed by source evidence or explicitly marked inference.
-- `S13_MAINTAINER_REFERENCE` is an index, not prose. Prefer dense symbol/file references with line numbers.
+- `S13_MAINTAINER_REFERENCE` is an index, not prose. It must be a Markdown table, not paragraphs or a bullet list. Recommended columns: `Name`, `Kind`, `Location`, `Purpose`, `Notes`. Keep rows dense and include line numbers or symbol references whenever available.
 
 ## Scope-Specific Depth
 
@@ -132,7 +132,9 @@ Merge rule: if an `M` section would produce no more than two useful sentences or
 - Prefer code snippets under 30 lines; surround snippets with explanation.
 - Avoid marketing prose, generic compliments, and vague "can be optimized" statements. Name the specific risk and the specific improvement.
 - Text must cover the core information even if the reader skips every diagram.
-- The maintainer reference must include line numbers or symbol locations whenever available.
+- Use content-driven line breaks in `[Description]` and `[Detail]`. Short content may stay on one line; break lines when content contains sentence-ending punctuation such as periods and semicolons, or at meaningful list, step, caveat, or comparison boundaries.
+- Organize `[Description]` and `[Detail]` with Markdown structures that match the content: paragraphs, bullet lists, numbered steps, indentation, and Markdown tables. Use lists for peer items, numbered steps for ordered workflows, indentation for nested context, and tables for comparison, indexes, or dense reference data.
+- The maintainer reference table must use Markdown table syntax and include line numbers or symbol locations whenever available.
 
 ## Validation Checklist
 
@@ -145,6 +147,8 @@ Before creating or finalizing report artifacts, verify:
 - [ ] Required section IDs are covered according to the scope applicability matrix.
 - [ ] Merged sections are intentionally merged and still mentioned in the section summary.
 - [ ] `S12_REVIEWER_QUESTIONS` includes answers for every learning review question and ties them to the analyzed target scope.
+- [ ] `S13_MAINTAINER_REFERENCE` is written as a Markdown table, not prose or bullets.
+- [ ] `[Description]` and `[Detail]` use appropriate Markdown layout such as paragraphs, lists, indentation, or tables rather than unstructured prose.
 - [ ] Every architecture, risk, call-flow, and data-flow claim is backed by source evidence or marked as inference.
 - [ ] Code snippets are focused, explained, and not pasted as long unexplained source blocks.
 
@@ -158,14 +162,14 @@ Before runtime checks, verify:
 - [ ] Categories match tab `data-diagram` values and `data-diagram-overview` values.
 - [ ] `.ctu` syntax follows the template.
 - [ ] Topbar links are intentionally preserved, adapted, or removed.
-- [ ] `node <skill-dir>/scripts/validate-report.js --root <CTU_HOME> --html cache/<report-file>.html --lang <zh|en>` returns zero errors.
+- [ ] `node <skill-dir>/scripts/validate-report.js --root <CTU_HOME> --html cache/<report-file>.html --lang <zh|en> --strict` returns zero errors and zero warnings.
 
 ### Runtime Validation
 
 Before final response, verify:
 
 - [ ] Every UML block passed static checks.
-- [ ] PlantUML render check passed through `node <skill-dir>/scripts/validate-report.js --render`, or limitation stated.
+- [ ] PlantUML render check passed through `node <skill-dir>/scripts/validate-report.js --strict --render`, or limitation stated.
 - [ ] Server running and page/API loads at `http://localhost:<PORT>/...`.
 - [ ] Data API returns all expected category keys and card counts.
 - [ ] Browser URL is included in the final response.

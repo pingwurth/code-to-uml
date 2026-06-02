@@ -1,0 +1,52 @@
+Title: 核心原理与风险改进
+Describe: 本文件的核心思想是把模型循环、工具执行、安全裁决、状态压缩和协作协议分层组合。
+------------------------------------------------------------
+[Example]
+S09_CORE_PRINCIPLES: 分层但不拆文件
+
+[Description]
+核心设计原则是“表驱动工具池 + hook 裁决 + 文件持久状态 + 消息反馈循环”。
+
+模型只看到 tool schema，Python 通过 handler 表执行。
+
+权限、日志和大输出处理不散落在每个工具中，而是由 hook 管道统一处理。
+
+任务、mailbox、transcript 和 scheduled jobs 采用可检查的本地文件，便于教学观察。
+[UML]
+None
+
+[Detail]
+这种设计让一份文件能讲清 agent harness 的完整链路：prompt 组装说明模型知道什么，tool pool 说明模型能做什么，hook 说明本地如何拒绝动作，messages/history 说明结果如何回到模型。
+
+代价是跨子系统全局状态很多，生产代码应拆成模块并建立更明确的接口和测试边界。
+
+------------------------------------------------------------
+[Example]
+S11_RISKS_AND_IMPROVEMENTS: 具体风险
+
+[Description]
+主要风险包括：导入期副作用较多，导入模块会创建目录并启动 cron scheduler；
+
+任务、mailbox 和 pending_requests 没有完整事务或 TTL；
+
+`permission_hook` 用字符串匹配 shell 风险；
+
+多个 daemon thread 共享全局状态，只有部分字典有锁；
+
+cron parser 是简化实现，异常被局部吞掉；
+
+`safe_path` 只保护文件工具，`run_bash` 仍可在 workspace 内执行任意 shell。
+[UML]
+None
+
+[Detail]
+可行动改进：
+
+1. 把导入期启动线程改为显式 `main()` 初始化，方便测试导入。
+2. 为 `Task` 状态迁移、cron 解析、permission hook、MCP 工具合并增加单元测试。
+3. 给 `pending_requests` 添加过期和清理逻辑，避免队友永久等待。
+4. 把任务和 mailbox 文件操作封装为带锁或原子写的 store。
+5. 把 shell 权限从字符串匹配升级为命令解析和策略对象。
+6. 把子系统拆成 task_store、tool_runtime、protocol_bus、context_manager、scheduler、mcp_registry。
+
+------------------------------------------------------------

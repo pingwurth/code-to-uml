@@ -1,0 +1,144 @@
+Title: 顶层结构
+Describe: 文件由 17 个通过注释分隔的子系统组成，按依赖顺序从底向上排列。
+------------------------------------------------------------
+[Example]
+S02_TOP_LEVEL_STRUCTURE: 子系统分区总览
+
+[Description]
+文件通过 `# ── XXX ──` 注释分隔为 17 个逻辑分区，按依赖关系从底向上排列。底部子系统依赖顶部子系统，不存在循环依赖。
+
+| 行范围 | 分区名称 | 职责 |
+|--------|----------|------|
+| 1-55 | 配置与全局变量 | 导入、环境变量、客户端、常量 |
+| 57-69 | `terminal_print` | 线程安全的终端输出 |
+| 70-167 | Task System | 任务 CRUD、依赖检查、状态机 |
+| 170-281 | Worktree System | Git worktree 创建/删除/保留 |
+| 283-339 | Skill Loading | SKILL.md 扫描与注册表 |
+| 342-373 | Prompt Assembly | 系统提示动态装配 |
+| 376-457 | Basic Tools | bash/read/write/edit/glob |
+| 459-468 | Todo Write | 会话级任务列表管理 |
+| 471-501 | MessageBus | JSONL 邮箱消息传递 |
+| 504-546 | Protocol State | 请求/响应协议匹配 |
+| 549-600 | Autonomous Agent | idle_poll 与任务自动认领 |
+| 603-809 | Teammate Thread | 队友线程生命周期管理 |
+| 826-853 | Lead Protocol Tools | Lead 端协议工具 |
+| 855-940 | Hooks + Permission Pipeline | 四阶段 hook 管线 |
+| 943-1033 | Subagent Tool | 子 Agent 生成与执行 |
+| 1036-1148 | Context Compaction | 四层上下文压缩 |
+| 1151-1202 | Error Recovery | 重试、降级、恢复状态机 |
+| 1204-1272 | Background Tasks | 慢操作异步执行 |
+| 1275-1473 | Cron Scheduler | 定时任务调度 |
+| 1476-1591 | MCP System | MCP 客户端与工具合并 |
+| 1593-1603 | Lead Worktree Tools | Worktree 工具封装 |
+| 1605-1835 | Tool Definitions | BUILTIN_TOOLS + BUILTIN_HANDLERS |
+| 1838-1852 | Context | 记忆管理 |
+| 1855-2005 | Agent Loop | 主执行循环 |
+| 2007-2068 | CLI + Entry Point | 交互式入口 |
+[UML]
+@startuml
+package "配置层" {
+  [imports & globals] as CFG
+  [terminal_print] as TP
+}
+package "存储层" {
+  [Task System] as TASK
+  [Worktree System] as WT
+  [Skill Loading] as SKILL
+  [Cron Scheduler] as CRON
+}
+package "通信层" {
+  [MessageBus] as BUS
+  [Protocol State] as PROTO
+}
+package "执行层" {
+  [Basic Tools] as TOOLS
+  [Subagent Tool] as SUB
+  [Background Tasks] as BG
+  [Hooks + Permission] as HOOK
+}
+package "控制层" {
+  [Agent Loop] as LOOP
+  [Teammate Thread] as TEAM
+  [Autonomous Agent] as AUTO
+  [Context Compaction] as COMP
+  [Error Recovery] as ERR
+}
+package "集成层" {
+  [MCP System] as MCP
+  [Prompt Assembly] as PROMPT
+}
+
+CFG --> TASK
+CFG --> WT
+CFG --> SKILL
+CFG --> CRON
+CFG --> BUS
+TASK --> WT
+LOOP --> TOOLS
+LOOP --> HOOK
+LOOP --> COMP
+LOOP --> ERR
+LOOP --> BG
+LOOP --> MCP
+LOOP --> PROMPT
+LOOP --> BUS
+TEAM --> BUS
+TEAM --> TASK
+TEAM --> WT
+AUTO --> BUS
+AUTO --> TASK
+CRON --> LOOP
+SUB --> TOOLS
+SUB --> HOOK
+PROMPT --> SKILL
+PROMPT --> BUS
+PROMPT --> MCP
+@enduml
+
+[Detail]
+**阅读入口**：从底部开始——`__main__`（第 2034 行）→ `agent_loop`（第 1901 行）→ 工具调度 → 子系统。
+
+**依赖方向**：存储层提供持久化原语，通信层提供跨线程消息，执行层封装工具调用，控制层编排循环逻辑，集成层连接外部服务。
+
+**分区边界的意义**：
+- 每个 `# ── XXX ──` 注释标记一个独立的子系统
+- 子系统之间通过函数调用和全局变量交互
+- 没有 class-based 模块边界，所有状态通过模块级变量共享
+
+------------------------------------------------------------
+[Example]
+S02_TOP_LEVEL_STRUCTURE: 导入与全局配置
+
+[Description]
+文件头部（第 1-55 行）定义了所有全局配置：
+
+| 变量 | 行 | 值/来源 | 用途 |
+|------|-----|---------|------|
+| `WORKDIR` | 33 | `Path.cwd()` | 所有路径解析的基目录 |
+| `client` | 34 | `Anthropic(base_url=...)` | 全局 API 客户端 |
+| `MODEL` | 35 | `os.environ["MODEL_ID"]` | 主模型 ID |
+| `PRIMARY_MODEL` | 36 | `MODEL` | 主模型标识 |
+| `FALLBACK_MODEL` | 37 | `os.getenv("FALLBACK_MODEL_ID")` | 降级模型 |
+| `SKILLS_DIR` | 39 | `WORKDIR / "skills"` | 技能目录 |
+| `TRANSCRIPT_DIR` | 40 | `WORKDIR / ".transcripts"` | 转录目录 |
+| `TOOL_RESULTS_DIR` | 41 | `WORKDIR / ".task_outputs" / "tool-results"` | 工具输出目录 |
+| `DEFAULT_MAX_TOKENS` | 43 | 8000 | 默认最大 token |
+| `ESCALATED_MAX_TOKENS` | 44 | 16000 | 升级后最大 token |
+| `MAX_RETRIES` | 45 | 3 | 最大重试次数 |
+| `MAX_CONSECUTIVE_529` | 46 | 2 | 连续 529 触发降级阈值 |
+| `MAX_RECOVERY_RETRIES` | 47 | 2 | 恢复重试上限 |
+| `BASE_DELAY_MS` | 48 | 500 | 重试基础延迟 |
+| `CONTEXT_LIMIT` | 49 | 50000 | 触发压缩的上下文大小 |
+| `KEEP_RECENT_TOOL_RESULTS` | 50 | 3 | micro_compact 保留数 |
+| `PERSIST_THRESHOLD` | 51 | 30000 | 大输出持久化阈值 |
+[UML]
+None
+
+[Detail]
+**readline 配置**（第 19-24 行）：尝试导入 readline 并关闭 `bind-tty-special-chars`，避免后台线程干扰终端。如果 readline 不可用，`READLINE_AVAILABLE` 标志降级 `terminal_print` 行为。
+
+**环境变量依赖**：
+- `ANTHROPIC_API_KEY`：必需，通过 `.env` 加载
+- `ANTHROPIC_BASE_URL`：可选，自定义 API 端点
+- `MODEL_ID`：必需，主模型标识
+- `FALLBACK_MODEL_ID`：可选，529 降级目标模型

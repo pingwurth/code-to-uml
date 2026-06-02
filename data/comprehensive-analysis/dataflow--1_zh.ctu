@@ -1,0 +1,79 @@
+Title: 数据流/状态流图
+Describe: 状态主要通过 JSON 文件、全局字典、消息列表和线程队列移动。
+------------------------------------------------------------
+[Example]
+S07_DATA_OR_STATE_FLOW: Task 生命周期
+
+[Description]
+任务从 `create_task` 创建为 `pending`，保存到 `.tasks/task_*.json`。
+
+`claim_task` 要求状态为 pending、没有 owner、且 `can_start` 判断依赖已完成，然后改为 `in_progress`。
+
+`complete_task` 只接受 in_progress，改为 `completed`，并检查是否有被解锁的 pending 任务。
+
+worktree 可通过 `bind_task_to_worktree` 绑定到任务。
+[UML]
+@startuml
+[*] --> pending : create_task
+pending --> in_progress : claim_task / owner set
+pending --> pending : blockedBy missing or incomplete
+pending --> pending : already owned or not pending
+in_progress --> completed : complete_task
+in_progress --> in_progress : complete_task rejected if wrong state
+completed --> completed : cannot claim or complete again
+pending --> pending : bind_task_to_worktree / worktree field set
+@enduml
+
+[Detail]
+状态图展示合法迁移和拒绝路径。
+
+迁移由 `.tasks` JSON 文件承载，没有数据库事务。
+
+`can_start` 对不存在的依赖直接返回 False；
+
+`claim_task` 会把 missing deps 和未完成 deps 写进返回字符串。
+
+维护者扩展状态时，需要同步更新 `claim_task`、`complete_task`、`scan_unclaimed_tasks` 和展示函数 `run_list_tasks`。
+
+------------------------------------------------------------
+[Example]
+消息和上下文数据流
+
+[Description]
+队友、lead、protocol 和 cron 都通过 `messages` 或 mailbox 文件进入模型上下文。
+
+`prepare_context` 会先压缩大 tool_result，再裁剪旧消息，再微压缩较早 tool_result；
+
+超过 `CONTEXT_LIMIT` 时写 transcript 并调用模型总结。
+
+后台任务结果先进入 `background_results`，下一轮由 `collect_background_results` 转成 XML 风格通知。
+[UML]
+@startuml
+left to right direction
+component "用户输入" as UserInput
+component "cron_queue" as CronQ
+component "background_results" as BG
+component ".mailboxes/*.jsonl" as Mail
+component "messages/history" as Msg
+component "prepare_context" as Prep
+database ".transcripts\n.tool-results" as Persist
+component "Anthropic request" as Req
+UserInput --> Msg
+CronQ --> Msg : Scheduled prompt
+BG --> Msg : task_notification
+Mail --> Msg : inbox/protocol content
+Msg --> Prep
+Prep --> Persist : transcript 或大输出
+Prep --> Req : trimmed/compacted messages
+@enduml
+
+[Detail]
+箭头表示数据移动方向。
+
+`messages` 是模型上下文的中心缓存，文件和队列只是进入它的不同入口。
+
+`tool_result_budget` 会把大输出落盘到 `.task_outputs/tool-results`，但返回给模型的是路径和预览。
+
+这个设计让上下文可控，但也要求后续工具能重新读取落盘内容，否则模型只能看到预览。
+
+------------------------------------------------------------

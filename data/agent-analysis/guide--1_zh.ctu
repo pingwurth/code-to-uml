@@ -1,0 +1,186 @@
+Title: 开发上手指南与复盘问答
+Describe: 推荐阅读顺序、学习复盘问答和维护者速查表。
+------------------------------------------------------------
+[Example]
+S10_ONBOARDING_GUIDE: 推荐阅读顺序
+
+[Description]
+建议按以下顺序阅读 s20_comprehensive.py，从核心循环向外扩展：
+
+**第一遍：核心循环（30 分钟）**
+1. `__main__`（第 2034-2068 行）：入口和 CLI 循环
+2. `agent_loop()`（第 1901-2005 行）：主执行循环
+3. `prepare_context()`（第 1861-1868 行）：上下文预算
+4. `call_llm()`（第 1888-1898 行）：模型调用
+
+**第二遍：工具系统（30 分钟）**
+5. `BUILTIN_TOOLS`（第 1670-1814 行）：工具定义
+6. `BUILTIN_HANDLERS`（第 1816-1835 行）：处理器映射
+7. `permission_hook()`（第 879-904 行）：权限管线
+8. `assemble_tool_pool()`（第 1574-1590 行）：MCP 合并
+
+**第三遍：子系统（60 分钟）**
+9. Task System（第 70-167 行）
+10. MessageBus（第 471-501 行）
+11. Teammate Thread（第 603-809 行）
+12. Context Compaction（第 1036-1148 行）
+13. Error Recovery（第 1151-1202 行）
+14. Cron Scheduler（第 1275-1473 行）
+15. MCP System（第 1476-1591 行）
+[UML]
+@startmindmap
+* s20 阅读路径
+** 核心循环
+*** __main__ 入口
+*** agent_loop 主循环
+*** prepare_context 上下文
+*** call_llm 模型调用
+** 工具系统
+*** BUILTIN_TOOLS 定义
+*** BUILTIN_HANDLERS 处理器
+*** permission_hook 权限
+*** assemble_tool_pool 合并
+** 子系统
+*** Task System 任务
+*** MessageBus 消息
+*** Teammate 队友
+*** Compaction 压缩
+*** Error Recovery 恢复
+*** Cron 定时
+*** MCP 集成
+@endmindmap
+
+[Detail]
+**运行验证**：
+```bash
+cd learn-claude-code
+pip install anthropic python-dotenv
+echo "ANTHROPIC_API_KEY=your-key" > .env
+echo "MODEL_ID=claude-sonnet-4-20250514" >> .env
+python agents/s20_comprehensive.py
+```
+
+**调试技巧**：
+- 在 `permission_hook()` 中添加 `print()` 观察工具调用
+- 在 `agent_loop()` 的 `call_llm()` 前后添加断点
+- 检查 `.tasks/` 目录观察任务状态变化
+- 检查 `.mailboxes/` 观察消息传递
+
+**常见陷阱**：
+- 忘记设置 `MODEL_ID` 环境变量会导致 `KeyError`
+- `FALLBACK_MODEL_ID` 未设置时，529 错误不会触发降级
+- `skills/` 目录不存在时，`scan_skills()` 静默返回空注册表
+
+------------------------------------------------------------
+[Example]
+S12_REVIEWER_QUESTIONS: 学习复盘问答
+
+[Description]
+以下问题帮助读者巩固对 s20_comprehensive.py 的理解，每个问题都有基于源码的具体答案。
+[UML]
+None
+
+[Detail]
+**Q1：agent_loop 如何决定何时退出？**
+
+A：三种退出条件（第 1901-2005 行）：
+1. LLM 响应不包含 tool_use block（第 1954 行 `has_tool_use()` 返回 False）
+2. 发生不可恢复的异常（第 1929-1936 行）
+3. max_tokens 且 recovery_count 耗尽（第 1945-1949 行）
+
+**Q2：permission_hook 如何阻止工具执行？**
+
+A：`trigger_hooks()`（第 867-872 行）遍历 hook 列表，第一个返回非 None 的 hook 的返回值作为阻止原因。在 agent_loop 第 1972-1977 行，如果 `blocked` 非 None，工具不会被执行，阻止原因作为 tool_result 返回给模型。
+
+**Q3：teammate 线程如何接收 lead 的指令？**
+
+A：通过 `BUS.read_inbox(name)`（第 491-498 行）读取 `.mailboxes/{name}.jsonl` 文件。Lead 通过 `BUS.send("lead", teammate_name, content)` 写入消息。read_inbox 是破坏性读取（读取后删除文件）。
+
+**Q4：compact 工具调用后为什么跳过 tool_result 追加？**
+
+A：第 1965-1970 行，当 `block.name == "compact"` 时，`messages[:]` 被重写为压缩后的版本，`compacted_now` 标志为 True。第 2001-2002 行检查此标志，跳过 tool_result 追加并 continue 循环。这是因为压缩已经改变了 messages 结构。
+
+**Q5：cron 作业如何在不中断 CLI 的情况下执行？**
+
+A：`cron_scheduler_loop()`（第 1422-1438 行）在守护线程中每秒检查，匹配的作业加入 `cron_queue`。`cron_autorun_loop()`（第 2017-2031 行）在另一个守护线程中消费队列，通过 `agent_lock` 与主线程互斥地执行 agent_loop。
+
+**Q6：MCP 工具如何避免与内置工具名称冲突？**
+
+A：MCP 工具使用 `mcp__{server}__{tool}` 三段式命名（第 1582 行），`normalize_mcp_name()`（第 1508-1510 行）清理特殊字符。内置工具不使用此前缀。
+
+**Q7：reactive_compact 和 compact_history 的区别是什么？**
+
+A：`compact_history()`（第 1133 行）是主动压缩，在 agent_loop 的 `prepare_context()` 中触发。`reactive_compact()`（第 1140 行）是被动压缩，在 prompt-too-long 错误后触发。reactive_compact 保留最近 5 条消息，compact_history 替换为单条摘要。
+
+**Q8：为什么 assemble_tool_pool 每轮都调用？**
+
+A：第 1925 行，在 agent_loop 的每轮迭代中调用 `assemble_tool_pool()`。这是因为用户可能在对话过程中调用 `connect_mcp()` 添加新的 MCP 服务器，工具池需要立即更新。
+
+**Q9：background_task 的结果如何返回给模型？**
+
+A：`start_background_task()`（第 1230 行）返回占位 tool_result。后台线程完成后，结果存储在 `background_results` 字典中。下一轮 `inject_background_notifications()`（第 1881 行）将结果作为 `<task_notification>` 注入 messages。
+
+**Q10：idle_poll 如何实现自动认领任务？**
+
+A：`idle_poll()`（第 566 行）先检查 inbox，如果没有消息，则调用 `scan_unclaimed_tasks()`（第 555 行）查找 status=="pending"、owner 为空、can_start()==True 的任务。认领后将任务信息注入 teammate 的 messages。
+
+------------------------------------------------------------
+[Example]
+S13_MAINTAINER_REFERENCE: 维护者速查表
+
+[Description]
+以下表格索引了文件中的所有关键符号，便于快速定位和修改。
+[UML]
+None
+
+[Detail]
+| 名称 | 类型 | 位置 | 用途 | 备注 |
+|------|------|------|------|------|
+| `WORKDIR` | 常量 | :33 | 工作目录基路径 | `Path.cwd()` |
+| `client` | 全局 | :34 | Anthropic API 客户端 | 模块级单例 |
+| `MODEL` | 常量 | :35 | 主模型 ID | 来自 `MODEL_ID` 环境变量 |
+| `FALLBACK_MODEL` | 常量 | :37 | 降级模型 ID | 来自 `FALLBACK_MODEL_ID` |
+| `DEFAULT_MAX_TOKENS` | 常量 | :43 | 默认最大 token | 8000 |
+| `ESCALATED_MAX_TOKENS` | 常量 | :44 | 升级后最大 token | 16000 |
+| `MAX_RETRIES` | 常量 | :45 | 最大重试次数 | 3 |
+| `CONTEXT_LIMIT` | 常量 | :49 | 触发压缩阈值 | 50000 字符 |
+| `PERSIST_THRESHOLD` | 常量 | :51 | 大输出持久化阈值 | 30000 字符 |
+| `Task` | 数据类 | :78 | 任务记录 | 7 字段 |
+| `CronJob` | 数据类 | :1283 | 定时任务 | 5 字段 |
+| `ProtocolState` | 数据类 | :507 | 协议请求状态 | 7 字段 |
+| `MCPClient` | 类 | :1480 | MCP 客户端 | mock 实现 |
+| `MessageBus` | 类 | :479 | 消息总线 | JSONL 邮箱 |
+| `RecoveryState` | 类 | :1153 | 错误恢复状态 | 每轮新建 |
+| `create_task()` | 函数 | :93 | 创建任务 | 生成唯一 ID |
+| `claim_task()` | 函数 | :134 | 认领任务 | 状态→in_progress |
+| `complete_task()` | 函数 | :155 | 完成任务 | 状态→completed |
+| `can_start()` | 函数 | :122 | 检查依赖 | 递归检查 blockedBy |
+| `run_bash()` | 函数 | :388 | 执行 shell 命令 | 120s 超时 |
+| `run_read()` | 函数 | :400 | 读取文件 | 支持 offset/limit |
+| `run_write()` | 函数 | :414 | 写入文件 | 自动创建父目录 |
+| `run_edit()` | 函数 | :424 | 编辑文件 | 仅替换第一次出现 |
+| `safe_path()` | 函数 | :378 | 路径安全检查 | 防止逃逸 |
+| `permission_hook()` | 函数 | :879 | 权限拦截 | deny list + 用户确认 |
+| `trigger_hooks()` | 函数 | :867 | 触发 hook 管线 | 短路特性 |
+| `assemble_system_prompt()` | 函数 | :359 | 装配系统提示 | 每轮重建 |
+| `assemble_tool_pool()` | 函数 | :1574 | 合并工具池 | 内置 + MCP |
+| `spawn_subagent()` | 函数 | :1004 | 生成子 Agent | 最多 30 轮 |
+| `spawn_teammate_thread()` | 函数 | :605 | 生成队友线程 | 独立消息循环 |
+| `agent_loop()` | 函数 | :1901 | 主执行循环 | 核心函数 |
+| `prepare_context()` | 函数 | :1861 | 上下文预算 | 4 层压缩 |
+| `call_llm()` | 函数 | :1888 | 调用 LLM | 带重试和降级 |
+| `with_retry()` | 函数 | :1167 | 重试引擎 | 指数退避 |
+| `compact_history()` | 函数 | :1133 | 全量压缩 | 调用模型摘要 |
+| `reactive_compact()` | 函数 | :1140 | 被动压缩 | prompt-too-long |
+| `cron_matches()` | 函数 | :1312 | cron 表达式匹配 | 5 字段 |
+| `connect_mcp()` | 函数 | :1559 | 连接 MCP 服务器 | late-bound |
+| `consume_lead_inbox()` | 函数 | :537 | 消费 lead 邮箱 | 协议路由 |
+| `idle_poll()` | 函数 | :566 | 空闲轮询 | 自动认领任务 |
+| `BUILTIN_TOOLS` | 常量 | :1670 | 工具定义列表 | 22 个工具 |
+| `BUILTIN_HANDLERS` | 常量 | :1816 | 处理器映射 | 22 个处理器 |
+| `HOOKS` | 全局 | :859 | hook 注册表 | 4 个事件 |
+| `mcp_clients` | 全局 | :1503 | MCP 客户端字典 | 运行时扩展 |
+| `scheduled_jobs` | 全局 | :1291 | cron 作业字典 | 受 cron_lock 保护 |
+| `background_tasks` | 全局 | :1209 | 后台任务字典 | 受 background_lock 保护 |
+| `active_teammates` | 全局 | :502 | 活跃队友字典 | 无锁保护 |
+| `pending_requests` | 全局 | :517 | 待处理协议字典 | 无锁保护 |

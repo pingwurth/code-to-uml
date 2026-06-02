@@ -1,0 +1,93 @@
+Title: 核心对象/函数说明
+Describe: 数据类保存持久记录，函数负责工具执行、状态迁移和循环编排。
+------------------------------------------------------------
+[Example]
+S03_CORE_OBJECTS: 数据类和服务对象
+
+[Description]
+`Task` 是 `.tasks/task_*.json` 的持久记录，字段包括 `id`、`subject`、`description`、`status`、`owner`、`blockedBy` 和可选 `worktree`。
+
+`ProtocolState` 记录 shutdown 和 plan approval 请求。
+
+`CronJob` 记录 cron 表达式、prompt、是否 recurring 和 durable。
+
+`MessageBus` 用 JSONL mailbox 发送和读取消息。
+
+`MCPClient` 是教学 mock 客户端，用 `register` 保存工具定义和 handler，用 `call_tool` 执行。
+[UML]
+@startuml
+class Task {
+  id: str
+  subject: str
+  description: str
+  status: str
+  owner: str | None
+  blockedBy: list[str]
+  worktree: str | None
+}
+class ProtocolState {
+  request_id: str
+  type: str
+  sender: str
+  target: str
+  status: str
+  payload: str
+}
+class CronJob {
+  id: str
+  cron: str
+  prompt: str
+  recurring: bool
+  durable: bool
+}
+class MessageBus {
+  send(from_agent, to_agent, content, msg_type, metadata)
+  read_inbox(agent)
+}
+class MCPClient {
+  name: str
+  tools: list[dict]
+  register(tool_defs, handlers)
+  call_tool(tool_name, args)
+}
+Task --> "JSON file" : asdict/json
+ProtocolState --> "pending_requests" : request_id key
+CronJob --> ".scheduled_tasks.json" : durable jobs
+MessageBus --> ".mailboxes/*.jsonl" : append/read/unlink
+MCPClient --> "assemble_tool_pool" : prefixed tools
+@enduml
+
+[Detail]
+类图回答“哪些对象拥有状态”。
+
+`Task`、`ProtocolState` 和 `CronJob` 是记录型数据；
+
+`MessageBus` 和 `MCPClient` 是轻量服务对象。
+
+箭头表示状态保存或消费关系。
+
+注意 `MessageBus.read_inbox` 读取后会删除 inbox 文件，这是一个破坏性读取语义；
+
+`MCPClient.call_tool` 捕获异常并返回字符串，避免异常穿透到主循环。
+
+------------------------------------------------------------
+[Example]
+关键函数职责表
+
+[Description]
+`agent_loop` 是主编排器，`prepare_context` 控制上下文预算，`call_llm` 包装 `with_retry`，`trigger_hooks` 执行权限和日志 hook，`call_tool_handler` 统一调用 handler。
+
+`spawn_subagent` 是同步子代理，`spawn_teammate_thread` 是后台队友线程。
+
+`start_background_task` 把慢 bash 放入 daemon thread，`collect_background_results` 把结果变成 task notification。
+[UML]
+None
+
+[Detail]
+局部调用关系可以用三组理解：一是任务组 `create_task -> save_task`、`claim_task -> can_start -> load_task`、`complete_task -> list_tasks/can_start`；
+
+二是上下文组 `prepare_context -> tool_result_budget/snip_compact/micro_compact/compact_history`；
+
+三是工具执行组 `agent_loop -> trigger_hooks -> should_run_background/call_tool_handler -> trigger_hooks(PostToolUse)`。
+
+------------------------------------------------------------

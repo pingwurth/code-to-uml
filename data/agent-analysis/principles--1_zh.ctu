@@ -1,0 +1,156 @@
+Title: 核心原理说明
+Describe: 设计理念、工具池合并、协议匹配和分层压缩策略。
+------------------------------------------------------------
+[Example]
+S09_CORE_PRINCIPLES: "单文件集成实验台"设计哲学
+
+[Description]
+s20 的核心设计理念是**教学完整性优于代码组织**。所有 17 个子系统放在一个文件中，通过注释分隔，目的是：
+
+1. **消除跨文件认知负担**：读者不需要在多个文件间跳转
+2. **共享状态可见性**：所有全局变量在同一作用域，依赖关系一目了然
+3. **执行流可追踪**：从 `__main__` 到任何子系统最多 3 层函数调用
+
+这个设计牺牲了模块化和可测试性，但极大降低了学习门槛。
+[UML]
+None
+
+[Detail]
+**与生产系统的对比**：
+
+| 维度 | s20 教学版本 | 生产级 harness |
+|------|-------------|---------------|
+| 文件组织 | 单文件 + 注释分隔 | 多模块 + 包结构 |
+| 状态管理 | 模块级全局变量 | 依赖注入 + 状态容器 |
+| 锁策略 | 粗粒度 Lock | 细粒度锁 + 无锁数据结构 |
+| 错误处理 | 字符串匹配异常类型 | 异常层次 + 错误码 |
+| 工具注册 | 双表同步（TOOLS + HANDLERS） | 装饰器/注册表模式 |
+| 持久化 | JSON 文件 | 数据库 + 事务 |
+| 测试 | 无 | 单元测试 + 集成测试 |
+
+**教学价值**：读者理解 s20 后，可以将任何子系统提取为独立模块，因为所有依赖关系已经通过全局变量显式暴露。
+
+------------------------------------------------------------
+[Example]
+S09_CORE_PRINCIPLES: Hook 管线的 AOP 设计
+
+[Description]
+Hook 系统（第 859-940 行）实现了面向切面编程（AOP）的核心思想：在不修改工具处理器代码的情况下，添加权限检查、日志记录和输出监控。
+
+四个 hook 事件对应工具生命周期的 4 个切面：
+- `UserPromptSubmit`：用户输入后、模型调用前
+- `PreToolUse`：工具执行前（可阻止执行）
+- `PostToolUse`：工具执行后（可修改输出）
+- `Stop`：模型停止后（可检查状态）
+[UML]
+None
+
+[Detail]
+**hook 的短路特性**（`trigger_hooks()`，第 867-872 行）：
+```python
+def trigger_hooks(event: str, *args):
+    for callback in HOOKS[event]:
+        result = callback(*args)
+        if result is not None:
+            return result
+    return None
+```
+第一个返回非 None 的 hook 阻止后续 hook 执行。这使得 permission_hook 拒绝后，log_hook 不会被调用。
+
+**hook 注册顺序**（第 936-940 行）：
+```python
+register_hook("UserPromptSubmit", user_prompt_hook)
+register_hook("PreToolUse", permission_hook)  # 先检查权限
+register_hook("PreToolUse", log_hook)          # 再记录日志
+register_hook("PostToolUse", large_output_hook)
+register_hook("Stop", stop_hook)
+```
+permission_hook 在 log_hook 之前，确保被拒绝的命令不会出现在日志中。
+
+**扩展点**：添加新 hook 只需调用 `register_hook()`，无需修改任何现有代码。
+
+------------------------------------------------------------
+[Example]
+S09_CORE_PRINCIPLES: MCP Late-Bound 工具合并
+
+[Description]
+MCP（Model Context Protocol）集成采用 late-bound 设计：工具不是在启动时静态定义的，而是在运行时通过 `connect_mcp()` 动态发现并合并到工具池。
+
+这使得模型可以在对话过程中"学会"新的工具能力。
+[UML]
+None
+
+[Detail]
+**Late-Bound 的实现**：
+1. `connect_mcp(name)`（第 1559 行）：连接 MCP 服务器，发现工具
+2. `mcp_clients` 字典：存储所有已连接的 MCP 客户端
+3. `assemble_tool_pool()`（第 1574 行）：每次 agent_loop 迭代重建工具池
+4. 模型看到的工具列表在每轮都可能不同
+
+**工具命名空间**：`mcp__{server}__{tool}` 三段式命名避免了内置工具和 MCP 工具的名称冲突。`normalize_mcp_name()` 清理特殊字符。
+
+**mock 服务器**（第 1513-1556 行）：教学版本使用 mock 服务器（docs、deploy），生产版本应替换为真实的 MCP 协议实现。
+
+**安全考虑**：deploy MCP 服务器的 trigger 工具在 permission_hook 中被标记为"destructive-looking"（第 899 行），需要用户确认。
+
+------------------------------------------------------------
+[Example]
+S09_CORE_PRINCIPLES: 分层上下文压缩策略
+
+[Description]
+上下文压缩采用 4 层渐进式策略，从低成本操作到高成本操作逐步升级：
+
+| 层 | 成本 | 策略 | 触发条件 |
+|----|------|------|----------|
+| 1 | 低 | 持久化大输出到文件 | tool_result > 200KB |
+| 2 | 低 | 截断旧消息 | 消息数 > 50 |
+| 3 | 低 | 截断旧 tool_result | 旧结果 > 3 个 |
+| 4 | 高 | 调用模型生成摘要 | 总大小 > 50KB |
+
+这种分层设计确保了低成本操作优先执行，只有在必要时才调用模型。
+[UML]
+None
+
+[Detail]
+**每层解决的问题**：
+1. `tool_result_budget()`：解决单个 tool_result 过大的问题（如长文件内容）
+2. `snip_compact()`：解决消息数量过多的问题（长对话）
+3. `micro_compact()`：解决旧 tool_result 堆积的问题（多次工具调用）
+4. `compact_history()`：解决整体上下文过大的问题（综合压缩）
+
+**reactive_compact 的特殊性**（第 1140-1148 行）：当 API 返回 prompt-too-long 错误时触发，保留最近 5 条消息 + 模型摘要。这是最后的防线。
+
+**transcript 备份**（`write_transcript()`，第 1112-1118 行）：压缩前将完整消息写入 `.transcripts/` 目录，允许事后审计。
+
+**压缩的副作用**：压缩后，模型丢失了之前的上下文细节。如果摘要质量不高，可能导致模型重复已完成的工作。CONTINUATION_PROMPT（第 52 行）试图缓解这个问题。
+
+------------------------------------------------------------
+[Example]
+S09_CORE_PRINCIPLES: 自治 Agent 的 idle_poll 模式
+
+[Description]
+自治 teammate 使用 idle_poll 模式实现"无事则等、有事则做"的行为：
+
+1. 优先检查 inbox（直接消息优先级最高）
+2. 其次扫描未认领任务（自动认领）
+3. 两者都没有则 sleep，直到超时
+[UML]
+None
+
+[Detail]
+**优先级设计**（`idle_poll()`，第 566-600 行）：
+- inbox 消息来自 lead 或其他 teammate，通常是直接指令或协议消息，优先级最高
+- 未认领任务是自治行为，优先级次之
+- 超时退出（`IDLE_TIMEOUT = 60` 秒）防止无限等待
+
+**自动认领的条件**（`scan_unclaimed_tasks()`，第 555-563 行）：
+- status == "pending"
+- owner 为空
+- can_start() 为 True（所有依赖已完成）
+
+**worktree 上下文传递**：认领带 worktree 的任务时，`worktree_context` 被更新，teammate 的文件工具自动切换到该目录。
+
+**与生产系统的差距**：
+- 没有任务优先级
+- 没有负载均衡（第一个看到的 teammate 认领）
+- 没有认领确认（可能出现竞态条件）

@@ -1,0 +1,86 @@
+Title: 关键代码片段解析
+Describe: 聚焦最能说明设计意图的源码片段，而不是复制整份文件。
+------------------------------------------------------------
+[Example]
+S08_CODE_SNIPPETS: 权限 hook 的安全边界
+
+[Description]
+`permission_hook` 在 `agents/s20_comprehensive.py:879-904` 处理三类风险：bash 命令 deny list、破坏性 bash token 的交互确认、write/edit 的 workspace path 检查，以及名称含 deploy 的 MCP 工具确认。
+
+它位于 `PreToolUse` hook，因此在 handler 前运行。
+[UML]
+None
+
+[Detail]
+关键片段：
+
+```python
+if block.name == "bash":
+    command = block.input.get("command", "")
+    for pattern in DENY_LIST:
+        if pattern in command:
+            return f"Permission denied: '{pattern}' is on the deny list"
+    if any(token in command for token in DESTRUCTIVE):
+        choice = input("  Allow? [y/N] ").strip().lower()
+        if choice not in ("y", "yes"):
+            return "Permission denied by user"
+```
+
+这个 hook 展示了“模型提出动作，本地运行时裁决动作”的边界。
+
+风险是字符串匹配只能覆盖教学样例，不是完整 shell 解析；
+
+生产化应使用更结构化的命令策略、路径策略和审计记录。
+
+------------------------------------------------------------
+[Example]
+S08_CODE_SNIPPETS: MCP late-bound 工具池
+
+[Description]
+`assemble_tool_pool` 在 `agents/s20_comprehensive.py:1574-1590` 每轮复制 builtin tools 和 handlers，再把已连接 MCP server 的工具加上 `mcp__{server}__{tool}` 前缀。
+
+handler 使用默认参数捕获当前 client 和原始 tool name，避免 Python lambda 闭包晚绑定错误。
+[UML]
+None
+
+[Detail]
+关键片段：
+
+```python
+handlers[prefixed] = (
+    lambda *, c=mcp_client, t=tool_def["name"], **kw: c.call_tool(t, kw))
+```
+
+这里的 `c=mcp_client, t=tool_def["name"]` 是必要细节。
+
+如果直接引用循环变量，所有 handler 可能指向最后一个 MCP 工具。
+
+这个片段也解释了为什么系统 prompt 会提示 MCP tools 使用 prefixed 名称。
+
+------------------------------------------------------------
+[Example]
+S08_CODE_SNIPPETS: 上下文预算管道
+
+[Description]
+`prepare_context` 在 `agents/s20_comprehensive.py:1861-1868` 是每轮 LLM 前的统一入口。
+
+它依次调用 `tool_result_budget`、`snip_compact`、`micro_compact`，最后在估算大小超过 `CONTEXT_LIMIT` 时调用 `compact_history`。
+[UML]
+None
+
+[Detail]
+关键片段：
+
+```python
+messages[:] = tool_result_budget(messages)
+messages[:] = snip_compact(messages)
+messages[:] = micro_compact(messages)
+if estimate_size(messages) > CONTEXT_LIMIT:
+    messages[:] = compact_history(messages)
+```
+
+`messages[:] = ...` 保留原 list 对象但替换内容，这对调用方共享 `history` 很重要。
+
+代价是函数有明显副作用，调试时不能把它当纯函数看待。
+
+------------------------------------------------------------

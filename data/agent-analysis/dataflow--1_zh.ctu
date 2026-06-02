@@ -1,0 +1,143 @@
+Title: 数据流/状态流图
+Describe: 任务状态机、消息总线数据流和上下文压缩管线。
+------------------------------------------------------------
+[Example]
+S07_DATA_OR_STATE_FLOW: 任务状态机
+
+[Description]
+Task 对象在生命周期中经历 3 个状态，由 4 个函数驱动转换：
+
+| 当前状态 | 触发函数 | 目标状态 | 条件 |
+|----------|----------|----------|------|
+| (新建) | `create_task()` | pending | 无 |
+| pending | `claim_task()` | in_progress | 无 owner 且 can_start() |
+| in_progress | `complete_task()` | completed | 状态必须是 in_progress |
+
+每个状态转换都立即持久化到 `.tasks/{id}.json`。
+[UML]
+@startuml
+[*] --> pending : create_task()
+
+pending --> in_progress : claim_task()
+note right of pending
+  条件：
+  - owner 为空
+  - can_start() 为 True
+  - 所有 blockedBy 已完成
+end note
+
+in_progress --> completed : complete_task()
+note right of in_progress
+  条件：
+  - status == "in_progress"
+end note
+
+completed --> [*]
+@enduml
+
+[Detail]
+**can_start() 的递归检查**（第 122-131 行）：对于每个 blockedBy 依赖，不仅检查状态是否为 completed，还检查依赖文件是否存在。这防止了引用不存在的任务导致的静默失败。
+
+**解锁传播**：`complete_task()`（第 155-167 行）完成后，扫描所有 pending 任务，报告哪些因本次完成而解锁。这是一个 O(n) 操作，教学版本未做优化。
+
+**worktree 绑定**：任务可以通过 `bind_task_to_worktree()`（第 233 行）关联一个 worktree。认领带 worktree 的任务时，teammate 的文件工具自动切换到该目录。
+
+------------------------------------------------------------
+[Example]
+S07_DATA_OR_STATE_FLOW: 消息总线数据流
+
+[Description]
+MessageBus 使用 append-only JSONL 文件实现跨线程消息传递：
+
+| 组件 | 写入 | 读取 | 文件 |
+|------|------|------|------|
+| Lead (主循环) | `BUS.send("lead", teammate, ...)` | `consume_lead_inbox()` | `.mailboxes/lead.jsonl` |
+| Teammate | `BUS.send(name, "lead", ...)` | `BUS.read_inbox(name)` | `.mailboxes/{name}.jsonl` |
+| Cron 注入 | 直接 append 到 messages | - | (内存) |
+
+消息类型：`message`（普通）、`shutdown_request`/`shutdown_response`（关闭协议）、`plan_approval_request`/`plan_approval_response`（计划审批）、`result`（任务结果）。
+[UML]
+@startuml
+component "Lead (agent_loop)" as Lead
+component "Teammate A" as TA
+component "Teammate B" as TB
+component "MessageBus" as BUS
+database ".mailboxes/" as FS
+
+Lead --> BUS : send(lead, A, ...)
+Lead --> BUS : send(lead, B, ...)
+TA --> BUS : send(A, lead, ...)
+TB --> BUS : send(B, lead, ...)
+BUS --> FS : append JSONL
+Lead --> FS : read_inbox(lead)
+TA --> FS : read_inbox(A)
+TB --> FS : read_inbox(B)
+@enduml
+
+[Detail]
+**read_inbox 的破坏性读取**（第 491-498 行）：读取后立即删除 JSONL 文件。这意味着每条消息只能被读取一次。
+
+**协议路由**（`consume_lead_inbox()`，第 537-546 行）：lead 的 inbox 消息会自动路由——如果消息类型以 `_response` 结尾且包含 `request_id`，则调用 `match_response()` 更新 `pending_requests` 状态。
+
+**消息持久化**：消息仅以 JSONL 文件形式存在于磁盘，没有重试机制或确认机制。如果进程崩溃，未读消息会丢失（因为 read_inbox 会删除文件）。
+
+------------------------------------------------------------
+[Example]
+S07_DATA_OR_STATE_FLOW: 上下文压缩管线
+
+[Description]
+上下文压缩分为 4 层，每层解决不同的上下文膨胀问题：
+
+| 层 | 函数 | 行 | 触发条件 | 策略 |
+|----|------|-----|----------|------|
+| 1 | `tool_result_budget()` | 1068 | 最近 tool_result > 200KB | 大输出持久化到文件 |
+| 2 | `snip_compact()` | 1092 | 消息数 > 50 | 保留前 3 + 后 47 条 |
+| 3 | `micro_compact()` | 1102 | 旧 tool_result > 3 个 | 截断旧结果为摘要 |
+| 4 | `compact_history()` | 1133 | 总大小 > 50KB | 调用模型生成完整摘要 |
+
+额外的 `reactive_compact()`（第 1140 行）在 prompt-too-long 错误后触发，保留最近 5 条消息 + 模型摘要。
+[UML]
+@startuml
+start
+:messages 输入;
+
+:tool_result_budget()
+阈值: 200KB;
+if (超过?) then (yes)
+  :持久化大输出到文件;
+  :替换为预览;
+endif
+
+:snip_compact()
+阈值: 50 条消息;
+if (超过?) then (yes)
+  :保留前 3 + 后 47;
+  :中间插入 [snipped N messages];
+endif
+
+:micro_compact()
+阈值: 3 个旧 tool_result;
+if (超过?) then (yes)
+  :截断旧结果为摘要;
+endif
+
+:estimate_size()
+阈值: 50KB;
+if (超过?) then (yes)
+  :write_transcript()
+  保存完整转录;
+  :summarize_history()
+  调用模型生成摘要;
+  :替换为 [Compacted] + 摘要;
+endif
+
+:messages 输出;
+stop
+@enduml
+
+[Detail]
+**PERSIST_THRESHOLD**（第 51 行，30000 字符）：单个 tool_result 超过此阈值时，`persist_large_output()` 将完整内容写入 `.task_outputs/tool-results/{tool_use_id}.txt`，返回预览 + 文件路径。
+
+**summarize_history()**（第 1121-1130 行）：将消息序列化为 JSON（截断到 80KB），要求模型保留"当前目标、关键发现、已修改文件、剩余工作、用户约束"。
+
+**reactive_compact 的降级**（第 1140-1148 行）：如果 `summarize_history()` 也失败（如 API 错误），使用硬编码的错误消息作为摘要。
