@@ -1,0 +1,188 @@
+# Report Contract
+
+Use this reference whenever planning, generating, or validating Code-To-UML report content.
+
+## Contract Goals
+
+- Keep one consistent report model across project, module/package, file, class, and function scopes.
+- Measure report coverage by stable section IDs, not by tab labels or physical `.ctu` filenames.
+- Keep the HTML template data-driven: report cards, diagrams, descriptions, and details belong in `.ctu` files.
+- Let the reader understand the target from text alone; diagrams reduce cognitive load but never replace explanation.
+
+## Category Model
+
+Use category-based `.ctu` files named `{category}--{n}_{lang}.ctu`.
+
+- Default language suffix: `_zh`, unless the user requested another language.
+- Each `{category}` must match a tab button's `data-diagram` value and its `data-diagram-overview` entry.
+- The categories below are the canonical default for a full Code-To-UML source analysis report.
+- The template may use other category names when the user or target shape requires module-, method-, or principle-specific tabs. When using custom categories, still map every required section ID to a category and verify tab/data alignment.
+
+Canonical full-report categories:
+
+- `overview`
+- `structure`
+- `objects`
+- `architecture`
+- `flow`
+- `calls`
+- `dataflow`
+- `code`
+- `principles`
+- `guide`
+
+### Category Ownership
+
+Each standard category owns the primary content for these section IDs:
+
+| Category | Owns | Notes |
+| --- | --- | --- |
+| `overview` | `S01_TARGET_OVERVIEW` | May include a short `S13_MAINTAINER_REFERENCE` summary, but the full reference belongs in `guide`. |
+| `structure` | `S02_TOP_LEVEL_STRUCTURE` | Covers imports, constants, files, classes/functions, and entry logic. |
+| `objects` | `S03_CORE_OBJECTS` | Local per-object responsibilities and call interfaces. |
+| `architecture` | `S04_ARCHITECTURE` | Global architecture and dependency boundaries. |
+| `flow` | `S05_CORE_FLOW` | Main execution flow, branches, and error paths. |
+| `calls` | `S06_CALL_RELATIONSHIPS` | End-to-end call traces across meaningful boundaries. |
+| `dataflow` | `S07_DATA_OR_STATE_FLOW` | Data movement, state ownership, lifecycle, or FSM behavior. |
+| `code` | `S08_CODE_SNIPPETS` | Focused source excerpts with analysis, not source dumping. |
+| `principles` | `S09_CORE_PRINCIPLES`, `S11_RISKS_AND_IMPROVEMENTS` | Design ideas, mechanisms, tradeoffs, risks, and specific improvements. |
+| `guide` | `S10_ONBOARDING_GUIDE`, `S12_REVIEWER_QUESTIONS`, `S13_MAINTAINER_REFERENCE` | Practical reading/debugging paths, review prompts, and symbol/file index. |
+
+## Section Catalog
+
+Use stable section IDs in planning notes, validation, and summaries. Display titles may be localized or adapted.
+
+| ID | Default title | Required content |
+| --- | --- | --- |
+| `S01_TARGET_OVERVIEW` | Target Overview | Purpose, role in project, problem solved, scope boundaries, source version, and evidence baseline. |
+| `S02_TOP_LEVEL_STRUCTURE` | Top-Level Structure | Imports/dependencies, constants/config, files/modules, classes/functions, entry logic, and import-time side effects when relevant. |
+| `S03_CORE_OBJECTS` | Core Objects and Functions | Key classes/functions/methods, responsibilities, parameters, returns, side effects, invariants, and local "who I call / who calls me" summaries. |
+| `S04_ARCHITECTURE` | Architecture Diagram | Major modules, objects, layers, runtime/deployment assumptions, and dependency direction. |
+| `S05_CORE_FLOW` | Core Flow Diagram | Main execution path, important branches, failure/error paths, retries, and fallback behavior. |
+| `S06_CALL_RELATIONSHIPS` | Call Relationship Diagram | Complete trace paths across module/service/object boundaries; not a duplicate of `S03` local call notes. |
+| `S07_DATA_OR_STATE_FLOW` | Data or State Flow Diagram | Inputs, transformations, persistence, outputs, state ownership, lifecycle transitions, or FSM/workflow states. |
+| `S08_CODE_SNIPPETS` | Key Code Snippet Analysis | Short snippets with problem solved, design intent, edge cases, and usage cautions. Prefer snippets under 30 lines. |
+| `S09_CORE_PRINCIPLES` | Core Principles | Runtime mechanisms, patterns, design tradeoffs, and why the implementation is shaped this way. |
+| `S10_ONBOARDING_GUIDE` | Developer Onboarding Guide | Reading order, run/debug steps, manual verification, extension points, and troubleshooting paths. |
+| `S11_RISKS_AND_IMPROVEMENTS` | Risks and Improvement Suggestions | Specific complexity, concurrency, security, performance, correctness, maintainability risks, and actionable improvements. |
+| `S12_REVIEWER_QUESTIONS` | Key Questions for Code Reviewers | Concrete correctness, edge-case, security, performance, and design-intent questions that surface hidden assumptions. |
+| `S13_MAINTAINER_REFERENCE` | Maintainer Quick Reference | Function/class/file index with line numbers or symbol references whenever available. |
+
+## Scope Applicability
+
+Use the same section catalog for every target. Scope changes required depth and merge behavior.
+
+Legend:
+
+- `R`: required standalone section coverage in its owning category or an equivalent custom category.
+- `M`: required coverage, but may be merged into the nearest owning section/category when standalone content would be thin.
+- `O`: optional; include only when it materially improves understanding.
+
+| Section ID | Project | Module/package | File | Class | Function |
+| --- | --- | --- | --- | --- | --- |
+| `S01_TARGET_OVERVIEW` | R | R | R | R | R |
+| `S02_TOP_LEVEL_STRUCTURE` | R | R | R | M | M |
+| `S03_CORE_OBJECTS` | R | R | R | R | R |
+| `S04_ARCHITECTURE` | R | R | M | O | O |
+| `S05_CORE_FLOW` | R | R | R | R | R |
+| `S06_CALL_RELATIONSHIPS` | R | R | M | M | M |
+| `S07_DATA_OR_STATE_FLOW` | R | R | M | M | M |
+| `S08_CODE_SNIPPETS` | R | R | R | R | R |
+| `S09_CORE_PRINCIPLES` | R | R | R | R | R |
+| `S10_ONBOARDING_GUIDE` | R | R | R | M | M |
+| `S11_RISKS_AND_IMPROVEMENTS` | R | R | R | R | R |
+| `S12_REVIEWER_QUESTIONS` | R | R | M | M | M |
+| `S13_MAINTAINER_REFERENCE` | R | R | R | M | M |
+
+Merge rule: if an `M` section would produce no more than two useful sentences or one trivial diagram, merge it into the nearest owning section rather than creating a shallow tab/card. Still mention the section ID in the final section summary.
+
+## Responsibility Boundaries
+
+- `S03_CORE_OBJECTS` is a local view. It explains each important object's responsibility, interface, side effects, and immediate callers/callees in text.
+- `S06_CALL_RELATIONSHIPS` is a global trace view. It shows complete call paths across meaningful boundaries as sequence, component, or call-chain diagrams.
+- `S09_CORE_PRINCIPLES` explains why the design works the way it does.
+- `S11_RISKS_AND_IMPROVEMENTS` explains where the design can fail and what should be changed.
+- `S12_REVIEWER_QUESTIONS` is not a FAQ. It is a review checklist of concrete questions that can reveal correctness, security, performance, and design issues.
+- `S13_MAINTAINER_REFERENCE` is an index, not prose. Prefer dense symbol/file references with line numbers.
+
+## Scope-Specific Depth
+
+- **Project**: include architecture layers, entrypoints, major subsystems, deployment/runtime assumptions, cross-module dependencies, operational constraints, and one core user/runtime path.
+- **Module/package**: include public API, internal files, dependency direction, state ownership, extension points, and mismatches between likely intended design and actual implementation.
+- **File**: include top-level layout, contained classes/functions, globals, import-time side effects, primary runtime path, exceptional paths, and performance-sensitive paths.
+- **Class**: include constructor/state, public methods, invariants, lifecycle, collaborators, subclass/consumer risks, and state transitions.
+- **Function**: include signature, preconditions, algorithm, branches, exceptions/errors, side effects, callers/callees, and examples of correct/incorrect use.
+
+## Analysis Playbook
+
+- Use a five-layer progression when the target is non-trivial: system map -> flow walkthrough -> design decisions -> pattern recognition -> pitfalls and boundaries.
+- Let output needs drive analysis depth: every paragraph should answer a concrete reader question.
+- Favor fewer precise sections over long generic prose.
+- Explain side effects and failure paths, not only the happy path.
+- For onboarding guidance, prefer verifiable action steps before abstract explanation:
+  - onboarding: map the system -> run it -> find the relevant module -> avoid known pitfalls
+  - daily development: follow the flow -> identify impact scope -> check local conventions
+  - troubleshooting: runbook -> call chain -> state/data checks
+
+## Evidence and Quality Bar
+
+- Be concrete: mention real function/class names, files, directories, constants, state files, environment variables, routes, commands, or line numbers from the target.
+- Tie architecture claims, risk claims, and call/data-flow claims back to observed source evidence. If a conclusion is inferred rather than directly visible, say so.
+- Be proportional: broad targets get more architectural synthesis; narrow targets get deeper branch/call/side-effect analysis.
+- Prefer code snippets under 30 lines; surround snippets with explanation.
+- Avoid marketing prose, generic compliments, and vague "can be optimized" statements. Name the specific risk and the specific improvement.
+- Text must cover the core information even if the reader skips every diagram.
+- The maintainer reference must include line numbers or symbol locations whenever available.
+
+## Validation Checklist
+
+### Content Validation
+
+Before creating or finalizing report artifacts, verify:
+
+- [ ] Target source read-only constraint respected.
+- [ ] Scope identified as project, module/package, file, class, or function.
+- [ ] Required section IDs are covered according to the scope applicability matrix.
+- [ ] Merged sections are intentionally merged and still mentioned in the section summary.
+- [ ] Every architecture, risk, call-flow, and data-flow claim is backed by source evidence or marked as inference.
+- [ ] Code snippets are focused, explained, and not pasted as long unexplained source blocks.
+
+### Artifact Validation
+
+Before runtime checks, verify:
+
+- [ ] HTML output exists at the requested path.
+- [ ] Data directory exists.
+- [ ] `.ctu` filenames match `{category}--{n}_{lang}.ctu`.
+- [ ] Categories match tab `data-diagram` values and `data-diagram-overview` values.
+- [ ] `.ctu` syntax follows the template.
+- [ ] Topbar links are intentionally preserved, adapted, or removed.
+
+### Runtime Validation
+
+Before final response, verify:
+
+- [ ] Every UML block passed static checks.
+- [ ] PlantUML render check passed, or limitation stated.
+- [ ] Server running and page/API loads at `http://localhost:<PORT>/...`.
+- [ ] Data API returns all expected category keys and card counts.
+- [ ] Browser URL is included in the final response.
+
+## Maintenance Rules
+
+- Tag each report with the source code version: commit hash when available, otherwise generation date.
+- Regenerate after major source changes such as architecture restructuring or core module refactoring.
+- Treat pitfalls, troubleshooting, risk sections, and maintainer references as living content.
+- Prefer removing stale content over keeping it with a disclaimer.
+- Keep report updates in the same repository, PR, and review flow as the source code they explain.
+
+## Final Response Shape
+
+When the user does not specify a custom final format, report:
+
+1. `HTML file path`
+2. `Template reuse status`
+3. `Multi-file split decision`
+4. `PlantUML check result`
+5. `Report section summary`
+6. `Browser URL`

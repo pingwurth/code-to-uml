@@ -10,8 +10,8 @@ You can use **markdown** formatting here.
 Write "None" if no description is needed.
 
 [UML]
+# === Your PlantUML code here, write "None" or leave empty to skip. ===
 @startuml
-' === Your PlantUML code here ===
 Alice -> Bob: Hello
 Bob --> Alice: Hi there
 @enduml
@@ -32,7 +32,6 @@ Description for the second example.
 
 [UML]
 @startuml
-' === Another diagram ===
 participant User
 participant System
 User -> System: Request

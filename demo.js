@@ -279,7 +279,9 @@
 				level: 3,
 				onClick: () => scrollToExample(node)
 			});
-			enqueueRender(() => renderCurrent(node, generation));
+			if (examples[i] && examples[i].hasUml !== false) {
+				enqueueRender(() => renderCurrent(node, generation));
+			}
 		}
 		applyDemoI18n();
 		renderTocForActiveTab(tocItems);
@@ -374,6 +376,7 @@
 	async function renderCurrent(example, generation) {
 		if (generation !== renderGeneration) return;
 		if (!example.isConnected) return;
+		if (example.dataset.hasUml === "false") return;
 		const preview = example.querySelector("[data-preview]");
 		const exampleId = example && example.id ? example.id : "";
 		if (!preview) {

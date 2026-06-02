@@ -89,12 +89,14 @@
 		} = options || {};
 
 		const exampleItem = Object.assign({}, item || {});
+		const hasUml = exampleItem.hasUml !== false && Boolean(String(exampleItem.source || "").trim());
 
 		const safeDiagramKey = String(diagramKey || "").toLowerCase().replace(/\s+/g, "-");
 		const wrapper = document.createElement("div");
-		wrapper.className = "example";
+		wrapper.className = hasUml ? "example" : "example example-no-uml";
 		wrapper.id = `demo-example-${safeDiagramKey}-${index + 1}`;
 		wrapper.dataset.filename = `demo-${safeDiagramKey}-${index + 1}`;
+		wrapper.dataset.hasUml = hasUml ? "true" : "false";
 
 		const heading = document.createElement("h3");
 		heading.className = "demo-example-title";
@@ -122,6 +124,10 @@
 
 		const previewNode = grid.querySelector("[data-preview]");
 		previewNode.id = `demo-preview-${safeDiagramKey}-${index + 1}`;
+		if (!hasUml) {
+			actions.remove();
+			grid.remove();
+		}
 
 		const message = document.createElement("div");
 		message.className = "example-message";
@@ -134,12 +140,14 @@
 		wrapper.appendChild(message);
 
 		const source = wrapper.querySelector("[data-source]");
-		source.value = exampleItem.source || "";
-		source.addEventListener("input", () => {
-			if (typeof onSourceInput === "function") {
-				onSourceInput(wrapper);
-			}
-		});
+		if (source) {
+			source.value = exampleItem.source || "";
+			source.addEventListener("input", () => {
+				if (typeof onSourceInput === "function") {
+					onSourceInput(wrapper);
+				}
+			});
+		}
 
 		for (const btn of Array.from(wrapper.querySelectorAll("[data-action]"))) {
 			btn.addEventListener("click", () => {

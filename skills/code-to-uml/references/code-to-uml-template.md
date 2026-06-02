@@ -1,6 +1,22 @@
 # Code-To-UML Template Notes
 
-Use this reference only when the target output is a Code-To-UML report page or when `$CTU_HOME/cache/_TEMPLATE.html` and `$CTU_HOME/data/_TEMPLATE.ctu` exist.
+Use this reference when the output must be a Code-To-UML report page, especially when `$CTU_HOME/cache/_TEMPLATE.html` and `$CTU_HOME/data/_TEMPLATE.ctu` exist.
+
+This file owns only the HTML, `.ctu`, and runtime loading contract. For content coverage, diagram choice, and UML rules, use:
+
+- `report-contract.md`: category model, 13 section IDs, scope depth, validation.
+- `diagram-decision-table.md`: when to use diagrams and which type to choose.
+- `uml-standards.md`: PlantUML syntax and detail-writing rules.
+
+## Quick Checklist
+
+- Resolve `$CTU_HOME`; all paths below are relative to it.
+- Put HTML in `cache/<report-slug>.html` and content in `data/<report-slug>/{category}--{n}_{lang}.ctu`.
+- Use ASCII `report-slug` and `category` values: `a-z`, `0-9`, `_`, `-`.
+- Set `<body class="demo-page" data-dir="<report-slug>">` for custom report data.
+- Keep required selectors, script order, tabs, overviews, `.ctu` prefixes, and API keys aligned.
+- Use `None` only to mean "empty/hidden"; `[UML]` may be `None` for text-only cards. Handle `official-demo-link` deliberately.
+- Verify page route, API payload, card counts, topbar behavior, and UML rendering.
 
 ## Root Resolution
 
@@ -10,19 +26,34 @@ Resolve the Code-To-UML project root as:
 2. Current working directory, only if it contains `cache/_TEMPLATE.html` and `data/_TEMPLATE.ctu`.
 3. Otherwise stop and tell the user to run `node install-ctu-home.js` from the Code-To-UML project.
 
-All paths below are relative to `$CTU_HOME`.
+## Artifact and Naming Contract
 
-## Required Files
+The HTML should be a thin data-driven shell. Report cards, diagrams, descriptions, and details belong in `.ctu` files.
 
-- HTML report: usually `$CTU_HOME/cache/<report-slug>.html`.
-- Data directory: `$CTU_HOME/data/<report-slug>/`.
-- Data files: `{category}--{n}_zh.ctu` or `{category}--{n}_en.ctu`.
+- HTML report: `cache/<report-slug>.html`.
+- Data directory: `data/<report-slug>/`.
+- Data files: `{category}--{n}_{lang}.ctu`, for example `overview--1_zh.ctu`.
+- Supported language suffixes: `_zh` and `_en`; default to `_zh` unless requested otherwise.
+- `report-slug` and `category`: lowercase kebab-case is recommended.
+- `n`: positive integer used for sorting.
 
-The HTML should be a thin template-driven shell. The report cards, diagrams, descriptions, and details belong in `.ctu` files.
+Do not use slashes, dots, spaces, or non-ASCII characters in `report-slug` or `category`. The server sanitizes `dir` by removing characters outside `[a-zA-Z0-9_-]`, so invalid names can silently load the wrong directory.
+
+## Category Contract
+
+For a full Code-To-UML source analysis report, use the canonical categories from `report-contract.md`:
+
+```text
+overview, structure, objects, architecture, flow, calls, dataflow, code, principles, guide
+```
+
+These 10 categories are UI/data groupings, not the full content contract. The 13 section IDs and canonical mapping live in `report-contract.md`; notably, `principles` carries risks/improvements, and `guide` carries Q&A plus maintainer reference content.
+
+Custom categories are allowed, but every required section ID must still map to a category and every category must align across tabs, overviews, filenames, and API keys.
 
 ## HTML Runtime Contract
 
-Preserve:
+Preserve the template's fixed structure and script order. These selectors are runtime dependencies:
 
 - `body class="demo-page"`.
 - `main class="content"`.
@@ -34,21 +65,34 @@ Preserve:
 - `aside data-demo-toc`.
 - Required script order from the template.
 
-When using a custom data directory, add `data-dir="<report-slug>"` to `<body>`. `demo.js` calls `/api/demo-examples?lang=<mode>&dir=<data-dir>`.
+When using custom data, add `data-dir="<report-slug>"` to `<body>`. `demo.js` calls `/api/demo-examples?lang=<mode>&dir=<data-dir>`.
+
+Alignment rules:
+
+- Exactly one `.demo-tab` should start with `is-active`.
+- Every `button[data-diagram]` must have one matching `p[data-diagram-overview]`.
+- Every expected API category key must have one matching `button[data-diagram]`.
+- Remove tabs whose `.ctu` data does not exist.
+
+Path rules:
+
+- Reports under `cache/` usually need `../favicon.svg`, `../main.css`, `../demo.js`, and `../js` or `../component` script paths.
+- A root-level page such as `demo.html` uses paths without `../`.
+- If custom scripts are necessary, append them after `demo.js` unless the template explicitly says otherwise.
 
 ## Topbar Link Contract
 
-The template’s `official-demo-link` is easy to mishandle. Always choose one of these states deliberately:
+Choose one state deliberately:
 
-1. **Official PlantUML tutorial link**: preserve `id="official-demo-link"` and ensure the href/text are correct for the report page’s relative path. If existing pages use a dynamic language script, copy/adapt that script with correct `../` prefixes.
-2. **Internal companion report link**: keep `class="demo-topbar-link"` but use a truthful id/href/text for that companion page. Do not leave `official-demo-link` if it no longer points to the official demo behavior.
-3. **No extra link**: delete the entire `<a class="demo-topbar-link" ...>` element.
+- Official PlantUML tutorial link: preserve `id="official-demo-link"` and verify `href`, text, target behavior, relative path, and language-update script.
+- Internal companion report link: keep `class="demo-topbar-link"` but use a truthful id, href, and text; do not leave `official-demo-link`.
+- No extra link: delete the whole `<a class="demo-topbar-link" ...>` element.
 
-Do not keep a placeholder like “PlantUML Official Demo” or “返回 Demo” unless it is intentionally correct and verified.
+Do not keep placeholder text like "PlantUML Official Demo" or "Back to Demo".
 
 ## `.ctu` Contract
 
-Each file starts with:
+Each `.ctu` file starts with:
 
 ```text
 Title: <section title>
@@ -60,10 +104,10 @@ Each card uses:
 
 ```text
 [Example]
-<card title>
+<card title or None>
 
 [Description]
-<markdown description>
+<markdown description or None>
 
 [UML]
 @startuml
@@ -71,23 +115,81 @@ Each card uses:
 @enduml
 
 [Detail]
-<markdown detail>
+<markdown detail or None>
 ```
 
-Use at least 60 hyphens as the separator. Write `None` only when a title/detail should be hidden.
+Text-only cards are valid. Use `None` in `[UML]` when the card should not render a diagram:
+
+```text
+[Example]
+Risk checklist
+
+[Description]
+Review risks that are clearer as text than as a diagram.
+
+[UML]
+None
+
+[Detail]
+No diagram is rendered for this card. The report content is carried by the description and detail text.
+```
+
+Parser behavior to respect:
+
+- `Title:` and `Describe:` are read before the first separator; `Describe:` may span multiple lines.
+- Separator lines must contain at least 60 hyphens; lines starting with `#` are ignored.
+- Section markers are `[Example]`, `[Description]`, `[UML]`, and `[Detail]`.
+- A field containing only `None` is normalized to empty. This applies to card title, description, UML source, detail, `Title:`, and `Describe:`.
+- Empty `[UML]` or `[UML]` containing only `None` means the card is text-only and should not render a diagram.
+- UML syntax validation applies only to non-empty `[UML]` content after `None` normalization.
+- Generated files should still include separators between cards, even though the parser can split on a later `[Example]`.
+
+If a card includes a diagram, `[Detail]` must explain the important nodes, arrows, relationships, and why the diagram matters.
+
+## Runtime API Contract
+
+`demo.js` loads report data through:
+
+```text
+GET http://localhost:<PORT>/api/demo-examples?lang=<zh|en>&dir=<report-slug>
+```
+
+Important response facts:
+
+- Top-level keys are category names from `.ctu` filename prefixes before `--`.
+- Items include fields such as `title`, `description`, `source`, `detail`, `sectionTitle`, `sectionDescription`, `hasUml`, and `*I18n` maps.
+- Cards are sorted by `{n}` and then by card order inside each file.
+- Missing requested language falls back between `_zh` and `_en` when possible.
+- Generated reports should use exact category alignment even though the frontend normalizes some tab matching.
+
+Minimal alignment example:
+
+```text
+body[data-dir="auth-module"]
+button[data-diagram="overview"]
+p[data-diagram-overview="overview"]
+data/auth-module/overview--1_zh.ctu
+API key: overview
+```
 
 ## Verification
 
-- Use port `5401` unless the user specified another port.
-- Start the server from `$CTU_HOME` and leave it running. The scripts contain the port cleanup logic and kill only the process bound to the selected port:
-  - macOS/Linux: `"$CTU_HOME/serve.sh" "$PORT"`
-  - Windows: `"%CTU_HOME%\serve.bat" "%PORT%"`
-- `curl /api/demo-examples?lang=zh&dir=<report-slug>` should return all category keys expected by the tabs.
-- The total card count should match the generated `.ctu` blocks.
-- If `$CTU_HOME/plantuml.jar` exists, batch-render extracted UML blocks with `java -jar "$CTU_HOME/plantuml.jar" -tsvg`.
-- Verify the report HTML route returns HTTP 200 under the local server.
-- Verify topbar link behavior after changing language if i18n scripts are present.
-- Tell the user the browser URL: `http://localhost:<PORT>/cache/<report-slug>.html`.
+Use port `5401` unless the user specified another port.
+
+Start the server from `$CTU_HOME` and leave it running:
+
+- macOS/Linux: `"$CTU_HOME/serve.sh" "$PORT"`
+- Windows: `"%CTU_HOME%\serve.bat" "%PORT%"`
+
+Before claiming completion, verify:
+
+- `http://localhost:<PORT>/cache/<report-slug>.html` returns HTTP 200.
+- `http://localhost:<PORT>/api/demo-examples?lang=zh&dir=<report-slug>` returns all expected category keys.
+- API category keys, `button[data-diagram]`, `p[data-diagram-overview]`, card counts, and `.ctu` blocks match.
+- Every `.ctu` filename matches `{category}--{n}_{lang}.ctu` and uses UTF-8 marker syntax.
+- Every non-empty UML block passes static checks; if `plantuml.jar` exists, extracted blocks render successfully. `[UML]` blocks normalized from `None` are text-only and are not sent to PlantUML.
+- Topbar links are intentionally preserved, adapted, or removed and verified after language changes when i18n is present.
+- The final response includes `http://localhost:<PORT>/cache/<report-slug>.html`.
 
 ## Port Cleanup Location
 

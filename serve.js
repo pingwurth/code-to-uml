@@ -118,6 +118,9 @@ function parseCtuGroups(content) {
 	}
 
 	for (const line of lines) {
+		if (/^\s*#/.test(line)) {
+			continue;
+		}
 		if (!headerParsed) {
 			const titleMatch = line.match(/^\s*Title\s*:\s*(.*)\s*$/i);
 			if (titleMatch) {
@@ -340,7 +343,7 @@ async function loadDemoExamplesFromData(lang, dataSubdir) {
 		}
 		for (let i = 0; i < parsedGroups.length; i += 1) {
 			const group = parsedGroups[i];
-			if (!group || !String(group.source || "").trim()) continue;
+			if (!group) continue;
 			const groupKey = `${id}:${i}`;
 			let item = itemMap.get(groupKey);
 			if (!item) {
@@ -371,6 +374,7 @@ async function loadDemoExamplesFromData(lang, dataSubdir) {
 			.sort((a, b) => (a.id - b.id) || (a.groupIndex - b.groupIndex))
 				.map(item => {
 					const source = String(item.sourceByLang.zh || item.sourceByLang.en || "").trim();
+					const hasUml = Boolean(source);
 					return {
 						id: item.id + item.groupIndex,
 						titleI18n: item.titleI18n,
@@ -383,10 +387,10 @@ async function loadDemoExamplesFromData(lang, dataSubdir) {
 						title: localizeValue(item.titleI18n, lang, "\n"),
 						description: localizeValue(item.descriptionI18n, lang, "\n\n"),
 						detail: localizeValue(item.detailI18n, lang, "\n\n"),
+						hasUml,
 						source
 					};
-				})
-			.filter(item => item.source);
+				});
 		if (items.length) {
 			out[diagramKey] = items;
 		}
