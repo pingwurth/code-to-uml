@@ -147,3 +147,6 @@ vite.config.ts.timestamp-*
 .cursor/
 .codegraph/
 .idea/
+
+# skills
+skills/*_zh/
