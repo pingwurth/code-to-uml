@@ -16,15 +16,16 @@ This file owns only the HTML, `.ctu`, and runtime loading contract. For content 
 - Set `<body class="demo-page" data-dir="<report-slug>">` for custom report data.
 - Keep required selectors, script order, tabs, overviews, `.ctu` prefixes, and API keys aligned.
 - Use `None` only to mean "empty/hidden"; `[UML]` may be `None` for text-only cards. Handle `official-demo-link` deliberately.
-- Verify page route, API payload, card counts, topbar behavior, and UML rendering.
+- Run `scripts/validate-report.js`, then verify page route, API payload, card counts, topbar behavior, and UML rendering.
 
 ## Root Resolution
 
 Resolve the Code-To-UML project root as:
 
 1. `CTU_HOME` environment variable.
-2. Current working directory, only if it contains `cache/_TEMPLATE.html` and `data/_TEMPLATE.ctu`.
-3. Otherwise stop and tell the user to run `node install-ctu-home.js` from the Code-To-UML project.
+2. A user-provided Code-To-UML project root path, when the request gives one.
+3. Current working directory, only if it contains `cache/_TEMPLATE.html` and `data/_TEMPLATE.ctu`.
+4. Otherwise stop and tell the user to run `node install-ctu-home.js` from the Code-To-UML project.
 
 ## Artifact and Naming Contract
 
@@ -176,13 +177,23 @@ API key: overview
 
 Use port `5401` unless the user specified another port.
 
+First run the bundled artifact validator from the skill directory:
+
+```text
+node <skill-dir>/scripts/validate-report.js --root <CTU_HOME> --html cache/<report-slug>.html --lang zh
+```
+
+Add `--render` when `plantuml.jar` exists in `<CTU_HOME>` and Java is available on `PATH`.
+
 Start the server from `$CTU_HOME` and leave it running:
 
 - macOS/Linux: `"$CTU_HOME/serve.sh" "$PORT"`
-- Windows: `"%CTU_HOME%\serve.bat" "%PORT%"`
+- Windows PowerShell: `Set-Location $env:CTU_HOME`, then `.\serve.bat 5401`
+- Windows cmd.exe: `cd /d "%CTU_HOME%"`, then `serve.bat 5401`
 
 Before claiming completion, verify:
 
+- `scripts/validate-report.js` returns zero errors. In `--strict` mode, it must also return zero warnings.
 - `http://localhost:<PORT>/cache/<report-slug>.html` returns HTTP 200.
 - `http://localhost:<PORT>/api/demo-examples?lang=zh&dir=<report-slug>` returns all expected category keys.
 - API category keys, `button[data-diagram]`, `p[data-diagram-overview]`, card counts, and `.ctu` blocks match.

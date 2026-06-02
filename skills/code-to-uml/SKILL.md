@@ -7,7 +7,7 @@ description: Use when source code must be analyzed at project, module, file, cla
 
 ## Purpose
 
-Generate a developer-friendly source-code analysis report for any scope: whole project, module/package, file, class, or single function. The final artifact must combine UML diagrams, Chinese explanatory text, focused code examples, and the existing Code-To-UML template/report conventions.
+Generate a developer-friendly source-code analysis report for any scope: whole project, module/package, file, class, or single function. The final artifact must use the existing Code-To-UML template/report conventions, Chinese explanatory text by default, focused code examples, and UML diagrams only when they reduce reader effort.
 
 ## Reference Loading
 
@@ -17,16 +17,17 @@ Load references only when their condition applies:
 - `references/code-to-uml-template.md`: read when `$CTU_HOME/cache/_TEMPLATE.html` and `$CTU_HOME/data/_TEMPLATE.ctu` exist, or when generating a Code-To-UML report page.
 - `references/diagram-decision-table.md`: read before deciding the text-to-diagram ratio or diagram types.
 - `references/uml-standards.md`: read after diagram decisions whenever the report will contain non-empty `[UML]` blocks or existing PlantUML must be validated; apply it before authoring, while writing each diagram's `[Detail]`, and during UML validation.
+- `scripts/validate-report.js`: run after generating report HTML and `.ctu` data, before claiming completion. Use `--render` when `plantuml.jar` is available and Java is on `PATH`.
 
 ## Hard Rules
 
 - Treat analyzed source as read-only unless the user explicitly asks for code changes.
-- Resolve the Code-To-UML project root from `CTU_HOME` first. If `CTU_HOME` is unset, use the current working directory only when it contains `cache/_TEMPLATE.html` and `data/_TEMPLATE.ctu`; otherwise tell the user to run the project install script that sets `CTU_HOME`.
+- Resolve the Code-To-UML project root in this order: `CTU_HOME`, a user-provided Code-To-UML root path, then the current working directory only when it contains `cache/_TEMPLATE.html` and `data/_TEMPLATE.ctu`. If none works, tell the user to run the project install script that sets `CTU_HOME`.
 - If the Code-To-UML template exists, reuse its structure, CSS/JS dependencies, data conventions, navigation rules, and UML rendering path. Preserve every template `[FIXED]` class/id/data attribute and script order; edit only `[EDIT]` and `[CONFIG]` areas unless the template explicitly allows more.
 - Put report content in the matching data directory when the template is data-driven. Do not add ad hoc report blocks to HTML.
 - Report body defaults to Chinese unless the user explicitly requests another language.
 - Keep one consistent report section catalog across project/module/file/class/function scopes. Scope changes depth, evidence, and standalone/merged section requirements according to `references/report-contract.md`.
-- Text must fully carry the analysis; diagrams are aids. Use real function/class names, file paths, constants, routes, commands, environment variables, side effects, failure paths, and line/symbol references.
+- Text must fully carry the analysis; diagrams are aids. Text-only cards with `[UML]` set to `None` are valid when a diagram would add little value. Use real function/class names, file paths, constants, routes, commands, environment variables, side effects, failure paths, and line/symbol references.
 - Do not split into multiple HTML files unless the target contains more than three highly independent, complex core classes or subsystems. If splitting, update all topbar/page links.
 - Handle topbar links such as `official-demo-link` deliberately: preserve a truthful link, replace it with a truthful companion link, or remove the whole `<a>` element.
 - After generating a report, start the Code-To-UML server from `$CTU_HOME` with `serve.sh` on macOS/Linux or `serve.bat` on Windows. The scripts own port cleanup; do not duplicate port-kill logic or add `$CTU_HOME` to `PATH`.
@@ -37,7 +38,7 @@ Load references only when their condition applies:
 1. **Resolve scope and constraints**
    - Identify the target type: project, module/package, file, class, or function.
    - Record target path/symbol, requested output path, report language, read-only constraints, and template requirements.
-   - Resolve `CTU_HOME`; if no output path is specified, use `$CTU_HOME/cache/<target-slug>_analysis.html`.
+   - Resolve the Code-To-UML root; if no output path is specified, use `$CTU_HOME/cache/<target-slug>_analysis.html`.
 
 2. **Read instructions and templates**
    - Read local instructions such as `AGENTS.md`, `CLAUDE.md`, or project docs.
@@ -66,10 +67,12 @@ Load references only when their condition applies:
 
 6. **Validate UML, page, and navigation**
    - Extract every `[UML]` block, treat empty or `None` content as text-only per `references/code-to-uml-template.md`, and validate every non-empty UML block against `references/uml-standards.md`, including start/end tags, balanced delimiters, declared participants/classes where needed, valid arrows, unsafe special characters, diagram-type rules, and `[Detail]` coverage.
+   - Run `node <skill-dir>/scripts/validate-report.js --root "$CTU_HOME" --html "cache/<report-file>.html" --lang <zh|en>` before runtime checks. Add `--render` when `plantuml.jar` exists and Java is available.
    - If PlantUML is available, render every diagram locally and require zero render errors; otherwise state the static-check limitation and render risk.
    - Start the local server on port `5401` unless the user specified another port.
+   - On PowerShell, start from the project root with `.\serve.bat 5401`; on cmd.exe, use `serve.bat 5401`; on macOS/Linux, use `./serve.sh 5401`.
    - Verify the report URL returns HTTP 200, the data API/loader returns all expected categories and card counts, topbar links behave correctly, and analyzed source files were not modified.
 
 ## Completion
 
-Return the concise final status shape from `references/report-contract.md`, including the generated HTML path, template reuse status, split-file decision, PlantUML check result, section summary, and browser URL.
+Return the concise final status shape from `references/report-contract.md`, including the generated HTML path, template reuse status, split-file decision, validation/PlantUML check result, section summary, and browser URL.

@@ -50,23 +50,23 @@ Each standard category owns the primary content for these section IDs:
 
 ## Section Catalog
 
-Use stable section IDs in planning notes, validation, and summaries. Display titles may be localized or adapted.
+Use stable section IDs in planning notes, validation, and summaries. Display titles may be localized or adapted. For Chinese reports, prefer the Chinese titles below.
 
-| ID | Default title | Required content |
-| --- | --- | --- |
-| `S01_TARGET_OVERVIEW` | Target Overview | Purpose, role in project, problem solved, scope boundaries, source version, and evidence baseline. |
-| `S02_TOP_LEVEL_STRUCTURE` | Top-Level Structure | Imports/dependencies, constants/config, files/modules, classes/functions, entry logic, and import-time side effects when relevant. |
-| `S03_CORE_OBJECTS` | Core Objects and Functions | Key classes/functions/methods, responsibilities, parameters, returns, side effects, invariants, and local "who I call / who calls me" summaries. |
-| `S04_ARCHITECTURE` | Architecture Diagram | Major modules, objects, layers, runtime/deployment assumptions, and dependency direction. |
-| `S05_CORE_FLOW` | Core Flow Diagram | Main execution path, important branches, failure/error paths, retries, and fallback behavior. |
-| `S06_CALL_RELATIONSHIPS` | Call Relationship Diagram | Complete trace paths across module/service/object boundaries; not a duplicate of `S03` local call notes. |
-| `S07_DATA_OR_STATE_FLOW` | Data or State Flow Diagram | Inputs, transformations, persistence, outputs, state ownership, lifecycle transitions, or FSM/workflow states. |
-| `S08_CODE_SNIPPETS` | Key Code Snippet Analysis | Short snippets with problem solved, design intent, edge cases, and usage cautions. Prefer snippets under 30 lines. |
-| `S09_CORE_PRINCIPLES` | Core Principles | Runtime mechanisms, patterns, design tradeoffs, and why the implementation is shaped this way. |
-| `S10_ONBOARDING_GUIDE` | Developer Onboarding Guide | Reading order, run/debug steps, manual verification, extension points, and troubleshooting paths. |
-| `S11_RISKS_AND_IMPROVEMENTS` | Risks and Improvement Suggestions | Specific complexity, concurrency, security, performance, correctness, maintainability risks, and actionable improvements. |
-| `S12_REVIEWER_QUESTIONS` | Key Questions for Code Reviewers | Concrete correctness, edge-case, security, performance, and design-intent questions that surface hidden assumptions. |
-| `S13_MAINTAINER_REFERENCE` | Maintainer Quick Reference | Function/class/file index with line numbers or symbol references whenever available. |
+| ID | Default title | Chinese title | Required content |
+| --- | --- | --- | --- |
+| `S01_TARGET_OVERVIEW` | Target Overview | 文件/目标概览 | Purpose, role in project, problem solved, scope boundaries, source version, and evidence baseline. |
+| `S02_TOP_LEVEL_STRUCTURE` | Top-Level Structure | 顶层结构 | Imports/dependencies, constants/config, files/modules, classes/functions, entry logic, and import-time side effects when relevant. |
+| `S03_CORE_OBJECTS` | Core Objects and Functions | 核心对象/函数说明 | Key classes/functions/methods, responsibilities, parameters, returns, side effects, invariants, and local "who I call / who calls me" summaries. |
+| `S04_ARCHITECTURE` | Architecture Diagram | 整体架构图 | Major modules, objects, layers, runtime/deployment assumptions, and dependency direction. |
+| `S05_CORE_FLOW` | Core Flow Diagram | 核心流程图 | Main execution path, important branches, failure/error paths, retries, and fallback behavior. |
+| `S06_CALL_RELATIONSHIPS` | Call Relationship Diagram | 调用关系图 | Complete trace paths across module/service/object boundaries; not a duplicate of `S03` local call notes. |
+| `S07_DATA_OR_STATE_FLOW` | Data or State Flow Diagram | 数据流/状态流图 | Inputs, transformations, persistence, outputs, state ownership, lifecycle transitions, or FSM/workflow states. |
+| `S08_CODE_SNIPPETS` | Key Code Snippet Analysis | 关键代码片段解析 | Short snippets with problem solved, design intent, edge cases, and usage cautions. Prefer snippets under 30 lines. |
+| `S09_CORE_PRINCIPLES` | Core Principles | 核心原理说明 | Runtime mechanisms, patterns, design tradeoffs, and why the implementation is shaped this way. |
+| `S10_ONBOARDING_GUIDE` | Developer Onboarding Guide | 开发上手指南 | Reading order, run/debug steps, manual verification, extension points, and troubleshooting paths. |
+| `S11_RISKS_AND_IMPROVEMENTS` | Risks and Improvement Suggestions | 风险与改进建议 | Specific complexity, concurrency, security, performance, correctness, maintainability risks, and actionable improvements. |
+| `S12_REVIEWER_QUESTIONS` | Key Questions for Code Reviewers | Q&A / 复盘问答清单 | Concrete correctness, edge-case, security, performance, and design-intent questions that surface hidden assumptions. |
+| `S13_MAINTAINER_REFERENCE` | Maintainer Quick Reference | 维护者速查表 | Function/class/file index with line numbers or symbol references whenever available. |
 
 ## Scope Applicability
 
@@ -157,13 +157,14 @@ Before runtime checks, verify:
 - [ ] Categories match tab `data-diagram` values and `data-diagram-overview` values.
 - [ ] `.ctu` syntax follows the template.
 - [ ] Topbar links are intentionally preserved, adapted, or removed.
+- [ ] `node <skill-dir>/scripts/validate-report.js --root <CTU_HOME> --html cache/<report-file>.html --lang <zh|en>` returns zero errors.
 
 ### Runtime Validation
 
 Before final response, verify:
 
 - [ ] Every UML block passed static checks.
-- [ ] PlantUML render check passed, or limitation stated.
+- [ ] PlantUML render check passed through `node <skill-dir>/scripts/validate-report.js --render`, or limitation stated.
 - [ ] Server running and page/API loads at `http://localhost:<PORT>/...`.
 - [ ] Data API returns all expected category keys and card counts.
 - [ ] Browser URL is included in the final response.
@@ -180,9 +181,9 @@ Before final response, verify:
 
 When the user does not specify a custom final format, report:
 
-1. `HTML file path`
-2. `Template reuse status`
-3. `Multi-file split decision`
-4. `PlantUML check result`
-5. `Report section summary`
-6. `Browser URL`
+1. `HTML 文件路径`
+2. `模板复用情况`
+3. `多文件拆分决策`
+4. `校验 / PlantUML 检查结果`
+5. `报告章节摘要`
+6. `浏览器访问地址`
