@@ -1,12 +1,14 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
+
 <head>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<title>LangChain Monorepo — 项目级 UML 架构分析报告</title>
+	<title>LangChain Monorepo Analysis</title>
 	<link rel="icon" href="../favicon.svg" type="image/svg+xml" />
 	<link rel="stylesheet" href="../main.css">
 </head>
+
 <body class="demo-page" data-dir="langchain-monorepo-analysis">
 	<header class="demo-topbar">
 		<a class="demo-topbar-logo" href="../index.html" aria-label="Code-To-UML Home">
@@ -14,41 +16,45 @@
 			<span>Code-To-UML</span>
 		</a>
 	</header>
+
 	<div class="page-shell demo-shell">
 		<main class="content">
 			<section class="intro">
-				<h1>LangChain Monorepo — 项目级 UML 架构分析报告</h1>
-				<p>分析范围：C:\devops\_gitProjects\AI\langchain · 生成日期：2026-06-02 · Git 元数据不可用，基于当前文件快照。</p>
+				<h1>LangChain Monorepo 工程代码分析</h1>
+				<p>项目级 Code-To-UML 报告，覆盖当前仓库的包边界、核心抽象、运行流、调用关系、数据流、风险和维护入口。源版本：dfca7f4424。</p>
 			</section>
-			<nav class="demo-tabs" aria-label="Demo 图类型">
+
+			<nav class="demo-tabs" aria-label="LangChain Analysis Categories">
 				<button class="demo-tab is-active" type="button" data-diagram="overview">概览</button>
-				<button class="demo-tab" type="button" data-diagram="structure">顶层结构</button>
-				<button class="demo-tab" type="button" data-diagram="objects">核心对象</button>
-				<button class="demo-tab" type="button" data-diagram="architecture">架构图</button>
-				<button class="demo-tab" type="button" data-diagram="flow">核心流程</button>
-				<button class="demo-tab" type="button" data-diagram="calls">调用关系</button>
+				<button class="demo-tab" type="button" data-diagram="structure">结构</button>
+				<button class="demo-tab" type="button" data-diagram="objects">对象</button>
+				<button class="demo-tab" type="button" data-diagram="architecture">架构</button>
+				<button class="demo-tab" type="button" data-diagram="flow">流程</button>
+				<button class="demo-tab" type="button" data-diagram="calls">调用</button>
 				<button class="demo-tab" type="button" data-diagram="dataflow">数据流</button>
-				<button class="demo-tab" type="button" data-diagram="code">代码解析</button>
-				<button class="demo-tab" type="button" data-diagram="principles">核心原理</button>
-				<button class="demo-tab" type="button" data-diagram="guide">上手指南</button>
+				<button class="demo-tab" type="button" data-diagram="code">代码</button>
+				<button class="demo-tab" type="button" data-diagram="principles">原则与风险</button>
+				<button class="demo-tab" type="button" data-diagram="guide">指南</button>
 			</nav>
+
 			<section class="doc-section demo-panel">
 				<h2 id="demo-title">概览</h2>
-				<p class="demo-section-overview is-active" data-diagram-overview="overview">S01：目标、范围、版本基线和项目级复杂度。</p>
-				<p class="demo-section-overview" data-diagram-overview="structure" hidden>S02：libs/ 包结构、独立 pyproject、测试与 CI 组织。</p>
-				<p class="demo-section-overview" data-diagram-overview="objects" hidden>S03：Runnable、模型、消息、工具、向量库、标准测试和 partner 实现的核心对象关系。</p>
-				<p class="demo-section-overview" data-diagram-overview="architecture" hidden>S04：core、langchain、legacy classic、partners、standard-tests、model-profiles 的依赖边界。</p>
-				<p class="demo-section-overview" data-diagram-overview="flow" hidden>S05：agent 主循环、工具调用、结构化输出和终止条件。</p>
-				<p class="demo-section-overview" data-diagram-overview="calls" hidden>S06：从用户 API 到 provider SDK 的端到端调用链。</p>
-				<p class="demo-section-overview" data-diagram-overview="dataflow" hidden>S07：消息、配置、状态、profile 数据和 CI 数据流。</p>
-				<p class="demo-section-overview" data-diagram-overview="code" hidden>S08：关键源码片段和维护注意点。</p>
-				<p class="demo-section-overview" data-diagram-overview="principles" hidden>S09/S11：核心设计原则、取舍、风险和改进建议。</p>
-				<p class="demo-section-overview" data-diagram-overview="guide" hidden>S10/S12/S13：上手路径、评审问题和维护者速查表。</p>
+				<p class="demo-section-overview is-active" data-diagram-overview="overview">当前 LangChain monorepo 的目标、范围、版本证据和分析边界。</p>
+				<p class="demo-section-overview" data-diagram-overview="structure" hidden>包级目录、配置文件、测试目录和发布单元的顶层结构。</p>
+				<p class="demo-section-overview" data-diagram-overview="objects" hidden>核心抽象、集成类和工具对象的职责说明。</p>
+				<p class="demo-section-overview" data-diagram-overview="architecture" hidden>从 core 到 v1、classic、partners、tests 的依赖边界。</p>
+				<p class="demo-section-overview" data-diagram-overview="flow" hidden>应用构建、agent 执行、模型调用和工具调用的主要流程。</p>
+				<p class="demo-section-overview" data-diagram-overview="calls" hidden>跨包调用链和维护时最需要关注的调用方向。</p>
+				<p class="demo-section-overview" data-diagram-overview="dataflow" hidden>消息、工具调用、文档和模型 profile 数据的状态流。</p>
+				<p class="demo-section-overview" data-diagram-overview="code" hidden>关键源码片段与设计意图解析。</p>
+				<p class="demo-section-overview" data-diagram-overview="principles" hidden>设计原则、权衡、风险和可执行改进建议。</p>
+				<p class="demo-section-overview" data-diagram-overview="guide" hidden>上手路径、复盘问答和维护者速查表。</p>
 				<div class="demo-examples" data-examples></div>
 			</section>
 		</main>
 		<aside data-demo-toc></aside>
 	</div>
+
 	<script src="../js/viz-global.js"></script>
 	<script src="../js/plantuml.js"></script>
 	<script src="../component/docs-page-core.js"></script>
@@ -58,4 +64,5 @@
 	<script src="../component/demo-example-component.js"></script>
 	<script src="../demo.js"></script>
 </body>
+
 </html>

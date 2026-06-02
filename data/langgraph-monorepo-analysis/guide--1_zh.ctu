@@ -1,0 +1,94 @@
+Title: 开发上手指南
+Describe: 阅读顺序、验证命令、复盘问答和维护者速查表。
+------------------------------------------------------------
+[Example]
+S10_ONBOARDING_GUIDE：推荐阅读路径
+
+[Description]
+新维护者建议按“核心图 API -> 执行引擎 -> checkpoint -> prebuilt -> CLI/SDK”的顺序阅读，而不是从 CLI 或 README 直接跳进所有模块。
+
+[UML]
+@startwbs
+* LangGraph 上手路径
+** 1. 读 AGENTS.md 和 libs/*/pyproject.toml
+** 2. 读 StateGraph
+*** graph/state.py
+*** graph/message.py
+** 3. 读 Pregel 执行
+*** pregel/main.py
+*** pregel/_loop.py
+*** pregel/_algo.py
+*** pregel/_runner.py
+** 4. 读状态持久化
+*** checkpoint/base
+*** checkpoint/memory
+*** checkpoint-sqlite
+*** checkpoint-postgres
+** 5. 读高层 API
+*** prebuilt/chat_agent_executor.py
+*** prebuilt/tool_node.py
+** 6. 读外部操作面
+*** cli.py
+*** sdk-py client/stream
+@endwbs
+
+[Detail]
+修改任一 `libs/` 下的库时，`AGENTS.md` 要求在对应库目录运行 `make format`、`make lint`、`make test`。只跑根目录命令不足以满足该仓库约束。针对单个测试文件可用 `TEST=path/to/test.py make test`。
+------------------------------------------------------------
+[Example]
+S12_REVIEWER_QUESTIONS：复盘问答清单
+
+[Description]
+以下问题用于确认读者是否掌握项目级架构，而不是通用面试题。
+
+[UML]
+None
+
+[Detail]
+**Q1：为什么 `StateGraph` 不能直接执行？**  
+A：它是 builder，负责 schema、node、edge、branch 和 channel 定义。源码注释明确必须先 `.compile()` 才能得到支持 `invoke()`、`stream()`、`ainvoke()` 的 executable graph。
+
+**Q2：`Pregel` 运行时的核心状态是什么？**  
+A：节点、channel、input/output/stream channels、checkpointer、store、cache、retry/cache policy、interrupt_before/after、context_schema 和 trigger_to_nodes。`Pregel.__init__` 负责集中保存这些配置。
+
+**Q3：checkpoint 为什么需要 `thread_id`？**  
+A：`BaseCheckpointSaver` 文档说明 `thread_id` 是存取 checkpoint 的主要键；没有它，checkpointer 无法保存状态、resume interrupt 或支持 time-travel debugging。
+
+**Q4：prebuilt agent 为什么还要构建 StateGraph？**  
+A：`create_react_agent` 本质是一个图工厂，把 prompt、model、tools、agent node、tools node 和条件路由组装成 `CompiledStateGraph`，不是单独的执行引擎。
+
+**Q5：修改 checkpoint base 的 blast radius 是什么？**  
+A：会影响 `checkpoint-postgres`、`checkpoint-sqlite`、`prebuilt`、`langgraph` 和 conformance tests。这一点由 `AGENTS.md` 的依赖图和各库生产依赖共同支持。
+------------------------------------------------------------
+[Example]
+S13_MAINTAINER_REFERENCE：维护者速查表
+
+[Description]
+常用文件和符号索引。
+
+[UML]
+None
+
+[Detail]
+`libs/langgraph/langgraph/graph/state.py:130` — `StateGraph` builder。  
+`libs/langgraph/langgraph/graph/state.py:520` — `StateGraph.add_node` 主实现。  
+`libs/langgraph/langgraph/graph/state.py:1391` — `CompiledStateGraph`。  
+`libs/langgraph/langgraph/pregel/main.py:204` — `NodeBuilder`。  
+`libs/langgraph/langgraph/pregel/main.py:448` — `Pregel`。  
+`libs/langgraph/langgraph/pregel/_loop.py:156` — `PregelLoop`。  
+`libs/langgraph/langgraph/pregel/_loop.py:1446` — `SyncPregelLoop`。  
+`libs/langgraph/langgraph/pregel/_loop.py:1698` — `AsyncPregelLoop`。  
+`libs/langgraph/langgraph/pregel/_algo.py:232` — `apply_writes`。  
+`libs/langgraph/langgraph/pregel/_algo.py:349` — `prepare_next_tasks`。  
+`libs/langgraph/langgraph/pregel/_runner.py:135` — `PregelRunner`。  
+`libs/checkpoint/langgraph/checkpoint/base/__init__.py:176` — `BaseCheckpointSaver`。  
+`libs/checkpoint/langgraph/checkpoint/memory/__init__.py:33` — `InMemorySaver`。  
+`libs/checkpoint-sqlite/langgraph/checkpoint/sqlite/__init__.py:45` — `SqliteSaver`。  
+`libs/checkpoint-postgres/langgraph/checkpoint/postgres/base.py:297` — `BasePostgresSaver`。  
+`libs/prebuilt/langgraph/prebuilt/chat_agent_executor.py:278` — `create_react_agent`。  
+`libs/prebuilt/langgraph/prebuilt/tool_node.py:622` — `ToolNode`。  
+`libs/prebuilt/langgraph/prebuilt/tool_node.py:1582` — `tools_condition`。  
+`libs/cli/langgraph_cli/cli.py:225` — CLI group。  
+`libs/cli/pyproject.toml` — `langgraph = "langgraph_cli.cli:cli"` 脚本入口。  
+`libs/sdk-py/langgraph_sdk/client.py` — Python SDK client 入口。
+

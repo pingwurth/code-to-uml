@@ -1,0 +1,85 @@
+Title: 核心对象/函数说明
+Describe: SDK、CLI、ACP 和 partner 包中的关键对象职责。
+------------------------------------------------------------
+[Example]
+S03_CORE_OBJECTS - SDK 核心对象
+
+[Description]
+SDK 的中心是 `create_deep_agent`，它把模型解析、profile、tools、backend、subagents、middleware、prompt 和 state schema 装配成一个 `CompiledStateGraph`。
+
+[UML]
+@startuml
+class "DeepAgentState" as DeepAgentState {
+  messages: DeltaChannel
+}
+class "create_deep_agent" as CreateDeepAgent {
+  model
+  tools
+  subagents
+  skills
+  memory
+  permissions
+  backend
+  interrupt_on
+}
+class "FilesystemMiddleware" as FSM
+class "SubAgentMiddleware" as SAM
+class "AsyncSubAgentMiddleware" as ASAM
+class "MemoryMiddleware" as MM
+class "HarnessProfile" as HP
+class "StateBackend" as SB
+CreateDeepAgent --> HP : resolve profile
+CreateDeepAgent --> SB : default backend
+CreateDeepAgent --> FSM : file tools and permissions
+CreateDeepAgent --> SAM : task tool
+CreateDeepAgent --> ASAM : remote tasks
+CreateDeepAgent --> MM : memory sources
+CreateDeepAgent --> DeepAgentState : default schema
+@enduml
+
+[Detail]
+`DeepAgentState` 在 `graph.py:63-66` 为 `messages` 使用 `DeltaChannel`，避免 checkpoint 随历史消息 O(N²) 增长。`create_deep_agent` 的签名在 `graph.py:217-237`，公开参数覆盖 model、tools、middleware、subagents、skills、memory、permissions、backend、HITL、structured output、schema、checkpointer、store、cache 等。`_REQUIRED_MIDDLEWARE` 在 `graph.py:187-201` 把 `FilesystemMiddleware` 与 `SubAgentMiddleware` 标为不能被 profile 排除的脚手架能力。箭头表示装配关系，不表示继承。
+
+------------------------------------------------------------
+[Example]
+部署 CLI 对象
+
+[Description]
+部署 CLI 以 `Project` dataclass 表示本地 managed-agent 项目，以 payload builder 生成远端 API 请求和目录 commit delta。
+
+[UML]
+@startuml
+class "Project" as Project {
+  root
+  agent_id
+  name
+  model
+  system_prompt
+  tools
+  skills
+  subagents
+}
+class "Skill" as Skill {
+  name
+  description
+  instructions
+  files
+}
+class "Subagent" as Subagent {
+  name
+  model_id
+  instructions
+  tools
+  extra_files
+}
+class "payload.py" as Payload
+class "ApiClient" as ApiClient
+Project *-- Skill
+Project *-- Subagent
+Payload --> Project : build_payload
+Payload --> Project : build_directory_files
+Payload --> ApiClient : request bodies
+@enduml
+
+[Detail]
+`Project`、`Skill`、`Subagent` 位于 `libs/cli/deepagents_cli/deploy/project.py:115-157`。`Project.load` 在 `project.py:159-188` 读取 `agent.json`、`AGENTS.md`、`tools.json`、skills 和 subagents。`payload.py:20-43` 生成 create payload，`payload.py:46-61` 生成 metadata patch payload，`payload.py:64-83` 生成远端 managed directory 文件集合，`payload.py:86-98` 计算远端目录 delta。CLI 命令使用这些对象，避免在 payload builder 内再次做 I/O。

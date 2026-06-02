@@ -1,106 +1,41 @@
 Title: 关键代码片段解析
-Describe: 覆盖 S08_CODE_SNIPPETS。聚焦少量能代表架构边界和风险的代码片段，避免长篇源码转录。
+Describe: S08_CODE_SNIPPETS。聚焦短片段对应的设计意图、边界和维护注意事项。
 ------------------------------------------------------------
 [Example]
-S08_CODE_SNIPPETS - Runnable 是统一执行协议
+Runnable 是组合单元
 
 [Description]
-摘自 `libs/core/langchain_core/runnables/base.py:125` 附近：
-
-```python
-class Runnable(ABC, Generic[Input, Output]):
-    """A unit of work that can be invoked, batched, streamed, transformed and composed.
-
-    Key Methods
-    ===========
-
-    - `invoke`/`ainvoke`: Transforms a single input into an output.
-    - `batch`/`abatch`: Efficiently transforms multiple inputs into outputs.
-    - `stream`/`astream`: Streams output from a single input as it's produced.
-```
+`Runnable` 的文档明确把 invoke、batch、stream 和组合能力放在同一个抽象里，这是 Core 层最重要的设计支点。
 
 [UML]
 None
 
 [Detail]
-这段代码解释了为什么 core 层能承载模型、工具、chain、retriever 等不同对象：它们都可以被视为 `Runnable`，并获得 sync、async、batch、stream 和组合能力。维护上要注意，`Runnable` 的 docstring 和方法契约不是内部细节，partner、agent 和用户 chain 都依赖这个协议。
+证据位于 `libs/core/langchain_core/runnables/base.py:125`。类文档说明 Runnable 是“can be invoked, batched, streamed, transformed and composed”的 unit of work，并强调 `RunnableSequence` 和 `RunnableParallel`。这解释了为什么模型、工具、检索器都倾向于继承或适配 Runnable：上层 chain 和 agent 可以不关心具体实现，只按统一运行接口组合。
 
 ------------------------------------------------------------
 [Example]
-init_chat_model 的安全边界
+BaseTool 的 schema 推断
 
 [Description]
-摘自 `libs/langchain_v1/langchain/chat_models/base.py:311` 附近：
-
-```python
-configurable_fields: Which model parameters are configurable at runtime:
-
-    - `None`: No configurable fields (i.e., a fixed model).
-    - `'any'`: All fields are configurable. **See security note below.**
-    - `list[str] | Tuple[str, ...]`: Specified fields are configurable.
-
-    !!! warning "Security note"
-
-        Setting `configurable_fields="any"` means fields like `api_key`,
-        `base_url`, etc., can be altered at runtime, potentially redirecting
-        model requests to a different service/user.
-```
+`BaseTool` 文件顶部包含 `_get_filtered_args`、`_parse_python_function_docstring` 和 `_infer_arg_descriptions` 等函数，用于把 Python 函数签名和 docstring 转成工具 schema。
 
 [UML]
 None
 
 [Detail]
-这段不是普通参数说明，而是运行时信任边界。`_ConfigurableModel` 会从 `config.configurable` 提取字段并在真正调用时实例化模型；如果允许 `any`，用户或上层配置可以改 provider endpoint 和凭据。安全建议是对非可信输入显式列出 `configurable_fields`，不要把 `api_key`、`base_url`、代理配置等交给外部请求控制。
+证据位于 `libs/core/langchain_core/tools/base.py`。`FILTERED_ARGS = ("run_manager", "callbacks")` 表明 tool schema 会过滤运行时注入参数；`_parse_python_function_docstring` 假设 Google Python style guide；`_validate_docstring_args_against_annotations` 会在 docstring 参数与类型注解不匹配时抛出 `ValueError`。因此新增 tool 时，签名、Annotated 描述和 docstring 必须同步，否则模型可见 schema 可能错误。
 
 ------------------------------------------------------------
 [Example]
-create_agent 的 graph 编译出口
+OpenAI 包的 provider 边界
 
 [Description]
-摘自 `libs/langchain_v1/langchain/agents/factory.py:1671` 附近：
-
-```python
-return graph.compile(
-    checkpointer=checkpointer,
-    store=store,
-    interrupt_before=interrupt_before,
-    interrupt_after=interrupt_after,
-    debug=debug,
-    name=name,
-    cache=cache,
-    transformers=[
-        ToolCallTransformer,
-        SubagentTransformer,
-        *middleware_transformers,
-        *(transformers or ()),
-    ],
-).with_config(config)
-```
+`ChatOpenAI` 文件开头有 API scope 警告：只面向官方 OpenAI API 规范，非标准 provider 字段不应在这里长期兼容。
 
 [UML]
 None
 
 [Detail]
-这段是 agent 工厂从“构建图”到“返回可运行对象”的出口。`checkpointer`、`store`、interrupt、debug、name、cache 和 transformers 都在这里固化为 compiled graph 行为。新增 transformer 或 middleware 变更顺序会影响 streaming 输出、tool call 展示和 subagent 行为；评审这类改动时需要同时看 tool loop、interrupt 和 stream 场景。
+证据位于 `libs/partners/openai/langchain_openai/chat_models/base.py` 的模块 docstring。文件还维护 `_get_ssrf_safe_client`、`_MODEL_PROFILES`、message conversion、tool conversion、streaming 和 error metadata 提取等逻辑。维护者应把 provider-specific behavior 放到对应 partner 包，如 `langchain_deepseek` 或 `langchain_openrouter`，避免污染 OpenAI 官方语义。
 
-------------------------------------------------------------
-[Example]
-标准测试基类要求实现者声明模型类和参数
-
-[Description]
-摘自 `libs/standard-tests/langchain_tests/unit_tests/chat_models.py:276` 附近：
-
-```python
-class ChatModelUnitTests(ChatModelTests):
-    '''Base class for chat model unit tests.
-
-    Test subclasses must implement the `chat_model_class` and
-    `chat_model_params` properties to specify what model to test and its
-    initialization parameters.
-```
-
-[UML]
-None
-
-[Detail]
-这段说明标准测试不是“可选文档示例”，而是 partner integration 的契约执行器。实现者只提供模型类和初始化参数，测试基类负责验证通用行为。新增 chat model 能力后，应优先扩展 `langchain-tests`，再更新 partner 测试继承情况。

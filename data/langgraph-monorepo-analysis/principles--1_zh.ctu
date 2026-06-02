@@ -1,0 +1,55 @@
+Title: 核心原理说明
+Describe: 设计机制、取舍、风险和改进建议。
+------------------------------------------------------------
+[Example]
+S09_CORE_PRINCIPLES：核心机制
+
+[Description]
+LangGraph 的核心原理可以概括为四点：声明式图构建、Pregel-style superstep 执行、channel/reducer 状态合并、checkpoint-backed 恢复与可观测 stream。
+
+[UML]
+@startmindmap
+* LangGraph 核心原理
+** 声明式图构建
+*** StateGraph
+*** node / edge / branch
+** Superstep 执行
+*** PregelLoop
+*** PregelRunner
+*** prepare_next_tasks
+** 状态语义
+*** channels
+*** reducers
+*** Command / Send
+** 持久化与恢复
+*** checkpoint
+*** thread_id
+*** interrupt / resume
+** 可观测输出
+*** values
+*** updates
+*** messages
+*** events
+@endmindmap
+
+[Detail]
+读图从中心向外看。`StateGraph` 把用户代码从“立即执行函数”转换为“可验证、可编译的图”；`PregelLoop` 让节点按 channel 版本和 task 触发执行；checkpoint 让每次 superstep 的状态可恢复；stream 让运行过程可以以多种粒度输出。这个设计的代价是概念数量较多，维护者必须同时理解 schema、channel、版本、pending writes 和 config namespace。
+------------------------------------------------------------
+[Example]
+S11_RISKS_AND_IMPROVEMENTS：风险与改进建议
+
+[Description]
+主要风险集中在跨库契约、持久化兼容性、同步/异步双实现、deprecated API 迁移和工具调用错误路径。
+
+[UML]
+None
+
+[Detail]
+1. `checkpoint` 是多个库的底层契约。修改 `Checkpoint`、`BaseCheckpointSaver` 或 delta metadata 时，必须同步检查 memory/sqlite/postgres/conformance 和 `langgraph` 的 replay/resume 路径。
+
+2. `Pregel` 同时承载 sync/async、stream、cache、retry、timeout、subgraph、checkpointer 和 store。新增横切能力时优先寻找已有 config key 和 loop hook，避免把逻辑直接塞到节点执行分支。
+
+3. `prebuilt.create_react_agent` 已标记 deprecated，但仍是重要兼容路径。迁移到 `langchain.agents.create_agent` 时，需要保留旧 state schema、tool calling 版本语义和错误消息行为。
+
+4. 当前没有 CodeGraph 索引，项目级报告的调用关系基于静态文件读取和符号定位。建议后续运行 `codegraph init -i` 后再生成一次更精确的 symbol/caller/callee 报告。
+

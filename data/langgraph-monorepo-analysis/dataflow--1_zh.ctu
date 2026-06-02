@@ -1,0 +1,65 @@
+Title: 数据流/状态流图
+Describe: state、channel、checkpoint、thread_id 和 tool messages 的数据生命周期。
+------------------------------------------------------------
+[Example]
+S07_DATA_OR_STATE_FLOW：图运行状态生命周期
+
+[Description]
+LangGraph 的状态不是单个 mutable dict 在节点间传递，而是通过 channel update、reducer、版本号、checkpoint 和 pending writes 共同推进。
+
+[UML]
+@startuml
+state "No Thread State" as New
+state "Input Checkpoint" as Input
+state "Loop Checkpoint" as Loop
+state "Interrupted" as Interrupted
+state "Resumed" as Resumed
+state "Completed" as Completed
+state "Errored" as Errored
+
+[*] --> New
+New --> Input : invoke/stream with input
+Input --> Loop : prepare_next_tasks
+Loop --> Loop : apply_writes and create checkpoint
+Loop --> Interrupted : interrupt_before/after or GraphInterrupt
+Interrupted --> Resumed : Command(resume) / config resume
+Resumed --> Loop : resume remaining supersteps
+Loop --> Completed : no more tasks / finish point
+Loop --> Errored : unhandled node/checkpoint error
+Completed --> [*]
+Errored --> [*]
+@enduml
+
+[Detail]
+状态转移来自 `CheckpointMetadata.source` 的 `input/loop/update/fork` 语义、`Checkpoint` 中 `channel_values/channel_versions/versions_seen/updated_channels` 字段，以及 `PregelLoop` 管理 step、stop、is_replaying、checkpointer、store、stream 等运行状态。`thread_id` 是 checkpoint 的主要索引，缺失时 checkpointer 无法提供跨调用恢复。
+
+图中 `Interrupted -> Resumed` 是维护时最容易破坏的路径：interrupt 不只是异常，它还要求 checkpoint 和 pending writes 保持足够信息，后续 resume 才能从正确 task 和 namespace 继续。
+------------------------------------------------------------
+[Example]
+Tool calling 数据流
+
+[Description]
+在 prebuilt agent 中，LLM 输出 `AIMessage.tool_calls`，`ToolNode` 转成工具调用请求并返回 `ToolMessage` 或 `Command`，再由 graph state 中的 `messages` reducer 聚合。
+
+[UML]
+@startuml
+left to right direction
+component "AIMessage.tool_calls" as Calls
+component "ToolCallRequest" as Request
+component "BaseTool / Callable" as Tool
+component "ToolMessage" as ToolMessage
+component "Command" as Command
+component "messages state" as Messages
+component "InjectedState / InjectedStore / ToolRuntime" as Injection
+
+Calls --> Request : parse and validate
+Injection --> Request : inject state, store, runtime
+Request --> Tool : execute
+Tool --> ToolMessage : normal result
+Tool --> Command : state/control update
+ToolMessage --> Messages : append via reducer
+Command --> Messages : update state or route
+@enduml
+
+[Detail]
+`ToolNode` 的模块注释明确其设计模式：并行执行多个 tool call、可配置错误处理、state 注入、store 注入和 Command-based state updates。`ToolCallRequest` 在 `libs/prebuilt/langgraph/prebuilt/tool_node.py:133`，`ToolNode` 在 `:622`，`ToolRuntime` 在 `:1663`，`InjectedState` 和 `InjectedStore` 分别在 `:1753`、`:1829`。

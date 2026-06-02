@@ -1,0 +1,78 @@
+Title: 关键代码片段解析
+Describe: 聚焦源码片段，说明设计意图、边界条件和维护注意点。
+------------------------------------------------------------
+[Example]
+S08_CODE_SNIPPETS - `create_deep_agent` 公开签名
+
+[Description]
+公开 API 参数非常宽，体现 Deep Agents 作为 harness 的职责：调用方可替换模型、工具、middleware、backend、subagents、memory、HITL、state schema 和 store。
+
+[UML]
+None
+
+[Detail]
+关键片段位置：`libs/deepagents/deepagents/graph.py:217-237`。
+
+```python
+def create_deep_agent(
+    model: str | BaseChatModel | None = None,
+    tools: Sequence[BaseTool | Callable | dict[str, Any]] | None = None,
+    *,
+    system_prompt: str | SystemMessage | None = None,
+    middleware: Sequence[AgentMiddleware] = (),
+    subagents: Sequence[SubAgent | CompiledSubAgent | AsyncSubAgent] | None = None,
+    skills: list[str] | None = None,
+    memory: list[str] | None = None,
+    permissions: list[FilesystemPermission] | None = None,
+    backend: BackendProtocol | BackendFactory | None = None,
+    interrupt_on: dict[str, bool | InterruptOnConfig] | None = None,
+    ...
+) -> CompiledStateGraph[...]:
+```
+
+风险点是这是 SDK 的主要公共接口，根 `AGENTS.md` 明确要求保持 public interface 稳定。新增参数应优先使用 keyword-only，且需要测试 `__init__.py` 导出和示例使用。当前 `model=None` 路径已在 `graph.py:519-535` 标记弃用，到 1.0.0 会移除。
+
+------------------------------------------------------------
+[Example]
+S08_CODE_SNIPPETS - 必要中间件保护
+
+[Description]
+profile 支持排除 middleware，但 `FilesystemMiddleware` 和 `SubAgentMiddleware` 被保护，避免核心功能静默降级。
+
+[UML]
+None
+
+[Detail]
+关键片段位置：`libs/deepagents/deepagents/graph.py:187-201`。
+
+```python
+_REQUIRED_MIDDLEWARE = (
+    (FilesystemMiddleware, ()),
+    (SubAgentMiddleware, ()),
+)
+```
+
+这个小常量承担安全边界：文件工具和 `permissions` 规则由 `FilesystemMiddleware` 承载，`task` tool 由 `SubAgentMiddleware` 承载。`create_deep_agent` 在 `graph.py:539-544` 和 `graph.py:772-788` 分别校验 profile 配置与最终覆盖率。维护时如果重命名 middleware、改变 `.name` 或调整 profile 排除语义，必须同步测试防止核心工具被误删。
+
+------------------------------------------------------------
+[Example]
+S08_CODE_SNIPPETS - 部署项目读取边界
+
+[Description]
+部署 CLI 在读取项目文件时拒绝 symlink 和路径逃逸，避免将项目根外文件打包进 managed directory。
+
+[UML]
+None
+
+[Detail]
+关键片段位置：`libs/cli/deepagents_cli/deploy/project.py:62-94`。
+
+```python
+def _ensure_project_contained(root: Path, path: Path, *, container: Path | None = None) -> None:
+    resolved = path.resolve(strict=True)
+    resolved.relative_to(root.resolve(strict=True))
+    if container is not None:
+        resolved.relative_to(container.resolve(strict=True))
+```
+
+`_read_project_text` 在 `project.py:81-94` 先拒绝 symlink，再要求 regular file，并调用 containment check。这是部署命令的重要安全边界，因为后续 `build_directory_files` 会把本地文件内容发送到远端目录。若新增读取路径，必须复用这些 helper，而不是直接 `Path.read_text()`。

@@ -1,29 +1,60 @@
-Title: 项目概览
-Describe: 覆盖 S01_TARGET_OVERVIEW。说明 LangChain monorepo 的目标、分析范围、版本基线、证据来源和复杂度评分。
+Title: 文件/目标概览
+Describe: S01_TARGET_OVERVIEW。当前报告分析 `/home/ping/gitProjects/langchain` 这个 LangChain Python monorepo，源版本为 `dfca7f4424`。CodeGraph 未初始化，因此结构证据来自 `rg`、`find`、包级 `pyproject.toml` 和聚焦源码读取。
 ------------------------------------------------------------
 [Example]
-S01_TARGET_OVERVIEW - 目标、范围与证据基线
+分析目标与边界
 
 [Description]
-本报告分析 `C:\devops\_gitProjects\AI\langchain` 这个 Python monorepo。项目根目录包含 `libs/`、`.github/`、`.vscode/`、`README.md`、`AGENTS.md` 等文件；`libs/` 下有 7 个主要包目录，当前快照中通过 `rg --files -g '*.py'` 统计到 2483 个 Python 文件。根目录不是可用 Git 仓库，`git rev-parse HEAD` 返回 `fatal: not a git repository`，因此版本基线使用生成日期 `2026-06-02` 和当前文件快照。
-
-核心目标是提供 LangChain Python 生态的项目级可维护地图，而不是逐文件枚举。主要证据包括：`README.md` 对 LangChain 的定位、`AGENTS.md` 对 monorepo 分层和开发约束的说明、各包 `pyproject.toml` 的项目名/依赖、关键入口点如 `langchain.chat_models.init_chat_model`、`langchain.agents.create_agent`、`langchain_core.runnables.Runnable`、`langchain_openai.ChatOpenAI`，以及 `langchain-tests` 标准测试基类。
+本报告把当前工程作为项目级目标处理，而不是单个包或单个文件。分析重点是 monorepo 中独立发布包之间的职责分配、依赖方向、核心运行机制和维护风险。
 
 [UML]
 None
 
 [Detail]
-报告按 Code-To-UML 的项目级契约覆盖 13 个章节 ID：S01 在本分类，S02 在 `structure`，S03 在 `objects`，S04 在 `architecture`，S05 在 `flow`，S06 在 `calls`，S07 在 `dataflow`，S08 在 `code`，S09/S11 在 `principles`，S10/S12/S13 在 `guide`。复杂度评分按技能规范评估为高复杂度：跨模块和跨包边界 2 分，多个外部 provider/SDK 和 CI/发布入口 2 分，agent graph/checkpointer/store/profile 等状态生命周期 2 分，async/streaming/graph 编排 2 分，工具调用和结构化输出错误路径 2 分，模型/provider 路由规则 2 分，总分 12/12。
+证据基线包括：`libs/core/pyproject.toml` 中的 `langchain-core==1.4.0`，`libs/langchain_v1/pyproject.toml` 中的 `langchain==1.3.2`，`libs/langchain/pyproject.toml` 中的 `langchain-classic==1.0.7`，以及 `libs/partners/openai/pyproject.toml`、`libs/text-splitters/pyproject.toml` 等 partner 和工具包配置。项目没有根 `pyproject.toml`，包级构建和测试配置分散在 `libs/*/pyproject.toml`。
+
+范围包含 `libs/core`、`libs/langchain_v1`、`libs/langchain`、`libs/partners`、`libs/text-splitters`、`libs/standard-tests` 和 `libs/model-profiles`。不覆盖外部单独维护的 `langchain-google`、`langchain-aws` 等仓库，只按 AGENTS.md 提示记录它们可能作为同级目录存在。
 
 ------------------------------------------------------------
 [Example]
-项目级包快照
+项目角色速览
 
 [Description]
-当前可见包和 Python 文件数量：`core` 350、`langchain` 1581、`langchain_v1` 123、`partners` 363、`standard-tests` 36、`text-splitters` 23、`model-profiles` 7。`libs/partners` 下有 15 个 integration package：`anthropic`、`chroma`、`deepseek`、`exa`、`fireworks`、`groq`、`huggingface`、`mistralai`、`nomic`、`ollama`、`openai`、`openrouter`、`perplexity`、`qdrant`、`xai`。
+LangChain monorepo 的核心问题是把 LLM 应用中的模型、消息、工具、检索、可组合运行单元、agent 和第三方 provider 适配分层，使上层应用可以用稳定接口组合不同实现。
+
+[UML]
+@startuml
+left to right direction
+package "LangChain monorepo" as Repo {
+  component "libs/core\nlangchain_core" as Core
+  component "libs/langchain_v1\nlangchain" as V1
+  component "libs/langchain\nlangchain_classic" as Classic
+  component "libs/partners/*\nprovider packages" as Partners
+  component "libs/text-splitters" as Splitters
+  component "libs/standard-tests" as Tests
+  component "libs/model-profiles" as Profiles
+}
+V1 --> Core : imports abstractions
+Classic --> Core : legacy APIs
+Classic --> Splitters : document chunking
+Partners --> Core : implement interfaces
+Partners --> Tests : standard contract suites
+Profiles --> Partners : generated profile data
+@enduml
+
+[Detail]
+从左到右读取：`langchain_core` 是抽象层，`langchain` v1 和 `langchain_classic` 是面向用户的上层 API，`partners` 是第三方服务实现，`standard-tests` 约束 provider 行为，`model-profiles` 维护模型能力数据。箭头表示导入或契约依赖方向，而不是发布顺序。维护风险集中在 Core 公共接口变化，因为它会影响 v1、classic、partners 和 tests。
+
+------------------------------------------------------------
+[Example]
+CodeGraph 可用性说明
+
+[Description]
+项目 AGENTS.md 要求结构问题优先使用 CodeGraph，但本会话中 CodeGraph 返回“未初始化”。报告因此使用源码文件和配置文件证据，未声明 AST 图谱级调用完整性。
 
 [UML]
 None
 
 [Detail]
-包数量和文件数量说明这个仓库的维护风险主要不在单个函数复杂度，而在公共接口稳定性、跨包依赖版本、provider 能力差异、CI 矩阵和旧包兼容性。`AGENTS.md` 明确要求保护公开接口签名、给新功能加单元测试、使用 `uv` 管理各包依赖，并把 `langchain-classic` 标为 legacy。
+尝试 `codegraph_status` 时，MCP 返回 `CodeGraph not initialized in /home/ping/gitProjects/langchain`。如果后续需要更精确的调用图、影响半径或符号级覆盖，应先在仓库中运行 `codegraph init -i` 并重新生成报告。
+

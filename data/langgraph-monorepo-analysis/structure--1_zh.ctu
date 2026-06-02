@@ -1,0 +1,50 @@
+Title: 顶层结构
+Describe: monorepo 库划分、源码入口、配置文件和依赖方向。
+------------------------------------------------------------
+[Example]
+S02_TOP_LEVEL_STRUCTURE：库与入口结构
+
+[Description]
+`libs/` 下当前包含九个顶层库：`checkpoint`、`checkpoint-conformance`、`checkpoint-postgres`、`checkpoint-sqlite`、`cli`、`langgraph`、`prebuilt`、`sdk-js`、`sdk-py`。Python 库都使用 `pyproject.toml` 和 Hatchling；`cli` 的命令入口是 `langgraph = "langgraph_cli.cli:cli"`。
+
+[UML]
+@startuml
+left to right direction
+package "libs/" {
+  component "checkpoint" as Checkpoint
+  component "checkpoint-postgres" as Postgres
+  component "checkpoint-sqlite" as SQLite
+  component "langgraph" as Core
+  component "prebuilt" as Prebuilt
+  component "cli" as CLI
+  component "sdk-py" as SDKPy
+  component "sdk-js" as SDKJS
+  component "checkpoint-conformance" as Conformance
+}
+Checkpoint --> Core : base saver/store API
+Checkpoint --> Postgres : concrete saver/store
+Checkpoint --> SQLite : concrete saver/store
+Checkpoint --> Prebuilt : state persistence support
+Prebuilt --> Core : StateGraph / ToolNode integration
+SDKPy --> CLI : API client dependency
+SDKPy --> Core : remote/runtime surface
+Conformance --> Checkpoint : compatibility tests
+@enduml
+
+[Detail]
+这张图按 `AGENTS.md` 的依赖图和各库 `pyproject.toml` 建模。箭头表示生产依赖或直接使用方向，而不是测试依赖。`checkpoint` 是最底层公共抽象；`langgraph` 通过 `langgraph-checkpoint>=4.1.0,<5.0.0` 使用它；`prebuilt` 使用 `StateGraph` 和 `ToolNode` 包装 agent loop；`cli` 通过 `project.scripts` 暴露 `langgraph` 命令并依赖 `langgraph-sdk`。
+
+`sdk-js` 在当前工作区只列出 `README.md`，没有发现 `src/` 或 `package.json`，因此报告不把它纳入核心源码图。维护时如果补齐 JS SDK 源码，需要重新生成本节。
+------------------------------------------------------------
+[Example]
+核心源码目录说明
+
+[Description]
+`libs/langgraph/langgraph` 的主要目录按运行职责拆分：`graph/` 是用户构建图的 API，`pregel/` 是执行引擎，`channels/` 是 state key 的合并/传播语义，`stream/` 是运行输出转换，`managed/` 和 `runtime.py` 提供运行上下文，`_internal/` 承载配置、序列化、重试、scratchpad 等内部工具。
+
+[UML]
+None
+
+[Detail]
+关键入口包括 `StateGraph` 位于 `libs/langgraph/langgraph/graph/state.py:130`，`CompiledStateGraph` 位于同文件 `:1391`，`Pregel` 位于 `libs/langgraph/langgraph/pregel/main.py:448`，`PregelLoop` 位于 `libs/langgraph/langgraph/pregel/_loop.py:156`。这些符号形成“构建 API -> 编译对象 -> 运行循环”的主轴。
+

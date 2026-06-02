@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Deep Agents 工程代码分析报告</title>
+	<link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+	<link rel="stylesheet" href="../main.css">
+</head>
+
+<body class="demo-page" data-dir="deepagents-project-analysis">
+	<header class="demo-topbar">
+		<a class="demo-topbar-logo" href="../index.html" aria-label="Code-To-UML Home">
+			<img src="../favicon.svg" alt="" />
+			<span>Code-To-UML</span>
+		</a>
+	</header>
+
+	<div class="page-shell demo-shell">
+		<main class="content">
+			<section class="intro">
+				<h1>Deep Agents 工程代码分析报告</h1>
+				<p>项目级架构、核心流程、调用关系、状态流与维护指南。证据基线：/home/ping/gitProjects/deepagents，提交 b66748bd。</p>
+			</section>
+
+			<nav class="demo-tabs" aria-label="Report Categories">
+				<button class="demo-tab is-active" type="button" data-diagram="overview">概览</button>
+				<button class="demo-tab" type="button" data-diagram="structure">结构</button>
+				<button class="demo-tab" type="button" data-diagram="objects">核心对象</button>
+				<button class="demo-tab" type="button" data-diagram="architecture">架构</button>
+				<button class="demo-tab" type="button" data-diagram="flow">流程</button>
+				<button class="demo-tab" type="button" data-diagram="calls">调用</button>
+				<button class="demo-tab" type="button" data-diagram="dataflow">状态流</button>
+				<button class="demo-tab" type="button" data-diagram="code">代码片段</button>
+				<button class="demo-tab" type="button" data-diagram="principles">原理与风险</button>
+				<button class="demo-tab" type="button" data-diagram="guide">指南</button>
+			</nav>
+
+			<section class="doc-section demo-panel">
+				<h2 id="demo-title">概览</h2>
+				<p class="demo-section-overview is-active" data-diagram-overview="overview">项目目标、包边界与证据基线。</p>
+				<p class="demo-section-overview" data-diagram-overview="structure" hidden>monorepo 顶层结构、入口与工具链。</p>
+				<p class="demo-section-overview" data-diagram-overview="objects" hidden>关键类、函数、中间件和后端对象。</p>
+				<p class="demo-section-overview" data-diagram-overview="architecture" hidden>SDK、CLI、Code、ACP、partner 和 evals 的架构边界。</p>
+				<p class="demo-section-overview" data-diagram-overview="flow" hidden>核心 agent 构建流、部署流和交互终端启动流。</p>
+				<p class="demo-section-overview" data-diagram-overview="calls" hidden>跨模块调用链与责任交接。</p>
+				<p class="demo-section-overview" data-diagram-overview="dataflow" hidden>消息、文件、项目配置、远端任务和部署目录的状态流。</p>
+				<p class="demo-section-overview" data-diagram-overview="code" hidden>关键源码片段解析。</p>
+				<p class="demo-section-overview" data-diagram-overview="principles" hidden>核心设计原则、取舍、风险与改进建议。</p>
+				<p class="demo-section-overview" data-diagram-overview="guide" hidden>上手路径、复盘问答和维护者速查表。</p>
+				<div class="demo-examples" data-examples></div>
+			</section>
+		</main>
+		<aside data-demo-toc></aside>
+	</div>
+
+	<script src="../js/viz-global.js"></script>
+	<script src="../js/plantuml.js"></script>
+	<script src="../component/docs-page-core.js"></script>
+	<script src="../component/render-failure-common.js"></script>
+	<script src="../component/toc-component.js"></script>
+	<script src="../js/markdown-it.js"></script>
+	<script src="../component/demo-example-component.js"></script>
+	<script src="../demo.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,27 @@
+Title: 文件/目标概览
+Describe: Deep Agents monorepo 的项目级目标、范围边界和证据基线。
+------------------------------------------------------------
+[Example]
+S01_TARGET_OVERVIEW - 项目定位
+
+[Description]
+Deep Agents 是一个 Python monorepo，核心 SDK 包 `libs/deepagents` 提供 `create_deep_agent`，在 LangChain `create_agent` 与 LangGraph 运行时之上装配文件系统、子代理、摘要、记忆、权限和人工审批等能力。仓库还包含部署 CLI、交互式终端、ACP 集成、评测套件和 sandbox partner 包。
+
+[UML]
+None
+
+[Detail]
+证据基线为 `/home/ping/gitProjects/deepagents`，提交 `b66748bd`。README 将 Deep Agents 定义为 “batteries-included agent harness”，强调 sub-agents、filesystem、context management、persistent memory、HITL、skills 和 MCP tools。公开 Python SDK 从 `libs/deepagents/deepagents/__init__.py:9-47` 导出 `create_deep_agent`、`DeepAgentState`、中间件、profile 注册函数和子代理类型。核心装配函数位于 `libs/deepagents/deepagents/graph.py:217`，最终调用 LangChain `create_agent` 并设置 LangGraph metadata 与 `recursion_limit`，见 `graph.py:806-829`。
+
+------------------------------------------------------------
+[Example]
+项目范围与非范围
+
+[Description]
+本报告分析当前工程代码，不修改 Deep Agents 源码。CodeGraph MCP 未初始化，因此结构分析使用 `rg`、文件配置和关键源码读取完成；报告产物写入 Code-To-UML 项目目录。
+
+[UML]
+None
+
+[Detail]
+纳入范围：`libs/deepagents` SDK、`libs/cli` 部署命令、`libs/code` 交互式终端、`libs/acp` Agent Client Protocol 桥接、`libs/evals` 评测与 Harbor 集成、`libs/partners` 的 Daytona、Modal、QuickJS、Runloop integration 包。非范围：逐个测试用例的完整行为证明、远端 LangSmith API 的运行时可用性、外部服务行为和文档站内容。由于用户要求是“分析当前工程代码，使用 code-to-uml 生成报告”，报告采用项目级深度，重点是模块边界、核心路径、状态流和维护风险。

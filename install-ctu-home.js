@@ -109,6 +109,28 @@ function copyDirectory(source, target) {
 	}
 }
 
+function promptYesNo(question) {
+	process.stdout.write(question);
+	const chunks = [];
+	const buffer = Buffer.alloc(1);
+	while (true) {
+		let bytesRead = 0;
+		try {
+			bytesRead = fs.readSync(0, buffer, 0, 1, null);
+		} catch (err) {
+			if (err && err.code === "EAGAIN") continue;
+			throw err;
+		}
+		if (bytesRead === 0) break;
+		const char = buffer.toString("utf8", 0, bytesRead);
+		if (char === "\n") break;
+		if (char === "\r") continue;
+		chunks.push(char);
+	}
+	const answer = chunks.join("").trim().toLowerCase();
+	return answer === "y" || answer === "yes";
+}
+
 function skillBaseDir(tool) {
 	return path.join(userDir(), ...TOOL_SKILL_DIRS[tool]);
 }
@@ -121,8 +143,15 @@ function installSkill(tool) {
 	const target = path.join(baseDir, SKILL_NAME);
 	fs.mkdirSync(baseDir, { recursive: true });
 	if (fs.existsSync(target)) {
-		console.log(`Skill for ${tool} already exists at ${target}; skipping (not overwritten).`);
-		return false;
+		console.log(`Skill for ${tool} already exists at ${target}.`);
+		if (!promptYesNo("Overwrite? [y/N] ")) {
+			console.log(`Skipped ${SKILL_NAME} skill for ${tool}: ${target}`);
+			return false;
+		}
+		fs.rmSync(target, { recursive: true, force: true });
+		copyDirectory(SKILL_SOURCE_DIR, target);
+		console.log(`Overwritten ${SKILL_NAME} skill for ${tool}: ${target}`);
+		return true;
 	}
 	copyDirectory(SKILL_SOURCE_DIR, target);
 	console.log(`Installed ${SKILL_NAME} skill for ${tool}: ${target}`);

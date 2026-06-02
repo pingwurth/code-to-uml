@@ -1,0 +1,56 @@
+Title: 核心对象/函数说明
+Describe: 项目级核心对象职责、接口、状态和相邻调用关系。
+------------------------------------------------------------
+[Example]
+S03_CORE_OBJECTS：核心对象责任表
+
+[Description]
+核心对象可以分成五组：图构建、执行引擎、状态/持久化、预构建 agent、外部操作入口。
+
+[UML]
+@startuml
+class "StateGraph" as StateGraph {
+  +add_node(...)
+  +add_edge(...)
+  +compile(...)
+}
+class "CompiledStateGraph" as Compiled
+class "Pregel" as Pregel {
+  +invoke(...)
+  +stream(...)
+  +get_graph(...)
+}
+class "PregelLoop" as Loop
+class "BaseCheckpointSaver" as Saver {
+  +get(...)
+  +put(...)
+  +list(...)
+}
+class "ToolNode" as ToolNode
+class "create_react_agent" as ReactAgent
+
+StateGraph --> Compiled : compile
+Compiled --|> Pregel
+Pregel --> Loop : run supersteps
+Loop --> Saver : persist/load checkpoints
+ReactAgent --> StateGraph : builds agent graph
+ReactAgent --> ToolNode : tool execution node
+@enduml
+
+[Detail]
+读图从 `StateGraph` 开始。用户通过 `add_node`、`add_edge`、条件边和 schema 建立 builder；`compile()` 产出 `CompiledStateGraph`，它继承/包装 `Pregel` 的执行能力。`Pregel` 负责 validate、schema、stream、subgraph、invoke/stream 等运行面；`PregelLoop` 在运行期间管理 step、checkpoint、stream、resume、interrupt 和 task 调度。
+
+`BaseCheckpointSaver` 是持久化接口，内存、SQLite、Postgres 实现都围绕它展开。`create_react_agent` 和 `ToolNode` 是 `prebuilt` 的高层封装：它们把 LLM 消息、tool_calls、ToolMessage 和 LangGraph 的状态图连接起来。
+------------------------------------------------------------
+[Example]
+重要符号索引
+
+[Description]
+`StateGraph.add_node` 会处理 node name、输入 schema 推断、retry/cache/error handler/timeout 策略以及 `Command[Literal[...]]` 的可视化目的地。`Pregel.__init__` 会规范化 checkpointer、构建节点、注册 `TASKS` channel、保存 stream/cache/retry/context 配置并调用 `validate()`。
+
+[UML]
+None
+
+[Detail]
+证据位置：`StateGraph` 在 `libs/langgraph/langgraph/graph/state.py:130`；`StateGraph.add_node` 实现从 `:520` 附近开始；`CompiledStateGraph` 在 `:1391`；`Pregel` 在 `libs/langgraph/langgraph/pregel/main.py:448`，其 `__init__` 片段显示 `ensure_valid_checkpointer()`、`TASKS` channel 注册和 `validate()`；`PregelLoop` 在 `libs/langgraph/langgraph/pregel/_loop.py:156`；`BaseCheckpointSaver` 在 `libs/checkpoint/langgraph/checkpoint/base/__init__.py:176`；`ToolNode` 在 `libs/prebuilt/langgraph/prebuilt/tool_node.py:622`。
+

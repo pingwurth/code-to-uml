@@ -1,0 +1,51 @@
+Title: 整体架构图
+Describe: LangGraph monorepo 的分层、边界和运行时假设。
+------------------------------------------------------------
+[Example]
+S04_ARCHITECTURE：分层架构
+
+[Description]
+LangGraph 的核心设计是“用户图构建 API + Pregel superstep 执行引擎 + channel/checkpoint 状态模型”。外围库提供持久化实现、高层 agent 封装、API SDK 和 CLI。
+
+[UML]
+@startuml
+top to bottom direction
+package "用户/应用层" {
+  component "用户 graph 代码" as UserGraph
+  component "create_react_agent" as ReactAgent
+}
+package "LangGraph 核心框架 libs/langgraph" {
+  component "graph/state.py\nStateGraph" as StateGraph
+  component "pregel/main.py\nPregel" as Pregel
+  component "pregel/_loop.py\nPregelLoop" as Loop
+  component "channels/*" as Channels
+  component "stream/*" as Stream
+}
+package "状态与持久化" {
+  component "checkpoint/base" as CheckpointBase
+  database "memory/sqlite/postgres savers" as Savers
+  component "store/base + store impl" as Store
+}
+package "外部操作面" {
+  component "langgraph_cli.cli" as CLI
+  component "langgraph_sdk.client" as SDK
+}
+
+UserGraph --> StateGraph : add nodes / edges
+ReactAgent --> StateGraph : builds agent loop
+StateGraph --> Pregel : compile
+Pregel --> Loop : invoke / stream
+Loop --> Channels : read/apply writes
+Loop --> CheckpointBase : get/put/list
+CheckpointBase --> Savers : concrete persistence
+Loop --> Store : cross-thread memory
+Pregel --> Stream : values/updates/messages/events
+CLI --> SDK : remote API operations
+SDK --> Pregel : API surface for hosted runs
+@enduml
+
+[Detail]
+这张图回答“哪里是边界”。箭头表示依赖或调用方向。`StateGraph` 是构建期对象，`Pregel` 与 `PregelLoop` 是运行期对象；`channels/*` 和 checkpoint 是状态语义层；`prebuilt` 不替代核心引擎，而是在用户层创建特定图形。`CLI` 与 `sdk-py` 更接近 LangGraph API 的操作面，它们不应承载核心执行语义。
+
+维护风险在于层之间并不完全独立：`libs/langgraph/pyproject.toml` 对 `langgraph-checkpoint`、`langgraph-sdk`、`langgraph-prebuilt` 都有生产依赖；因此核心框架升级经常需要同时考虑持久化协议、SDK schema 和 prebuilt agent 行为。
+

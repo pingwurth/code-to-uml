@@ -1,0 +1,63 @@
+Title: 数据流/状态流图
+Describe: 消息、文件、部署配置和远端任务的状态所有权。
+------------------------------------------------------------
+[Example]
+S07_DATA_OR_STATE_FLOW - agent 状态与工具数据流
+
+[Description]
+SDK 的核心状态包括消息、文件、记忆、skills metadata 和 async task tracking。状态扩展由中间件贡献，默认 `DeepAgentState` 只强制 messages 使用 DeltaChannel。
+
+[UML]
+@startuml
+left to right direction
+rectangle "User input" as Input
+rectangle "DeepAgentState.messages" as Msg
+rectangle "Middleware state extensions" as MWState
+database "BackendProtocol" as Backend
+rectangle "Tool outputs" as ToolOut
+rectangle "Model response" as ModelOut
+
+Input --> Msg : HumanMessage
+Msg --> ModelOut : prompt context
+ModelOut --> ToolOut : tool calls
+ToolOut --> Backend : file reads writes execute
+Backend --> MWState : files or task updates
+ToolOut --> Msg : ToolMessage
+MWState --> Msg : system prompt additions
+Msg --> ModelOut : next turn
+@enduml
+
+[Detail]
+`DeepAgentState` 在 `graph.py:63-66` 用 `DeltaChannel(_messages_delta_reducer, snapshot_frequency=50)` 控制 messages 历史合并成本。`FilesystemMiddleware` 的 `FilesystemState` 同样使用 DeltaChannel 管理 `files`，其 reducer 在 `libs/deepagents/deepagents/middleware/filesystem.py` 处理写入和删除。`AsyncSubAgentState` 在 `async_subagents.py` 用 `async_tasks` 记录 task id、agent name、thread id、run id 和 status。箭头表示数据流：用户消息进入 messages，模型产出工具调用，工具通过 backend 读写文件或执行命令，结果再回到 messages 或中间件状态。
+
+------------------------------------------------------------
+[Example]
+S07_DATA_OR_STATE_FLOW - 部署项目数据流
+
+[Description]
+本地 managed-agent 项目的 `agent.json`、`AGENTS.md`、`tools.json`、`skills/` 和 `subagents/` 被解析为 `Project`，再转换为 API payload 与目录 commit delta。
+
+[UML]
+@startuml
+left to right direction
+folder "Project directory" as Dir
+rectangle "Project.load" as Load
+rectangle "Project dataclass" as Project
+rectangle "build_payload" as Payload
+rectangle "build_directory_files" as Files
+rectangle "build_directory_delta" as Delta
+cloud "Deep Agents API" as API
+database "Local State" as State
+
+Dir --> Load : agent.json AGENTS.md tools skills subagents
+Load --> Project : validated data
+Project --> Payload : metadata system prompt tools skills subagents
+Project --> Files : managed file tree
+Payload --> API : create or patch body
+Files --> Delta : compare remote directory
+Delta --> API : commit entries
+API --> State : agent_id revision
+@enduml
+
+[Detail]
+`Project.load` 在 `project.py:159-188` 返回纯 dataclass；`_read_agent_json` 在 `project.py:191-245` 校验 name、agent_id、model、runtime 和 backend。`build_payload`、`build_metadata_payload`、`build_directory_files`、`build_directory_delta` 分别位于 `payload.py:20-98`。目录同步只管理 `AGENTS.md`、`tools.json`、`skills/` 和 `subagents/` 路径，见 `_is_managed_path` 的 `payload.py:153-156`。这样可以把远端 metadata 与 Hub directory 文件状态分开维护。

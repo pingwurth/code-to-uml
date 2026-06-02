@@ -1,0 +1,63 @@
+Title: 调用关系图
+Describe: 关键跨模块调用链，覆盖普通图运行与 prebuilt agent/tool 路径。
+------------------------------------------------------------
+[Example]
+S06_CALL_RELATIONSHIPS：用户图运行调用链
+
+[Description]
+普通用户路径可以概括为：用户代码调用 `StateGraph` builder，编译成 `CompiledStateGraph/Pregel`，运行时由 loop 和 runner 调度节点，checkpoint/store/cache/stream 作为横切能力接入。
+
+[UML]
+@startuml
+participant "User Code" as User
+participant "StateGraph" as Builder
+participant "CompiledStateGraph/Pregel" as Pregel
+participant "PregelLoop" as Loop
+participant "PregelRunner" as Runner
+participant "BaseCheckpointSaver" as Saver
+participant "StreamMux/Transformers" as Stream
+
+User -> Builder: add_node / add_edge / compile
+Builder --> User: compiled graph
+User -> Pregel: invoke or stream
+Pregel -> Loop: enter run loop
+Loop -> Saver: load latest checkpoint
+Loop -> Runner: execute prepared tasks
+Runner --> Loop: writes, interrupts, errors
+Loop -> Saver: persist checkpoint and writes
+Loop -> Stream: emit values, updates, messages
+Pregel --> User: output or stream chunks
+@enduml
+
+[Detail]
+这张序列图强调调用顺序。`BaseCheckpointSaver` 不是每次运行都必须存在，但当传入 checkpointer 时，它决定 `thread_id`、resume、time travel 和 interrupt 后恢复能力。`StreamMux/Transformers` 代表 `libs/langgraph/langgraph/stream/*`，它把内部运行事件转换为 `values`、`updates`、`messages` 等用户可见模式。
+------------------------------------------------------------
+[Example]
+prebuilt ReAct agent 调用链
+
+[Description]
+`create_react_agent` 是 deprecated 但仍在 `prebuilt` 中的重要路径。它把 model、prompt、tools、state schema、checkpointer/store 和 interrupt 配置组装成一个 `StateGraph`。
+
+[UML]
+@startuml
+participant "create_react_agent" as Factory
+participant "Prompt Runnable" as Prompt
+participant "Chat Model" as Model
+participant "ToolNode" as ToolNode
+participant "StateGraph" as Graph
+
+Factory -> Prompt: build prompt runnable
+Factory -> Model: bind_tools when needed
+Factory -> ToolNode: wrap BaseTool/callables
+Factory -> Graph: add agent node
+Factory -> Graph: add tools node and conditional route
+Graph --> Factory: CompiledStateGraph
+loop while AIMessage has tool_calls
+  Model -> ToolNode: tool_calls
+  ToolNode --> Model: ToolMessage or Command
+end
+@enduml
+
+[Detail]
+`create_react_agent` 位于 `libs/prebuilt/langgraph/prebuilt/chat_agent_executor.py:278`。它校验 `version in ("v1", "v2")`、state schema 必含 `messages` 和 `remaining_steps`，必要时调用 `.bind_tools()`。`ToolNode` 负责工具并发执行、错误处理、state/store/runtime 注入和 `Command` 返回值。v2 模式通过 `Send` 将 tool call 分发给多个 tool node 实例，这是与 v1 的重要行为差异。
+

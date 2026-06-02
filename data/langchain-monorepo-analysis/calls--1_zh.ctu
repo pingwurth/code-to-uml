@@ -1,69 +1,59 @@
 Title: 调用关系图
-Describe: 覆盖 S06_CALL_RELATIONSHIPS。展示用户调用、agent graph、provider implementation、SDK/API、callback/streaming 的端到端路径。
+Describe: S06_CALL_RELATIONSHIPS。展示跨包边界的调用链，避免只重复局部对象职责。
 ------------------------------------------------------------
 [Example]
-S06_CALL_RELATIONSHIPS - 从 agent 到 provider SDK
+从用户 API 到 provider SDK
 
 [Description]
-典型调用链：用户调用 `create_agent(model="openai:...", tools=[...])`，工厂函数调用 `init_chat_model`，provider 解析后创建 `langchain_openai.ChatOpenAI`，agent graph 运行时调用 `BaseChatModel.invoke`/stream 相关方法，OpenAI partner 把 LangChain messages 转换为 provider payload，调用 OpenAI SDK，返回 `AIMessage`，如有 tool calls 再进入 `ToolNode`。
+典型 chat model 调用从用户代码进入 Runnable 接口，经 BaseChatModel 生命周期包装后，到 partner 包和 provider SDK。
 
 [UML]
 @startuml
-participant "用户代码" as User
-participant "create_agent" as AgentFactory
-participant "init_chat_model" as InitModel
-participant "ChatOpenAI" as ChatOpenAI
-participant "StateGraph" as Graph
-participant "OpenAI SDK/API" as OpenAIAPI
+participant "应用代码" as App
+participant "langchain v1\ncreate_agent" as Agent
+participant "langchain_core\nRunnable" as Runnable
+participant "langchain_core\nBaseChatModel" as CoreModel
+participant "langchain_openai\nChatOpenAI" as ChatOpenAI
+participant "openai SDK" as OpenAISDK
+
+App -> Agent: invoke agent
+Agent -> Runnable: invoke graph node
+Runnable -> CoreModel: invoke messages
+CoreModel -> ChatOpenAI: provider _generate/_stream
+ChatOpenAI -> OpenAISDK: HTTP API request
+OpenAISDK --> ChatOpenAI: provider response
+ChatOpenAI --> CoreModel: ChatResult
+CoreModel --> Runnable: AIMessage
+Runnable --> Agent: updated state
+Agent --> App: final response
+@enduml
+
+[Detail]
+调用方向跨越 v1、Core、partner 和外部 SDK。`ChatOpenAI` 的源码位于 `libs/partners/openai/langchain_openai/chat_models/base.py:2534`，文件顶部明确警告它只面向官方 OpenAI API 规范，非标准 OpenAI-compatible provider 应使用 provider-specific 包。这是维护边界：不能为了 OpenRouter、vLLM 或 DeepSeek 的非标准字段随意扩展 OpenAI 包。
+
+------------------------------------------------------------
+[Example]
+工具调用链
+
+[Description]
+Tool 调用链从模型生成 `tool_calls` 开始，经 LangGraph `ToolNode` 找到注册 `BaseTool`，再把结果回写为 `ToolMessage`。
+
+[UML]
+@startuml
+participant "AIMessage" as AI
 participant "ToolNode" as ToolNode
-participant "BaseTool 或 Callable" as Tool
-User -> AgentFactory: create_agent(model, tools, middleware)
-AgentFactory -> InitModel: init_chat_model(model)
-InitModel --> AgentFactory: BaseChatModel
-AgentFactory -> Graph: add_node model and tools
-AgentFactory --> User: CompiledStateGraph
-User -> Graph: stream or invoke messages
-Graph -> ChatOpenAI: invoke messages
-ChatOpenAI -> OpenAIAPI: request with converted messages
-OpenAIAPI --> ChatOpenAI: assistant message or tool calls
-ChatOpenAI --> Graph: AIMessage
-alt AIMessage has tool_calls
-  Graph -> ToolNode: route tool calls
-  ToolNode -> Tool: execute selected tool
-  Tool --> ToolNode: tool result
-  ToolNode --> Graph: ToolMessage
-  Graph -> ChatOpenAI: next model turn
-else no tool_calls
-  Graph --> User: final messages
-end
+participant "BaseTool" as BaseTool
+participant "用户函数" as UserFunc
+participant "state.messages" as Messages
+
+AI -> ToolNode: tool_calls
+ToolNode -> BaseTool: invoke tool input
+BaseTool -> UserFunc: 调用同步或异步函数
+UserFunc --> BaseTool: 原始结果
+BaseTool --> ToolNode: tool output
+ToolNode -> Messages: 追加 ToolMessage
 @enduml
 
 [Detail]
-从用户代码开始读序列图。实线箭头表示同步或运行时调用，`alt` 块展示 agent 的停止条件。`create_agent` 本身不直接调用 OpenAI SDK，它只组装 graph；实际 provider I/O 发生在 `ChatOpenAI` 内部。工具路径由 LangGraph `ToolNode` 管理，但工具对象仍然来自用户提供的 `BaseTool`、callable 或 dict。维护风险是这条链跨越了用户代码、LangChain active package、partner package、provider API 和工具实现。
+`BaseTool` 位于 `libs/core/langchain_core/tools/base.py:405`，它继承 `RunnableSerializable`，所以工具也是可组合运行单元。工具 schema 由函数签名、Pydantic schema、Annotated 描述和 Google-style docstring 共同推断。边界风险在于 tool input schema 和模型产生的 tool call 参数必须一致，否则会在 tool 执行前后产生验证错误。
 
-------------------------------------------------------------
-[Example]
-标准测试调用链
-
-[Description]
-`langchain-tests` 让 partner 包用相同测试基类验证实现。`ChatModelUnitTests` 位于 `libs/standard-tests/langchain_tests/unit_tests/chat_models.py:276`，要求子类实现 `chat_model_class` 和 `chat_model_params`；`ChatModelIntegrationTests` 位于 integration tests 包约 178 行；OpenAI partner 的多个 standard test 文件继承这些基类。
-
-[UML]
-@startuml
-participant "Partner test class" as PartnerTest
-participant "ChatModelUnitTests" as UnitSuite
-participant "ChatModelIntegrationTests" as IntegrationSuite
-participant "Partner ChatModel" as ChatModel
-participant "Provider API 或 VCR" as Provider
-PartnerTest -> UnitSuite: inherit and provide class params
-UnitSuite -> ChatModel: instantiate without live network
-UnitSuite --> PartnerTest: assert contract behavior
-PartnerTest -> IntegrationSuite: optional live or recorded tests
-IntegrationSuite -> ChatModel: invoke model operations
-ChatModel -> Provider: HTTP through SDK when enabled
-Provider --> ChatModel: model response
-IntegrationSuite --> PartnerTest: assert integration behavior
-@enduml
-
-[Detail]
-箭头表示测试执行和被测对象实例化。unit suite 强调无网络、确定性和接口行为；integration suite 允许 live API 或 VCR 录制。由于 provider 包很多，标准测试是防止每个 integration 自行解释 core 契约的关键机制。风险是当 core 添加新能力时，标准测试和 partner 覆盖必须同步，否则某些 provider 会静默缺少能力。

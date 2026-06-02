@@ -1,0 +1,37 @@
+Title: 核心原理说明与风险建议
+Describe: 设计取舍、运行机制、风险和可执行改进。
+------------------------------------------------------------
+[Example]
+S09_CORE_PRINCIPLES - 设计机制
+
+[Description]
+Deep Agents 的核心机制是“可组合 middleware stack 加 profile 策略”。SDK 不自己实现完整 agent loop，而是把 LangChain agent 和 LangGraph state graph 作为底座。
+
+[UML]
+None
+
+[Detail]
+`create_deep_agent` 通过 LangChain `create_agent` 装配 runnable graph，而不是手写循环。优势是继承 LangGraph streaming、checkpoint、store、cache、context schema 和 transformer 能力；代价是公共 API 与 LangChain/LangGraph 版本和行为高度耦合。profile 机制允许按模型调整 prompt、tool description、extra middleware 和 excluded tools，但必须用 `_validate_excluded_middleware_config` 与 `_verify_excluded_middleware_coverage` 防止配置漂移。文件系统、子代理、摘要、memory 和 HITL 都被中间件化，使扩展点清晰，但也让 middleware 顺序成为隐含契约。
+
+------------------------------------------------------------
+[Example]
+S11_RISKS_AND_IMPROVEMENTS - 风险与改进建议
+
+[Description]
+主要风险来自公共接口稳定性、middleware 顺序耦合、远端部署并发、sandbox 权限边界、CodeGraph 缺失和模型名新鲜度。
+
+[UML]
+None
+
+[Detail]
+1. 公共接口风险：`create_deep_agent` 是 `__init__.py` 导出的主 API。任何签名、默认值或返回类型变化都可能破坏用户代码。建议新增行为通过 keyword-only 参数和 profile/中间件扩展实现，并补充导出与示例兼容测试。
+
+2. middleware 顺序风险：`graph.py:309-335` 的 docstring 描述了 base stack 与 tail stack 顺序。用户 middleware 插入点、profile extra middleware、memory 和 prompt cache 的相对顺序会影响 prompt、工具和缓存行为。建议为 stack ordering 保留专门快照测试。
+
+3. 部署并发风险：`_sync_agent_directory` 对 409/412 会重新读取并提交，但仍依赖远端 commit hash 语义。建议在冲突测试中覆盖“远端新增 managed path、本地删除”的 delta 行为。
+
+4. 权限边界风险：`FilesystemMiddleware` 的 `permissions` 是工具层控制，`graph.py:408-410` 明确 direct backend usage 不受该规则控制。建议文档和测试强调 backend 直接调用不等价于工具权限。
+
+5. 分析工具风险：本仓库 CodeGraph 未初始化，结构查询不能使用预建 AST 图。建议运行 `codegraph init -i` 后再做精细调用影响报告。
+
+6. 模型引用风险：仓库内有多处 model ID 示例和默认值，项目规范要求写入或更新模型引用前查询官方最新 ID。后续改 docstring 或默认值时不要凭记忆更新。

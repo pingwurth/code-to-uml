@@ -1,0 +1,91 @@
+Title: 开发上手指南、Q&A 与维护者速查表
+Describe: 面向维护者的阅读路径、运行建议、复盘问题和符号索引。
+------------------------------------------------------------
+[Example]
+S10_ONBOARDING_GUIDE - 推荐阅读路径
+
+[Description]
+新维护者应先理解包边界，再阅读 SDK 装配函数，随后按目标进入 CLI、Code、ACP、partner 或 evals。
+
+[UML]
+@startmindmap
+* Deep Agents 上手路径
+** 1. 仓库边界
+*** README
+*** AGENTS.md
+*** libs/*/pyproject.toml
+** 2. SDK 核心
+*** deepagents.__init__
+*** graph.create_deep_agent
+*** middleware
+*** backends
+** 3. 入口包
+*** deepagents-cli main and deploy
+*** deepagents-code main and app
+*** deepagents-acp server
+** 4. 扩展与验证
+*** partners
+*** evals
+*** package Makefile
+@endmindmap
+
+[Detail]
+先读 README 的产品定位，再读根 `AGENTS.md` 的 monorepo 规范。SDK 路径从 `libs/deepagents/deepagents/__init__.py` 进入，重点看 `graph.py:217-829`。部署相关从 `libs/cli/deepagents_cli/main.py` 到 `deploy/commands.py`、`project.py`、`payload.py`。交互终端从 `libs/code/deepagents_code/main.py` 与 `app.py` 进入。ACP 从 `libs/acp/deepagents_acp/server.py:92` 进入。测试命令按包使用 `make -C libs/deepagents test` 或具体 `uv run --group test pytest ...`，不要在 unit tests 中引入网络调用。
+
+------------------------------------------------------------
+[Example]
+S12_REVIEWER_QUESTIONS - 复盘问答清单
+
+[Description]
+下面的问题用于确认读者已理解项目级结构、核心流程和风险边界。
+
+[UML]
+None
+
+[Detail]
+Q1: `create_deep_agent` 为什么不是简单包装 `create_agent`？
+A1: 因为它先解析模型、选择 harness profile、准备 backend、处理同步与异步子代理、插入默认 general-purpose subagent、组装 middleware、合成 system prompt，并在最后给 LangGraph graph 加 metadata。证据见 `graph.py:517-829`。
+
+Q2: 哪些 middleware 不能被 profile 排除，为什么？
+A2: `FilesystemMiddleware` 和 `SubAgentMiddleware`。前者承载内置文件工具和权限规则，后者承载 `task` tool。证据见 `_REQUIRED_MIDDLEWARE` 的 `graph.py:187-201`。
+
+Q3: `deepagents-cli` 和 `deepagents-code` 的职责如何区分？
+A3: `deepagents-cli` 暴露 `init`、`deploy`、`agents`、`mcp-servers`，无子命令时提示交互 REPL 已迁移；`deepagents-code` 是 Textual 终端交互包。证据见 `libs/cli/deepagents_cli/main.py:1-8` 与 `main.py:151-170`，以及 `libs/code/pyproject.toml` 的脚本声明。
+
+Q4: 部署 CLI 如何避免把项目根外文件发到远端？
+A4: `project.py` 在 `_read_project_text` 和 `_ensure_project_contained` 中拒绝 symlink、要求 regular file，并验证 resolved path 位于项目根内。证据见 `project.py:62-94`。
+
+Q5: 为什么 `build_directory_delta` 只处理部分路径？
+A5: 它只管理 `AGENTS.md`、`tools.json`、`skills/`、`subagents/`，避免删除远端非 managed 文件。证据见 `payload.py:86-98` 与 `_is_managed_path` 的 `payload.py:153-156`。
+
+Q6: ACP adapter 的核心对象是什么？
+A6: `AgentServerACP`，它继承 ACP `Agent`，持有 compiled graph 或 factory，并维护 session mode、model、plan、cwd 与允许命令类型。证据见 `server.py:92-138`。
+
+------------------------------------------------------------
+[Example]
+S13_MAINTAINER_REFERENCE - 维护者速查表
+
+[Description]
+高频文件、符号和行号索引。
+
+[UML]
+None
+
+[Detail]
+| 区域 | 符号/文件 | 位置 |
+| --- | --- | --- |
+| SDK public API | `deepagents.__all__` | `libs/deepagents/deepagents/__init__.py:26-48` |
+| SDK state | `DeepAgentState` | `libs/deepagents/deepagents/graph.py:63-66` |
+| SDK main entry | `create_deep_agent` | `libs/deepagents/deepagents/graph.py:217-829` |
+| SDK default prompt | `BASE_AGENT_PROMPT` | `libs/deepagents/deepagents/graph.py:69-142` |
+| SDK required middleware | `_REQUIRED_MIDDLEWARE` | `libs/deepagents/deepagents/graph.py:187-201` |
+| SDK final graph | `create_agent(...).with_config(...)` | `libs/deepagents/deepagents/graph.py:806-829` |
+| CLI parser | `_build_parser` | `libs/cli/deepagents_cli/main.py:82-115` |
+| CLI dispatch | `cli_main` | `libs/cli/deepagents_cli/main.py:131-173` |
+| Deploy command | `execute_deploy_command` | `libs/cli/deepagents_cli/deploy/commands.py:129-217` |
+| Deploy project model | `Project`, `Skill`, `Subagent` | `libs/cli/deepagents_cli/deploy/project.py:115-157` |
+| Deploy project load | `Project.load` | `libs/cli/deepagents_cli/deploy/project.py:159-188` |
+| Deploy payload | `build_payload` | `libs/cli/deepagents_cli/deploy/payload.py:20-43` |
+| Deploy directory delta | `build_directory_delta` | `libs/cli/deepagents_cli/deploy/payload.py:86-98` |
+| ACP bridge | `AgentServerACP` | `libs/acp/deepagents_acp/server.py:92-206` |
+| Code CLI app | `DeepAgentsApp` related Textual app code | `libs/code/deepagents_code/app.py` |

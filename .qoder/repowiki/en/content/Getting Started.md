@@ -17,6 +17,13 @@
 - [serve-scripts-static.test.js](file://test/serve-scripts-static.test.js)
 </cite>
 
+## Update Summary
+**Changes Made**
+- Updated installation instructions with corrected repository URL
+- Simplified demo access URL from `demo.html` to root endpoint (`/`)
+- Enhanced server startup procedures documentation
+- Updated troubleshooting guidance for simplified access patterns
+
 ## Table of Contents
 1. [Introduction](#introduction)
 2. [Prerequisites](#prerequisites)
@@ -83,13 +90,14 @@ Notes:
 
 ## Accessing the Demo Interface
 Once the server is running, open the demo page in your browser:
-- URL: http://localhost:5401/demo.html
+- URL: http://localhost:5401
 
-The demo page displays multiple diagram types and languages. You can switch between diagram categories and languages.
+The demo page displays multiple diagram types and languages. You can switch between diagram categories and languages. The root endpoint serves the main index page which contains navigation to the demo interface.
 
 **Section sources**
-- [README.md:113–117:113-117](file://README.md#L113-L117)
-- [demo.html:1–116:1-116](file://demo.html#L1-L116)
+- [README.md:113–119:113-119](file://README.md#L113-L119)
+- [index.html:244](file://index.html#L244)
+- [serve.js:413–415:413-415](file://serve.js#L413-L415)
 
 ## Verify Successful Installation
 After starting the server and opening the demo page, confirm:
@@ -113,7 +121,7 @@ Setting CTU_HOME allows AI agents to locate the project root and skill definitio
 - The installer writes the environment variable to your shell profile (Unix/macOS) or the user environment (Windows).
 - You can also print the appropriate command for your current shell without modifying profiles.
 
-Supported tools include several popular AI coding assistants. The installer copies the skill definition into each tool’s skills directory and updates your shell profile.
+Supported tools include several popular AI coding assistants. The installer copies the skill definition into each tool's skills directory and updates your shell profile.
 
 **Section sources**
 - [README.md:97–101:97-101](file://README.md#L97-L101)
@@ -158,7 +166,7 @@ Common setup issues and resolutions:
 
 - Java not installed or not on PATH
   - Install Java and ensure it is available on PATH.
-  - The server’s fallback endpoint requires Java to render diagrams.
+  - The server's fallback endpoint requires Java to render diagrams.
 
 - Port already in use
   - The shell and batch scripts automatically detect and terminate the occupying process before starting the server.
@@ -167,6 +175,7 @@ Common setup issues and resolutions:
 - Cannot access the demo page
   - Verify the server is running and listening on the expected port.
   - Ensure your browser can reach localhost on the configured port.
+  - Note: Access the demo via the root endpoint (`/`) rather than `demo.html`.
 
 - Cache index page shows errors
   - The cache index requires the Node.js server to be running.
@@ -184,4 +193,4 @@ Common setup issues and resolutions:
 - [index.html:350–364:350-364](file://index.html#L350-L364)
 
 ## Conclusion
-You now have everything needed to run Code-To-UML locally. Start the server, open the demo page, and explore the diagrams. Optionally configure CTU_HOME to integrate with AI agents. If you encounter issues, use the troubleshooting steps above to diagnose and resolve them quickly.
+You now have everything needed to run Code-To-UML locally. Start the server, open the demo page at the root endpoint (`http://localhost:5401`), and explore the diagrams. Optionally configure CTU_HOME to integrate with AI agents. If you encounter issues, use the troubleshooting steps above to diagnose and resolve them quickly.

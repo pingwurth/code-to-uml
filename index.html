@@ -82,6 +82,7 @@
 			display: inline-flex;
 			align-items: center;
 			justify-content: flex-end;
+			gap: 0.5rem;
 			flex: 0 0 auto;
 		}
 
@@ -117,6 +118,31 @@
 		.action-button[data-variant="danger"] {
 			border-color: color-mix(in srgb, var(--error) 45%, var(--line));
 			color: var(--error);
+		}
+
+		.sort-controls {
+			display: inline-flex;
+			align-items: center;
+			gap: 0.35rem;
+			color: var(--muted);
+			font-size: 0.92rem;
+		}
+
+		.sort-button {
+			min-width: 4.25rem;
+			gap: 0.25rem;
+			padding-inline: 0.55rem;
+		}
+
+		.sort-button[aria-pressed="true"] {
+			border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
+			background: var(--accent-soft);
+			color: var(--accent);
+		}
+
+		.sort-arrow {
+			font-size: 0.75rem;
+			line-height: 1;
 		}
 
 		.shell {
@@ -218,6 +244,16 @@
 				font-size: 1.65rem;
 			}
 
+			.intro-heading {
+				align-items: flex-start;
+				flex-direction: column;
+			}
+
+			.intro-actions {
+				flex-wrap: wrap;
+				justify-content: flex-start;
+			}
+
 			.index-link {
 				grid-template-columns: minmax(0, 1fr);
 			}
@@ -249,6 +285,15 @@
 			<div class="intro-heading">
 				<h1>Cache Index</h1>
 				<div class="intro-actions">
+					<div class="sort-controls" aria-label="排序">
+						<b><span>Sort</span></b>
+						<button class="action-button sort-button" type="button" data-sort-field="time" aria-pressed="true">
+							<span>Time</span><span class="sort-arrow" data-sort-arrow="time">▼</span>
+						</button>
+						<button class="action-button sort-button" type="button" data-sort-field="name" aria-pressed="false">
+							<span>Name</span><span class="sort-arrow" data-sort-arrow="name">▲</span>
+						</button>
+					</div>
 					<button class="action-button" data-variant="danger" type="button" data-clear-cache>Clear</button>
 				</div>
 			</div>
@@ -259,6 +304,7 @@
 		<ul class="index-list" data-index-list aria-label="cache HTML 文件"></ul>
 	</main>
 
+	<script src="component/cache-index-sort.js"></script>
 	<script>
 		"use strict";
 
@@ -267,7 +313,17 @@
 			const summary = document.querySelector("[data-summary]");
 			const list = document.querySelector("[data-index-list]");
 			const clearButton = document.querySelector("[data-clear-cache]");
+			const sortButtons = Array.from(document.querySelectorAll("[data-sort-field]"));
+			const sortArrows = {
+				time: document.querySelector("[data-sort-arrow='time']"),
+				name: document.querySelector("[data-sort-arrow='name']")
+			};
 			let currentFiles = [];
+			const sortDirections = {
+				time: "desc",
+				name: "asc"
+			};
+			let currentSortField = "time";
 
 			function formatBytes(size) {
 				const bytes = Number(size) || 0;
@@ -296,8 +352,25 @@
 					});
 			}
 
-			function renderFiles(files) {
-				currentFiles = files;
+			function currentSortState() {
+				return {
+					field: currentSortField,
+					direction: sortDirections[currentSortField]
+				};
+			}
+
+			function updateSortControls() {
+				for (const button of sortButtons) {
+					const field = button.dataset.sortField;
+					button.setAttribute("aria-pressed", field === currentSortField ? "true" : "false");
+				}
+				for (const field of Object.keys(sortArrows)) {
+					sortArrows[field].textContent = sortDirections[field] === "desc" ? "▼" : "▲";
+				}
+			}
+
+			function renderCurrentFiles() {
+				const files = window.CacheIndexSort.sortCacheFiles(currentFiles, currentSortState());
 				list.textContent = "";
 				if (!files.length) {
 					setStatus("cache/ 下暂无 HTML 文件。");
@@ -344,6 +417,12 @@
 					item.append(link, deleteButton);
 					list.appendChild(item);
 				}
+			}
+
+			function renderFiles(files) {
+				currentFiles = Array.isArray(files) ? files.slice() : [];
+				updateSortControls();
+				renderCurrentFiles();
 			}
 
 			function loadFiles() {
@@ -395,6 +474,18 @@
 			}
 
 			clearButton.addEventListener("click", clearCache);
+			for (const button of sortButtons) {
+				button.addEventListener("click", () => {
+					const field = button.dataset.sortField;
+					if (field !== "time" && field !== "name") return;
+					if (field === currentSortField) {
+						sortDirections[field] = sortDirections[field] === "desc" ? "asc" : "desc";
+					}
+					currentSortField = field;
+					updateSortControls();
+					renderCurrentFiles();
+				});
+			}
 			loadFiles();
 		})();
 	</script>

@@ -1,90 +1,102 @@
-Title: 上手指南与维护速查
-Describe: 覆盖 S10_ONBOARDING_GUIDE、S12_REVIEWER_QUESTIONS、S13_MAINTAINER_REFERENCE。给维护者提供阅读顺序、评审问题和符号索引。
+Title: 开发上手指南、复盘问答与维护者速查表
+Describe: S10_ONBOARDING_GUIDE、S12_REVIEWER_QUESTIONS、S13_MAINTAINER_REFERENCE。给维护者提供阅读路径、调试路径、学习问答和符号索引。
 ------------------------------------------------------------
 [Example]
-S10_ONBOARDING_GUIDE - 推荐阅读和调试路径
+上手阅读路径
 
 [Description]
-新维护者建议按这个顺序读：先读根目录 `README.md` 和 `AGENTS.md`，理解项目定位、monorepo 分层、公共 API 稳定性要求；再读 `libs/core/langchain_core/__init__.py` 和 `runnables/base.py`，理解 core 只提供抽象和 `Runnable` 协议；然后读 `libs/langchain_v1/langchain/chat_models/base.py` 的 `init_chat_model` 和 `libs/langchain_v1/langchain/agents/factory.py` 的 `create_agent`；最后按目标 provider 进入 `libs/partners/<provider>` 并运行对应标准测试。
+先读包边界，再读 Core 抽象，最后读具体 v1 或 partner 实现。不要从 classic 的大量历史模块开始，否则容易把旧 API 当作新增功能入口。
 
 [UML]
-@startmindmap
-* LangChain 维护上手
-** 1. 项目约束
-*** README.md
-*** AGENTS.md
-*** 各包 pyproject.toml
+@startwbs
+* LangChain monorepo 上手
+** 1. 包边界
+*** libs/core/pyproject.toml
+*** libs/langchain_v1/pyproject.toml
+*** libs/partners/*/pyproject.toml
 ** 2. Core 抽象
 *** Runnable
 *** BaseChatModel
-*** Messages
-*** Tools and VectorStore
-** 3. 活跃高层 API
-*** init_chat_model
+*** BaseTool
+*** BaseMessage / Document
+** 3. v1 入口
 *** create_agent
-*** middleware and structured output
-** 4. Partner 实现
-*** langchain-openai
-*** provider SDK dependency
-*** profile data
-** 5. 验证路径
-*** langchain-tests
+*** middleware
+*** structured_output
+** 4. Provider 实现
+*** ChatOpenAI
+*** ChatAnthropic
+*** ChatOllama
+** 5. 验证
 *** package unit tests
-*** integration tests and CI
-@endmindmap
+*** standard-tests
+*** ruff / mypy
+@endwbs
 
 [Detail]
-mindmap 从根节点开始读，表示阅读和排查顺序，不表示运行时依赖。实际调试时，如果问题是“模型没有初始化”，先看 `init_chat_model` 的 provider 解析和 integration package 是否安装；如果问题是“agent 卡在工具循环”，先看 `create_agent` 的 conditional edges、`AIMessage.tool_calls` 和 tools node；如果问题是“某 provider 行为不一致”，先看 standard-tests 是否覆盖该能力，再看 partner 实现和 profile 数据。
+WBS 表示推荐阅读顺序。第一层确认包级依赖和版本范围；第二层理解统一抽象；第三层进入用户 API；第四层看 provider 如何实现 Core 接口；第五层回到验证命令。调试 agent 问题时优先看 `create_agent`、middleware 类型、`BaseChatModel` 和 tool schema；调试 provider 问题时优先看对应 `libs/partners/<name>` 包和 standard tests。
 
 ------------------------------------------------------------
 [Example]
-S12_REVIEWER_QUESTIONS - 评审问题清单
+Q&A / 复盘问答清单
 
 [Description]
-- 这次改动是否改变了公开函数、类、参数名、参数顺序或默认值？如果是，是否检查了 `__init__.py` 导出、示例和标准测试？  
-- 新增 provider 或模型能力是否更新了 profile 数据、标准测试和 docs 示例中的模型 ID？  
-- `create_agent` 改动是否覆盖了工具存在/不存在、structured output、middleware hook、interrupt、cache/checkpointer 的组合？  
-- partner 包是否只依赖必要 SDK，并把 provider 特定逻辑限制在 integration 包内？  
-- 单元测试是否无网络、确定性，并且能在逻辑破坏时失败？  
-- GitHub Actions 是否使用完整 commit SHA pin，而不是 tag？
+这些问题用于确认读者已经理解项目结构、核心流程和维护风险。
 
 [UML]
 None
 
 [Detail]
-这些问题来自 AGENTS 的开发原则和当前代码结构。它们不是通用 checklist，而是针对这个 monorepo 的高风险边界：公共 API、provider 路由、agent graph、标准测试、CI 发布和安全配置。评审时如果回答不了其中任何一项，应补充测试、说明或限制变更范围。
+Q1：为什么 `langchain_core` 不能依赖 `langchain` v1 或 partner 包？
+
+A1：Core 是抽象层，v1、classic 和 partners 都依赖它。如果 Core 反向依赖上层实现，会破坏独立发布和 provider 隔离。
+
+Q2：`create_agent` 的核心责任是什么？
+
+A2：它把模型、工具、middleware、结构化输出和 LangGraph `StateGraph` 组合成运行时 agent。证据是 `libs/langchain_v1/langchain/agents/factory.py:697` 以及该文件导入的 `StateGraph`、`ToolNode`、`Command`、middleware 和 structured output 类型。
+
+Q3：为什么工具也是 Runnable？
+
+A3：`BaseTool` 继承 `RunnableSerializable`，所以工具可被统一 invoke、序列化和配置。这样 agent 的 tool node 可以按同一运行协议执行工具。
+
+Q4：OpenAI 兼容 provider 的字段应该放在哪里？
+
+A4：不应长期放在 `langchain_openai`。该模块 docstring 明确 `ChatOpenAI` 只面向官方 OpenAI API，非标准字段应进入 provider-specific 包。
+
+Q5：模型 profile 过期会影响什么？
+
+A5：会影响模型能力判断，例如 structured output、tool use 或 context window。OpenAI 包读取 `_PROFILES` 并转换为 `ModelProfileRegistry`。
 
 ------------------------------------------------------------
 [Example]
-S13_MAINTAINER_REFERENCE - 维护者速查表
+维护者速查表
 
 [Description]
-| 符号或文件 | 位置 | 维护用途 |
-| --- | --- | --- |
-| `Runnable` | `libs/core/langchain_core/runnables/base.py:125` | 统一执行、batch、stream、组合协议 |
-| `BaseChatModel` | `libs/core/langchain_core/language_models/chat_models.py:270` | chat model 抽象和 provider 实现目标 |
-| `BaseMessage` | `libs/core/langchain_core/messages/base.py:93` | 消息对象基础 |
-| `AIMessage` | `libs/core/langchain_core/messages/ai.py:160` | 模型输出、tool calls 承载 |
-| `BaseTool` | `libs/core/langchain_core/tools/base.py:405` | 工具契约 |
-| `VectorStore` | `libs/core/langchain_core/vectorstores/base.py:43` | 向量库抽象 |
-| `Embeddings` | `libs/core/langchain_core/embeddings/embeddings.py:8` | embedding 抽象 |
-| `init_chat_model` | `libs/langchain_v1/langchain/chat_models/base.py:210` | 统一模型初始化和 provider 路由 |
-| `_attempt_infer_model_provider` | `libs/langchain_v1/langchain/chat_models/base.py:521` | 模型名前缀推断 |
-| `_ConfigurableModel` | `libs/langchain_v1/langchain/chat_models/base.py:640` 附近 | 运行时配置模型代理 |
-| `create_agent` | `libs/langchain_v1/langchain/agents/factory.py:697` | agent graph 工厂 |
-| `AgentState` | `libs/langchain_v1/langchain/agents/middleware/types.py:353` | agent 状态 schema |
-| `AgentMiddleware` | `libs/langchain_v1/langchain/agents/middleware/types.py:383` | middleware hook 契约 |
-| `ToolStrategy` | `libs/langchain_v1/langchain/agents/structured_output.py:195` | structured output tool 策略 |
-| `ProviderStrategy` | `libs/langchain_v1/langchain/agents/structured_output.py:261` | provider-native structured output 策略 |
-| `ChatOpenAI` | `libs/partners/openai/langchain_openai/chat_models/base.py:2534` | OpenAI chat model 实现 |
-| `OpenAIEmbeddings` | `libs/partners/openai/langchain_openai/embeddings/base.py:86` | OpenAI embedding 实现 |
-| `_get_default_model_profile` | `libs/partners/openai/langchain_openai/chat_models/base.py:181` | OpenAI profile 解析 |
-| `ChatModelUnitTests` | `libs/standard-tests/langchain_tests/unit_tests/chat_models.py:276` | chat model unit contract |
-| `ChatModelIntegrationTests` | `libs/standard-tests/langchain_tests/integration_tests/chat_models.py:178` | chat model integration contract |
-| `langchain-profiles` CLI | `libs/model-profiles/pyproject.toml:33` | profile refresh entry point |
+常用文件、类和命令入口。
 
 [UML]
 None
 
 [Detail]
-速查表刻意保留文件和行号，因为它是维护索引，不是叙述段落。行号基于当前 2026-06-02 文件快照；如果源码移动或重构，应重新生成报告。优先从这些符号入手，能覆盖大多数架构、API、agent、provider 和测试问题。
+符号入口：
+
+- `Runnable`：`libs/core/langchain_core/runnables/base.py:125`
+- `BaseChatModel`：`libs/core/langchain_core/language_models/chat_models.py:270`
+- `BaseLanguageModel`：`libs/core/langchain_core/language_models/base.py:141`
+- `BaseTool`：`libs/core/langchain_core/tools/base.py:405`
+- `BaseRetriever`：`libs/core/langchain_core/retrievers.py:55`
+- `VectorStore`：`libs/core/langchain_core/vectorstores/base.py:43`
+- `BaseMessage`：`libs/core/langchain_core/messages/base.py:93`
+- `Document`：`libs/core/langchain_core/documents/base.py:288`
+- `create_agent`：`libs/langchain_v1/langchain/agents/factory.py:697`
+- `ChatOpenAI`：`libs/partners/openai/langchain_openai/chat_models/base.py:2534`
+- `TextSplitter`：`libs/text-splitters/langchain_text_splitters/base.py:44`
+- `langchain-profiles refresh`：`libs/model-profiles/langchain_model_profiles/cli.py:255`
+
+常用命令模式：
+
+- 安装测试依赖：在目标包目录运行 `uv sync --group test`
+- 单包单测：`uv run --group test pytest tests/unit_tests/...`
+- lint：按包运行 `make lint` 或 `uv run --group lint ruff ...`
+- typing：按包运行 `uv run --group lint mypy .`
+

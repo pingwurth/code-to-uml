@@ -1,0 +1,53 @@
+Title: 整体架构图
+Describe: 运行时、发布包和外部系统的层次边界。
+------------------------------------------------------------
+[Example]
+S04_ARCHITECTURE - 分层架构
+
+[Description]
+Deep Agents 把 SDK 作为中心层，周边入口按用途分成 deployment、terminal UI、protocol adapter、sandbox providers 和 evaluation harness。
+
+[UML]
+@startuml
+left to right direction
+actor "Developer" as Dev
+actor "ACP Client" as Client
+cloud "LangGraph Platform" as Platform
+cloud "LangSmith API" as Smith
+node "Terminal" as Terminal
+
+package "Entry packages" {
+  component "deepagents-cli" as DeployCLI
+  component "deepagents-code" as CodeCLI
+  component "deepagents-acp" as ACP
+}
+package "Core SDK" {
+  component "create_deep_agent" as Create
+  component "Middleware stack" as MW
+  component "Backends" as Backends
+  component "Profiles" as Profiles
+}
+package "Extensions" {
+  component "Partner sandboxes" as Sandboxes
+  component "QuickJS middleware" as Quick
+  component "Evals and Harbor" as Evals
+}
+
+Dev --> DeployCLI : init deploy agents mcp-servers
+Dev --> CodeCLI : dcode session
+Client --> ACP : protocol requests
+DeployCLI --> Smith : managed agent API
+DeployCLI --> Platform : directory and deployment
+CodeCLI --> Terminal : Textual UI
+CodeCLI --> Create
+ACP --> Create
+Evals --> Create
+Create --> MW
+Create --> Backends
+Create --> Profiles
+Sandboxes --> Backends
+Quick --> MW
+@enduml
+
+[Detail]
+入口层的 `deepagents-cli` 只做部署相关命令，见 `libs/cli/deepagents_cli/main.py:151-167`；`deepagents-code` 是终端交互包，`libs/code/pyproject.toml` 声明 Textual、LangGraph SDK、MCP、sandbox 和 model provider 依赖；`deepagents-acp` 用 `AgentServerACP` 接 ACP 客户端，见 `server.py:92-103`。核心 SDK 层集中在 `libs/deepagents`：`create_deep_agent` 负责 middleware stack、backend、profile 和 LangGraph compiled graph。外部系统边界包括 LangSmith API、LangGraph Platform、terminal UI、ACP client 和各 sandbox provider。维护时应先判断改动位于入口、SDK 核心、协议适配还是 provider 扩展，避免把周边包特定逻辑推入 SDK。

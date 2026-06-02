@@ -1,0 +1,50 @@
+Title: 顶层结构
+Describe: monorepo 包结构、入口脚本、配置和测试/发布边界。
+------------------------------------------------------------
+[Example]
+S02_TOP_LEVEL_STRUCTURE - monorepo 包结构
+
+[Description]
+仓库没有根 `pyproject.toml`，而是由 `libs/*/pyproject.toml` 管理多个独立发布包。根 `AGENTS.md` 说明包目录：SDK、CLI、ACP、evals、partners 和 examples。
+
+[UML]
+@startuml
+left to right direction
+package "deepagents monorepo" as Repo {
+  package "libs/deepagents" as SDK
+  package "libs/cli" as DeployCLI
+  package "libs/code" as CodeCLI
+  package "libs/acp" as ACP
+  package "libs/evals" as Evals
+  package "libs/partners" as Partners {
+    component "daytona" as Daytona
+    component "modal" as Modal
+    component "quickjs" as QuickJS
+    component "runloop" as Runloop
+  }
+  package "examples" as Examples
+}
+DeployCLI --> SDK : editable source
+CodeCLI --> SDK : pinned dependency
+ACP --> SDK : create_deep_agent
+Evals --> SDK : benchmark and eval target
+Evals --> CodeCLI : terminal agent eval support
+Partners --> SDK : sandbox or middleware integration
+Examples --> SDK : usage patterns
+@enduml
+
+[Detail]
+从 `libs/deepagents/pyproject.toml` 可见 SDK 包名是 `deepagents`，当前版本 `0.6.7`，依赖 LangChain、LangSmith、Anthropic、Google GenAI 和 `wcmatch`。`libs/cli/pyproject.toml` 发布 `deepagents-cli`，通过 `[project.scripts]` 暴露 `deepagents` 与 `deepagents-cli`。`libs/code/pyproject.toml` 发布 `deepagents-code`，脚本为 `deepagents-code` 与 `dcode`。箭头表示本地依赖或运行时调用方向：Deploy CLI、Code CLI、ACP、partner 包和 evals 都围绕 SDK 构建，但目标不同。这个结构允许 SDK 稳定发布，周边包独立演进。
+
+------------------------------------------------------------
+[Example]
+入口与命令面
+
+[Description]
+命令面拆分明确：`deepagents-cli` 负责 deployment tooling；交互式 Textual REPL 已迁移到 `deepagents-code`。
+
+[UML]
+None
+
+[Detail]
+`libs/cli/deepagents_cli/main.py:82-115` 构建 argparse parser，`cli_main` 在 `main.py:131-173` 分发 `init`、`deploy`、`agents` 和 `mcp-servers`。无子命令时，`main.py:25-33` 的 `_REPL_REDIRECT_MESSAGE` 告知用户交互式 REPL 已迁移到 `deepagents-code`。`libs/code/deepagents_code/main.py` 是交互式终端入口，依赖 Textual、LangGraph SDK、SQLite checkpoint、MCP adapters 和 sandbox integrations。`libs/acp/deepagents_acp/server.py:92` 定义 `AgentServerACP`，把 ACP 会话协议和 Deep Agents compiled graph 连接起来。

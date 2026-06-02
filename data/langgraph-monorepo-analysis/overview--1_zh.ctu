@@ -1,0 +1,31 @@
+Title: 文件/目标概览
+Describe: LangGraph monorepo 的项目级分析，覆盖核心框架、checkpointer、prebuilt、CLI 和 SDK 的职责边界。
+------------------------------------------------------------
+[Example]
+S01_TARGET_OVERVIEW：分析目标与证据边界
+
+[Description]
+本报告分析 `/home/ping/gitProjects/langgraph` 当前工作区。源码版本来自 `git rev-parse HEAD`：`83dd61feaca993d2ee428706ad04c869895ce400`。目标是给维护者提供一个项目级架构读图：哪些库组成 LangGraph，核心执行链如何从 `StateGraph` 进入 `Pregel`，以及 checkpoint、prebuilt、CLI、SDK 如何围绕核心框架工作。
+
+证据来源包括 `AGENTS.md`、各库 `pyproject.toml`、源码目录清单、关键文件片段和函数/类位置。当前项目没有 `.codegraph/` 初始化，CodeGraph MCP 返回 `CodeGraph not initialized in /home/ping/gitProjects/langgraph`，因此结构证据主要来自仓库文件读取和 `rg` 的符号定位。
+
+[UML]
+None
+
+[Detail]
+分析范围是 monorepo 级别，不尝试穷尽每个函数实现。重点文件包括 `libs/langgraph/langgraph/graph/state.py`、`libs/langgraph/langgraph/pregel/main.py`、`libs/langgraph/langgraph/pregel/_loop.py`、`libs/checkpoint/langgraph/checkpoint/base/__init__.py`、`libs/prebuilt/langgraph/prebuilt/chat_agent_executor.py`、`libs/prebuilt/langgraph/prebuilt/tool_node.py`、`libs/cli/langgraph_cli/cli.py`、`libs/sdk-py/langgraph_sdk/client.py`。
+
+边界判断来自 `AGENTS.md` 中的库说明和依赖图：`checkpoint` 是底层接口，`langgraph` 是核心框架，`prebuilt` 是高层 agent/tool API，`checkpoint-postgres` 与 `checkpoint-sqlite` 是持久化实现，`cli` 和 `sdk-py` 面向 LangGraph API，`sdk-js` 在当前工作区只观察到 `README.md`。
+------------------------------------------------------------
+[Example]
+项目角色速览
+
+[Description]
+LangGraph 是一个用于构建 stateful、multi-actor LLM 应用的框架。`libs/langgraph/pyproject.toml` 标明包名 `langgraph`、版本 `1.2.3`，生产依赖包含 `langchain-core`、`langgraph-checkpoint`、`langgraph-sdk`、`langgraph-prebuilt`、`xxhash` 和 `pydantic`。
+
+[UML]
+None
+
+[Detail]
+从项目结构看，核心框架本身不是孤立包，而是与 checkpoint 和 SDK 保持紧耦合的 monorepo：`langgraph` 依赖 `langgraph-checkpoint` 提供持久化抽象，依赖 `langgraph-sdk` 支持远程/API 交互，依赖 `langgraph-prebuilt` 暴露高层 agent 工具。`AGENTS.md` 的下游关系说明修改 `checkpoint` 可能影响 `checkpoint-postgres`、`checkpoint-sqlite`、`prebuilt` 和 `langgraph`，这是维护时最重要的 blast radius。
+

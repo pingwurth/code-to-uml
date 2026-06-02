@@ -3,20 +3,26 @@
 <cite>
 **Referenced Files in This Document**
 - [SKILL.md](file://skills/code-to-uml/SKILL.md)
+- [report-contract.md](file://skills/code-to-uml/references/report-contract.md)
 - [code-to-uml-template.md](file://skills/code-to-uml/references/code-to-uml-template.md)
+- [diagram-decision-table.md](file://skills/code-to-uml/references/diagram-decision-table.md)
+- [uml-standards.md](file://skills/code-to-uml/references/uml-standards.md)
+- [validate-report.js](file://skills/code-to-uml/scripts/validate-report.js)
 - [openai.yaml](file://skills/code-to-uml/agents/openai.yaml)
 - [_TEMPLATE.html](file://cache/_TEMPLATE.html)
 - [_TEMPLATE.ctu](file://data/_TEMPLATE.ctu)
 - [sequence--1_zh.ctu](file://data/demo/sequence--1_zh.ctu)
 - [use-case--1_zh.ctu](file://data/demo/use-case--1_zh.ctu)
-- [class--1_en.ctu](file://data/demo/class--1_en.ctu)
-- [activity--1_zh.ctu](file://data/demo/activity--1_zh.ctu)
-- [archimate--1_zh.ctu](file://data/demo/archimate--1_zh.ctu)
-- [mindmap--1_zh.ctu](file://data/demo/mindmap--1_zh.ctu)
-- [serve.js](file://serve.js)
-- [serve.sh](file://serve.sh)
-- [serve.bat](file://serve.bat)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Updated SKILL.md structure to reflect the streamlined 80-line documentation with emphasis on reference loading protocols
+- Added comprehensive coverage of the seven-phase workflow: scope resolution, instruction reading, structural analysis, report planning, data generation, validation, and completion verification
+- Enhanced documentation of reference loading conditions and their application timing
+- Updated workflow stages with specific phase numbering and detailed procedures
+- Expanded validation requirements including PlantUML rendering checks
+- Added detailed explanation of the four reference documents and their roles
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -31,338 +37,303 @@
 10. [Appendices](#appendices)
 
 ## Introduction
-This document defines the Code-To-UML skill and its YAML-based agent configuration. It explains the SKILL.md structure, the YAML agent interface, and the end-to-end workflow for generating consistent UML-backed HTML reports from existing Code-To-UML templates. It documents hard rules, scope constraints, output formatting standards, mandatory report sections, UML standards, quality bar requirements, verification checklist, and final response format. It also highlights template reuse requirements, scope-specific depth expectations, and common pitfalls to avoid.
+This document defines the Code-To-UML skill and its YAML-based agent configuration. It explains the SKILL.md structure, the YAML agent interface, and the end-to-end workflow for generating consistent UML-backed HTML reports from existing Code-To-UML templates. The skill now emphasizes systematic reference loading protocols and a structured seven-phase workflow that ensures consistent, validated output across all analysis scopes.
+
+**Updated** Streamlined from 167 lines to 80 lines while maintaining comprehensive coverage of all essential requirements and workflows.
 
 ## Project Structure
-The skill is organized around a YAML agent descriptor and a set of reference materials that define the report generation contract:
+The skill is organized around a YAML agent descriptor and a comprehensive set of reference materials that define the report generation contract and validation requirements:
 - Agent interface: YAML that declares display metadata and default prompt.
-- Skill definition: Markdown that specifies purpose, hard rules, workflow, sections, standards, and verification.
+- Skill definition: Markdown that specifies purpose, reference loading protocols, workflow phases, and validation requirements.
+- Reference system: Four specialized documents that govern different aspects of report generation.
 - Template system: HTML template and data contract for UML-backed reports.
-- Example data: Minimal .ctu files demonstrating the data format.
-- Dev server: Node.js server and platform scripts for local verification.
+- Validation scripts: Automated checking of HTML structure, .ctu syntax, and PlantUML rendering.
 
 ```mermaid
 graph TB
 A["Agent: openai.yaml"] --> B["Skill: SKILL.md"]
-B --> C["Template: _TEMPLATE.html"]
-B --> D["Data Contract: _TEMPLATE.ctu"]
-D --> E["Example .ctu files<br/>sequence--1_zh.ctu<br/>use-case--1_zh.ctu<br/>class--1_en.ctu<br/>activity--1_zh.ctu<br/>archimate--1_zh.ctu<br/>mindmap--1_zh.ctu"]
-C --> F["Dev Server: serve.js"]
-F --> G["Platform Scripts<br/>serve.sh (macOS/Linux)<br/>serve.bat (Windows)"]
+B --> C["Reference Loading Protocol"]
+C --> D["report-contract.md"]
+C --> E["code-to-uml-template.md"]
+C --> F["diagram-decision-table.md"]
+C --> G["uml-standards.md"]
+B --> H["Validation Script: validate-report.js"]
+B --> I["Template: _TEMPLATE.html"]
+B --> J["Data Contract: _TEMPLATE.ctu"]
+I --> K["Dev Server Infrastructure"]
 ```
 
 **Diagram sources**
 - [openai.yaml:1-5](file://skills/code-to-uml/agents/openai.yaml#L1-L5)
-- [SKILL.md:1-174](file://skills/code-to-uml/SKILL.md#L1-L174)
-- [_TEMPLATE.html:1-260](file://cache/_TEMPLATE.html#L1-L260)
-- [_TEMPLATE.ctu:1-46](file://data/_TEMPLATE.ctu#L1-L46)
-- [sequence--1_zh.ctu:1-22](file://data/demo/sequence--1_zh.ctu#L1-L22)
-- [use-case--1_zh.ctu:1-21](file://data/demo/use-case--1_zh.ctu#L1-L21)
-- [class--1_en.ctu:1-34](file://data/demo/class--1_en.ctu#L1-L34)
-- [activity--1_zh.ctu:1-18](file://data/demo/activity--1_zh.ctu#L1-L18)
-- [archimate--1_zh.ctu:1-20](file://data/demo/archimate--1_zh.ctu#L1-L20)
-- [mindmap--1_zh.ctu:1-27](file://data/demo/mindmap--1_zh.ctu#L1-L27)
-- [serve.js:1-567](file://serve.js#L1-L567)
-- [serve.sh:1-54](file://serve.sh#L1-L54)
-- [serve.bat:1-33](file://serve.bat#L1-L33)
+- [SKILL.md:12-21](file://skills/code-to-uml/SKILL.md#L12-L21)
+- [report-contract.md:1-191](file://skills/code-to-uml/references/report-contract.md#L1-L191)
+- [code-to-uml-template.md:1-208](file://skills/code-to-uml/references/code-to-uml-template.md#L1-L208)
+- [diagram-decision-table.md:1-95](file://skills/code-to-uml/references/diagram-decision-table.md#L1-L95)
+- [uml-standards.md:1-172](file://skills/code-to-uml/references/uml-standards.md#L1-L172)
+- [validate-report.js:1-506](file://skills/code-to-uml/scripts/validate-report.js#L1-L506)
 
 **Section sources**
 - [openai.yaml:1-5](file://skills/code-to-uml/agents/openai.yaml#L1-L5)
-- [SKILL.md:1-174](file://skills/code-to-uml/SKILL.md#L1-L174)
-- [_TEMPLATE.html:1-260](file://cache/_TEMPLATE.html#L1-L260)
-- [_TEMPLATE.ctu:1-46](file://data/_TEMPLATE.ctu#L1-L46)
-- [sequence--1_zh.ctu:1-22](file://data/demo/sequence--1_zh.ctu#L1-L22)
-- [use-case--1_zh.ctu:1-21](file://data/demo/use-case--1_zh.ctu#L1-L21)
-- [class--1_en.ctu:1-34](file://data/demo/class--1_en.ctu#L1-L34)
-- [activity--1_zh.ctu:1-18](file://data/demo/activity--1_zh.ctu#L1-L18)
-- [archimate--1_zh.ctu:1-20](file://data/demo/archimate--1_zh.ctu#L1-L20)
-- [mindmap--1_zh.ctu:1-27](file://data/demo/mindmap--1_zh.ctu#L1-L27)
-- [serve.js:1-567](file://serve.js#L1-L567)
-- [serve.sh:1-54](file://serve.sh#L1-L54)
-- [serve.bat:1-33](file://serve.bat#L1-L33)
+- [SKILL.md:12-21](file://skills/code-to-uml/SKILL.md#L12-L21)
+- [report-contract.md:1-191](file://skills/code-to-uml/references/report-contract.md#L1-L191)
+- [code-to-uml-template.md:1-208](file://skills/code-to-uml/references/code-to-uml-template.md#L1-L208)
+- [diagram-decision-table.md:1-95](file://skills/code-to-uml/references/diagram-decision-table.md#L1-L95)
+- [uml-standards.md:1-172](file://skills/code-to-uml/references/uml-standards.md#L1-L172)
+- [validate-report.js:1-506](file://skills/code-to-uml/scripts/validate-report.js#L1-L506)
 
 ## Core Components
-- Agent interface (YAML): Defines display name, short description, and default prompt for the skill.
-- Skill definition (Markdown): Specifies purpose, hard rules, workflow stages, mandatory sections, scope-specific depth, UML standards, content quality bar, verification checklist, and final response shape.
-- Template system: HTML template and .ctu data contract that enforce structural reuse, navigation rules, and runtime behavior.
-- Example data: Demonstrates the .ctu format and typical diagram categories.
-- Dev server and scripts: Provide local verification endpoints and port cleanup semantics.
+- **Agent interface (YAML)**: Defines display name, short description, and default prompt for the skill.
+- **Reference loading system**: Four specialized documents that govern different aspects of report generation:
+  - `report-contract.md`: Category model, section catalog, scope applicability, and validation requirements
+  - `code-to-uml-template.md`: Template structure, naming conventions, and runtime contracts
+  - `diagram-decision-table.md`: Diagram selection principles and complexity scoring
+  - `uml-standards.md`: PlantUML syntax rules and validation requirements
+- **Structured workflow**: Seven-phase process that ensures systematic report generation and validation.
+- **Validation system**: Automated checking of HTML structure, .ctu syntax, and PlantUML rendering.
+- **Template system**: HTML template and .ctu data contract that enforce structural reuse and runtime behavior.
 
 **Section sources**
 - [openai.yaml:1-5](file://skills/code-to-uml/agents/openai.yaml#L1-L5)
-- [SKILL.md:1-174](file://skills/code-to-uml/SKILL.md#L1-L174)
-- [_TEMPLATE.html:1-260](file://cache/_TEMPLATE.html#L1-L260)
-- [_TEMPLATE.ctu:1-46](file://data/_TEMPLATE.ctu#L1-L46)
+- [SKILL.md:12-21](file://skills/code-to-uml/SKILL.md#L12-L21)
+- [SKILL.md:37-76](file://skills/code-to-uml/SKILL.md#L37-L76)
+- [report-contract.md:1-191](file://skills/code-to-uml/references/report-contract.md#L1-L191)
+- [code-to-uml-template.md:1-208](file://skills/code-to-uml/references/code-to-uml-template.md#L1-L208)
+- [diagram-decision-table.md:1-95](file://skills/code-to-uml/references/diagram-decision-table.md#L1-L95)
+- [uml-standards.md:1-172](file://skills/code-to-uml/references/uml-standards.md#L1-L172)
+- [validate-report.js:1-506](file://skills/code-to-uml/scripts/validate-report.js#L1-L506)
 
 ## Architecture Overview
-The skill orchestrates a deterministic pipeline: resolve scope and constraints, read template and instructions, analyze code, normalize report plan, generate data files, generate HTML, self-check UML, start server, and verify page/API.
+The skill orchestrates a systematic pipeline with emphasis on reference loading protocols and validation: resolve scope and constraints, load appropriate references, analyze code, plan report structure, generate data and HTML, validate UML and navigation, and verify completion.
 
 ```mermaid
 sequenceDiagram
 participant User as "User"
 participant Skill as "SKILL.md Workflow"
+participant References as "Reference Documents"
+participant Validator as "validate-report.js"
 participant Template as "_TEMPLATE.html"
 participant Data as "_TEMPLATE.ctu + .ctu files"
-participant Server as "serve.js"
-participant OS as "serve.sh/serve.bat"
 User->>Skill : "Scope + constraints"
-Skill->>Skill : "Resolve CTU_HOME, output path"
-Skill->>Template : "Read HTML + navigation + scripts"
-Skill->>Data : "Read data contract + example .ctu"
-Skill->>Skill : "Analyze code (structural + text)"
-Skill->>Data : "Generate {category}--{n}_zh.ctu"
-Skill->>Template : "Copy + configure tabs + data-dir"
-Skill->>Skill : "UML self-check (static + optional render)"
-Skill->>OS : "Start server (port cleanup)"
-OS->>Server : "node serve.js PORT"
-Server-->>Skill : "HTTP 200 + API responses"
-Skill-->>User : "Final response with URL"
+Skill->>References : "Load report-contract.md (always)"
+Skill->>References : "Load code-to-uml-template.md (when template exists)"
+Skill->>References : "Load diagram-decision-table.md (before diagram decisions)"
+Skill->>References : "Load uml-standards.md (after diagram decisions)"
+Skill->>Skill : "Resolve scope and constraints"
+Skill->>Skill : "Analyze code structurally"
+Skill->>Skill : "Plan report with reference guidance"
+Skill->>Data : "Generate {category}--{n}_{lang}.ctu files"
+Skill->>Template : "Generate HTML with template reuse"
+Skill->>Validator : "Run validation checks"
+Validator->>References : "Apply uml-standards.md validation"
+Validator->>Validator : "Check HTML structure and .ctu syntax"
+Validator->>Validator : "Optional PlantUML rendering"
+Validator-->>Skill : "Validation results"
+Skill-->>User : "Final validated report"
 ```
 
 **Diagram sources**
-- [SKILL.md:30-94](file://skills/code-to-uml/SKILL.md#L30-L94)
-- [_TEMPLATE.html:132-183](file://cache/_TEMPLATE.html#L132-L183)
-- [_TEMPLATE.ctu:1-46](file://data/_TEMPLATE.ctu#L1-L46)
-- [serve.js:454-561](file://serve.js#L454-L561)
-- [serve.sh:1-54](file://serve.sh#L1-L54)
-- [serve.bat:1-33](file://serve.bat#L1-L33)
+- [SKILL.md:12-21](file://skills/code-to-uml/SKILL.md#L12-L21)
+- [SKILL.md:37-76](file://skills/code-to-uml/SKILL.md#L37-L76)
+- [validate-report.js:454-506](file://skills/code-to-uml/scripts/validate-report.js#L454-L506)
 
 ## Detailed Component Analysis
 
 ### YAML Agent Interface (openai.yaml)
 - Declares display metadata and default prompt for the skill.
-- Provides a concise entry point for agent configuration.
+- Provides a concise entry point for agent configuration with "Code UML Report" display name and "Analyze code into consistent Code-To-UML HTML reports" description.
 
 **Section sources**
 - [openai.yaml:1-5](file://skills/code-to-uml/agents/openai.yaml#L1-L5)
 
-### SKILL.md: Purpose, Hard Rules, Workflow, and Output Contracts
-- Purpose: Produce a consistent, UML-backed HTML report across scopes (project/module/file/class/function).
-- Hard rules:
-  - Source is read-only unless explicitly requested.
-  - Resolve CTU_HOME and template reuse requirements.
-  - Preserve fixed/script/nav attributes; only edit configurable/editable areas.
-  - Handle topbar links intentionally (preserve, adapt, or remove).
-  - Data-driven reports go into data directories.
-  - Default to Chinese unless requested otherwise.
-  - Enforce consistent final shape across scopes.
-  - Avoid splitting into multiple HTML files unless justified.
-  - Start server from CTU_HOME with provided scripts; include browser URL in final response.
-  - Do not claim completion without verification.
-- Workflow stages:
-  - Resolve scope and constraints.
-  - Read project instructions and template.
-  - Analyze code structurally.
-  - Normalize report plan (mandatory sections).
-  - Generate data files (.ctu) with stable categories.
-  - Generate HTML (tabs, data-dir, scripts).
-  - UML self-check (static + optional PlantUML render).
-  - Start server and verify page/API, navigation, and read-only constraint.
-- Mandatory report sections (13):
-  - File/Object Overview, Top-Level Structure, Core Objects/Functions, Overall Architecture, Core Flow, Call Relationship, Data/State Flow, Key Code Snippet Analysis, Core Principles, Getting Started Guide, Risks & Improvements, Q&A / Retrospective Checklist, Maintainer Quick Reference.
-- Scope-specific depth:
-  - Project: layers, entry points, subsystems, dependencies, runtime assumptions, onboarding.
-  - Module/package: public API, internal files, dependency direction, state ownership, extension points.
-  - File: top-level layout, contained classes/functions, globals, import-time side effects, primary runtime path.
-  - Class: constructor/state, public methods, invariants, lifecycle, collaborators, subclass/consumer risks.
-  - Function: signature, preconditions, algorithm, branches, exceptions, side effects, callers/callees, usage examples.
-- UML standards:
-  - Use PlantUML syntax inside [UML].
-  - Prefer diagram types by purpose (component/package for architecture, activity for execution flow, sequence for call chains, state for lifecycle, class/object for data ownership, mindmap/wbs for overview/Q&A/reading path).
-  - Keep labels readable; prefer Chinese when possible.
-  - Avoid raw < and > unless required and safely escaped.
-  - Avoid ambiguous activity continue statements.
-  - Every diagram’s [Detail] must explain nodes/arrows and relevance.
-- Content quality bar:
-  - Be concrete (mention real names, files, constants, routes, commands).
-  - Be proportional (broader scopes synthesize more; narrower scopes dive deeper).
-  - Explain side effects and failure paths.
-  - Include line numbers or symbol locations in maintainer index.
-  - Prefer concise snippets (<30 lines) with explanation.
-  - Avoid vague “improvement” statements; name specific risks and improvements.
-- Verification checklist:
-  - Read-only constraint respected.
-  - HTML output exists at requested path.
-  - Data directory exists and categories match tab data-diagram values.
-  - .ctu syntax follows template.
-  - All 13 mandatory sections present.
-  - Every UML block passed static checks.
-  - PlantUML render check passed or limitation stated.
-  - Topbar links intentionally preserved/adapted/removed and verified.
-  - Server started via serve.sh/serve.bat; port cleanup handled by scripts.
-  - Local page/API loads; browser URL included in final response.
-  - Final response uses user-requested concise status format when provided.
-- Final response shape (when not customized):
-  - HTML file path
-  - Template reuse situation
-  - Multi-file split status
-  - PlantUML check result
-  - Report section summary
-  - Browser URL
+### SKILL.md: Purpose, Reference Loading Protocols, and Structured Workflow
+- **Purpose**: Generate developer-friendly source-code analysis reports for any scope (project, module, file, class, or function) using existing Code-To-UML template/report conventions.
+- **Reference Loading Protocols**: Systematic loading of reference documents based on specific conditions:
+  - `references/report-contract.md`: Always read before planning or generating report content
+  - `references/code-to-uml-template.md`: Read when `$CTU_HOME/cache/_TEMPLATE.html` and `$CTU_HOME/data/_TEMPLATE.ctu` exist, or when generating a Code-To-UML report page
+  - `references/diagram-decision-table.md`: Read before deciding the text-to-diagram ratio or diagram types
+  - `references/uml-standards.md`: Read after diagram decisions whenever the report will contain non-empty `[UML]` blocks
+  - `scripts/validate-report.js`: Run after generating report HTML and `.ctu` data, before claiming completion
+- **Structured Workflow**: Seven-phase process with specific procedures:
+  1. **Resolve scope and constraints**: Identify target type, record constraints, resolve Code-To-UML root
+  2. **Read instructions and templates**: Load local instructions and required references
+  3. **Analyze code structurally**: Prefer structural tools, use focused file reads for text analysis
+  4. **Plan the report**: Use reference documents for section IDs, category ownership, and diagram decisions
+  5. **Generate data and HTML**: Create data directory and category-based .ctu files
+  6. **Validate UML, page, and navigation**: Extract UML blocks, validate against standards, run validation script
+  7. **Completion**: Return final status shape with validation results
 
 **Section sources**
-- [SKILL.md:8-29](file://skills/code-to-uml/SKILL.md#L8-L29)
-- [SKILL.md:30-94](file://skills/code-to-uml/SKILL.md#L30-L94)
-- [SKILL.md:95-112](file://skills/code-to-uml/SKILL.md#L95-L112)
-- [SKILL.md:113-122](file://skills/code-to-uml/SKILL.md#L113-L122)
-- [SKILL.md:123-137](file://skills/code-to-uml/SKILL.md#L123-L137)
-- [SKILL.md:138-146](file://skills/code-to-uml/SKILL.md#L138-L146)
-- [SKILL.md:147-163](file://skills/code-to-uml/SKILL.md#L147-L163)
-- [SKILL.md:164-174](file://skills/code-to-uml/SKILL.md#L164-L174)
+- [SKILL.md:8-21](file://skills/code-to-uml/SKILL.md#L8-L21)
+- [SKILL.md:37-76](file://skills/code-to-uml/SKILL.md#L37-L76)
+
+### Reference Loading System
+The skill employs a systematic approach to loading reference documents based on specific conditions:
+
+#### report-contract.md
+- **Always loaded**: Before planning or generating report content
+- **Purpose**: Defines category model, 13 section IDs, scope applicability matrix, and validation requirements
+- **Key features**: Canonical categories (overview, structure, objects, architecture, flow, calls, dataflow, code, principles, guide), scope-specific depth requirements, and merge rules
+
+#### code-to-uml-template.md
+- **Loaded when**: Template files exist or when generating Code-To-UML report pages
+- **Purpose**: Template structure, naming conventions, and runtime contracts
+- **Key features**: HTML runtime contract, topbar link contract, .ctu file format, and verification procedures
+
+#### diagram-decision-table.md
+- **Loaded before**: Deciding text-to-diagram ratio or diagram types
+- **Purpose**: Diagram selection principles and complexity scoring
+- **Key features**: Six-dimensional complexity scoring (module count, external dependencies, state mutation, concurrency, exception paths, business rules), diagram type recommendations
+
+#### uml-standards.md
+- **Loaded after**: Diagram decisions, when reports contain non-empty `[UML]` blocks
+- **Purpose**: PlantUML syntax rules and validation requirements
+- **Key features**: Mandatory UML block contract, diagram-type specific rules, readability budget guidelines, and validation checklist
+
+**Section sources**
+- [SKILL.md:12-21](file://skills/code-to-uml/SKILL.md#L12-L21)
+- [report-contract.md:1-191](file://skills/code-to-uml/references/report-contract.md#L1-L191)
+- [code-to-uml-template.md:1-208](file://skills/code-to-uml/references/code-to-uml-template.md#L1-L208)
+- [diagram-decision-table.md:1-95](file://skills/code-to-uml/references/diagram-decision-table.md#L1-L95)
+- [uml-standards.md:1-172](file://skills/code-to-uml/references/uml-standards.md#L1-L172)
+
+### Validation System
+The skill includes comprehensive validation through `scripts/validate-report.js`:
+
+#### HTML Structure Validation
+- Validates presence of required HTML elements (`<body>`, `<main>`, `<nav>`, etc.)
+- Checks for proper class attributes and data attributes
+- Verifies tab and overview alignment
+- Ensures official demo link integrity
+
+#### Data Validation
+- Validates .ctu file naming conventions (`{category}--{n}_{lang}.ctu`)
+- Checks header format (Title:, Describe:)
+- Validates card structure ([Example], [Description], [UML], [Detail])
+- Ensures separator line presence and proper formatting
+
+#### UML Validation
+- Validates PlantUML syntax and structure
+- Checks start/end tag matching
+- Verifies bracket and delimiter balance
+- Performs optional PlantUML rendering with `plantuml.jar`
+
+#### Execution Flow
+- Resolves Code-To-UML root from multiple sources
+- Supports strict mode for warnings-as-errors
+- Provides detailed error reporting with file and line information
+
+**Section sources**
+- [validate-report.js:1-506](file://skills/code-to-uml/scripts/validate-report.js#L1-L506)
 
 ### Template Reuse and Navigation Rules
-- Root resolution: Prefer CTU_HOME; otherwise require current directory to contain the template files.
-- HTML template:
-  - Enforce [FIXED], [EDIT], [CONFIG] markers.
-  - Preserve structural classes, ids, and script order.
-  - Tabs must align with .ctu category prefixes.
-  - data-dir must point to the report’s data directory.
-  - Topbar links (e.g., official-demo-link) must be preserved, adapted, or removed intentionally.
-- Data contract:
-  - Title/Describe header followed by at least 60 hyphens separator.
-  - Blocks: [Example], [Description], [UML], [Detail].
-  - Use zh/en suffixes; hide content by writing “None”.
+- **Root resolution**: Prefer CTU_HOME; otherwise require current directory to contain template files
+- **HTML template enforcement**: Preserve structural classes, ids, and script order
+- **Data contract**: Title/Describe header followed by at least 60 hyphens separator
+- **Navigation rules**: Tabs must align with .ctu category prefixes; data-dir must point to report's data directory
 
 **Section sources**
-- [code-to-uml-template.md:5-11](file://skills/code-to-uml/references/code-to-uml-template.md#L5-L11)
-- [code-to-uml-template.md:15-21](file://skills/code-to-uml/references/code-to-uml-template.md#L15-L21)
-- [code-to-uml-template.md:23-38](file://skills/code-to-uml/references/code-to-uml-template.md#L23-L38)
-- [code-to-uml-template.md:39-48](file://skills/code-to-uml/references/code-to-uml-template.md#L39-L48)
-- [code-to-uml-template.md:49-78](file://skills/code-to-uml/references/code-to-uml-template.md#L49-L78)
-- [code-to-uml-template.md:79-95](file://skills/code-to-uml/references/code-to-uml-template.md#L79-L95)
-- [_TEMPLATE.html:18-91](file://cache/_TEMPLATE.html#L18-L91)
-- [_TEMPLATE.html:132-183](file://cache/_TEMPLATE.html#L132-L183)
-- [_TEMPLATE.html:244-257](file://cache/_TEMPLATE.html#L244-L257)
-- [_TEMPLATE.ctu:1-46](file://data/_TEMPLATE.ctu#L1-L46)
+- [code-to-uml-template.md:21-29](file://skills/code-to-uml/references/code-to-uml-template.md#L21-L29)
+- [code-to-uml-template.md:55-83](file://skills/code-to-uml/references/code-to-uml-template.md#L55-L83)
+- [code-to-uml-template.md:94-149](file://skills/code-to-uml/references/code-to-uml-template.md#L94-L149)
 
 ### Data Generation and Categories
-- Stable categories: overview, structure, objects, architecture, flow, calls, dataflow, code, principles, guide.
-- Naming convention: {category}--{n}_zh.ctu.
-- Each .ctu file must follow the template header and block structure.
+- **Stable categories**: overview, structure, objects, architecture, flow, calls, dataflow, code, principles, guide
+- **Naming convention**: `{category}--{n}_{lang}.ctu`
+- **Language support**: Default `_zh`, optional `_en`
 
 **Section sources**
-- [SKILL.md:55-70](file://skills/code-to-uml/SKILL.md#L55-L70)
-- [_TEMPLATE.ctu:1-46](file://data/_TEMPLATE.ctu#L1-L46)
+- [report-contract.md:21-33](file://skills/code-to-uml/references/report-contract.md#L21-L33)
+- [code-to-uml-template.md:30-42](file://skills/code-to-uml/references/code-to-uml-template.md#L30-L42)
 
 ### Example Data Files
-- Demonstrates minimal .ctu structure with UML blocks and optional descriptions/details.
-- Useful for validating parsing and rendering behavior.
+Demonstrate minimal .ctu structure with UML blocks and optional descriptions/details for validation and rendering testing.
 
 **Section sources**
 - [sequence--1_zh.ctu:1-22](file://data/demo/sequence--1_zh.ctu#L1-L22)
 - [use-case--1_zh.ctu:1-21](file://data/demo/use-case--1_zh.ctu#L1-L21)
-- [class--1_en.ctu:1-34](file://data/demo/class--1_en.ctu#L1-L34)
-- [activity--1_zh.ctu:1-18](file://data/demo/activity--1_zh.ctu#L1-L18)
-- [archimate--1_zh.ctu:1-20](file://data/demo/archimate--1_zh.ctu#L1-L20)
-- [mindmap--1_zh.ctu:1-27](file://data/demo/mindmap--1_zh.ctu#L1-L27)
-
-### Dev Server and Verification
-- serve.js:
-  - API endpoints: /api/demo-examples (GET), /api/plantuml-svg (POST), cache management (DELETE/GET).
-  - Parses .ctu files into grouped cards with i18n support.
-  - Optional PlantUML JAR fallback for SVG rendering.
-  - Path safety and MIME handling.
-- Platform scripts:
-  - serve.sh (macOS/Linux): port cleanup, foreground/background modes, logging, PID tracking.
-  - serve.bat (Windows): port cleanup, foreground/background modes, PowerShell-based startup.
-
-**Section sources**
-- [serve.js:454-561](file://serve.js#L454-L561)
-- [serve.js:90-170](file://serve.js#L90-L170)
-- [serve.js:304-395](file://serve.js#L304-L395)
-- [serve.js:56-88](file://serve.js#L56-L88)
-- [serve.sh:1-54](file://serve.sh#L1-L54)
-- [serve.bat:1-33](file://serve.bat#L1-L33)
 
 ## Dependency Analysis
-The skill depends on:
-- Template files for structure and navigation.
-- Data contract for content generation.
-- Dev server for API and rendering fallback.
-- Platform scripts for port cleanup and server lifecycle.
+The skill depends on a systematic reference loading mechanism and validation infrastructure:
+- **Reference documents**: Four specialized documents governing different aspects of report generation
+- **Template files**: For structure and navigation enforcement
+- **Validation scripts**: For automated checking and PlantUML rendering
+- **Data contracts**: For content generation and parsing
 
 ```mermaid
 graph LR
-Skill["SKILL.md"] --> HTML["_TEMPLATE.html"]
-Skill --> CTU["_TEMPLATE.ctu"]
-HTML --> Server["serve.js"]
-CTU --> Server
-Server --> OS1["serve.sh"]
-Server --> OS2["serve.bat"]
+Skill["SKILL.md"] --> Ref1["report-contract.md"]
+Skill --> Ref2["code-to-uml-template.md"]
+Skill --> Ref3["diagram-decision-table.md"]
+Skill --> Ref4["uml-standards.md"]
+Skill --> Validator["validate-report.js"]
+Ref1 --> HTML["_TEMPLATE.html"]
+Ref2 --> HTML
+Ref3 --> UMLRules["Diagram Selection"]
+Ref4 --> UMLValidation["PlantUML Validation"]
+Validator --> HTML
+Validator --> CTU["_TEMPLATE.ctu"]
 ```
 
 **Diagram sources**
-- [SKILL.md:38-42](file://skills/code-to-uml/SKILL.md#L38-L42)
-- [_TEMPLATE.html:132-183](file://cache/_TEMPLATE.html#L132-L183)
-- [_TEMPLATE.ctu:1-46](file://data/_TEMPLATE.ctu#L1-L46)
-- [serve.js:454-561](file://serve.js#L454-L561)
-- [serve.sh:1-54](file://serve.sh#L1-L54)
-- [serve.bat:1-33](file://serve.bat#L1-L33)
+- [SKILL.md:12-21](file://skills/code-to-uml/SKILL.md#L12-L21)
+- [validate-report.js:454-506](file://skills/code-to-uml/scripts/validate-report.js#L454-L506)
 
 **Section sources**
-- [SKILL.md:38-42](file://skills/code-to-uml/SKILL.md#L38-L42)
-- [_TEMPLATE.html:132-183](file://cache/_TEMPLATE.html#L132-L183)
-- [_TEMPLATE.ctu:1-46](file://data/_TEMPLATE.ctu#L1-L46)
-- [serve.js:454-561](file://serve.js#L454-L561)
-- [serve.sh:1-54](file://serve.sh#L1-L54)
-- [serve.bat:1-33](file://serve.bat#L1-L33)
+- [SKILL.md:12-21](file://skills/code-to-uml/SKILL.md#L12-L21)
+- [validate-report.js:1-506](file://skills/code-to-uml/scripts/validate-report.js#L1-L506)
 
 ## Performance Considerations
-- Prefer static checks first; defer PlantUML rendering to server fallback when available.
-- Keep UML concise and focused; avoid overly dense diagrams that increase render time.
-- Limit multi-page splits to justified scenarios to reduce navigation overhead.
-- Use the provided scripts’ port cleanup to avoid repeated startup failures.
-
-[No sources needed since this section provides general guidance]
+- **Reference loading optimization**: Load only when conditions apply to minimize processing overhead
+- **Validation prioritization**: Prefer static checks first; defer PlantUML rendering to server fallback when available
+- **Template reuse efficiency**: Leverage existing template structure to reduce generation time
+- **Selective diagram usage**: Use diagram-decision-table.md to avoid unnecessary diagrams that increase render time
 
 ## Troubleshooting Guide
 Common pitfalls and remedies:
-- Incorrect CTU_HOME or missing template files: Ensure CTU_HOME points to the project root or the current directory contains the template files; otherwise run the installation script.
-- Misaligned tabs and categories: Ensure each tab’s data-diagram matches the {category} prefix in .ctu filenames.
-- Unintentionally preserved placeholders: Remove or adapt topbar links (e.g., official-demo-link) to match the report’s behavior.
-- Missing mandatory sections: Include all 13 sections even for narrow scopes; adapt names without removing them.
-- UML syntax errors: Validate PlantUML blocks; if rendering fails, note the limitation and explain the risk.
-- Server startup conflicts: Use serve.sh/serve.bat to start the server; they handle port cleanup.
-- Read-only violation: Respect the read-only constraint; do not modify source files during analysis.
-
-Verification checklist reminders:
-- Confirm HTML output path and data directory existence.
-- Verify .ctu syntax and section completeness.
-- Confirm UML static checks and optional render pass.
-- Validate topbar link behavior and navigation.
-- Ensure server is running and returns HTTP 200 for the report route.
+- **Reference loading issues**: Ensure correct loading conditions are met for each reference document
+- **Template root resolution**: Verify CTU_HOME environment variable or provide explicit root path
+- **Diagram decision conflicts**: Use diagram-decision-table.md consistently for diagram selection
+- **UML syntax errors**: Validate against uml-standards.md before rendering
+- **Validation failures**: Use validate-report.js with --strict mode for comprehensive checking
+- **PlantUML rendering issues**: Ensure plantuml.jar is available and Java is on PATH when using --render flag
 
 **Section sources**
-- [SKILL.md:14-29](file://skills/code-to-uml/SKILL.md#L14-L29)
-- [SKILL.md:147-163](file://skills/code-to-uml/SKILL.md#L147-L163)
-- [code-to-uml-template.md:39-48](file://skills/code-to-uml/references/code-to-uml-template.md#L39-L48)
-- [serve.js:454-561](file://serve.js#L454-L561)
-- [serve.sh:1-54](file://serve.sh#L1-L54)
-- [serve.bat:1-33](file://serve.bat#L1-L33)
+- [SKILL.md:22-36](file://skills/code-to-uml/SKILL.md#L22-L36)
+- [validate-report.js:13-26](file://skills/code-to-uml/scripts/validate-report.js#L13-L26)
+- [validate-report.js:454-506](file://skills/code-to-uml/scripts/validate-report.js#L454-L506)
 
 ## Conclusion
-The Code-To-UML skill provides a rigorous, template-driven framework for generating consistent, UML-backed HTML reports across multiple analysis scopes. By adhering to the hard rules, following the workflow, and meeting the verification criteria, practitioners can produce high-quality, maintainable reports that integrate seamlessly with the project’s frontend and dev server infrastructure.
-
-[No sources needed since this section summarizes without analyzing specific files]
+The Code-To-UML skill provides a rigorous, reference-driven framework for generating consistent, UML-backed HTML reports across multiple analysis scopes. The streamlined 80-line SKILL.md documentation emphasizes systematic reference loading protocols and a structured seven-phase workflow that ensures comprehensive coverage while maintaining validation rigor. By adhering to the reference loading conditions, following the structured workflow, and meeting the validation criteria, practitioners can produce high-quality, maintainable reports that integrate seamlessly with the project's template system and validation infrastructure.
 
 ## Appendices
 
 ### Appendix A: SKILL.md Workflow Stages (Visualized)
 ```mermaid
 flowchart TD
-Start(["Start"]) --> Resolve["Resolve scope and constraints"]
-Resolve --> Read["Read project instructions and template"]
+Start(["Start"]) --> LoadRefs["Load References Based on Conditions"]
+LoadRefs --> Resolve["Resolve scope and constraints"]
+Resolve --> Read["Read instructions and templates"]
 Read --> Analyze["Analyze code structurally"]
-Analyze --> Plan["Normalize report plan (mandatory sections)"]
+Analyze --> Plan["Plan the report with reference guidance"]
 Plan --> Data["Generate data files (.ctu)"]
-Data --> HTML["Generate HTML (tabs, data-dir, scripts)"]
-HTML --> UMLCheck["UML self-check (static + optional render)"]
-UMLCheck --> Serve["Start server and verify page/API"]
-Serve --> Verify["Verify navigation and read-only constraint"]
-Verify --> End(["Final response with URL"])
+Data --> HTML["Generate HTML with template reuse"]
+HTML --> Validate["Validate UML, page, and navigation"]
+Validate --> Complete["Complete with final status"]
+Complete --> End(["Final validated report"])
 ```
 
 **Diagram sources**
-- [SKILL.md:30-94](file://skills/code-to-uml/SKILL.md#L30-L94)
-- [SKILL.md:147-163](file://skills/code-to-uml/SKILL.md#L147-L163)
-- [serve.js:454-561](file://serve.js#L454-L561)
+- [SKILL.md:12-21](file://skills/code-to-uml/SKILL.md#L12-L21)
+- [SKILL.md:37-76](file://skills/code-to-uml/SKILL.md#L37-L76)
+
+### Appendix B: Reference Loading Conditions Matrix
+| Reference Document | Loading Condition | Purpose |
+|-------------------|-------------------|---------|
+| report-contract.md | Always before planning or generating | Category model, section catalog, scope applicability |
+| code-to-uml-template.md | When template files exist or generating report | Template structure, naming conventions, runtime contracts |
+| diagram-decision-table.md | Before diagram decisions | Diagram selection principles, complexity scoring |
+| uml-standards.md | After diagram decisions with non-empty UML | PlantUML syntax rules, validation requirements |
+| validate-report.js | After HTML and .ctu generation | Comprehensive validation, PlantUML rendering |
+
+**Section sources**
+- [SKILL.md:12-21](file://skills/code-to-uml/SKILL.md#L12-L21)

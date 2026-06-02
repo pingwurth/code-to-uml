@@ -1,0 +1,42 @@
+Title: 核心流程图
+Describe: 从构建图、编译、执行到 checkpoint/stream 输出的主要流程。
+------------------------------------------------------------
+[Example]
+S05_CORE_FLOW：StateGraph 到 Pregel 执行路径
+
+[Description]
+核心运行路径不是普通函数调用链，而是 builder 生成可执行 Pregel 图，然后按 superstep 读取 channel、执行 task、应用 writes、持久化 checkpoint 和输出 stream。
+
+[UML]
+@startuml
+start
+:创建 StateGraph(state_schema);
+:add_node / add_edge / add_conditional_edges;
+if (schema 与节点有效?) then (是)
+  :compile 生成 CompiledStateGraph;
+else (否)
+  :抛出 ValueError 或 InvalidUpdateError;
+  stop
+endif
+:invoke / stream / ainvoke / astream;
+:创建 PregelLoop;
+repeat
+  :prepare_next_tasks;
+  :PregelRunner 执行节点;
+  if (节点写入有效?) then (是)
+    :apply_writes 更新 channels;
+    :写入 checkpoint / pending writes;
+    :发出 stream chunks;
+  else (否)
+    :错误处理 / retry / interrupt;
+  endif
+repeat while (还有可触发 task 且未到递归限制?)
+:读取 output_channels;
+stop
+@enduml
+
+[Detail]
+入口是 `StateGraph` 的构建方法，运行入口是 `Pregel.invoke/stream` 一类方法。图中 `prepare_next_tasks`、`apply_writes` 和 `PregelRunner` 分别对应 `libs/langgraph/langgraph/pregel/_algo.py`、`_runner.py` 和 `_loop.py/_main.py` 的协作。`TASKS` channel 在 `Pregel.__init__` 中被保留注册，用于 `Send`/动态分发。
+
+失败路径包括 schema 不合法、保留节点名 `START/END` 或 namespace 分隔符冲突、无效 state update、节点异常、timeout、interrupt、递归限制和 checkpoint 缺失。报告把这些放入流程图，是因为它们决定用户看到的是普通异常、可恢复中断、还是状态恢复路径。
+

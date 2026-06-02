@@ -1,0 +1,51 @@
+Title: 关键代码片段解析
+Describe: 选取短片段说明核心实现意图、边界条件和维护注意点。
+------------------------------------------------------------
+[Example]
+S08_CODE_SNIPPETS：StateGraph 初始化和 schema 注册
+
+[Description]
+`StateGraph.__init__` 建立 builder 的内部状态：节点、边、分支、schema、channel、managed values 和 waiting edges，并把 state/input/output schema 加入解析流程。
+
+[UML]
+None
+
+[Detail]
+位置：`libs/langgraph/langgraph/graph/state.py:220` 附近。关键维护点是 `_add_schema(self.state_schema)`、`_add_schema(self.input_schema, allow_managed=False)`、`_add_schema(self.output_schema, allow_managed=False)` 的顺序和限制。input/output schema 禁止 managed channel，是为了避免运行期管理值泄漏进用户输入输出契约。修改 schema 解析时要同时考虑 `_get_channels`、`_get_channel`、`_is_field_binop`、`_is_field_managed_value` 等底部 helper。
+------------------------------------------------------------
+[Example]
+Pregel 初始化的横切配置
+
+[Description]
+`Pregel.__init__` 统一处理 node build、`TASKS` channel、stream/cache/retry/context/checkpointer 配置，并在 `auto_validate` 为真时调用 `validate()`。
+
+[UML]
+None
+
+[Detail]
+位置：`libs/langgraph/langgraph/pregel/main.py:720` 之后。这里的 `TASKS` channel 是保留 channel，非 `Topic` 会报错；`checkpointer = ensure_valid_checkpointer(checkpointer)` 会先规范化持久化对象；`trigger_to_nodes` 由 `validate()` 后的 `_trigger_to_nodes` 得到。维护 `Pregel` 构造参数时需要兼顾同步/异步运行、stream transformer、subgraph 和 checkpoint allowlist。
+------------------------------------------------------------
+[Example]
+Checkpoint 数据模型
+
+[Description]
+`Checkpoint` 是 TypedDict，字段包括 `v`、`id`、`ts`、`channel_values`、`channel_versions`、`versions_seen` 和 `updated_channels`。这些字段共同决定 state snapshot 与下一轮 task 触发。
+
+[UML]
+None
+
+[Detail]
+位置：`libs/checkpoint/langgraph/checkpoint/base/__init__.py:92`。`channel_versions` 和 `versions_seen` 是调度正确性的关键：节点看到哪些 channel 版本，决定下一轮哪些节点应该执行。`CheckpointMetadata.counters_since_delta_snapshot` 还引入了 delta channel 的维护约束；这个 beta 字段和 `LANGGRAPH_DELTA_MAX_SUPERSTEPS_SINCE_SNAPSHOT` 环境变量相关，修改持久化 schema 时必须保留兼容性。
+------------------------------------------------------------
+[Example]
+create_react_agent 的版本分支
+
+[Description]
+`create_react_agent` 对 `version` 只接受 `v1` 或 `v2`，并要求自定义 state schema 包含 `messages`、`remaining_steps`，如果有 structured response 还要包含 `structured_response`。
+
+[UML]
+None
+
+[Detail]
+位置：`libs/prebuilt/langgraph/prebuilt/chat_agent_executor.py:278` 之后。v1/v2 的差异不只是配置名：v1 在单个 tool node 内并行处理 tool_calls；v2 使用 `Send` API 分发到多个 tool node 实例。修改这一段会影响 agent loop 的并发语义、工具返回直接结束的判断、interrupt_before/after 和 structured response 的后处理。
+

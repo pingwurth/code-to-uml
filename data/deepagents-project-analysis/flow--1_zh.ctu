@@ -1,0 +1,99 @@
+Title: 核心流程图
+Describe: agent 构建、部署和交互终端启动的主流程与分支。
+------------------------------------------------------------
+[Example]
+S05_CORE_FLOW - `create_deep_agent` 装配流程
+
+[Description]
+主流程从模型解析开始，逐步构造 backend、子代理列表、默认 general-purpose subagent、主 agent middleware、prompt 和 LangChain/LangGraph compiled graph。
+
+[UML]
+@startuml
+start
+:接收 create_deep_agent 参数;
+if (model is None?) then (是)
+  :发出弃用警告;
+  :构造默认 ChatAnthropic;
+else (否)
+  :resolve_model;
+endif
+:匹配 HarnessProfile;
+:校验 excluded_middleware 不移除必要脚手架;
+:准备工具描述覆盖;
+if (backend provided?) then (是)
+  :使用调用方 backend;
+else (否)
+  :创建 StateBackend;
+endif
+:拆分同步子代理和 async 子代理;
+if (需要默认 general-purpose?) then (是)
+  :插入默认 SubAgent spec;
+endif
+:组装主 middleware stack;
+if (skills configured?) then (是)
+  :添加 SkillsMiddleware;
+endif
+if (inline subagents exist?) then (是)
+  :添加 SubAgentMiddleware;
+endif
+if (async subagents exist?) then (是)
+  :添加 AsyncSubAgentMiddleware;
+endif
+if (memory configured?) then (是)
+  :添加 MemoryMiddleware;
+endif
+if (interrupt_on configured?) then (是)
+  :添加 HumanInTheLoopMiddleware;
+endif
+:组合 final_system_prompt;
+:调用 langchain.create_agent;
+:附加 recursion_limit 和 metadata;
+stop
+@enduml
+
+[Detail]
+从 `graph.py:517-538` 可见 model 为空会 warning 并创建默认 Anthropic model，否则调用 `resolve_model`。`graph.py:560-571` 设置默认 `StateBackend` 并识别 async subagent；`graph.py:568-620` 处理调用方传入的同步子代理；`graph.py:690-735` 自动插入默认 general-purpose subagent；`graph.py:737-771` 构造主 middleware；`graph.py:790-796` 组合 prompt；`graph.py:806-829` 返回 `create_agent(...).with_config(...)`。重要分支包括 profile 排除校验、默认子代理是否启用、skills/memory/HITL 是否配置，以及 async subagent 是否需要额外工具。
+
+------------------------------------------------------------
+[Example]
+S05_CORE_FLOW - 部署命令流程
+
+[Description]
+`deepagents deploy` 读取本地 managed-agent 项目，构造 payload，解析 MCP server 引用，调用 API 创建或更新 agent，并同步远端目录。
+
+[UML]
+@startuml
+start
+:解析 deepagents deploy 参数;
+:加载 .env;
+:Project.load(root);
+:build_payload and build_metadata_payload;
+:build_directory_files;
+if (--dry-run?) then (是)
+  :打印 agent_payload 和 directory_files;
+  stop
+endif
+:ApiClient.from_env;
+if (--reset conflicts with agent_id?) then (是)
+  :SystemExit;
+  stop
+endif
+:State.load;
+if (agent.json declares agent_id?) then (是)
+  :确认目标 agent;
+endif
+:resolve_referenced_servers;
+:_deploy_agent;
+if (remote exists?) then (更新)
+  :patch_agent;
+  :_sync_agent_directory;
+else (创建)
+  :create_agent;
+endif
+:state.save;
+:打印结果和可选 health check;
+stop
+@enduml
+
+[Detail]
+`execute_deploy_command` 位于 `libs/cli/deepagents_cli/deploy/commands.py:129-217`。它在 `commands.py:145-162` 加载 project 并构造 payload，在 `commands.py:164-177` 处理 dry-run，在 `commands.py:179-193` 解析本地 state 与显式 agent_id，在 `commands.py:195-201` 解析 MCP server 引用，然后调用 `_deploy_agent`。`_deploy_agent` 与 `_sync_agent_directory` 在 `commands.py:299-356`，后者处理 409/412 冲突后重新读取远端目录再提交 delta。部署路径的关键风险是配置校验、远端目标确认、MCP 引用解析和目录并发提交。
