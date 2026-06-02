@@ -5,7 +5,9 @@ Describe: Monorepo 目录组织、包管理策略和构建工具链
 Monorepo 包结构
 
 [Description]
-libs/ 下各包的层级和依赖关系。所有包共享同一个 Git 仓库，但各自独立版本、独立发布。使用 uv workspace 管理本地可编辑依赖。
+libs/ 下各包的层级和依赖关系。
+所有包共享同一个 Git 仓库，但各自独立版本、独立发布。
+使用 uv workspace 管理本地可编辑依赖。
 
 [UML]
 @startuml
@@ -80,7 +82,8 @@ Partners --> SDK_Pkg
 工具链与构建系统
 
 [Description]
-uv、ruff、ty、pytest、make 的协作关系。每个工具负责开发流程的一个环节，通过 Makefile 统一入口。
+uv、ruff、ty、pytest、make 的协作关系。
+每个工具负责开发流程的一个环节，通过 Makefile 统一入口。
 
 [UML]
 None

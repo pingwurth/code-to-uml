@@ -46,7 +46,7 @@ Each standard category owns the primary content for these section IDs:
 | `dataflow` | `S07_DATA_OR_STATE_FLOW` | Data movement, state ownership, lifecycle, or FSM behavior. |
 | `code` | `S08_CODE_SNIPPETS` | Focused source excerpts with analysis, not source dumping. |
 | `principles` | `S09_CORE_PRINCIPLES`, `S11_RISKS_AND_IMPROVEMENTS` | Design ideas, mechanisms, tradeoffs, risks, and specific improvements. |
-| `guide` | `S10_ONBOARDING_GUIDE`, `S12_REVIEWER_QUESTIONS`, `S13_MAINTAINER_REFERENCE` | Practical reading/debugging paths, review prompts, and symbol/file index. |
+| `guide` | `S10_ONBOARDING_GUIDE`, `S12_REVIEWER_QUESTIONS`, `S13_MAINTAINER_REFERENCE` | Practical reading/debugging paths, learning review Q&A, and symbol/file index. |
 
 ## Section Catalog
 
@@ -65,7 +65,7 @@ Use stable section IDs in planning notes, validation, and summaries. Display tit
 | `S09_CORE_PRINCIPLES` | Core Principles | 核心原理说明 | Runtime mechanisms, patterns, design tradeoffs, and why the implementation is shaped this way. |
 | `S10_ONBOARDING_GUIDE` | Developer Onboarding Guide | 开发上手指南 | Reading order, run/debug steps, manual verification, extension points, and troubleshooting paths. |
 | `S11_RISKS_AND_IMPROVEMENTS` | Risks and Improvement Suggestions | 风险与改进建议 | Specific complexity, concurrency, security, performance, correctness, maintainability risks, and actionable improvements. |
-| `S12_REVIEWER_QUESTIONS` | Key Questions for Code Reviewers | Q&A / 复盘问答清单 | Concrete correctness, edge-case, security, performance, and design-intent questions that surface hidden assumptions. |
+| `S12_REVIEWER_QUESTIONS` | Learning Review Questions with Answers | Q&A / 复盘问答清单 | Learning-oriented review questions and concrete answers about the analyzed project, module/package, file, class, or function, grounded in source evidence and written to help readers consolidate what they learned. |
 | `S13_MAINTAINER_REFERENCE` | Maintainer Quick Reference | 维护者速查表 | Function/class/file index with line numbers or symbol references whenever available. |
 
 ## Scope Applicability
@@ -102,7 +102,7 @@ Merge rule: if an `M` section would produce no more than two useful sentences or
 - `S06_CALL_RELATIONSHIPS` is a global trace view. It shows complete call paths across meaningful boundaries as sequence, component, or call-chain diagrams.
 - `S09_CORE_PRINCIPLES` explains why the design works the way it does.
 - `S11_RISKS_AND_IMPROVEMENTS` explains where the design can fail and what should be changed.
-- `S12_REVIEWER_QUESTIONS` is not a FAQ. It is a review checklist of concrete questions that can reveal correctness, security, performance, and design issues.
+- `S12_REVIEWER_QUESTIONS` is a learning review Q&A, not a code-review checklist or generic FAQ. For the current analysis scope (project, module/package, file, class, or function), ask consolidation questions about purpose, structure, execution flow, design decisions, risks, debugging paths, and extension boundaries. Every question must include a concrete answer backed by source evidence or explicitly marked inference.
 - `S13_MAINTAINER_REFERENCE` is an index, not prose. Prefer dense symbol/file references with line numbers.
 
 ## Scope-Specific Depth
@@ -144,6 +144,7 @@ Before creating or finalizing report artifacts, verify:
 - [ ] Scope identified as project, module/package, file, class, or function.
 - [ ] Required section IDs are covered according to the scope applicability matrix.
 - [ ] Merged sections are intentionally merged and still mentioned in the section summary.
+- [ ] `S12_REVIEWER_QUESTIONS` includes answers for every learning review question and ties them to the analyzed target scope.
 - [ ] Every architecture, risk, call-flow, and data-flow claim is backed by source evidence or marked as inference.
 - [ ] Code snippets are focused, explained, and not pasted as long unexplained source blocks.
 

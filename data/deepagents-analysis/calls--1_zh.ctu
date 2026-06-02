@@ -5,7 +5,8 @@ Describe: 跨模块、跨服务的完整调用链追踪
 SDK invoke 调用序列
 
 [Description]
-从用户 `invoke()` 到 LLM 响应返回的完整调用链。展示中间件栈如何层层包装和拦截。
+从用户 `invoke()` 到 LLM 响应返回的完整调用链。
+展示中间件栈如何层层包装和拦截。
 
 [UML]
 @startuml
@@ -95,7 +96,8 @@ deactivate Graph
 ACP 协议交互序列
 
 [Description]
-ACP (Agent Context Protocol) Client 与 Deep Agent Server 的完整交互协议。支持流式响应和工具调用编辑。
+ACP (Agent Context Protocol) Client 与 Deep Agent Server 的完整交互协议。
+支持流式响应和工具调用编辑。
 
 [UML]
 @startuml

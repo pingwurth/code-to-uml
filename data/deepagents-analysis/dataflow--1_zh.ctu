@@ -5,7 +5,8 @@ Describe: 消息历史的生命周期、DeltaChannel 压缩和上下文管理策
 消息状态生命周期
 
 [Description]
-从用户输入到持久化存储的消息流转。DeltaChannel 实现 O(N) 存储优化。
+从用户输入到持久化存储的消息流转。
+DeltaChannel 实现 O(N) 存储优化。
 
 [UML]
 @startuml
@@ -89,7 +90,8 @@ Checkpoint 51: [+msg51]       (增量)    → 1 条
 上下文管理流
 
 [Description]
-长对话的摘要、卸载和恢复策略。`SummarizationMiddleware` 和 `_overflow_clip.py` 协作管理上下文窗口。
+长对话的摘要、卸载和恢复策略。
+`SummarizationMiddleware` 和 `_overflow_clip.py` 协作管理上下文窗口。
 
 [UML]
 @startuml

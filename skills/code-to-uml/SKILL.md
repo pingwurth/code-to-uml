@@ -27,6 +27,7 @@ Load references only when their condition applies:
 - Put report content in the matching data directory when the template is data-driven. Do not add ad hoc report blocks to HTML.
 - Report body defaults to Chinese unless the user explicitly requests another language.
 - Keep one consistent report section catalog across project/module/file/class/function scopes. Scope changes depth, evidence, and standalone/merged section requirements according to `references/report-contract.md`.
+- For `S12_REVIEWER_QUESTIONS`, generate learning review questions for the analyzed project, module/package, file, class, or function, and provide an answer for every question.
 - Text must fully carry the analysis; diagrams are aids. Text-only cards with `[UML]` set to `None` are valid when a diagram would add little value. Use real function/class names, file paths, constants, routes, commands, environment variables, side effects, failure paths, and line/symbol references.
 - Do not split into multiple HTML files unless the target contains more than three highly independent, complex core classes or subsystems. If splitting, update all topbar/page links.
 - Handle topbar links such as `official-demo-link` deliberately: preserve a truthful link, replace it with a truthful companion link, or remove the whole `<a>` element.

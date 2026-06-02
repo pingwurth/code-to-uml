@@ -5,7 +5,8 @@ Describe: SDK 的核心类、接口和数据结构详解
 create_deep_agent() 工厂函数
 
 [Description]
-SDK 的主入口 API，接受 15+ 参数，构建完整配置的 Agent。返回 `CompiledStateGraph`，可直接 `invoke()` 或 `stream()` 调用。
+SDK 的主入口 API，接受 15+ 参数，构建完整配置的 Agent。
+返回 `CompiledStateGraph`，可直接 `invoke()` 或 `stream()` 调用。
 
 [UML]
 @startuml
@@ -41,15 +42,20 @@ class "create_deep_agent()" as CDA {
 [Detail]
 **参数分组说明**:
 
-1. **模型配置**: `model` 支持字符串格式 `"provider:model_name"`（如 `"openai:gpt-5.5"`）或预构建的 `BaseChatModel` 实例。`None` 已废弃，默认使用 `claude-sonnet-4-6`。
+1. **模型配置**: `model` 支持字符串格式 `"provider:model_name"`（如 `"openai:gpt-5.5"`）或预构建的 `BaseChatModel` 实例。
+`None` 已废弃，默认使用 `claude-sonnet-4-6`。
 
 2. **工具配置**: `tools` 为附加工具，与内建工具（`write_todos`, `ls`, `read_file`, `write_file`, `edit_file`, `glob`, `grep`, `execute`, `task`）合并。
 
-3. **中间件配置**: 定义功能栈。`middleware` 插入在 base stack 和 tail stack 之间。
+3. **中间件配置**: 定义功能栈。
+`middleware` 插入在 base stack 和 tail stack 之间。
 
-4. **后端配置**: `backend` 决定文件系统和 Shell 的实现方式。默认使用 `StateBackend`（内存态）。
+4. **后端配置**: `backend` 决定文件系统和 Shell 的实现方式。
+默认使用 `StateBackend`（内存态）。
 
-5. **运行时配置**: `checkpointer` 启用对话持久化；`store` 提供跨会话存储；`cache` 启用 LLM 调用缓存。
+5. **运行时配置**: `checkpointer` 启用对话持久化；
+`store` 提供跨会话存储；
+`cache` 启用 LLM 调用缓存。
 
 **关键行为**:
 - 函数内部 830 行，包含模型解析、profile 应用、中间件组装、子智能体处理等
@@ -61,7 +67,8 @@ class "create_deep_agent()" as CDA {
 DeepAgentState 状态机
 
 [Description]
-基于 LangGraph `DeltaChannel` 的消息状态管理。将检查点存储从 O(N^2) 优化到 O(N)。
+基于 LangGraph `DeltaChannel` 的消息状态管理。
+将检查点存储从 O(N^2) 优化到 O(N)。
 
 [UML]
 @startuml
@@ -112,7 +119,8 @@ DeltaChannel 方式：
 BackendProtocol 后端协议
 
 [Description]
-文件系统和 Shell 执行的统一接口。通过策略模式支持本地、沙箱、云端等多种执行环境。
+文件系统和 Shell 执行的统一接口。
+通过策略模式支持本地、沙箱、云端等多种执行环境。
 
 [UML]
 @startuml
@@ -179,7 +187,8 @@ BackendProtocol <|-- SandboxBackendProtocol
 SubAgent 子智能体定义
 
 [Description]
-子智能体的 TypedDict 结构和生命周期。支持声明式（`SubAgent`）、预编译（`CompiledSubAgent`）和异步（`AsyncSubAgent`）三种形式。
+子智能体的 TypedDict 结构和生命周期。
+支持声明式（`SubAgent`）、预编译（`CompiledSubAgent`）和异步（`AsyncSubAgent`）三种形式。
 
 [UML]
 @startuml
@@ -228,11 +237,13 @@ AsyncSubAgentMiddleware --> ASA : manages
 [Detail]
 **三种子智能体形式**:
 
-1. **SubAgent（声明式）**: 提供 name/description/system_prompt，SDK 自动构建。继承父 agent 的 tools 和 permissions（除非显式覆盖）。
+1. **SubAgent（声明式）**: 提供 name/description/system_prompt，SDK 自动构建。
+继承父 agent 的 tools 和 permissions（除非显式覆盖）。
 
 2. **CompiledSubAgent（预编译）**: 提供已编译的 `runnable`，适用于需要完全自定义图结构的场景。
 
-3. **AsyncSubAgent（异步/远程）**: 通过 `graph_id` 标识远程部署的 agent，支持后台执行。提供 launch/check/update/cancel/list 五个操作工具。
+3. **AsyncSubAgent（异步/远程）**: 通过 `graph_id` 标识远程部署的 agent，支持后台执行。
+提供 launch/check/update/cancel/list 五个操作工具。
 
 **默认行为**:
 - 如果没有提供名为 `general-purpose` 的子智能体，SDK 自动添加一个默认通用子智能体

@@ -5,7 +5,8 @@ Describe: 核心实现的设计意图、技术细节和使用注意事项
 中间件栈组装
 
 [Description]
-`create_deep_agent` 中中间件构建的核心逻辑。展示 base stack → user middleware → tail stack 的三段式组装和 excluded 过滤机制。
+`create_deep_agent` 中中间件构建的核心逻辑。
+展示 base stack → user middleware → tail stack 的三段式组装和 excluded 过滤机制。
 
 [UML]
 None
@@ -59,7 +60,8 @@ deepagent_middleware = _apply_excluded_middleware(deepagent_middleware, _profile
 后端协议实现
 
 [Description]
-`BackendProtocol` 和 `CompositeBackend` 的设计。展示协议定义如何实现多后端组合。
+`BackendProtocol` 和 `CompositeBackend` 的设计。
+展示协议定义如何实现多后端组合。
 
 [UML]
 None
@@ -117,7 +119,8 @@ class SandboxBackendProtocol(BackendProtocol):
 延迟导入优化
 
 [Description]
-CLI 和 Code 包的 `__getattr__` 延迟加载模式。优化启动性能，避免导入时加载整个依赖树。
+CLI 和 Code 包的 `__getattr__` 延迟加载模式。
+优化启动性能，避免导入时加载整个依赖树。
 
 [UML]
 None

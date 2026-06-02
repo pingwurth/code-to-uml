@@ -60,7 +60,7 @@ Use this table after checking `report-contract.md` for whether the section is re
 | `S06_CALL_RELATIONSHIPS` | What is the end-to-end call chain across boundaries? | Sequence or component call-chain diagram | Ordering, caller/callee responsibility, async behavior, or cross-boundary calls matter | Calls are local and already covered by `S03` text |
 | `S07_DATA_OR_STATE_FLOW` | How do inputs become outputs, or how does state move? | Activity, state, object, or data-flow style component diagram | Transformation, ownership, persistence, cache, or lifecycle is non-trivial | Inputs and outputs are direct and stateless |
 | `S10_ONBOARDING_GUIDE` | What path should a maintainer follow first? | Mindmap/WBS | The reading or debugging path has multiple branches | A short ordered checklist is enough |
-| `S12_REVIEWER_QUESTIONS` | What assumptions should reviewers challenge? | Mindmap/WBS | Questions cluster around distinct risk areas | A checklist is more scannable |
+| `S12_REVIEWER_QUESTIONS` | Which questions and answers help readers consolidate the analyzed target? | Mindmap/WBS | Q&A topics cluster around distinct learning areas such as structure, flow, design, risks, and extension paths | A question-answer checklist or table is more scannable |
 
 ## Choose by Problem
 
@@ -71,7 +71,7 @@ Use this table after checking `report-contract.md` for whether the section is re
 | Where are the boundaries and dependency directions? | Component/package/deployment diagram | The reader needs to see service, module, layer, storage, or runtime boundaries. |
 | Which classes or objects own data and behavior? | Class/object diagram | Inheritance, composition, ownership, or domain relationships are central to the design. |
 | Which branch or rule path is taken? | Activity diagram | Business logic, validation, routing, approval, or fallback behavior has many conditional paths. |
-| What should be read or reviewed first? | Mindmap/WBS | The goal is onboarding, Q&A grouping, or a structured review path rather than runtime behavior. |
+| What should be read or reviewed first? | Mindmap/WBS | The goal is onboarding, Q&A grouping, or a structured learning review path rather than runtime behavior. |
 
 ## Anti-Patterns
 
