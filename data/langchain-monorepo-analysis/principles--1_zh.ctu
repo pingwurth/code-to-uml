@@ -1,0 +1,40 @@
+Title: 核心原理与风险
+Describe: 覆盖 S09_CORE_PRINCIPLES 和 S11_RISKS_AND_IMPROVEMENTS。总结设计机制、取舍、风险和具体改进建议。
+------------------------------------------------------------
+[Example]
+S09_CORE_PRINCIPLES - 设计原则
+
+[Description]
+1. **抽象先行，integration 后置**：`langchain-core` 只定义抽象和协议，不包含第三方 provider 实现。  
+2. **Runnable 统一可组合性**：模型、工具、chain、retriever 都围绕 invoke/batch/stream/async/compose 工作。  
+3. **活跃 `langchain` 包薄编排**：`langchain_v1` 发布的 `langchain` 依赖 core 和 LangGraph，把 agent 复杂性封装在 `create_agent`。  
+4. **partner 独立发布**：每个 provider 包通过 `pyproject.toml` 管理自己的 SDK 依赖和测试组。  
+5. **标准测试收敛契约**：`langchain-tests` 用统一基类测试 provider 行为。  
+6. **profile 数据生成**：`langchain-profiles` 把 provider 能力数据集中生成到 partner 包。
+
+[UML]
+None
+
+[Detail]
+这些原则共同解决“既要统一 API，又要支持大量 provider 差异”的问题。核心取舍是 core 必须轻且稳定，活跃高层包必须尽量少承载 provider 细节，partner 包必须用标准测试和 profile 数据证明自己符合契约。`langchain-classic` 的存在说明向后兼容成本很高，因此新功能不应扩散到 legacy 包，除非是兼容性或迁移所必需。
+
+------------------------------------------------------------
+[Example]
+S11_RISKS_AND_IMPROVEMENTS - 风险与改进建议
+
+[Description]
+**公共接口漂移**：`Runnable`、`BaseChatModel`、`BaseTool`、`init_chat_model`、`create_agent` 的签名或默认行为改变会影响大量用户和 partner。建议所有公共签名改动都增加 focused tests，并在 PR 中明确说明兼容性影响。  
+
+**provider 推断和模型 profile 过期**：`_attempt_infer_model_provider` 根据前缀推断 provider，profile 数据由 CLI 生成。建议 provider 新增模型或能力时同步刷新 profile，并用测试覆盖推断结果和能力 flags。  
+
+**agent loop 边界复杂**：structured output、tool calls、middleware jump、`return_direct`、interrupt、cache、checkpointer 同时作用于 graph。建议对 `create_agent` 的边条件维护状态表，并把工具循环、无工具结构化输出、多 structured tool calls 分别纳入单元测试。  
+
+**legacy 包体量大**：`langchain-classic` 约 1581 个 Python 文件，动态 deprecated imports 很多。建议新功能默认不进入 classic，只做迁移路径、弃用提醒和兼容修复。  
+
+**CI 和发布矩阵复杂**：独立包发布、workflow SHA pin、working-directory 矩阵会增加维护成本。建议新增 partner 时按 AGENTS 中的 CI 文件清单逐项更新，并用 PR label/check_diffs 验证覆盖。
+
+[UML]
+None
+
+[Detail]
+这些风险都来自观察到的源结构和配置：core 是全生态基础，`langchain_v1` 使用 LangGraph 组织 agent，partners 有 15 个包且各自依赖 provider SDK，standard-tests 是共享测试层，model profiles 是生成数据。报告没有修改源码；这里的建议面向维护流程和测试覆盖。

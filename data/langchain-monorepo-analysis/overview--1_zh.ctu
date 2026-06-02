@@ -1,0 +1,29 @@
+Title: 项目概览
+Describe: 覆盖 S01_TARGET_OVERVIEW。说明 LangChain monorepo 的目标、分析范围、版本基线、证据来源和复杂度评分。
+------------------------------------------------------------
+[Example]
+S01_TARGET_OVERVIEW - 目标、范围与证据基线
+
+[Description]
+本报告分析 `C:\devops\_gitProjects\AI\langchain` 这个 Python monorepo。项目根目录包含 `libs/`、`.github/`、`.vscode/`、`README.md`、`AGENTS.md` 等文件；`libs/` 下有 7 个主要包目录，当前快照中通过 `rg --files -g '*.py'` 统计到 2483 个 Python 文件。根目录不是可用 Git 仓库，`git rev-parse HEAD` 返回 `fatal: not a git repository`，因此版本基线使用生成日期 `2026-06-02` 和当前文件快照。
+
+核心目标是提供 LangChain Python 生态的项目级可维护地图，而不是逐文件枚举。主要证据包括：`README.md` 对 LangChain 的定位、`AGENTS.md` 对 monorepo 分层和开发约束的说明、各包 `pyproject.toml` 的项目名/依赖、关键入口点如 `langchain.chat_models.init_chat_model`、`langchain.agents.create_agent`、`langchain_core.runnables.Runnable`、`langchain_openai.ChatOpenAI`，以及 `langchain-tests` 标准测试基类。
+
+[UML]
+None
+
+[Detail]
+报告按 Code-To-UML 的项目级契约覆盖 13 个章节 ID：S01 在本分类，S02 在 `structure`，S03 在 `objects`，S04 在 `architecture`，S05 在 `flow`，S06 在 `calls`，S07 在 `dataflow`，S08 在 `code`，S09/S11 在 `principles`，S10/S12/S13 在 `guide`。复杂度评分按技能规范评估为高复杂度：跨模块和跨包边界 2 分，多个外部 provider/SDK 和 CI/发布入口 2 分，agent graph/checkpointer/store/profile 等状态生命周期 2 分，async/streaming/graph 编排 2 分，工具调用和结构化输出错误路径 2 分，模型/provider 路由规则 2 分，总分 12/12。
+
+------------------------------------------------------------
+[Example]
+项目级包快照
+
+[Description]
+当前可见包和 Python 文件数量：`core` 350、`langchain` 1581、`langchain_v1` 123、`partners` 363、`standard-tests` 36、`text-splitters` 23、`model-profiles` 7。`libs/partners` 下有 15 个 integration package：`anthropic`、`chroma`、`deepseek`、`exa`、`fireworks`、`groq`、`huggingface`、`mistralai`、`nomic`、`ollama`、`openai`、`openrouter`、`perplexity`、`qdrant`、`xai`。
+
+[UML]
+None
+
+[Detail]
+包数量和文件数量说明这个仓库的维护风险主要不在单个函数复杂度，而在公共接口稳定性、跨包依赖版本、provider 能力差异、CI 矩阵和旧包兼容性。`AGENTS.md` 明确要求保护公开接口签名、给新功能加单元测试、使用 `uv` 管理各包依赖，并把 `langchain-classic` 标为 legacy。

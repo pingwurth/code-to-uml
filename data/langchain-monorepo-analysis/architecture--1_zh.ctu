@@ -1,0 +1,51 @@
+Title: 整体架构图
+Describe: 覆盖 S04_ARCHITECTURE。展示分层边界、运行时依赖、发布边界和测试/配置数据如何反馈到实现。
+------------------------------------------------------------
+[Example]
+S04_ARCHITECTURE - 分层和发布边界
+
+[Description]
+LangChain Python 的架构是“轻 core + 活跃高层包 + partner 实现 + 标准测试 + 配置数据生成”。`langchain-core` 明确说明不包含第三方 integrations；`langchain` 活跃包把 agent 编排交给 LangGraph；partners 作为独立发布包接入 OpenAI、Anthropic、Ollama、Qdrant 等 provider；`langchain-tests` 给 chat model、embeddings、tools 等实现提供一致性测试；`langchain-profiles` 生成 provider model profile 数据。
+
+[UML]
+@startuml
+left to right direction
+skinparam componentStyle rectangle
+frame "用户代码" as UserRuntime {
+  component "init_chat_model" as InitAPI
+  component "create_agent" as AgentAPI
+}
+frame "LangChain packages" as LangChainPackages {
+  component "langchain-core\nRunnable, messages, tools, models" as Core
+  component "langchain\nagents and chat_models" as Active
+  component "langchain-classic\nlegacy chains and adapters" as Classic
+}
+frame "Integration packages" as IntegrationPackages {
+  component "langchain-openai" as OpenAI
+  component "langchain-anthropic" as Anthropic
+  component "other partners" as OtherPartners
+}
+frame "Quality and data" as Quality {
+  component "langchain-tests" as Tests
+  component "langchain-profiles CLI" as Profiles
+  component "GitHub Actions" as Actions
+}
+component "LangGraph" as LangGraph
+component "Provider SDKs and APIs" as ProviderAPIs
+UserRuntime --> Active : imports public API
+Active --> Core : uses abstractions
+Active --> LangGraph : compiles agent graph
+Active --> IntegrationPackages : imports selected provider
+Classic --> Core : legacy compatibility
+OpenAI --> Core : implements contracts
+Anthropic --> Core : implements contracts
+OtherPartners --> Core : implement contracts
+IntegrationPackages --> ProviderAPIs : network calls
+Tests --> IntegrationPackages : conformance checks
+Profiles --> IntegrationPackages : generated capability data
+Actions --> LangChainPackages : package jobs
+Actions --> IntegrationPackages : partner jobs
+@enduml
+
+[Detail]
+从“用户代码”读起，箭头表示运行时 import、调用或质量反馈。`init_chat_model` 和 `create_agent` 是最常见入口；它们不直接把 provider SDK 逻辑放进 core，而是按 provider 名称加载 integration 包。`langchain-classic` 位于旧兼容层，文件量最大，应该避免承载新功能。`langchain-tests` 和 `model-profiles` 是架构的质量回路：前者检查实现行为是否符合 core 契约，后者把 provider 能力数据集中生成。维护风险集中在 core 抽象变更、agent graph 边条件、provider profile 与 SDK 实际能力不一致。

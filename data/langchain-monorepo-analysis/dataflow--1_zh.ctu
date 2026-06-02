@@ -1,0 +1,66 @@
+Title: 数据与状态流
+Describe: 覆盖 S07_DATA_OR_STATE_FLOW。说明消息状态、运行配置、model profile 生成和 CI 数据如何流动。
+------------------------------------------------------------
+[Example]
+S07_DATA_OR_STATE_FLOW - agent 消息与状态生命周期
+
+[Description]
+`create_agent` 的状态以 `AgentState`、`messages`、`structured_response`、checkpointer/store 和 runtime config 为核心。`AgentState` 位于 `libs/langchain_v1/langchain/agents/middleware/types.py:353`；`AgentMiddleware` 位于同文件约 383 行；`factory.py` 会合并 middleware state schema 和调用方 `state_schema`，再把它交给 LangGraph `StateGraph`。
+
+[UML]
+@startuml
+left to right direction
+rectangle "用户输入\nmessages" as Input
+rectangle "AgentState\nmessages and optional fields" as State
+rectangle "before_agent\nbefore_model middleware" as BeforeHooks
+rectangle "model node\nBaseChatModel" as ModelNode
+rectangle "AIMessage\ncontent and tool_calls" as AIMessageNode
+rectangle "tools node\nToolNode" as ToolsNode
+rectangle "ToolMessage\nappend to messages" as ToolMessageNode
+database "checkpointer\nsingle thread state" as Checkpointer
+database "store\ncross thread data" as Store
+rectangle "after_model\nafter_agent middleware" as AfterHooks
+rectangle "输出\nmessages and structured_response" as Output
+Input --> State : initialize
+State --> BeforeHooks : hook reads or updates
+BeforeHooks --> ModelNode : model request
+ModelNode --> AIMessageNode : model response
+AIMessageNode --> ToolsNode : tool_calls
+ToolsNode --> ToolMessageNode : execution result
+ToolMessageNode --> State : append messages
+AIMessageNode --> AfterHooks : no tool_calls or structured output
+AfterHooks --> Output : final graph output
+State <--> Checkpointer : persist thread state
+State <--> Store : persist shared data
+@enduml
+
+[Detail]
+从左到右读图：箭头表示状态数据流或持久化读写。`messages` 是循环里的主数据结构，`AIMessage.tool_calls` 决定是否进入工具节点，`ToolMessage` 再写回 messages 触发下一轮模型调用。checkpointer 和 store 是不同粒度的状态边界：前者偏单线程会话记忆，后者偏跨线程/用户数据。风险是 middleware 可以读写状态并改变跳转目标，如果 state schema 合并不清晰，工具输出、结构化响应和持久化状态可能产生耦合。
+
+------------------------------------------------------------
+[Example]
+model profile 数据生成流
+
+[Description]
+`langchain-profiles` CLI 位于 `libs/model-profiles`，入口在 `pyproject.toml:33`：`langchain-profiles = "langchain_model_profiles.cli:main"`。CLI 从 models.dev 拉取数据，合并 `profile_augmentations.toml`，生成 partner data 目录下的 `_profiles.py`。OpenAI partner 的 `langchain_openai/data/_profiles.py` 文件头说明它由 CLI 生成，`chat_models/base.py:181` 的 `_get_default_model_profile` 从 `_PROFILES` 读取并返回 copy。
+
+[UML]
+@startuml
+left to right direction
+component "models.dev data" as ModelsDev
+component "profile_augmentations.toml" as Augmentations
+component "langchain-profiles refresh" as ProfilesCLI
+component "partner data/_profiles.py" as GeneratedProfiles
+component "_get_default_model_profile" as Resolver
+component "ChatOpenAI or other model" as PartnerModel
+component "capability flags" as Capabilities
+ModelsDev --> ProfilesCLI : download provider data
+Augmentations --> ProfilesCLI : merge local overrides
+ProfilesCLI --> GeneratedProfiles : write _PROFILES
+GeneratedProfiles --> Resolver : import registry
+Resolver --> PartnerModel : copy profile
+PartnerModel --> Capabilities : route behavior
+@enduml
+
+[Detail]
+箭头表示数据生成和读取方向。profile 数据不是用户运行时实时拉取，而是通过 CLI 生成进 partner 包。这个设计让 release artifact 可重复，但也引入“数据可能过期”的风险。AGENTS 明确要求更新 model profile 时使用 `langchain-profiles refresh --provider ... --data-dir ...`，且 `--data-dir` 必须指向包含 `profile_augmentations.toml` 的目录。

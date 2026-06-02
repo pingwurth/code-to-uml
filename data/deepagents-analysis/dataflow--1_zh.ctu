@@ -1,0 +1,144 @@
+Title: 数据与状态流
+Describe: 消息历史的生命周期、DeltaChannel 压缩和上下文管理策略
+------------------------------------------------------------
+[Example]
+消息状态生命周期
+
+[Description]
+从用户输入到持久化存储的消息流转。DeltaChannel 实现 O(N) 存储优化。
+
+[UML]
+@startuml
+[*] --> NewMessage : 用户输入/工具结果
+
+state NewMessage {
+  state "HumanMessage" as HM
+  state "ToolMessage" as TM
+  state "AIMessage" as AM
+}
+
+NewMessage --> Validated : 类型检查+格式化
+
+Validated --> InMiddleware : 进入中间件栈
+
+state InMiddleware {
+  state "前处理注入" as Pre
+  state "LLM调用" as Call
+  state "工具执行" as Tool
+  Pre --> Call
+  Call --> Tool : tool_calls
+  Tool --> Call : tool_results
+}
+
+InMiddleware --> Processed : LLM返回最终响应
+
+Processed --> DeltaStore : DeltaChannel处理
+
+state DeltaStore {
+  state "增量存储" as Delta
+  state "完整快照" as Snap
+  Delta --> Snap : 每50轮
+}
+
+DeltaStore --> Persisted : Checkpointer保存
+
+Persisted --> [*]
+
+Persisted --> Summarized : 上下文超限
+Summarized --> Persisted : 替换旧消息
+
+Persisted --> Evicted : 消息驱逐
+note right of Evicted : _message_eviction.py\n移除最老消息
+@enduml
+
+[Detail]
+**DeltaChannel 的快照+增量机制**:
+
+传统检查点存储：
+```
+Checkpoint 1: [msg1]                    → 1 条
+Checkpoint 2: [msg1, msg2]              → 2 条
+Checkpoint 3: [msg1, msg2, msg3]        → 3 条
+...
+Checkpoint N: [msg1, ..., msgN]         → N 条
+总存储: 1+2+3+...+N = O(N²)
+```
+
+DeltaChannel 存储：
+```
+Checkpoint 1: [msg1]           (快照)    → 1 条
+Checkpoint 2: [+msg2]         (增量)    → 1 条
+...
+Checkpoint 50: [msg1,...,msg50] (快照)   → 50 条
+Checkpoint 51: [+msg51]       (增量)    → 1 条
+总存储: ≈ O(N)
+```
+
+**`_messages_delta_reducer` 行为**:
+- 合并新增消息到列表末尾
+- 通过 message ID 去重（更新已有消息）
+- 处理 ToolMessage 的回填（tool_call_id 匹配）
+
+**驱逐策略** (`_message_eviction.py`):
+- 当消息总量超过阈值时触发
+- 保留最近 N 条 + 摘要
+- 系统消息永不驱逐
+
+------------------------------------------------------------
+[Example]
+上下文管理流
+
+[Description]
+长对话的摘要、卸载和恢复策略。`SummarizationMiddleware` 和 `_overflow_clip.py` 协作管理上下文窗口。
+
+[UML]
+@startuml
+start
+
+:检查当前消息 token 数;
+
+if (超过模型上下文窗口 80%?) then (yes)
+  :选择压缩策略;
+  
+  if (有 SummarizationMiddleware?) then (yes)
+    :将旧消息发送给摘要 LLM;
+    :生成摘要 SystemMessage;
+    :替换原始旧消息;
+    note right: 保留最近 N 条原始消息\n旧消息替换为摘要
+  else (no)
+    :触发 overflow_clip;
+    :直接截断最老的消息;
+    note right: 硬截断\n可能丢失上下文
+  endif
+  
+  :更新 DeltaChannel 快照;
+else (no)
+  :继续正常处理;
+endif
+
+:传递给 LLM;
+
+stop
+@enduml
+
+[Detail]
+**摘要中间件触发条件**:
+- 消息列表的 token 总量超过模型上下文窗口的 80%（可配置）
+- 只对 HumanMessage 和 AIMessage 计数（SystemMessage 和 ToolMessage 不计入触发阈值，但计入总量）
+
+**摘要策略**:
+- 使用与主 agent 相同的模型（或更小的模型）生成摘要
+- 摘要作为特殊的 SystemMessage 插入到消息列表前部
+- 原始旧消息被移除，减少 token 消耗
+
+**`_overflow_clip.py` 的作用**:
+- 当摘要也无法缩减到安全范围时的最后手段
+- 直接从前往后移除消息（FIFO）
+- 永远保留第一条 SystemMessage 和最近的几轮对话
+
+**配置位置**:
+- `create_summarization_middleware(model, backend)` 在 `graph.py` 中构建
+- 文件 `middleware/summarization.py`（64.9KB）包含完整实现
+- 摘要提示词和策略可通过 HarnessProfile 自定义
+
+------------------------------------------------------------

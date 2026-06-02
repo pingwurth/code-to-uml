@@ -1,0 +1,242 @@
+Title: 核心对象与函数
+Describe: SDK 的核心类、接口和数据结构详解
+------------------------------------------------------------
+[Example]
+create_deep_agent() 工厂函数
+
+[Description]
+SDK 的主入口 API，接受 15+ 参数，构建完整配置的 Agent。返回 `CompiledStateGraph`，可直接 `invoke()` 或 `stream()` 调用。
+
+[UML]
+@startuml
+class "create_deep_agent()" as CDA {
+  .. 模型配置 ..
+  model: str | BaseChatModel | None
+  .. 工具配置 ..
+  tools: Sequence[BaseTool | Callable] | None
+  system_prompt: str | SystemMessage | None
+  .. 中间件配置 ..
+  middleware: Sequence[AgentMiddleware]
+  subagents: Sequence[SubAgent | AsyncSubAgent] | None
+  skills: list[str] | None
+  memory: list[str] | None
+  permissions: list[FilesystemPermission] | None
+  .. 后端配置 ..
+  backend: BackendProtocol | BackendFactory | None
+  .. 运行时配置 ..
+  interrupt_on: dict | None
+  response_format: ResponseFormat | None
+  state_schema: type[DeepAgentState] | None
+  context_schema: type[ContextT] | None
+  checkpointer: Checkpointer | None
+  store: BaseStore | None
+  cache: BaseCache | None
+  debug: bool
+  name: str | None
+  .. 返回值 ..
+  {method} -> CompiledStateGraph
+}
+@enduml
+
+[Detail]
+**参数分组说明**:
+
+1. **模型配置**: `model` 支持字符串格式 `"provider:model_name"`（如 `"openai:gpt-5.5"`）或预构建的 `BaseChatModel` 实例。`None` 已废弃，默认使用 `claude-sonnet-4-6`。
+
+2. **工具配置**: `tools` 为附加工具，与内建工具（`write_todos`, `ls`, `read_file`, `write_file`, `edit_file`, `glob`, `grep`, `execute`, `task`）合并。
+
+3. **中间件配置**: 定义功能栈。`middleware` 插入在 base stack 和 tail stack 之间。
+
+4. **后端配置**: `backend` 决定文件系统和 Shell 的实现方式。默认使用 `StateBackend`（内存态）。
+
+5. **运行时配置**: `checkpointer` 启用对话持久化；`store` 提供跨会话存储；`cache` 启用 LLM 调用缓存。
+
+**关键行为**:
+- 函数内部 830 行，包含模型解析、profile 应用、中间件组装、子智能体处理等
+- 最终调用 `create_agent()` + `.with_config()` 返回配置完毕的编译图
+- `recursion_limit` 硬编码为 9999，允许深度递归的工具调用循环
+
+------------------------------------------------------------
+[Example]
+DeepAgentState 状态机
+
+[Description]
+基于 LangGraph `DeltaChannel` 的消息状态管理。将检查点存储从 O(N^2) 优化到 O(N)。
+
+[UML]
+@startuml
+class AgentState {
+  messages: list[AnyMessage]
+}
+
+class DeepAgentState {
+  messages: Annotated[list[AnyMessage], DeltaChannel]
+  --
+  snapshot_frequency = 50
+  reducer = _messages_delta_reducer
+}
+
+class DeltaChannel {
+  reducer: Callable
+  snapshot_frequency: int
+  --
+  仅存储增量变更
+  每 N 轮保存完整快照
+}
+
+AgentState <|-- DeepAgentState
+DeepAgentState *-- DeltaChannel
+@enduml
+
+[Detail]
+**DeltaChannel 压缩原理**:
+
+传统方式：每次检查点保存完整消息列表 → 长对话时存储为 O(N^2)
+
+DeltaChannel 方式：
+- 平时只存储新增的消息（增量/delta）
+- 每隔 `snapshot_frequency`（默认50轮）保存一次完整快照
+- 恢复时：找到最近快照 + 重放后续增量
+
+**`_messages_delta_reducer` 的作用**:
+- 合并新消息到历史列表
+- 处理消息去重（基于 message ID）
+- 支持消息更新（tool call results 回填）
+
+**边界情况**:
+- 如果自定义 `state_schema`，必须继承 `DeepAgentState` 以保留 DeltaChannel 优化
+- `snapshot_frequency=50` 是经验值，平衡恢复速度和存储开销
+
+------------------------------------------------------------
+[Example]
+BackendProtocol 后端协议
+
+[Description]
+文件系统和 Shell 执行的统一接口。通过策略模式支持本地、沙箱、云端等多种执行环境。
+
+[UML]
+@startuml
+interface BackendProtocol {
+  +read_file(path): str
+  +write_file(path, content): None
+  +list_directory(path): list[FileInfo]
+  +glob(pattern): list[str]
+  +grep(pattern, path): list[GrepMatch]
+}
+
+interface SandboxBackendProtocol {
+  +execute(command): ExecuteResult
+  +upload_files(files): list[FileUploadResponse]
+  +download_files(paths): list[FileDownloadResponse]
+}
+
+class StateBackend {
+  内存态文件系统
+  适用于短期会话
+}
+
+class "FilesystemBackend\n(local)" as FSBackend {
+  本地磁盘操作
+  root_dir 限制
+}
+
+class CompositeBackend {
+  组合多个后端
+  路由到对应实现
+}
+
+class DaytonaBackend {
+  Daytona 沙箱
+  远程文件+执行
+}
+
+BackendProtocol <|.. StateBackend
+BackendProtocol <|.. FSBackend
+BackendProtocol <|.. CompositeBackend
+SandboxBackendProtocol <|.. DaytonaBackend
+BackendProtocol <|-- SandboxBackendProtocol
+@enduml
+
+[Detail]
+**设计原理**:
+- `BackendProtocol` 定义纯文件操作（读/写/列目录/glob/grep）
+- `SandboxBackendProtocol` 扩展增加命令执行和批量文件传输
+- 不实现 `SandboxBackendProtocol` 的后端，`execute` 工具会返回错误提示
+
+**实现清单**:
+- `StateBackend`: 默认后端，文件存储在 LangGraph state 中，无需真实文件系统
+- `FilesystemBackend`: 操作本地磁盘，受 `root_dir` 路径限制
+- `CompositeBackend`: 组合多个后端，按路径前缀路由
+- `DaytonaBackend`, `ModalBackend`, `RunloopBackend`: Partner 提供的远程沙箱
+
+**扩展新后端的步骤**:
+1. 实现 `BackendProtocol`（或 `SandboxBackendProtocol`）
+2. 注册为 partner 包或直接传入 `backend=` 参数
+3. 无需修改 SDK 核心代码
+
+------------------------------------------------------------
+[Example]
+SubAgent 子智能体定义
+
+[Description]
+子智能体的 TypedDict 结构和生命周期。支持声明式（`SubAgent`）、预编译（`CompiledSubAgent`）和异步（`AsyncSubAgent`）三种形式。
+
+[UML]
+@startuml
+class "SubAgent (TypedDict)" as SA {
+  name: str
+  description: str
+  system_prompt: str
+  --
+  model: BaseChatModel | str | None
+  tools: Sequence[BaseTool] | None
+  middleware: list[AgentMiddleware]
+  interrupt_on: dict | None
+  skills: list[str] | None
+}
+
+class "CompiledSubAgent (TypedDict)" as CSA {
+  name: str
+  description: str
+  runnable: CompiledStateGraph
+}
+
+class "AsyncSubAgent (TypedDict)" as ASA {
+  name: str
+  description: str
+  graph_id: str
+  --
+  url: str | None
+  headers: dict | None
+}
+
+class SubAgentMiddleware {
+  backend: BackendProtocol
+  subagents: list[SubAgent]
+  +subagent_names: frozenset[str]
+}
+
+class AsyncSubAgentMiddleware {
+  async_subagents: list[AsyncSubAgent]
+}
+
+SubAgentMiddleware --> SA : manages
+SubAgentMiddleware --> CSA : manages
+AsyncSubAgentMiddleware --> ASA : manages
+@enduml
+
+[Detail]
+**三种子智能体形式**:
+
+1. **SubAgent（声明式）**: 提供 name/description/system_prompt，SDK 自动构建。继承父 agent 的 tools 和 permissions（除非显式覆盖）。
+
+2. **CompiledSubAgent（预编译）**: 提供已编译的 `runnable`，适用于需要完全自定义图结构的场景。
+
+3. **AsyncSubAgent（异步/远程）**: 通过 `graph_id` 标识远程部署的 agent，支持后台执行。提供 launch/check/update/cancel/list 五个操作工具。
+
+**默认行为**:
+- 如果没有提供名为 `general-purpose` 的子智能体，SDK 自动添加一个默认通用子智能体
+- 可通过 `GeneralPurposeSubagentProfile(enabled=False)` 禁用
+- 子智能体通过 `task` 工具暴露给主 agent
+
+------------------------------------------------------------

@@ -1,0 +1,63 @@
+Title: 核心对象
+Describe: 覆盖 S03_CORE_OBJECTS。解释主要类、函数、包级对象的责任、接口、依赖方向和本地调用关系。
+------------------------------------------------------------
+[Example]
+S03_CORE_OBJECTS - 核心抽象关系
+
+[Description]
+项目核心抽象集中在 `langchain_core`。`Runnable` 位于 `libs/core/langchain_core/runnables/base.py:125`，定义 sync/async/batch/stream/compose 协议；`BaseChatModel` 位于 `libs/core/langchain_core/language_models/chat_models.py:270`；`BaseMessage`、`AIMessage`、`HumanMessage` 分别位于 messages 包；`BaseTool` 位于 tools 包并实现 `RunnableSerializable`；`Embeddings`、`VectorStore`、`Document`、`BasePromptTemplate`、`BaseOutputParser` 分别形成向量、文档、prompt 和解析契约。
+
+[UML]
+@startuml
+left to right direction
+abstract class Runnable {
+  invoke(input)
+  ainvoke(input)
+  batch(inputs)
+  stream(input)
+}
+abstract class BaseLanguageModel
+abstract class BaseChatModel {
+  _generate(messages)
+  _stream(messages)
+  bind_tools(tools)
+  with_structured_output(schema)
+}
+abstract class BaseTool
+abstract class Embeddings
+abstract class VectorStore
+class BaseMessage
+class AIMessage
+class HumanMessage
+class ToolMessage
+class Document
+class ChatOpenAI
+class OpenAIEmbeddings
+class ChatModelUnitTests
+BaseLanguageModel -|> Runnable
+BaseChatModel -|> BaseLanguageModel
+BaseTool -|> Runnable
+AIMessage -|> BaseMessage
+HumanMessage -|> BaseMessage
+ToolMessage -|> BaseMessage
+VectorStore --> Document : stores and retrieves
+ChatOpenAI -|> BaseChatModel
+OpenAIEmbeddings ..|> Embeddings
+ChatModelUnitTests --> BaseChatModel : conformance target
+@enduml
+
+[Detail]
+从 `Runnable` 读起：它是组合协议而不是某个 provider 的实现。箭头表示继承、接口实现或测试目标关系。`BaseChatModel` 通过 `_generate`、`_stream`、`bind_tools`、`with_structured_output` 规定聊天模型最低能力；`ChatOpenAI` 在 partner 包中实现这些能力，不能倒置依赖回 core。消息对象承载 agent 循环中的状态，尤其是 `AIMessage.tool_calls` 和 `ToolMessage`。风险点是任何公共抽象签名变更都会穿透到 partner 包、标准测试和用户代码。
+
+------------------------------------------------------------
+[Example]
+活跃入口和导出面
+
+[Description]
+`libs/langchain_v1/langchain/__init__.py` 只暴露 `__version__ = "1.3.2"`；真正用户入口分散在子包：`langchain.chat_models.__init__` 导出 `BaseChatModel` 和 `init_chat_model`，`langchain.agents.__init__` 导出 `create_agent` 和 `AgentState`。OpenAI partner 的 `langchain_openai.__init__` 导出 `ChatOpenAI`、`AzureChatOpenAI`、`OpenAIEmbeddings`、`AzureOpenAIEmbeddings`、`OpenAI`、`AzureOpenAI`、`custom_tool` 和 `StreamChunkTimeoutError`。
+
+[UML]
+None
+
+[Detail]
+导出面很克制：活跃 `langchain` 包把高层入口留在 `chat_models` 和 `agents`，core 包通过多个子模块暴露抽象，partners 按 provider 暴露具体实现。这样的好处是用户可以用统一入口初始化 provider，也可以直接实例化 `langchain_openai.ChatOpenAI`。代价是公共 API 审查必须覆盖 `__init__.py`、类型重载、docstring 示例、标准测试和外部 docs，不能只看实现文件。

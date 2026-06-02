@@ -1,0 +1,115 @@
+Title: 设计原理与风险
+Describe: 架构设计决策、核心模式的原理，以及已知风险和改进建议
+------------------------------------------------------------
+[Example]
+中间件栈模式
+
+[Description]
+可组合、可排除的中间件架构设计原理。解释为什么选择中间件模式而非继承或插件系统。
+
+[UML]
+None
+
+[Detail]
+**设计决策**:
+
+中间件模式 vs 替代方案：
+
+| 方案 | 优势 | 劣势 |
+|------|------|------|
+| **中间件栈（当前）** | 可组合、可排序、可排除 | 调试时调用栈较深 |
+| 继承/Mixin | 类型安全、IDE 友好 | 组合爆炸、菱形继承 |
+| 插件/Hook 系统 | 松耦合、动态注册 | 执行顺序不确定 |
+| 装饰器链 | 简洁、函数式 | 无法动态排除 |
+
+**选择中间件的核心原因**:
+1. **可排除性**: `excluded_middleware` 允许 Profile 移除不需要的功能，无需 fork
+2. **顺序可控**: 明确的 base → user → tail 三段顺序，避免优先级冲突
+3. **继承传播**: 子智能体自动继承父级中间件配置
+4. **安全保障**: `_REQUIRED_MIDDLEWARE` 机制确保关键中间件不被误删
+
+**扩展指南**:
+- 实现 `AgentMiddleware` 接口
+- 通过 `middleware=` 参数传入
+- 或通过 `HarnessProfile.extra_middleware` 注册为 profile 级别的扩展
+- 注意：中间件是有状态的（每个 agent 实例一份），不要共享可变状态
+
+------------------------------------------------------------
+[Example]
+后端协议（策略模式）
+
+[Description]
+通过协议接口解耦文件系统和 Shell 执行。策略模式实现零成本后端切换。
+
+[UML]
+None
+
+[Detail]
+**策略模式的优势**:
+
+1. **零修改切换**: 用户代码只需更换 `backend=` 参数即可切换执行环境
+   ```python
+   # 本地开发
+   agent = create_deep_agent(backend=FilesystemBackend(root_dir="."))
+   
+   # 沙箱部署
+   agent = create_deep_agent(backend=DaytonaBackend(workspace_id="..."))
+   ```
+
+2. **安全隔离**: `SandboxBackendProtocol` 的命令执行在隔离环境中运行
+   - Agent 无法逃逸沙箱边界
+   - `FilesystemPermission` 规则由 `FilesystemMiddleware` 强制执行
+   - 权限检查在中间件层，不依赖后端实现
+
+3. **测试友好**: `StateBackend` 提供零 I/O 的内存实现
+   - 单元测试不需要真实文件系统
+   - 可以预设文件内容和预期行为
+   - CI 环境无需特殊配置
+
+**沙箱安全边界**:
+- 后端实现负责路径验证和访问控制
+- `FilesystemMiddleware` 负责权限规则匹配
+- 两层防护：即使后端有漏洞，中间件仍会拦截违规操作
+
+------------------------------------------------------------
+[Example]
+风险与改进建议
+
+[Description]
+当前架构中的已知风险和可改进方向。基于代码复杂度、依赖管理和可维护性分析。
+
+[UML]
+None
+
+[Detail]
+**已知风险**:
+
+1. **graph.py 的 830 行复杂度**:
+   - 单函数 `create_deep_agent` 承载过多职责
+   - 已有 `# noqa: C901, PLR0912, PLR0915` 压制复杂度警告
+   - 风险：修改时容易引入回归，新开发者难以理解完整逻辑
+   - 建议：拆分为 `_resolve_model_and_profile()`、`_build_middleware_stack()`、`_process_subagents()` 等子函数
+
+2. **精确 pin 的维护压力**:
+   - Code 包对 SDK 使用 exact pin（`==0.6.7`）
+   - 每次 SDK 发布都必须同步更新 Code 包
+   - 风险：版本漂移时 CI 可能通过但运行时不兼容
+   - 建议：考虑使用兼容性约束（`~=0.6.7`）减少同步开销
+
+3. **Code 包的依赖膨胀**:
+   - `deepagents-code` 的 `uv.lock` 为 1109KB（最大的锁文件）
+   - 包含 Textual、Rich、httpx 等大量依赖
+   - 风险：安装慢、依赖冲突概率增加
+   - 建议：将重量级功能（如 MCP）移为可选依赖
+
+4. **middleware/summarization.py 的 64.9KB 体积**:
+   - 单文件过大，内含多种摘要策略
+   - 风险：难以独立测试和理解各策略的边界
+   - 建议：拆分为 `summarization/` 子包
+
+5. **默认模型废弃的过渡期**:
+   - `model=None` 已废弃但仍允许
+   - 1.0.0 前需要完成迁移通知
+   - 建议：在 0.8.0 升级为 `DeprecationWarning`（当前为自定义 warning）
+
+------------------------------------------------------------

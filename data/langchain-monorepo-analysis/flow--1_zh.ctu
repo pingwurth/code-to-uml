@@ -1,0 +1,74 @@
+Title: 核心流程图
+Describe: 覆盖 S05_CORE_FLOW。以 `create_agent` 为主流程，说明模型、工具、middleware、结构化输出和停止条件。
+------------------------------------------------------------
+[Example]
+S05_CORE_FLOW - agent 主循环
+
+[Description]
+`create_agent` 位于 `libs/langchain_v1/langchain/agents/factory.py:697`。它接受 `model`、`tools`、`system_prompt`、`middleware`、`response_format`、`state_schema`、`checkpointer`、`store`、interrupt 和 cache 等参数，返回 `CompiledStateGraph`。docstring 明确说明：agent node 调用语言模型；如果 `AIMessage` 包含 `tool_calls`，graph 调用 tools node 并把结果追加为 `ToolMessage`；之后再次调用模型，直到没有 tool calls。
+
+[UML]
+@startuml
+start
+:接收 create_agent 参数;
+if (model 是字符串?) then (是)
+  :调用 init_chat_model(model);
+else (否)
+  :使用传入的 BaseChatModel;
+endif
+:转换 system_prompt 为 SystemMessage;
+:规范化 tools 和 structured output strategy;
+:收集中间件 hooks 与工具;
+:解析 state_schema, input_schema, output_schema;
+:创建 LangGraph StateGraph;
+:添加 model 节点;
+if (有工具或 wrap_tool_call?) then (是)
+  :添加 tools 节点;
+endif
+:添加 middleware 节点;
+:连接 START, loop entry, loop exit 和 END;
+if (模型输出包含 tool_calls?) then (是)
+  :执行 tools 并追加 ToolMessage;
+  :回到 model 或 before_model;
+else (否)
+  :运行 after_agent 或直接 END;
+endif
+:compile graph 并绑定 metadata/config;
+stop
+@enduml
+
+[Detail]
+从顶部开始读活动图：它回答“一个 agent 从创建到运行循环如何成形”。图中的每个节点都对应 `factory.py` 中的代码段：字符串模型先走 `init_chat_model`，`response_format` 被包装成 `ToolStrategy` 或 `ProviderStrategy`，`StateGraph` 在约 1048 行创建，`model` 和 `tools` 节点在约 1386/1390 行添加，条件边在约 1504 行之后连接，最终在约 1671 行 `compile`。风险点在 structured output 与 tool loop 的交互：多个 structured output tool call、`return_direct`、middleware jump 和 provider strategy 都可能改变循环终点。
+
+------------------------------------------------------------
+[Example]
+模型初始化流程
+
+[Description]
+`init_chat_model` 位于 `libs/langchain_v1/langchain/chat_models/base.py:210`，通过 overload 支持固定模型和可配置模型。它的 docstring 警告 `configurable_fields="any"` 会让 `api_key`、`base_url` 等字段可被运行时配置修改，可能把请求重定向到不同服务或用户。`_attempt_infer_model_provider` 位于同文件约 521 行，根据模型名前缀推断 provider。
+
+[UML]
+@startuml
+start
+:调用 init_chat_model;
+if (model 缺失且 configurable_fields 缺失?) then (是)
+  :默认允许配置 model 和 model_provider;
+endif
+if (没有 configurable_fields?) then (固定模型)
+  :解析 provider:model 或推断 provider;
+  :加载 provider creator;
+  :返回 BaseChatModel 实例;
+else (可配置模型)
+  :创建 _ConfigurableModel;
+  :记录默认配置和允许字段;
+  if (调用 bind_tools 或 with_structured_output?) then (是)
+    :把声明式操作排队;
+  endif
+  :运行时从 config.configurable 取参数;
+  :实例化真实模型并回放队列;
+endif
+stop
+@enduml
+
+[Detail]
+这张图说明 `init_chat_model` 的两个模式。固定模型路径直接解析 provider 并返回真实 `BaseChatModel`；可配置模型路径返回代理对象，直到 `invoke` 或 `with_config` 时才用配置实例化真实模型。箭头是控制流，不是包依赖。维护风险是 provider 推断和可配置字段都是用户可见行为：新增 provider 前缀会改变路由，放宽 configurable 字段会改变安全边界。

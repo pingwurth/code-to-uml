@@ -1,0 +1,170 @@
+Title: 调用关系
+Describe: 跨模块、跨服务的完整调用链追踪
+------------------------------------------------------------
+[Example]
+SDK invoke 调用序列
+
+[Description]
+从用户 `invoke()` 到 LLM 响应返回的完整调用链。展示中间件栈如何层层包装和拦截。
+
+[UML]
+@startuml
+participant "User Code" as User
+participant "CompiledStateGraph" as Graph
+participant "TodoListMW" as Todo
+participant "FilesystemMW" as FSM
+participant "SubAgentMW" as SAM
+participant "SummarizationMW" as Sum
+participant "LLM Provider" as LLM
+participant "Backend" as BE
+
+User -> Graph: invoke({"messages": [HumanMessage]})
+activate Graph
+
+Graph -> Todo: pre_process(state)
+activate Todo
+Todo --> Graph: state + todo_tool
+deactivate Todo
+
+Graph -> FSM: pre_process(state)
+activate FSM
+FSM -> BE: validate permissions
+BE --> FSM: ok
+FSM --> Graph: state + file_tools
+deactivate FSM
+
+Graph -> SAM: pre_process(state)
+activate SAM
+SAM --> Graph: state + task_tool
+deactivate SAM
+
+Graph -> Sum: pre_process(state)
+activate Sum
+Sum -> Sum: check context length
+Sum --> Graph: state (possibly summarized)
+deactivate Sum
+
+Graph -> LLM: chat(messages, tools)
+activate LLM
+LLM --> Graph: AIMessage(tool_calls=[...])
+deactivate LLM
+
+Graph -> FSM: handle_tool_call("write_file", args)
+activate FSM
+FSM -> BE: write_file(path, content)
+BE --> FSM: success
+FSM --> Graph: ToolMessage(result)
+deactivate FSM
+
+Graph -> LLM: chat(messages + tool_result)
+activate LLM
+LLM --> Graph: AIMessage(content="Done")
+deactivate LLM
+
+Graph --> User: {"messages": [..., AIMessage]}
+deactivate Graph
+@enduml
+
+[Detail]
+**调用链关键节点**:
+
+1. **invoke 入口**: `CompiledStateGraph.invoke()` 接收 state dict，包含 `messages` 列表
+
+2. **中间件前处理**: 按注册顺序依次调用每个中间件的 `pre_process`
+   - 注入工具定义到 state
+   - 检查权限（FilesystemMW）
+   - 检查上下文长度（SummarizationMW）
+
+3. **LLM 调用**: 将处理后的 messages + 所有注入的 tools 发送给模型
+
+4. **工具执行**: LLM 返回 `tool_calls` 时，对应中间件拦截并执行
+   - 文件操作 → `FilesystemMiddleware` → `Backend`
+   - task 调用 → `SubAgentMiddleware` → 子智能体图
+
+5. **循环**: 工具结果追加为 `ToolMessage`，再次调用 LLM
+
+6. **返回**: LLM 最终返回纯文本响应（无 tool_calls），结束循环
+
+**数据变换**:
+- 每层中间件可修改 state（添加工具、注入系统消息）
+- Backend 操作是同步的（但 LangGraph 支持异步执行）
+- DeltaChannel 在每步后只记录增量
+
+------------------------------------------------------------
+[Example]
+ACP 协议交互序列
+
+[Description]
+ACP (Agent Context Protocol) Client 与 Deep Agent Server 的完整交互协议。支持流式响应和工具调用编辑。
+
+[UML]
+@startuml
+participant "ACP Client" as Client
+participant "ACP Server\n(deepagents_acp)" as Server
+participant "Deep Agent\n(SDK)" as Agent
+participant "LLM" as LLM
+
+Client -> Server: POST /initialize
+activate Server
+Server --> Client: capabilities, agent_info
+deactivate Server
+
+Client -> Server: POST /sessions/new
+activate Server
+Server -> Agent: create session (thread_id)
+Agent --> Server: session_id
+Server --> Client: session_id
+deactivate Server
+
+Client -> Server: POST /sessions/{id}/content
+activate Server
+Server -> Agent: invoke(messages)
+activate Agent
+Agent -> LLM: chat(messages, tools)
+LLM --> Agent: response (streaming)
+
+loop tool calls
+  Agent -> Agent: execute tool
+  Agent -> LLM: continue with results
+  LLM --> Agent: next response
+end
+
+Agent --> Server: final response
+deactivate Agent
+Server --> Client: streaming chunks
+deactivate Server
+
+Client -> Server: POST /sessions/{id}/content\n(follow-up)
+activate Server
+Server -> Agent: invoke(new messages, same thread)
+Agent --> Server: response
+Server --> Client: streaming response
+deactivate Server
+@enduml
+
+[Detail]
+**ACP 协议阶段**:
+
+1. **初始化** (`/initialize`):
+   - Client 发送能力声明
+   - Server 返回支持的功能、agent 信息
+   - 协商工具调用编辑权限
+
+2. **会话创建** (`/sessions/new`):
+   - 创建新的 LangGraph thread
+   - 返回 session_id 用于后续交互
+   - 可选：恢复已有会话
+
+3. **内容交互** (`/sessions/{id}/content`):
+   - 发送用户消息
+   - 服务端流式返回 agent 响应
+   - 支持多轮对话（同一 thread_id）
+
+4. **工具调用编辑** (可选):
+   - Client 可拦截 tool_calls 并修改参数
+   - 适用于 Human-in-the-loop 场景
+   - 通过 `interrupt_on` 机制实现
+
+**实现位置**: `libs/acp/deepagents_acp/server.py`（约 42KB）
+
+------------------------------------------------------------
