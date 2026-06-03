@@ -15,6 +15,14 @@
 
 ---
 
+## 演示
+
+<p align="center">
+  <img src="docs/images/demo_zh.gif" alt="Code-To-UML 演示" width="800">
+</p>
+
+---
+
 ## 核心特性
 
 - ✅ **浏览器优先渲染** — PlantUML WASM，零服务器延迟

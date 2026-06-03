@@ -15,6 +15,14 @@
 
 ---
 
+## Demo
+
+<p align="center">
+  <img src="docs/images/demo_en.gif" alt="Code-To-UML Demo" width="800">
+</p>
+
+---
+
 ## Key Features
 
 - ✅ **Browser-First Rendering** — PlantUML WASM, zero server latency
