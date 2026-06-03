@@ -1,0 +1,55 @@
+Title: Architecture Diagram
+Describe: Runtime boundaries include the CLI main thread, cron threads, teammate threads, background tool threads, the Anthropic API, and file-backed local state.
+------------------------------------------------------------
+[Example]
+S04_ARCHITECTURE: Runtime boundaries
+
+[Description]
+This architecture is not a conventional multi-module layered system.
+
+It is a teaching harness composed at runtime: the main CLI thread appends user input to `history`, `agent_loop` calls the Anthropic API, the model returns `tool_use` blocks, and local handlers execute them.
+
+The cron scheduler discovers scheduled prompts, the cron autorun path drives the same agent loop, teammate threads run independent model loops, and background workers return delayed tool output.
+
+[UML]
+@startuml
+left to right direction
+actor "User CLI" as User
+node "Main process" as Proc {
+  component "__main__ input loop" as CLI
+  component "agent_loop" as Loop
+  component "cron_autorun_loop" as AutoCron
+  component "cron_scheduler_loop" as Cron
+  component "spawn_teammate_thread.run" as Teammate
+  component "background worker" as Background
+  component "HOOKS permission/logging" as Hooks
+}
+cloud "Anthropic Messages API" as API
+database ".tasks\n.worktrees\n.mailboxes\n.transcripts\n.memory\n.scheduled_tasks.json" as Store
+component "mock MCP servers\ndocs/deploy" as MCP
+User -- CLI
+CLI -- Loop
+AutoCron -- Loop
+Loop -- API
+Loop -- Hooks
+Loop -- Store
+Loop -- MCP
+Cron -- Store
+Teammate -- API
+Teammate -- Store
+Background -- Store
+MCP -- Loop
+@enduml
+
+[Detail]
+Start from the CLI on the left.
+
+Arrows show call, read/write, or event injection direction.
+
+`agent_loop` is the core execution path for model tool calls; the cron autorun path also enters it through `agent_lock`.
+
+The storage node represents local teaching stores rather than a database abstraction.
+
+The main architectural risk is shared global and file-backed state across daemon threads.
+
+Cron and background dictionaries use locks in places, but task files, mailbox files, and pending protocol requests are not protected by a complete transaction model.

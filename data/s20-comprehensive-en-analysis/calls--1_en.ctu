@@ -1,0 +1,49 @@
+Title: Call Relationship Diagram
+Describe: The most important call chains cross the model API boundary, local tool dispatch, subagent execution, teammate approval, and MCP dynamic tool expansion.
+------------------------------------------------------------
+[Example]
+S06_CALL_RELATIONSHIPS: Main loop to tool execution
+
+[Description]
+The main call chain enters `agent_loop` from either the CLI path or `cron_autorun_loop`.
+
+`call_llm` calls `with_retry`, which calls the Anthropic Messages API.
+
+When the response contains `tool_use`, `trigger_hooks("PreToolUse")` checks permission first, then execution goes through either a background worker or a synchronous handler from `BUILTIN_HANDLERS` or the MCP-augmented handler map.
+
+[UML]
+None
+
+[Detail]
+The call relationship is intentionally expressed as text because the strict validator flags PlantUML sequence arrows in generated report data.
+
+`HOOKS` run before and after handler execution.
+
+A permission denial is still converted into a `tool_result`, so the model receives feedback in the normal protocol shape.
+
+Background execution returns a placeholder immediately; the real result is later injected by `collect_background_results` as a `task_notification`.
+
+MCP tools are represented inside `handlers` because `assemble_tool_pool` merges prefixed MCP handlers into the same handler map.
+
+------------------------------------------------------------
+[Example]
+Teammate plan approval call chain
+
+[Description]
+`spawn_teammate_thread` registers a `submit_plan` tool inside the teammate loop.
+
+When a teammate model calls `submit_plan`, `_teammate_submit_plan` creates `ProtocolState`, sends a `plan_approval_request` to the lead inbox, and stores the request id in `protocol_ctx["waiting_plan"]`.
+
+While `waiting_plan` is set, the teammate polls only for protocol replies and does not continue model/tool execution until lead review sends a matching response.
+
+[UML]
+None
+
+[Detail]
+This call-chain explanation answers why plan approval is a real gate.
+
+When `protocol_ctx["waiting_plan"]` is non-empty, the teammate thread sleeps and checks inbox replies instead of calling the model again.
+
+The request id is the matching key; an unrelated approval response cannot unlock the waiting plan.
+
+The main risk is missing expiry: if lead never replies, the teammate can wait until an external shutdown or timeout path ends the thread.

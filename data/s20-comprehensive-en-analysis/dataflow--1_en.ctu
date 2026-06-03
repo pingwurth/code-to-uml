@@ -1,0 +1,68 @@
+Title: Data or State Flow Diagram
+Describe: State moves through JSON files, global dictionaries, message lists, queues, and thread-owned local context.
+------------------------------------------------------------
+[Example]
+S07_DATA_OR_STATE_FLOW: Task lifecycle
+
+[Description]
+Tasks start in `pending` through `create_task`, which writes `.tasks/task_*.json`.
+
+`claim_task` requires a pending task with no owner and successful dependency checks through `can_start`, then changes status to `in_progress`.
+
+`complete_task` accepts only `in_progress`, changes status to `completed`, and reports newly unblocked pending tasks.
+
+`bind_task_to_worktree` can attach a worktree name to a task record.
+
+[UML]
+None
+
+[Detail]
+The lifecycle explanation shows valid transitions and rejection paths.
+
+The state is persisted in `.tasks` JSON files rather than a transactional database.
+
+`can_start` returns false when a dependency id is missing or incomplete.
+
+`claim_task` includes missing and incomplete dependencies in its return message.
+
+If maintainers add task states, they must update `claim_task`, `complete_task`, `scan_unclaimed_tasks`, and display functions such as `run_list_tasks`.
+
+------------------------------------------------------------
+[Example]
+Message and context dataflow
+
+[Description]
+User input, teammate messages, protocol replies, cron events, and background task results all eventually enter `messages` or `history`.
+
+`prepare_context` shrinks large tool results, trims old message ranges, micro-compacts earlier tool results, and calls `compact_history` when `estimate_size(messages)` exceeds `CONTEXT_LIMIT`.
+
+Background results first land in `background_results`, then later become XML-like notifications.
+
+[UML]
+@startuml
+left to right direction
+component "User input" as UserInput
+component "cron_queue" as CronQueue
+component "background_results" as BackgroundResults
+component ".mailboxes/*.jsonl" as Mailbox
+component "messages/history" as Messages
+component "prepare_context" as Prepare
+database ".transcripts\n.task_outputs/tool-results" as Persisted
+component "Anthropic request" as Request
+UserInput -- Messages
+CronQueue -- Messages : scheduled prompt
+BackgroundResults -- Messages : task_notification
+Mailbox -- Messages : inbox and protocol content
+Messages -- Prepare
+Prepare -- Persisted : transcript or large output
+Prepare -- Request : trimmed or compacted messages
+@enduml
+
+[Detail]
+Arrows show data movement.
+
+`messages` is the central model-context cache; files and queues are different entry points into it.
+
+`tool_result_budget` can persist large output under `.task_outputs/tool-results` and return only a path plus preview to the model.
+
+That controls context growth, but follow-up work must be able to reread persisted output when the preview is insufficient.

@@ -1,0 +1,124 @@
+Title: Developer Onboarding Guide, Review Questions, and Maintainer Reference
+Describe: Read from the main loop outward, then inspect tool pools, local state, protocol boundaries, and recovery paths.
+------------------------------------------------------------
+[Example]
+S10_ONBOARDING_GUIDE: Reading and debugging path
+
+[Description]
+Recommended reading order:
+
+1. Read `__main__` and `agent_loop` to see how CLI input enters the model loop.
+2. Read `BUILTIN_TOOLS`, `BUILTIN_HANDLERS`, and `assemble_tool_pool` to see how tools are exposed.
+3. Read `permission_hook` and the basic file/shell handlers.
+4. Read the task, worktree, `MessageBus`, and teammate thread sections.
+5. Finish with context compaction, error recovery, background tasks, cron, and MCP.
+
+[UML]
+@startmindmap
+* s20_comprehensive.py onboarding
+** Entry
+*** __main__
+*** agent_loop
+** Tools
+*** BUILTIN_TOOLS
+*** BUILTIN_HANDLERS
+*** assemble_tool_pool
+** Safety and state
+*** permission_hook
+*** Task / MessageBus / ProtocolState
+*** safe_path / run_bash
+** Long-running work
+*** background_tasks
+*** CronJob
+*** cron_autorun_loop
+** Maintenance focus
+*** prepare_context
+*** with_retry
+*** MCPClient
+@endmindmap
+
+[Detail]
+This mindmap is a reading path, not a call graph.
+
+For debugging, start from a concrete tool name:
+
+1. Locate its schema in `BUILTIN_TOOLS`.
+2. Locate its handler in `BUILTIN_HANDLERS`.
+3. Check whether `permission_hook` can block it.
+4. Follow execution inside the `agent_loop` tool_use traversal.
+
+Before running the file, provide `MODEL_ID` and Anthropic API configuration through `.env` or environment variables.
+
+------------------------------------------------------------
+[Example]
+S12_REVIEWER_QUESTIONS: Learning review questions with answers
+
+[Description]
+1. Question: Why does `agent_loop` call `assemble_tool_pool` every round?
+
+Answer: MCP servers can be connected at runtime by `connect_mcp`, so the tool list and handler map must reflect the current `mcp_clients` state.
+
+2. Question: Why is permission logic placed in `permission_hook` instead of only inside `run_bash`?
+
+Answer: The hook sees raw `tool_use` blocks before any handler runs, so it can gate bash, write/edit, and deployment-looking MCP tools through one policy pipeline.
+
+3. Question: How does teammate plan approval prevent continued execution?
+
+Answer: When `protocol_ctx["waiting_plan"]` is set, the teammate loop polls for inbox protocol replies and does not call the model again until a matching approval response clears the gate.
+
+4. Question: How does the file prevent large tool outputs from overfilling context?
+
+Answer: `tool_result_budget` can persist large outputs under `.task_outputs/tool-results` and return only a path plus preview; `micro_compact` then shrinks older tool results.
+
+5. Question: Where is the worktree safety boundary?
+
+Answer: Worktree names pass through `VALID_WT_NAME` and `validate_worktree_name` before `git worktree add`; after a teammate claims a task with a worktree, its file tools run with that worktree as cwd.
+
+[UML]
+None
+
+[Detail]
+These questions cover purpose, structure, execution flow, design decisions, risks, and extension boundaries.
+
+Every answer maps back to a concrete function, global state variable, or source region in the file.
+
+------------------------------------------------------------
+[Example]
+S13_MAINTAINER_REFERENCE: Maintainer quick reference
+
+[Description]
+| Name | Kind | Location | Purpose | Notes |
+| --- | --- | --- | --- | --- |
+| `__main__` | entry point | `agents/s20_comprehensive.py:2034` | Starts the interactive CLI and cron autorun thread. | Owns `history` initialization and quit handling. |
+| `agent_loop` | function | `agents/s20_comprehensive.py:1901` | Orchestrates model calls, tool execution, compaction, and stop conditions. | Main change-impact hotspot. |
+| `cron_autorun_loop` | function | `agents/s20_comprehensive.py:2017` | Injects scheduled prompts and enters `agent_loop` under `agent_lock`. | Shares history with CLI path. |
+| `Task` | dataclass | `agents/s20_comprehensive.py:78` | Represents `.tasks/task_*.json` records. | Update with transition logic. |
+| `create_task` / `claim_task` / `complete_task` | functions | `agents/s20_comprehensive.py:93` | Create, claim, and complete task state. | `claim_task` enforces dependencies. |
+| `validate_worktree_name` | function | `agents/s20_comprehensive.py:180` | Validates worktree path names. | First boundary before git sees a name. |
+| `create_worktree` / `remove_worktree` | functions | `agents/s20_comprehensive.py:209` | Manage git worktrees and task binding. | Removal checks local changes unless forced. |
+| `scan_skills` / `assemble_system_prompt` | functions | `agents/s20_comprehensive.py:302` | Build skill registry and system prompt. | Prompt includes memories, MCP, and teammates. |
+| `safe_path` / `run_bash` / file tools | functions | `agents/s20_comprehensive.py:378` | Execute local tools and enforce file path boundaries. | Bash remains broad and relies on hook policy. |
+| `MessageBus` / `ProtocolState` | class/dataclass | `agents/s20_comprehensive.py:479` | Provide mailbox messaging and request state. | Inbox reads delete files. |
+| `spawn_teammate_thread` | function | `agents/s20_comprehensive.py:605` | Runs autonomous teammate model loop. | Contains plan approval gate. |
+| `permission_hook` | function | `agents/s20_comprehensive.py:879` | Gates risky tool_use blocks before execution. | String matching is teaching-grade. |
+| `spawn_subagent` | function | `agents/s20_comprehensive.py:1004` | Runs synchronous subagent loop. | Uses `SUB_TOOLS` and shared hooks. |
+| `compact_history` / `reactive_compact` | functions | `agents/s20_comprehensive.py:1133` | Summarize or recover oversized context. | Writes transcripts. |
+| `with_retry` | function | `agents/s20_comprehensive.py:1167` | Retries API calls and switches fallback model for overload. | State is per loop invocation. |
+| `start_background_task` / `collect_background_results` | functions | `agents/s20_comprehensive.py:1230` | Run slow tool work asynchronously and inject notifications. | Results arrive later, not in the original tool result. |
+| `CronJob` / `schedule_job` | dataclass/function | `agents/s20_comprehensive.py:1282` | Represent and persist scheduled prompts. | Cron parser is intentionally simple. |
+| `MCPClient` / `connect_mcp` / `assemble_tool_pool` | class/functions | `agents/s20_comprehensive.py:1480` | Mock MCP discovery and dynamic tool merging. | Tool names become `mcp__server__tool`. |
+| `BUILTIN_TOOLS` / `BUILTIN_HANDLERS` | tables | `agents/s20_comprehensive.py:1670` | Map model-visible schemas to local handlers. | Additions must keep schema, handler, and permission policy aligned. |
+
+[UML]
+None
+
+[Detail]
+| Change Type | Check These Locations | Reason |
+| --- | --- | --- |
+| Add a builtin tool | `BUILTIN_TOOLS`, `BUILTIN_HANDLERS`, `permission_hook` | Schema, handler, and safety policy must stay aligned. |
+| Add an MCP server | `MOCK_SERVERS`, `connect_mcp`, `assemble_tool_pool` | Tool names are normalized and prefixed. |
+| Change task status values | `Task`, `claim_task`, `complete_task`, `scan_unclaimed_tasks` | State transitions and auto-claim logic must agree. |
+| Change teammate protocol | `MessageBus`, `ProtocolState`, `spawn_teammate_thread`, `run_review_plan` | Request-id matching and waiting gates define correctness. |
+| Change context budgeting | `prepare_context`, `tool_result_budget`, `micro_compact`, `compact_history` | These functions mutate `messages` in place. |
+| Change long-running tool behavior | `should_run_background`, `start_background_task`, `collect_background_results` | Background results are delivered on a later turn. |
+| Change the main loop | `agent_loop`, `call_llm`, `with_retry`, `trigger_hooks` | Every tool_use block needs clear feedback or a clear exit path. |

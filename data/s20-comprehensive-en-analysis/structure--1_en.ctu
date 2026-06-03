@@ -1,0 +1,87 @@
+Title: Top-Level Structure
+Describe: The file is ordered by teaching topic, starting with task and worktree state and ending in the main agent loop.
+------------------------------------------------------------
+[Example]
+S02_TOP_LEVEL_STRUCTURE: File regions
+
+[Description]
+The top-level structure can be grouped into twelve regions:
+
+- Task system: `Task`, `create_task`, `claim_task`, and `complete_task`.
+- Worktree system: validation, git worktree creation, removal, keep events, and task binding.
+- Skill loading and prompt assembly.
+- Basic tools: bash, read, write, edit, glob, and todo write.
+- Message bus and protocol state.
+- Autonomous teammate thread.
+- Hook and permission pipeline.
+- Synchronous subagent tool.
+- Context compaction and error recovery.
+- Background tasks and cron scheduling.
+- MCP mock client and dynamic tool-pool assembly.
+- `agent_loop`, `cron_autorun_loop`, and the CLI entry point.
+
+[UML]
+@startuml
+left to right direction
+package "agents/s20_comprehensive.py" as File {
+  component "Task system\nTask + .tasks" as Tasks
+  component "Worktree system\n.worktrees + git" as Worktrees
+  component "Skills and prompt\nSKILL_REGISTRY + PROMPT_SECTIONS" as Prompt
+  component "Tool layer\nrun_* + BUILTIN_TOOLS" as Tools
+  component "Collaboration protocol\nMessageBus + ProtocolState" as Protocol
+  component "Context and recovery\ncompaction + RecoveryState" as Recovery
+  component "Scheduling\nbackground + cron" as Scheduling
+  component "MCP extension\nMCPClient + assemble_tool_pool" as MCP
+  component "Main loop\nagent_loop + CLI" as Loop
+}
+Loop -- Prompt : rebuilds system prompt
+Loop -- Tools : executes tool_use blocks
+Loop -- Recovery : retries and compacts
+Loop -- Scheduling : injects background and cron events
+Tools -- Tasks : reads and writes task JSON
+Tools -- Worktrees : performs git worktree operations
+Tools -- Protocol : sends messages and checks inboxes
+MCP -- Tools : adds prefixed tools dynamically
+Protocol -- Loop : feeds messages into history
+@enduml
+
+[Detail]
+Start with `agent_loop`; it is the convergence point for prompt construction, model calls, hook checks, handler dispatch, and result feedback.
+
+Arrows show runtime dependency direction.
+
+`MCPClient` does not call the model directly; `assemble_tool_pool` exposes connected server tools as prefixed local handlers.
+
+Import-time side effects include reading `.env`, creating the Anthropic client, making `.tasks`, `.worktrees`, and `.mailboxes`, scanning skills, loading durable cron jobs, and starting `cron_scheduler_loop`.
+
+Those side effects make the file easy to run as a lesson, but they also make ordinary import-based testing harder.
+
+------------------------------------------------------------
+[Example]
+Constants and global state summary
+
+[Description]
+Key configuration constants include:
+
+- `DEFAULT_MAX_TOKENS=8000`.
+- `ESCALATED_MAX_TOKENS=16000`.
+- `MAX_RETRIES=3`.
+- `MAX_CONSECUTIVE_529=2`.
+- `CONTEXT_LIMIT=50000`.
+- `PERSIST_THRESHOLD=30000`.
+
+Key global state includes `SKILL_REGISTRY`, `BUS`, `active_teammates`, `pending_requests`, `HOOKS`, `background_tasks`, `background_results`, `scheduled_jobs`, `cron_queue`, `mcp_clients`, `rounds_since_todo`, and `agent_lock`.
+
+[UML]
+None
+
+[Detail]
+These globals are spread across topic sections, but several are read indirectly by the main loop.
+
+`assemble_system_prompt` reads skills, MCP connections, memories, and active teammates.
+
+`prepare_context` mutates `messages` in place.
+
+`assemble_tool_pool` recomputes the tool schema and handler map each round so newly connected MCP tools appear.
+
+Both the CLI path and the cron autorun path can enter `agent_loop`, so `agent_lock` serializes those two entry paths.

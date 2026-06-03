@@ -1,0 +1,101 @@
+Title: Core Objects and Functions
+Describe: Data classes persist records; service objects and functions coordinate tool execution, state transitions, and loop orchestration.
+------------------------------------------------------------
+[Example]
+S03_CORE_OBJECTS: Data classes and service objects
+
+[Description]
+`Task` is the durable `.tasks/task_*.json` record with `id`, `subject`, `description`, `status`, `owner`, `blockedBy`, and optional `worktree`.
+
+`ProtocolState` records shutdown and plan approval requests.
+
+`CronJob` records a cron expression, prompt, recurrence flag, and durability flag.
+
+`MessageBus` sends and reads append-only JSONL mailbox messages.
+
+`MCPClient` is a teaching mock that stores discovered tool definitions and handlers, then calls them through `call_tool`.
+
+[UML]
+@startuml
+class Task {
+  id: str
+  subject: str
+  description: str
+  status: str
+  owner: str | None
+  blockedBy: list[str]
+  worktree: str | None
+}
+class ProtocolState {
+  request_id: str
+  type: str
+  sender: str
+  target: str
+  status: str
+  payload: str
+}
+class CronJob {
+  id: str
+  cron: str
+  prompt: str
+  recurring: bool
+  durable: bool
+}
+class MessageBus {
+  send(from_agent, to_agent, content, msg_type, metadata)
+  read_inbox(agent)
+}
+class MCPClient {
+  name: str
+  tools: list[dict]
+  register(tool_defs, handlers)
+  call_tool(tool_name, args)
+}
+Task -- "JSON file" : asdict/json
+ProtocolState -- "pending_requests" : request_id key
+CronJob -- ".scheduled_tasks.json" : durable jobs
+MessageBus -- ".mailboxes/*.jsonl" : append/read/unlink
+MCPClient -- "assemble_tool_pool" : prefixed tools
+@enduml
+
+[Detail]
+This class diagram answers which objects own state.
+
+`Task`, `ProtocolState`, and `CronJob` are record-like data objects.
+
+`MessageBus` and `MCPClient` are lightweight service objects.
+
+Arrows represent storage or consumption relationships.
+
+`MessageBus.read_inbox` deletes the inbox file after reading, so mailbox reads are destructive.
+
+`MCPClient.call_tool` catches exceptions and returns strings, keeping MCP mock failures inside normal tool-result feedback.
+
+------------------------------------------------------------
+[Example]
+Key function responsibility table
+
+[Description]
+`agent_loop` is the main orchestrator.
+
+`prepare_context` manages context budget.
+
+`call_llm` wraps `with_retry`.
+
+`trigger_hooks` runs permission, logging, large-output, and stop hooks.
+
+`call_tool_handler` normalizes handler invocation and `TypeError` failures.
+
+`spawn_subagent` runs a synchronous subagent; `spawn_teammate_thread` runs an autonomous teammate in a daemon thread.
+
+`start_background_task` moves slow bash-like work into a daemon thread, and `collect_background_results` converts completed work into task notifications.
+
+[UML]
+None
+
+[Detail]
+Local call responsibilities are easiest to read in three groups:
+
+- Task group: `create_task -> save_task`, `claim_task -> can_start -> load_task`, and `complete_task -> list_tasks/can_start`.
+- Context group: `prepare_context -> tool_result_budget/snip_compact/micro_compact/compact_history`.
+- Tool execution group: `agent_loop -> trigger_hooks -> should_run_background/call_tool_handler -> trigger_hooks(PostToolUse)`.
