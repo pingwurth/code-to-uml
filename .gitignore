@@ -143,6 +143,7 @@ vite.config.ts.timestamp-*
 .vite/
 
 # ai/ide
+.claude/
 .cursor/
 .codegraph/
 .idea/

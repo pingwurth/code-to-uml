@@ -4,7 +4,7 @@
   <img src="logo.png" alt="Code-To-UML logo" width="180">
 </p>
 
-> Transform code into interactive UML reports and explore 100+ diagram examples — all in-browser, zero build tools.
+> Transform code into interactive UML reports and explore 100+ diagram examples with English/Chinese coverage — browser-first, zero build tools.
 
 **[中文文档](README_zh.md)**
 
@@ -99,10 +99,10 @@ Code-To-UML is the embodiment of this philosophy. It's not just another PlantUML
 Most UML documentation workflows rely on heavyweight IDEs, fragile build pipelines, or opaque SaaS tools. Code-To-UML takes a different approach:
 
 1. **Code Analysis Reports** — Feed source code to an AI agent and get back a self-contained HTML report with UML diagrams, bilingual explanations, and interactive navigation.
-2. **Diagram Showcase** — Browse 100+ bilingual PlantUML examples across 20+ diagram types, rendered live in your browser.
+2. **Diagram Showcase** — Browse 100+ PlantUML examples with English/Chinese coverage across 20+ diagram types, rendered live in your browser.
 3. **AI Agent Skill** — A bundled skill definition (`SKILL.md`) lets Cursor, Claude Code, Qwen, Codex, and other AI assistants generate reports autonomously.
 
-No frameworks. No transpilers. No `node_modules`. Just open `demo.html` and go.
+No frameworks. No transpilers. No `node_modules`. Start the lightweight server and go.
 
 ---
 
@@ -135,7 +135,7 @@ No frameworks. No transpilers. No `node_modules`. Just open `demo.html` and go.
 ### Prerequisites
 
 - **Node.js 18+**
-- **Java** (for server-side PlantUML rendering fallback)
+- **Java** (optional, only for server-side PlantUML rendering fallback)
 
 ### Installation
 
@@ -146,13 +146,19 @@ git clone https://github.com/pingwurth/code-to-uml.git
 cd code-to-uml
 ```
 
-2. Set up `CTU_HOME` for AI agent integration:
+2. Optional: set up `CTU_HOME` and install the bundled AI skill:
 
 ```bash
 node install.js
+# Install for one tool only
+node install.js codex
+# Print the current-shell CTU_HOME command without writing profile files
+node install.js --print
 ```
 
-3. Start the server:
+`install.js` writes `CTU_HOME` for AI report generation and copies the bundled skill into supported agent directories. It is not required for browsing demos.
+
+3. Start the server from the project root:
 
 ```bash
 ./serve.sh
@@ -167,6 +173,8 @@ node serve.js 5401
 ```bash
 # Visit the following URL to view analysis examples
 http://localhost:5401
+# Or browse the diagram showcase
+http://localhost:5401/demo.html
 # Or view UML syntax examples
 http://localhost:5401/plantuml-official-demo/en/sequence-diagram_en.html
 ```
@@ -209,17 +217,17 @@ All four commands produce the same 13-section report structure — scope changes
 
 ### Interactive Demo
 
-Open `demo.html` to browse all diagram examples. Use the tab bar to switch diagram types and the language toggle to switch between English and Chinese.
+Open `http://localhost:5401/demo.html` after starting the server to browse all diagram examples. Use the tab bar to switch diagram types and the language toggle to switch between English and Chinese.
 
 ### Generating Reports
 
-1. Place `.ctu` data files in `data/s20-comprehensive/` (or a custom directory).
+1. Place `.ctu` data files in `data/claude-code-demo-analysis/` (or another `data/<report-slug>/` directory).
 2. Use the AI skill (see [AI Agent Integration](#ai-agent-integration)) or manually create an HTML report using `cache/_TEMPLATE.html`.
 3. Generated reports appear in `cache/` and are accessible from `index.html`.
 
 ### .ctu File Format
 
-Each `.ctu` file defines one or more diagram examples with metadata:
+Each `.ctu` file defines a file-level `Title` and `Describe`, followed by one or more repeated `[Example]`, `[Description]`, `[UML]`, and `[Detail]` groups:
 
 ```text
 Title: Section Title
@@ -269,17 +277,21 @@ code-to-uml/
 ├── data/
 │   ├── demo/                # Built-in examples (.ctu files)
 │   ├── _TEMPLATE.ctu        # Template for new reports
-│   └── s20-comprehensive/   # Example: analysis report data
+│   └── claude-code-demo-analysis/  # Example: analysis report data
 ├── cache/
 │   ├── _TEMPLATE.html       # Reusable report HTML template
 │   └── (generated reports)
+├── docs/images/             # README demo GIFs
 ├── js/                      # PlantUML + theme libraries
 ├── plantuml-official-demo/  # Official PlantUML reference docs
 ├── skills/code-to-uml/
 │   └── SKILL.md             # AI agent skill definition
+├── test/                    # Node-based tests
+├── package.json             # npm scripts and package metadata
+├── serve.sh / serve.bat     # Platform launchers
 ├── CLAUDE.md                # Claude Code guidance
 ├── AGENTS.md                # Agent documentation
-└── install.js      # CTU_HOME setup script
+└── install.js               # CTU_HOME and AI skill installer
 ```
 
 ---
@@ -292,9 +304,10 @@ Returns parsed `.ctu` examples for the diagram viewer.
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `lang` | `en` \| `zh` | Language filter (default: `en`) |
+| `lang` | `en` \| `zh` | Language filter (default: `zh`) |
+| `dir` | string | Data subdirectory under `data/` (default: `demo`) |
 
-**Response:** JSON array of parsed example objects.
+**Response:** JSON object keyed by diagram/category name. Each value is an array of parsed example objects.
 
 ### `POST /api/plantuml-svg`
 
@@ -302,9 +315,25 @@ Server-side PlantUML rendering fallback.
 
 | Field | Description |
 |-------|-------------|
-| **Body** | Raw PlantUML source text |
-| **Content-Type** | `text/plain` |
-| **Response** | SVG markup |
+| **Body** | JSON object with a `source` string |
+| **Content-Type** | `application/json` |
+| **Response** | JSON object with an `svg` string, or an `error` string |
+
+### `GET /api/cache-html`
+
+Returns generated HTML reports from `cache/` for the home page index.
+
+### `DELETE /api/cache-html`
+
+Deletes one generated report and its matching `data/<report-slug>/` directory.
+
+| Field | Description |
+|-------|-------------|
+| **Body** | JSON object with a `path` field, such as `cache/example.html` |
+
+### `DELETE /api/cache-html/all`
+
+Deletes generated cache reports and matching generated data directories while preserving templates.
 
 ---
 
@@ -313,8 +342,9 @@ Server-side PlantUML rendering fallback.
 | Setting | Mechanism | Default |
 |---------|-----------|---------|
 | Server port | `PORT` env var or CLI argument | `5401` |
-| Project root | `CTU_HOME` env var (set by `install.js`) | CWD |
-| UI language | `localStorage` key `plantuml-docs-lang` | Browser locale |
+| Server root | Current working directory when running `serve.js` | CWD |
+| AI report root | `CTU_HOME` env var (set by `install.js`) | Project root at install time |
+| UI language | `localStorage` key `plantuml-docs-lang` | `en` |
 | Theme | CSS custom properties in `main.css` | Light |
 
 ---
@@ -324,7 +354,7 @@ Server-side PlantUML rendering fallback.
 The rendering pipeline uses a two-tier strategy for maximum reliability:
 
 ```
-User opens demo.html
+User opens http://localhost:5401/demo.html
         │
         ▼
   [Render Queue]
