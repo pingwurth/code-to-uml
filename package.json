@@ -1,0 +1,68 @@
+{
+  "name": "code-to-uml",
+  "version": "1.0.0",
+  "description": "AI-powered code analysis that generates interactive UML reports. Zero dependencies, browser-first rendering, supports 20+ diagram types.",
+  "main": "serve.js",
+  "scripts": {
+    "start": "node serve.js",
+    "test": "node test/*.test.js",
+    "lint": "node --check serve.js demo.js i18n-config.js install-ctu-home.js",
+    "serve": "node serve.js 5401"
+  },
+  "keywords": [
+    "uml",
+    "plantuml",
+    "code-analysis",
+    "ai",
+    "documentation",
+    "architecture",
+    "diagrams",
+    "sequence-diagram",
+    "class-diagram",
+    "activity-diagram",
+    "component-diagram",
+    "state-diagram",
+    "browser",
+    "zero-dependencies",
+    "bilingual"
+  ],
+  "author": "Code-To-UML",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pingwurth/code-to-uml.git"
+  },
+  "bugs": {
+    "url": "https://github.com/pingwurth/code-to-uml/issues"
+  },
+  "homepage": "https://github.com/pingwurth/code-to-uml#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "serve.js",
+    "demo.js",
+    "demo.html",
+    "index.html",
+    "main.css",
+    "i18n-config.js",
+    "i18n/",
+    "component/",
+    "data/",
+    "cache/",
+    "js/",
+    "skills/",
+    "plantuml-official-demo/",
+    "install-ctu-home.js",
+    "favicon.svg",
+    "favicon.ico",
+    "logo.png",
+    "plantuml.jar",
+    "README.md",
+    "README_zh.md",
+    "CONTRIBUTING.md",
+    "LICENSE"
+  ],
+  "dependencies": {},
+  "devDependencies": {}
+}

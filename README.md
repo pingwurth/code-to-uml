@@ -9,9 +9,49 @@
 **[中文文档](README_zh.md)**
 
 <!-- Badges -->
-![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
-![Node](https://img.shields.io/badge/Node.js-18%2B-green.svg)
-![No Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen.svg)
+<p align="center">
+  <a href="https://github.com/pingwurth/code-to-uml/stargazers"><img src="https://img.shields.io/github/stars/pingwurth/code-to-uml?style=social" alt="GitHub Stars"></a>
+  <a href="https://github.com/pingwurth/code-to-uml/network/members"><img src="https://img.shields.io/github/forks/pingwurth/code-to-uml?style=social" alt="GitHub Forks"></a>
+  <a href="https://github.com/pingwurth/code-to-uml/issues"><img src="https://img.shields.io/github/issues/pingwurth/code-to-uml" alt="GitHub Issues"></a>
+  <a href="https://github.com/pingwurth/code-to-uml/pulls"><img src="https://img.shields.io/github/issues-pr/pingwurth/code-to-uml" alt="GitHub Pull Requests"></a>
+  <a href="https://github.com/pingwurth/code-to-uml/graphs/contributors"><img src="https://img.shields.io/github/contributors/pingwurth/code-to-uml" alt="GitHub Contributors"></a>
+  <a href="https://github.com/pingwurth/code-to-uml/blob/main/LICENSE"><img src="https://img.shields.io/github/license/pingwurth/code-to-uml" alt="License"></a>
+</p>
+
+<p align="center">
+  <a href="https://twitter.com/intent/tweet?text=Check%20out%20Code-To-UML%20-%20AI-powered%20code%20analysis%20that%20generates%20interactive%20UML%20reports!&url=https://github.com/pingwurth/code-to-uml"><img src="https://img.shields.io/twitter/url/http/shields.io.svg?style=social" alt="Twitter"></a>
+  <a href="https://github.com/pingwurth/code-to-uml/discussions"><img src="https://img.shields.io/badge/GitHub-Discussions-blue" alt="GitHub Discussions"></a>
+  <a href="https://github.com/pingwurth/code-to-uml/blob/main/CONTRIBUTING.md"><img src="https://img.shields.io/badge/Contributions-Welcome-brightgreen" alt="Contributions Welcome"></a>
+</p>
+
+<p align="center">
+  <a href="#why-code-to-uml"><strong>Why Code-To-UML?</strong></a> ·
+  <a href="#demo"><strong>Demo</strong></a> ·
+  <a href="#getting-started"><strong>Getting Started</strong></a> ·
+  <a href="#contributing"><strong>Contributing</strong></a> ·
+  <a href="#links"><strong>Links</strong></a>
+</p>
+
+---
+
+## Why Code-To-UML?
+
+> **"In the AI era, the ability to read code is scarcer than the ability to write it."**
+
+Code-To-UML is the embodiment of this philosophy. It's not just another PlantUML online editor — it's a complete toolchain that lets AI understand your code, draw architecture diagrams, and generate bilingual reports.
+
+### Six Core Pain Points, One Solution
+
+| Pain Point | Problem Description | Code-To-UML Solution |
+|------------|---------------------|----------------------|
+| 🔍 **System Analysis Difficulty** | Complex codebases make it hard to quickly understand overall architecture and module relationships | One-click generation of project/module/file-level architecture diagrams with interactive navigation |
+| 📝 **Design Documentation Burden** | Organizing existing code logic requires reading hundreds of lines method by method | Auto-generated 13-dimension analysis reports with intelligent code snippet extraction (< 30 lines) |
+| 🐛 **Inefficient Debugging** | Line-by-line code reading for troubleshooting is extremely inefficient | Call relationship diagrams to quickly locate problem paths, data flow diagrams to track state changes |
+| 🤖 **AI Code Review** | In the Vibe Coding era, AI-generated code needs more efficient review tools | Quickly understand AI-generated code structure, identify potential architecture issues and risks |
+| 📚 **Rapid Framework Learning** | Learning new tech stacks and participating in open-source maintenance requires quick code comprehension | Auto-generated developer onboarding guides, core principles and design decision visualization |
+| 🎯 **Reading Code > Writing Code** | Code comprehension ability becomes a core competitive advantage | AI skill integration, supporting mainstream AI tools like Cursor, Claude Code, and more |
+
+**Core Value:** Transform code into interactive UML reports, improving code comprehension efficiency by 10x
 
 ---
 
@@ -37,6 +77,7 @@
 
 ## Table of Contents
 
+- [Why Code-To-UML?](#why-code-to-uml)
 - [About](#about)
 - [Supported Diagram Types](#supported-diagram-types)
 - [Tech Stack](#tech-stack)
@@ -340,6 +381,8 @@ Code-To-UML ships with a skill definition at [`skills/code-to-uml/SKILL.md`](ski
 
 ## Contributing
 
+We welcome contributions from the community! Please read our [Contributing Guide](CONTRIBUTING.md) before submitting a Pull Request.
+
 Areas where contributions are welcome:
 
 - **New diagram examples** — Add `.ctu` files for under-represented diagram types
@@ -347,6 +390,15 @@ Areas where contributions are welcome:
 - **Theme variants** — Additional CSS custom property sets
 - **PlantUML stdlib coverage** — Examples using AWS, Azure, K8s icon libraries
 - **Testing** — Expand the test suite in `test/`
+- **Bug fixes** — Check our [open issues](https://github.com/pingwurth/code-to-uml/issues)
+- **Documentation** — Improve guides and examples
+
+### Quick Contribution Links
+
+- 🐛 [Report a Bug](https://github.com/pingwurth/code-to-uml/issues/new?template=bug_report.md)
+- 💡 [Request a Feature](https://github.com/pingwurth/code-to-uml/issues/new?template=feature_request.md)
+- 📊 [Suggest a Diagram Example](https://github.com/pingwurth/code-to-uml/issues/new?template=new_example.md)
+- 💬 [Join the Discussion](https://github.com/pingwurth/code-to-uml/discussions)
 
 ---
 
@@ -358,8 +410,20 @@ Areas where contributions are welcome:
 
 ## Links
 
+### Documentation
 - [PlantUML Official Documentation](https://plantuml.com)
 - [AI Skill Definition](skills/code-to-uml/SKILL.md)
 - [Agent Guidelines](AGENTS.md)
 - [Claude Code Guidelines](CLAUDE.md)
 - [CTU Template](data/_TEMPLATE.ctu)
+- [Contributing Guide](CONTRIBUTING.md)
+
+### Community
+- [GitHub Discussions](https://github.com/pingwurth/code-to-uml/discussions) - Ask questions, share ideas
+- [GitHub Issues](https://github.com/pingwurth/code-to-uml/issues) - Report bugs, request features
+- [Pull Requests](https://github.com/pingwurth/code-to-uml/pulls) - Contribute code
+
+### Social
+- ⭐ [Star on GitHub](https://github.com/pingwurth/code-to-uml) - Show your support!
+- 🐦 [Share on Twitter](https://twitter.com/intent/tweet?text=Check%20out%20Code-To-UML%20-%20AI-powered%20code%20analysis%20that%20generates%20interactive%20UML%20reports!&url=https://github.com/pingwurth/code-to-uml) - Spread the word
+- 📖 [GitHub Profile](https://github.com/pingwurth) - Follow for updates

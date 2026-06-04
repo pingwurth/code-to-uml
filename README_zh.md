@@ -9,9 +9,49 @@
 **[English Documentation](README.md)**
 
 <!-- Badges -->
-![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
-![Node](https://img.shields.io/badge/Node.js-18%2B-green.svg)
-![No Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen.svg)
+<p align="center">
+  <a href="https://github.com/pingwurth/code-to-uml/stargazers"><img src="https://img.shields.io/github/stars/pingwurth/code-to-uml?style=social" alt="GitHub Stars"></a>
+  <a href="https://github.com/pingwurth/code-to-uml/network/members"><img src="https://img.shields.io/github/forks/pingwurth/code-to-uml?style=social" alt="GitHub Forks"></a>
+  <a href="https://github.com/pingwurth/code-to-uml/issues"><img src="https://img.shields.io/github/issues/pingwurth/code-to-uml" alt="GitHub Issues"></a>
+  <a href="https://github.com/pingwurth/code-to-uml/pulls"><img src="https://img.shields.io/github/issues-pr/pingwurth/code-to-uml" alt="GitHub Pull Requests"></a>
+  <a href="https://github.com/pingwurth/code-to-uml/graphs/contributors"><img src="https://img.shields.io/github/contributors/pingwurth/code-to-uml" alt="GitHub Contributors"></a>
+  <a href="https://github.com/pingwurth/code-to-uml/blob/main/LICENSE"><img src="https://img.shields.io/github/license/pingwurth/code-to-uml" alt="License"></a>
+</p>
+
+<p align="center">
+  <a href="https://twitter.com/intent/tweet?text=Check%20out%20Code-To-UML%20-%20AI-powered%20code%20analysis%20that%20generates%20interactive%20UML%20reports!&url=https://github.com/pingwurth/code-to-uml"><img src="https://img.shields.io/twitter/url/http/shields.io.svg?style=social" alt="Twitter"></a>
+  <a href="https://github.com/pingwurth/code-to-uml/discussions"><img src="https://img.shields.io/badge/GitHub-Discussions-blue" alt="GitHub Discussions"></a>
+  <a href="https://github.com/pingwurth/code-to-uml/blob/main/CONTRIBUTING.md"><img src="https://img.shields.io/badge/Contributions-Welcome-brightgreen" alt="Contributions Welcome"></a>
+</p>
+
+<p align="center">
+  <a href="#为什么选择-code-to-uml"><strong>为什么选择 Code-To-UML？</strong></a> ·
+  <a href="#演示"><strong>演示</strong></a> ·
+  <a href="#快速开始"><strong>快速开始</strong></a> ·
+  <a href="#参与贡献"><strong>参与贡献</strong></a> ·
+  <a href="#相关链接"><strong>相关链接</strong></a>
+</p>
+
+---
+
+## 为什么选择 Code-To-UML？
+
+> **"AI 时代，读代码的能力比写代码的能力更稀缺。"**
+
+Code-To-UML 是这个理念的产物。它不是又一个 PlantUML 在线编辑器——它是一个让 AI 为你理解代码、画出架构图、生成双语报告的完整工具链。
+
+### 六大核心痛点，一个解决方案
+
+| 痛点 | 问题描述 | Code-To-UML 解决方案 |
+|------|----------|---------------------|
+| 🔍 **系统分析困难** | 面对复杂代码库，难以快速理解整体架构和模块关系 | 一键生成项目/模块/文件级别的架构图 |
+| 📝 **设计文档创建困难** | 整理现有代码逻辑时，面对数百行方法需要逐行阅读 | 自动生成 13 个维度的分析报告，智能代码片段提取（< 30 行）|
+| 🐛 **调试效率低下** | 逐行阅读代码进行故障排查效率极低 | 调用关系图快速定位问题路径，数据流图追踪状态变化 |
+| 🤖 **AI 代码审查** | Vibe Coding 时代，AI 生成的代码需要更高效的审查工具 | 快速理解 AI 生成代码的结构，识别潜在的架构问题和风险 |
+| 📚 **快速学习新框架** | 学习新技术栈和参与开源维护需要快速理解代码 | 开发者入门指南自动生成，核心原理和设计决策可视化 |
+| 🎯 **读代码比写代码更重要** | 代码理解能力成为核心竞争力 | AI 技能集成，支持 Cursor、Claude Code 等主流 AI 工具 |
+
+**核心价值:** 将代码转换为交互式 UML 报告，让代码理解效率提升 10 倍
 
 ---
 
@@ -37,6 +77,7 @@
 
 ## 目录
 
+- [为什么选择 Code-To-UML？](#为什么选择-code-to-uml)
 - [关于项目](#关于项目)
 - [支持的图表类型](#支持的图表类型)
 - [技术栈](#技术栈)
@@ -340,6 +381,8 @@ Code-To-UML 在 [`skills/code-to-uml/SKILL.md`](skills/code-to-uml/SKILL.md) 中
 
 ## 参与贡献
 
+我们欢迎社区贡献！请在提交 Pull Request 前阅读我们的[贡献指南](CONTRIBUTING.md)。
+
 欢迎以下方向的贡献：
 
 - **新图表示例** — 为覆盖不足的图表类型添加 `.ctu` 文件
@@ -347,6 +390,15 @@ Code-To-UML 在 [`skills/code-to-uml/SKILL.md`](skills/code-to-uml/SKILL.md) 中
 - **主题变体** — 额外的 CSS 自定义属性集
 - **PlantUML 标准库覆盖** — 使用 AWS、Azure、K8s 图标库的示例
 - **测试** — 扩展 `test/` 中的测试套件
+- **Bug 修复** — 查看我们的[开放 Issue](https://github.com/pingwurth/code-to-uml/issues)
+- **文档** — 改进指南和示例
+
+### 快速贡献链接
+
+- 🐛 [报告 Bug](https://github.com/pingwurth/code-to-uml/issues/new?template=bug_report.md)
+- 💡 [请求功能](https://github.com/pingwurth/code-to-uml/issues/new?template=feature_request.md)
+- 📊 [建议图表示例](https://github.com/pingwurth/code-to-uml/issues/new?template=new_example.md)
+- 💬 [加入讨论](https://github.com/pingwurth/code-to-uml/discussions)
 
 ---
 
@@ -358,8 +410,20 @@ Code-To-UML 在 [`skills/code-to-uml/SKILL.md`](skills/code-to-uml/SKILL.md) 中
 
 ## 相关链接
 
+### 文档
 - [PlantUML 官方文档](https://plantuml.com)
 - [AI 技能定义](skills/code-to-uml/SKILL.md)
 - [代理指引](AGENTS.md)
 - [Claude Code 指引](CLAUDE.md)
 - [CTU 模板](data/_TEMPLATE.ctu)
+- [贡献指南](CONTRIBUTING.md)
+
+### 社区
+- [GitHub Discussions](https://github.com/pingwurth/code-to-uml/discussions) — 提问、分享想法
+- [GitHub Issues](https://github.com/pingwurth/code-to-uml/issues) — 报告 Bug、请求功能
+- [Pull Requests](https://github.com/pingwurth/code-to-uml/pulls) — 贡献代码
+
+### 社交
+- ⭐ [在 GitHub 上 Star](https://github.com/pingwurth/code-to-uml) — 表示支持！
+- 🐦 [在 Twitter 上分享](https://twitter.com/intent/tweet?text=Check%20out%20Code-To-UML%20-%20AI-powered%20code%20analysis%20that%20generates%20interactive%20UML%20reports!&url=https://github.com/pingwurth/code-to-uml) — 传播消息
+- 📖 [GitHub 个人主页](https://github.com/pingwurth) — 关注获取更新
