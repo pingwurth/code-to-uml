@@ -170,7 +170,11 @@ async function main() {
 		assert.ok(!fs.existsSync(path.join(dataDir, "beta report")), "clear should remove non-demo data folders");
 	} finally {
 		child.kill();
-		fs.rmSync(fixtureRoot, { recursive: true, force: true });
+		try {
+			fs.rmSync(fixtureRoot, { recursive: true, force: true });
+		} catch {
+			// Ignore cleanup errors on Windows
+		}
 	}
 }
 

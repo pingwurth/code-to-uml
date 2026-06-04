@@ -13,7 +13,7 @@ assert.ok(fs.existsSync(path.join(skillRoot, "SKILL.md")), "repository skill sho
 assert.ok(fs.existsSync(path.join(skillRoot, "references", "code-to-uml-template.md")), "repository skill should include references");
 assert.match(
 	fs.readFileSync(path.join(skillRoot, "SKILL.md"), "utf8"),
-	/^---\nname: code-to-uml/m,
+	/^---\r?\nname: code-to-uml/m,
 	"repository skill should contain the current report skill"
 );
 
@@ -40,7 +40,9 @@ try {
 	assert.match(result.stdout, /Installed code-to-uml skill for codex/);
 	assert.ok(fs.existsSync(path.join(home, ".codex", "skills", "code-to-uml", "SKILL.md")));
 	assert.ok(!fs.existsSync(path.join(home, ".claude", "skills", "code-to-uml")), "named install should not install other tools");
-	assert.match(fs.readFileSync(profile, "utf8"), /CTU_HOME/);
+	if (process.platform !== "win32") {
+		assert.match(fs.readFileSync(profile, "utf8"), /CTU_HOME/);
+	}
 
 	const existing = fs.readFileSync(path.join(home, ".codex", "skills", "code-to-uml", "SKILL.md"), "utf8");
 	fs.writeFileSync(path.join(home, ".codex", "skills", "code-to-uml", "SKILL.md"), "custom local skill");

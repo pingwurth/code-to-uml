@@ -1,13 +1,20 @@
 {
   "name": "code-to-uml",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "AI-powered code analysis that generates interactive UML reports. Zero dependencies, browser-first rendering, supports 20+ diagram types.",
   "main": "serve.js",
+  "bin": {
+    "code-to-uml": "./serve.js"
+  },
   "scripts": {
     "start": "node serve.js",
-    "test": "node test/*.test.js",
+    "test": "node test/run-all.js",
     "lint": "node --check serve.js demo.js i18n-config.js install-ctu-home.js",
-    "serve": "node serve.js 5401"
+    "serve": "node serve.js 5401",
+    "prepublishOnly": "npm run lint && npm test",
+    "preversion": "npm run lint",
+    "version": "git add -A",
+    "postversion": "git push && git push --tags"
   },
   "keywords": [
     "uml",
@@ -38,6 +45,10 @@
   "homepage": "https://github.com/pingwurth/code-to-uml#readme",
   "engines": {
     "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "files": [
     "serve.js",
