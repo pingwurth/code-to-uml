@@ -1,45 +1,40 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-This is a static frontend project for editing/rendering PlantUML content in-browser and via a local Node server.
 
-- `demo.html`, `demo.js`, `main.css`: main UI entrypoint and client behavior.
-- `component/`: reusable UI modules (for example `docs-page-core.js`, `demo-example-component.js`).
-- `serve.js`, `serve.sh`, `serve.bat`: local dev server and PlantUML render endpoint.
-- `js/`: bundled third-party libraries and PlantUML-related runtime assets.
-- `data/demo/`: sample `.ctu` input files used by the demo.
-- `i18n/` + `i18n-config.js`: localization dictionaries and language config.
-- `plantuml-official-demo/`: reference HTML examples.
+Code-To-UML is a zero-dependency static frontend with a lightweight Node server.
+
+- `index.html`, `demo.html`, `demo.js`, `main.css`: main browser UI, demo runtime, and global styling.
+- `serve.js`, `serve.sh`, `serve.bat`: local static server and PlantUML rendering fallback.
+- `component/`: reusable browser modules such as TOC, report cards, sorting, and failure handling.
+- `data/`: `.ctu` report/example data; `data/_TEMPLATE.ctu` defines the data format.
+- `cache/`: generated HTML reports and `cache/_TEMPLATE.html`.
+- `i18n/` and `i18n-config.js`: English/Chinese localization.
+- `js/`: bundled third-party PlantUML and diagram libraries; avoid editing minified vendor files.
+- `test/`: Node-based unit/static tests, run through `test/run-all.js`.
+- `skills/`: AI-agent skill definitions and validators for Code-To-UML report generation.
 
 ## Build, Test, and Development Commands
-No package manager scripts are defined at repo root; run with Node directly.
 
-- `./serve.sh` or `./serve.sh 5401`: start local server on default/custom port.
-- `node serve.js 5401`: equivalent cross-platform server launch.
-- `serve.bat 5401`: Windows launcher.
+- `npm start` or `node serve.js`: start the local server on the default port.
+- `npm run serve` or `node serve.js 5401`: start the server on port `5401`.
+- `./serve.sh 5401` / `serve.bat 5401`: platform launchers for local development.
+- `npm test`: run all tests via `node test/run-all.js`.
+- `npm run lint`: syntax-check core JavaScript files with `node --check`.
+- `npm run prepublishOnly`: run lint and tests before publishing.
 
-The server hosts static files and exposes backend rendering via `plantuml.jar`, so Java must be installed and available on `PATH`.
+Node.js 18+ is required. Java is required only for server-side PlantUML rendering through `plantuml.jar`.
 
 ## Coding Style & Naming Conventions
-- JavaScript: keep existing style (`"use strict"`, semicolons, tab indentation in core JS files).
-- Prefer `camelCase` for variables/functions and `UPPER_SNAKE_CASE` for constants.
-- Keep component files focused by feature (`component/<feature>-component.js`).
-- Do not edit minified vendor files under `js/*.min.js`; place custom logic in `demo.js` or `component/`.
+
+Use vanilla ES6+ JavaScript with `"use strict"` and semicolons. Follow existing indentation and formatting in the touched file. Prefer `camelCase` for variables/functions and `UPPER_SNAKE_CASE` for constants. Keep browser logic in `demo.js` or `component/`; do not modify `js/*.min.js` vendor assets. Use semantic HTML, `data-*` hooks for runtime behavior, and CSS custom properties for themeable styles.
 
 ## Testing Guidelines
-There is currently no automated test suite in this repository. Validate changes manually:
 
-1. Start server (`./serve.sh`).
-2. Open `http://localhost:5401`.
-3. Verify diagram rendering, localization switch, and failure states.
-4. If server/render logic changed, test at least one `.ctu` file from `data/demo/`.
+Tests are plain Node scripts under `test/`, generally named `<feature>.test.js` or `<feature>-static.test.js`. Add focused tests for changed parser, server, template, rendering, install, or static-contract behavior. Run `npm test` before submitting changes; run `npm run lint` when JavaScript files change. For visual/report changes, also start the server and verify `http://localhost:5401`.
 
 ## Commit & Pull Request Guidelines
-Recent history favors short, imperative commits with optional scope, e.g.:
-- `refactor(render): simplify and unify rendering logic for .mycell elements`
-- `Complete the development of the sample page.`
 
-Follow this pattern:
-- Use one clear subject line (imperative mood).
-- Keep related changes in one commit.
-- In PRs, include purpose, key file changes, manual test steps, and UI screenshots for visual updates.
+Use short conventional-style commits seen in history, for example `feat(template): enhance page introduction` or `docs(readme): add demo image sections`. Keep related changes together.
+
+Pull requests should include a clear description, linked issue when relevant, change type, test steps, and screenshots for UI/report visual changes. Confirm local server testing, diagram rendering, and mobile responsiveness when applicable.

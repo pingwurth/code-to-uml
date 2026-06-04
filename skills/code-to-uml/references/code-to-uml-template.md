@@ -41,7 +41,7 @@ Resolve the Code-To-UML project root as:
 1. `CTU_HOME` environment variable.
 2. A user-provided Code-To-UML project root path, when the request gives one.
 3. Current working directory, only if it contains `cache/_TEMPLATE.html` and `data/_TEMPLATE.ctu`.
-4. Otherwise stop and tell the user to run `node install-ctu-home.js` from the Code-To-UML project.
+4. Otherwise stop and tell the user to run `node install.js` from the Code-To-UML project.
 
 ## Artifact and Naming Contract
 

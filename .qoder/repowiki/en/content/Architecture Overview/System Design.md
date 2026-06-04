@@ -7,7 +7,7 @@
 - [demo.html](file://demo.html)
 - [demo.js](file://demo.js)
 - [index.html](file://index.html)
-- [install-ctu-home.js](file://install-ctu-home.js)
+- [install.js](file://install.js)
 - [component/docs-page-core.js](file://component/docs-page-core.js)
 - [component/render-failure-common.js](file://component/render-failure-common.js)
 - [component/toc-component.js](file://component/toc-component.js)
@@ -43,7 +43,7 @@ The repository organizes functionality by responsibility and runtime boundary:
 - Root HTML pages: demo.html (interactive showcase), index.html (cache index)
 - Data: data/ (CTU files), cache/ (generated report HTML)
 - Components: component/ (modular UI/logic), js/ (libraries), i18n/ (language resources)
-- Server: serve.js (lightweight dev server), install-ctu-home.js (agent integration helper)
+- Server: serve.js (lightweight dev server), install.js (agent integration helper)
 - Styles: main.css (theme and layout)
 - Documentation: README.md, SKILL.md, and agent guides
 
@@ -422,5 +422,5 @@ Code-To-UML achieves a clean separation of concerns with a browser-first renderi
 
 **Section sources**
 - [README.md:81-87](file://README.md#L81-L87)
-- [install-ctu-home.js:1-228](file://install-ctu-home.js#L1-L228)
+- [install.js:1-228](file://install.js#L1-L228)
 - [serve.js:56-88](file://serve.js#L56-L88)

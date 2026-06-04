@@ -8,20 +8,20 @@
 - [demo-example-component.js](file://component/demo-example-component.js)
 - [render-failure-common.js](file://component/render-failure-common.js)
 - [cache-index-sort.js](file://component/cache-index-sort.js)
-- [install-ctu-home.js](file://install-ctu-home.js)
+- [install.js](file://install.js)
 - [demo.html](file://demo.html)
 - [index.html](file://index.html)
 - [main.css](file://main.css)
 - [i18n-config.js](file://i18n-config.js)
 - [render-failure-common.test.js](file://test/render-failure-common.test.js)
 - [cache-index-sort.test.js](file://test/cache-index-sort.test.js)
-- [install-ctu-home.test.js](file://test/install-ctu-home.test.js)
+- [install.test.js](file://test/install.test.js)
 </cite>
 
 ## Update Summary
 **Changes Made**
 - Added documentation for new cache index sorting functionality (component/cache-index-sort.js)
-- Added documentation for enhanced installation safety mechanisms (install-ctu-home.js)
+- Added documentation for enhanced installation safety mechanisms (install.js)
 - Updated component integration patterns to include cache index sorting
 - Enhanced installation safety documentation with comprehensive testing coverage
 
@@ -37,7 +37,7 @@
 9. [Conclusion](#conclusion)
 
 ## Introduction
-This document explains the core component system of Code-To-UML's interactive demo page and cache management interface. It focuses on the main application controller (demo.js) and how it orchestrates UI interactions and the rendering pipeline. It also documents reusable UI components: docs-page-core.js for rendering utilities, toc-component.js for navigation, demo-example-component.js for individual diagram cards, render-failure-common.js for robust error handling, cache-index-sort.js for cache file management, and install-ctu-home.js for enhanced installation safety. The document covers component interfaces, event systems, data flow patterns, lifecycle management, state handling, and integration patterns. It concludes with practical usage and customization guidance grounded in the repository's implementation.
+This document explains the core component system of Code-To-UML's interactive demo page and cache management interface. It focuses on the main application controller (demo.js) and how it orchestrates UI interactions and the rendering pipeline. It also documents reusable UI components: docs-page-core.js for rendering utilities, toc-component.js for navigation, demo-example-component.js for individual diagram cards, render-failure-common.js for robust error handling, cache-index-sort.js for cache file management, and install.js for enhanced installation safety. The document covers component interfaces, event systems, data flow patterns, lifecycle management, state handling, and integration patterns. It concludes with practical usage and customization guidance grounded in the repository's implementation.
 
 ## Project Structure
 The demo page and cache management system are composed of:
@@ -47,7 +47,7 @@ The demo page and cache management system are composed of:
 - Reusable UI components under component/ that encapsulate rendering utilities, example cards, navigation, failure handling, and cache file sorting.
 - A shared CSS layer (main.css) that styles example cards, actions, preview areas, and the table of contents.
 - An internationalization system (i18n-config.js) that switches languages and dispatches events consumed by the controller.
-- Installation utilities (install-ctu-home.js) that provide enhanced safety mechanisms for environment setup.
+- Installation utilities (install.js) that provide enhanced safety mechanisms for environment setup.
 
 ```mermaid
 graph TB
@@ -58,7 +58,7 @@ DemoJS --> RenderFailure["render-failure-common.js"]
 DemoJS --> I18n["i18n-config.js"]
 DemoJS --> Toc["toc-component.js"]
 DemoJS --> ExampleComp["demo-example-component.js"]
-Install["install-ctu-home.js"] --> CacheSort
+Install["install.js"] --> CacheSort
 CacheSort --> IndexHTML["index.html"]
 CSS["main.css"] --> HTML
 CSS --> HTML2
@@ -74,7 +74,7 @@ CSS --> HTML2
 - [toc-component.js](file://component/toc-component.js)
 - [demo-example-component.js](file://component/demo-example-component.js)
 - [cache-index-sort.js](file://component/cache-index-sort.js)
-- [install-ctu-home.js](file://install-ctu-home.js)
+- [install.js](file://install.js)
 - [main.css](file://main.css)
 
 **Section sources**
@@ -109,7 +109,7 @@ This section introduces the primary components and their roles.
   - Offers bidirectional sorting (ascending/descending) with stable secondary sorting by filename.
   - Exposes a simple API for sorting cache file metadata arrays.
 
-- install-ctu-home.js
+- install.js
   - Enhanced installation utility that safely sets up the CTU_HOME environment variable across multiple AI development tools.
   - Provides comprehensive safety mechanisms including user confirmation prompts and backup verification.
   - Supports multiple AI platforms (codex, claude, vscode, etc.) with platform-specific configuration handling.
@@ -126,7 +126,7 @@ This section introduces the primary components and their roles.
 - [demo-example-component.js](file://component/demo-example-component.js)
 - [render-failure-common.js](file://component/render-failure-common.js)
 - [cache-index-sort.js](file://component/cache-index-sort.js)
-- [install-ctu-home.js](file://install-ctu-home.js)
+- [install.js](file://install.js)
 - [demo.js](file://demo.js)
 
 ## Architecture Overview
@@ -146,7 +146,7 @@ participant Example as "demo-example-component.js"
 participant Core as "docs-page-core.js"
 participant Failure as "render-failure-common.js"
 participant CacheSort as "cache-index-sort.js"
-participant Install as "install-ctu-home.js"
+participant Install as "install.js"
 participant Renderer as "Global Renderer"
 User->>Demo : Click tab / edit source / click action
 Demo->>Example : createExampleNode(options)
@@ -172,7 +172,7 @@ Install-->>User : Environment configured
 - [docs-page-core.js](file://component/docs-page-core.js)
 - [render-failure-common.js](file://component/render-failure-common.js)
 - [cache-index-sort.js](file://component/cache-index-sort.js)
-- [install-ctu-home.js](file://install-ctu-home.js)
+- [install.js](file://install.js)
 
 ## Detailed Component Analysis
 
@@ -309,7 +309,7 @@ Integration:
 - [cache-index-sort.js](file://component/cache-index-sort.js)
 - [index.html](file://index.html)
 
-### Installation Safety Mechanisms (install-ctu-home.js)
+### Installation Safety Mechanisms (install.js)
 Responsibilities:
 - Safely configure the CTU_HOME environment variable across multiple AI development platforms.
 - Provide comprehensive user interaction with confirmation prompts and overwrite warnings.
@@ -334,8 +334,8 @@ Testing coverage:
 - Validates that only specified tools are installed when selected.
 
 **Section sources**
-- [install-ctu-home.js](file://install-ctu-home.js)
-- [install-ctu-home.test.js](file://test/install-ctu-home.test.js)
+- [install.js](file://install.js)
+- [install.test.js](file://test/install.test.js)
 
 ### Component Interfaces and Data Flow
 The components communicate through:
@@ -405,7 +405,7 @@ InstallCtuHome --> ShellProfiles : "updates configs"
 - [toc-component.js](file://component/toc-component.js)
 - [render-failure-common.js](file://component/render-failure-common.js)
 - [cache-index-sort.js](file://component/cache-index-sort.js)
-- [install-ctu-home.js](file://install-ctu-home.js)
+- [install.js](file://install.js)
 
 ## Dependency Analysis
 The controller depends on:
@@ -425,7 +425,7 @@ Demo --> Failure["render-failure-common.js"]
 Demo --> HTML["demo.html"]
 Demo --> CSS["main.css"]
 CacheSort["cache-index-sort.js"] --> IndexHTML["index.html"]
-Install["install-ctu-home.js"] --> ShellProfiles["Shell Profiles"]
+Install["install.js"] --> ShellProfiles["Shell Profiles"]
 Install --> EnvVars["Environment Variables"]
 ```
 
@@ -440,7 +440,7 @@ Install --> EnvVars["Environment Variables"]
 - [main.css](file://main.css)
 - [cache-index-sort.js](file://component/cache-index-sort.js)
 - [index.html](file://index.html)
-- [install-ctu-home.js](file://install-ctu-home.js)
+- [install.js](file://install.js)
 
 **Section sources**
 - [demo.js](file://demo.js)
@@ -472,7 +472,7 @@ Validation and tests:
 - [render-failure-common.js](file://component/render-failure-common.js)
 - [render-failure-common.test.js](file://test/render-failure-common.test.js)
 - [cache-index-sort.test.js](file://test/cache-index-sort.test.js)
-- [install-ctu-home.test.js](file://test/install-ctu-home.test.js)
+- [install.test.js](file://test/install.test.js)
 - [demo.js](file://demo.js)
 
 ## Conclusion

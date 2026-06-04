@@ -8,9 +8,9 @@
 - [SKILL.md](file://skills/code-to-uml/SKILL.md)
 - [openai.yaml](file://skills/code-to-uml/agents/openai.yaml)
 - [code-to-uml-template.md](file://skills/code-to-uml/references/code-to-uml-template.md)
-- [install-ctu-home.js](file://install-ctu-home.js)
+- [install.js](file://install.js)
 - [serve.js](file://serve.js)
-- [install-ctu-home.test.js](file://test/install-ctu-home.test.js)
+- [install.test.js](file://test/install.test.js)
 </cite>
 
 ## Table of Contents
@@ -47,7 +47,7 @@ subgraph "Code-To-UML"
 A["skills/code-to-uml/SKILL.md"]
 B["skills/code-to-uml/agents/openai.yaml"]
 C["skills/code-to-uml/references/code-to-uml-template.md"]
-D["install-ctu-home.js"]
+D["install.js"]
 E["serve.js"]
 F["AGENTS.md"]
 end
@@ -69,7 +69,7 @@ F --> E
 - [SKILL.md:1-174](file://skills/code-to-uml/SKILL.md#L1-L174)
 - [openai.yaml:1-5](file://skills/code-to-uml/agents/openai.yaml#L1-L5)
 - [code-to-uml-template.md:1-95](file://skills/code-to-uml/references/code-to-uml-template.md#L1-L95)
-- [install-ctu-home.js:1-228](file://install-ctu-home.js#L1-L228)
+- [install.js:1-228](file://install.js#L1-L228)
 - [serve.js:1-567](file://serve.js#L1-L567)
 - [AGENTS.md:1-46](file://AGENTS.md#L1-L46)
 
@@ -81,14 +81,14 @@ F --> E
 - Skill definition: The skill describes the purpose, hard rules, workflow, and quality bar for generating Code-To-UML reports. It also documents how Cursor resolves the project root via CTU_HOME and how to start the local server.
 - Agent configuration: The agent YAML declares the display name, short description, and default prompt for Cursor.
 - Template contract: The template reference documents required HTML and .ctu contracts, topbar link handling, and verification steps.
-- Setup script: The install-ctu-home.js script sets CTU_HOME and installs the skill for Cursor and other agents.
+- Setup script: The install.js script sets CTU_HOME and installs the skill for Cursor and other agents.
 - Local server: The serve.js dev server exposes endpoints for demo examples and PlantUML fallback rendering.
 
 **Section sources**
 - [SKILL.md:1-174](file://skills/code-to-uml/SKILL.md#L1-L174)
 - [openai.yaml:1-5](file://skills/code-to-uml/agents/openai.yaml#L1-L5)
 - [code-to-uml-template.md:1-95](file://skills/code-to-uml/references/code-to-uml-template.md#L1-L95)
-- [install-ctu-home.js:1-228](file://install-ctu-home.js#L1-L228)
+- [install.js:1-228](file://install.js#L1-L228)
 - [serve.js:1-567](file://serve.js#L1-L567)
 
 ## Architecture Overview
@@ -102,7 +102,7 @@ The Cursor-to-Code-To-UML integration relies on:
 sequenceDiagram
 participant Cursor as "Cursor Agent"
 participant Skill as "SKILL.md"
-participant Setup as "install-ctu-home.js"
+participant Setup as "install.js"
 participant Server as "serve.js"
 Cursor->>Skill : "Analyze code and generate UML-backed HTML report"
 Skill->>Setup : "Resolve CTU_HOME and template paths"
@@ -115,7 +115,7 @@ Skill-->>Cursor : "Final response with report URL"
 
 **Diagram sources**
 - [SKILL.md:30-94](file://skills/code-to-uml/SKILL.md#L30-L94)
-- [install-ctu-home.js:204-220](file://install-ctu-home.js#L204-L220)
+- [install.js:204-220](file://install.js#L204-L220)
 - [serve.js:454-561](file://serve.js#L454-L561)
 
 ## Detailed Component Analysis
@@ -123,7 +123,7 @@ Skill-->>Cursor : "Final response with report URL"
 ### CTU_HOME Environment Variable Configuration
 - Purpose: CTU_HOME is the project root used by the skill to locate templates and data.
 - Resolution order: The skill resolves CTU_HOME first; if unset, it falls back to the current working directory only if it contains the template files. Otherwise, run the install script to set CTU_HOME.
-- Script behavior: The install-ctu-home.js script writes CTU_HOME to the user’s shell profile (on Unix-like systems) or sets a user environment variable (on Windows). It also installs the skill for Cursor and other agents.
+- Script behavior: The install.js script writes CTU_HOME to the user’s shell profile (on Unix-like systems) or sets a user environment variable (on Windows). It also installs the skill for Cursor and other agents.
 
 ```mermaid
 flowchart TD
@@ -133,7 +133,7 @@ HasEnv --> |Yes| UseEnv["Use CTU_HOME as project root"]
 HasEnv --> |No| CheckTemplate["Check for template files in CWD"]
 CheckTemplate --> HasTemplate{"Has template files?"}
 HasTemplate --> |Yes| UseCWD["Use CWD as project root"]
-HasTemplate --> |No| RunInstall["Run install-ctu-home.js"]
+HasTemplate --> |No| RunInstall["Run install.js"]
 RunInstall --> SetEnv["Set CTU_HOME and install skill"]
 SetEnv --> UseEnv
 UseEnv --> End(["Resolved"])
@@ -142,24 +142,24 @@ UseCWD --> End
 
 **Diagram sources**
 - [SKILL.md:14-16](file://skills/code-to-uml/SKILL.md#L14-L16)
-- [install-ctu-home.js:150-202](file://install-ctu-home.js#L150-L202)
+- [install.js:150-202](file://install.js#L150-L202)
 
 **Section sources**
 - [SKILL.md:14-16](file://skills/code-to-uml/SKILL.md#L14-L16)
-- [install-ctu-home.js:204-220](file://install-ctu-home.js#L204-L220)
+- [install.js:204-220](file://install.js#L204-L220)
 
 ### Project Registration and Skill Installation for Cursor
-- Install script: Run the install-ctu-home.js script to set CTU_HOME and install the skill into the Cursor skill directory.
+- Install script: Run the install.js script to set CTU_HOME and install the skill into the Cursor skill directory.
 - Tool targeting: The script supports multiple tools; for Cursor, the relevant directory is created under the user’s home directory according to the tool’s conventions.
 - Verification: Tests confirm that the skill is installed and that CTU_HOME is written to the shell profile.
 
 ```mermaid
 sequenceDiagram
 participant Dev as "Developer"
-participant Script as "install-ctu-home.js"
+participant Script as "install.js"
 participant FS as "Filesystem"
 participant Cursor as "Cursor Skills"
-Dev->>Script : "node install-ctu-home.js"
+Dev->>Script : "node install.js"
 Script->>FS : "Write CTU_HOME to shell profile"
 Script->>FS : "Copy skills/code-to-uml to Cursor skill dir"
 FS-->>Cursor : "Skill available"
@@ -167,14 +167,14 @@ Cursor-->>Dev : "Ready for activation"
 ```
 
 **Diagram sources**
-- [install-ctu-home.js:116-136](file://install-ctu-home.js#L116-L136)
-- [install-ctu-home.js:167-202](file://install-ctu-home.js#L167-L202)
-- [install-ctu-home.test.js:27-94](file://test/install-ctu-home.test.js#L27-L94)
+- [install.js:116-136](file://install.js#L116-L136)
+- [install.js:167-202](file://install.js#L167-L202)
+- [install.test.js:27-94](file://test/install.test.js#L27-L94)
 
 **Section sources**
-- [install-ctu-home.js:116-136](file://install-ctu-home.js#L116-L136)
-- [install-ctu-home.js:167-202](file://install-ctu-home.js#L167-L202)
-- [install-ctu-home.test.js:27-94](file://test/install-ctu-home.test.js#L27-L94)
+- [install.js:116-136](file://install.js#L116-L136)
+- [install.js:167-202](file://install.js#L167-L202)
+- [install.test.js:27-94](file://test/install.test.js#L27-L94)
 
 ### Cursor Workspace Setup and Skill Activation
 - Workspace: Open the Code-To-UML repository in Cursor.
@@ -313,8 +313,8 @@ Template["code-to-uml-template.md"] --> Server
 
 **Section sources**
 - [SKILL.md:14-16](file://skills/code-to-uml/SKILL.md#L14-L16)
-- [install-ctu-home.js:167-202](file://install-ctu-home.js#L167-L202)
-- [install-ctu-home.test.js:27-94](file://test/install-ctu-home.test.js#L27-L94)
+- [install.js:167-202](file://install.js#L167-L202)
+- [install.test.js:27-94](file://test/install.test.js#L27-L94)
 - [serve.js:56-88](file://serve.js#L56-L88)
 
 ## Conclusion

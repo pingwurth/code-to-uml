@@ -16,7 +16,7 @@
 - [use-case--18_en.ctu](file://data/demo/use-case--18_en.ctu)
 - [_TEMPLATE.html](file://cache/_TEMPLATE.html)
 - [index.html](file://index.html)
-- [install-ctu-home.js](file://install-ctu-home.js)
+- [install.js](file://install.js)
 - [serve.js](file://serve.js)
 - [demo.js](file://demo.js)
 - [demo-example-component.js](file://component/demo-example-component.js)
@@ -250,13 +250,13 @@ The cache index page:
 - [serve.js:217-302](file://serve.js#L217-L302)
 
 ### Tool Integration and Environment Setup
-The install-ctu-home.js script:
+The install.js script:
 - Installs the bundled skill directory into tool-specific locations.
 - Sets the CTU_HOME environment variable for downstream tooling.
 - Supports Windows and Unix shells with appropriate quoting and profiles.
 
 **Section sources**
-- [install-ctu-home.js:150-220](file://install-ctu-home.js#L150-L220)
+- [install.js:150-220](file://install.js#L150-L220)
 
 ## Visual Styling and Theme Customization
 

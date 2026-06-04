@@ -149,7 +149,7 @@ cd code-to-uml
 2. （可选）设置 `CTU_HOME` 以支持 AI 代理集成：
 
 ```bash
-node install-ctu-home.js
+node install.js
 ```
 
 3. 启动服务器：
@@ -279,7 +279,7 @@ code-to-uml/
 │   └── SKILL.md             # AI 代理技能定义
 ├── CLAUDE.md                # Claude Code 指引
 ├── AGENTS.md                # 代理文档
-└── install-ctu-home.js      # CTU_HOME 设置脚本
+└── install.js      # CTU_HOME 设置脚本
 ```
 
 ---
@@ -313,7 +313,7 @@ code-to-uml/
 | 设置 | 方式 | 默认值 |
 |------|------|--------|
 | 服务器端口 | `PORT` 环境变量或 CLI 参数 | `5401` |
-| 项目根目录 | `CTU_HOME` 环境变量（由 `install-ctu-home.js` 设置） | 当前工作目录 |
+| 项目根目录 | `CTU_HOME` 环境变量（由 `install.js` 设置） | 当前工作目录 |
 | 界面语言 | `localStorage` 键 `plantuml-docs-lang` | 浏览器区域设置 |
 | 主题 | `main.css` 中的 CSS 自定义属性 | 亮色 |
 
@@ -373,7 +373,7 @@ Code-To-UML 在 [`skills/code-to-uml/SKILL.md`](skills/code-to-uml/SKILL.md) 中
 
 ### 设置方法
 
-1. 运行 `node install-ctu-home.js` 注册项目路径。
+1. 运行 `node install.js` 注册项目路径。
 2. 将你的 AI 代理指向 `skills/code-to-uml/SKILL.md`。
 3. 让代理分析代码库 — 它将生成 `.ctu` 数据文件和 HTML 报告。
 

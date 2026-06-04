@@ -3,12 +3,12 @@
 <cite>
 **Referenced Files in This Document**
 - [README.md](file://README.md)
-- [install-ctu-home.js](file://install-ctu-home.js)
+- [install.js](file://install.js)
 - [skills/code-to-uml/SKILL.md](file://skills/code-to-uml/SKILL.md)
 - [skills/code-to-uml/agents/openai.yaml](file://skills/code-to-uml/agents/openai.yaml)
 - [CLAUDE.md](file://CLAUDE.md)
 - [AGENTS.md](file://AGENTS.md)
-- [test/install-ctu-home.test.js](file://test/install-ctu-home.test.js)
+- [test/install.test.js](file://test/install.test.js)
 </cite>
 
 ## Table of Contents
@@ -30,14 +30,14 @@ This document provides comprehensive setup guides for the AI agents supported by
 The repository is a static frontend project with a Node.js dev server and a skill definition that enables AI agents to generate UML-backed HTML reports. The key elements for agent integration are:
 - CTU_HOME environment variable pointing to the project root
 - A bundled skill definition under skills/code-to-uml/SKILL.md
-- An installer script install-ctu-home.js that writes CTU_HOME and installs the skill into agent-specific directories
+- An installer script install.js that writes CTU_HOME and installs the skill into agent-specific directories
 - Optional agent-specific YAML interface definitions under skills/code-to-uml/agents/
 
 ```mermaid
 graph TB
 subgraph "Project Root"
 A["README.md"]
-B["install-ctu-home.js"]
+B["install.js"]
 C["skills/code-to-uml/SKILL.md"]
 D["skills/code-to-uml/agents/openai.yaml"]
 E["CLAUDE.md"]
@@ -78,8 +78,8 @@ C --> R
 ```
 
 **Diagram sources**
-- [install-ctu-home.js:15-25](file://install-ctu-home.js#L15-L25)
-- [install-ctu-home.js:116-130](file://install-ctu-home.js#L116-L130)
+- [install.js:15-25](file://install.js#L15-L25)
+- [install.js:116-130](file://install.js#L116-L130)
 - [README.md:277-295](file://README.md#L277-L295)
 
 **Section sources**
@@ -103,7 +103,7 @@ The agent integration architecture centers on a single skill definition and a sh
 graph TB
 User["User"]
 Agent["AI Agent"]
-Installer["install-ctu-home.js"]
+Installer["install.js"]
 Env["CTU_HOME"]
 Skill["skills/code-to-uml/SKILL.md"]
 Templates["cache/_TEMPLATE.html<br/>data/_TEMPLATE.ctu"]
@@ -117,11 +117,11 @@ Agent --> Templates
 ```
 
 **Diagram sources**
-- [install-ctu-home.js:104-220](file://install-ctu-home.js#L104-L220)
+- [install.js:104-220](file://install.js#L104-L220)
 - [skills/code-to-uml/SKILL.md:35-42](file://skills/code-to-uml/SKILL.md#L35-L42)
 
 **Section sources**
-- [install-ctu-home.js:104-220](file://install-ctu-home.js#L104-L220)
+- [install.js:104-220](file://install.js#L104-L220)
 - [skills/code-to-uml/SKILL.md:35-42](file://skills/code-to-uml/SKILL.md#L35-L42)
 
 ## Detailed Component Analysis
@@ -133,7 +133,7 @@ Agent --> Templates
 
 ```mermaid
 flowchart TD
-Start(["Start"]) --> RunInstaller["Run install-ctu-home.js"]
+Start(["Start"]) --> RunInstaller["Run install.js"]
 RunInstaller --> SetEnv["Set CTU_HOME to project root"]
 SetEnv --> InstallSkill["Install skills/code-to-uml into agent skill dirs"]
 InstallSkill --> Verify["Verify CTU_HOME and skill presence"]
@@ -141,12 +141,12 @@ Verify --> End(["Done"])
 ```
 
 **Diagram sources**
-- [install-ctu-home.js:204-220](file://install-ctu-home.js#L204-L220)
-- [install-ctu-home.js:116-130](file://install-ctu-home.js#L116-L130)
+- [install.js:204-220](file://install.js#L204-L220)
+- [install.js:116-130](file://install.js#L116-L130)
 
 **Section sources**
 - [README.md:97-101](file://README.md#L97-L101)
-- [install-ctu-home.js:104-220](file://install-ctu-home.js#L104-L220)
+- [install.js:104-220](file://install.js#L104-L220)
 
 ### Cursor (Rules-based Agent)
 - Setup steps:
@@ -160,7 +160,7 @@ Verify --> End(["Done"])
 **Section sources**
 - [README.md:283-287](file://README.md#L283-L287)
 - [README.md:289-294](file://README.md#L289-L294)
-- [install-ctu-home.js:15](file://install-ctu-home.js#L15)
+- [install.js:15](file://install.js#L15)
 - [skills/code-to-uml/SKILL.md:35-42](file://skills/code-to-uml/SKILL.md#L35-L42)
 
 ### Claude Code
@@ -178,7 +178,7 @@ Verify --> End(["Done"])
 - [README.md:284-287](file://README.md#L284-L287)
 - [README.md:289-294](file://README.md#L289-L294)
 - [CLAUDE.md:1-100](file://CLAUDE.md#L1-L100)
-- [install-ctu-home.js:16](file://install-ctu-home.js#L16)
+- [install.js:16](file://install.js#L16)
 - [skills/code-to-uml/SKILL.md:35-42](file://skills/code-to-uml/SKILL.md#L35-L42)
 
 ### Qwen Coder
@@ -193,7 +193,7 @@ Verify --> End(["Done"])
 **Section sources**
 - [README.md:285-287](file://README.md#L285-L287)
 - [README.md:289-294](file://README.md#L289-L294)
-- [install-ctu-home.js:22](file://install-ctu-home.js#L22)
+- [install.js:22](file://install.js#L22)
 - [skills/code-to-uml/SKILL.md:35-42](file://skills/code-to-uml/SKILL.md#L35-L42)
 
 ### OpenAI Codex
@@ -211,7 +211,7 @@ Verify --> End(["Done"])
 - [README.md:286-287](file://README.md#L286-L287)
 - [README.md:289-294](file://README.md#L289-L294)
 - [skills/code-to-uml/agents/openai.yaml:1-5](file://skills/code-to-uml/agents/openai.yaml#L1-L5)
-- [install-ctu-home.js:15](file://install-ctu-home.js#L15)
+- [install.js:15](file://install.js#L15)
 - [skills/code-to-uml/SKILL.md:35-42](file://skills/code-to-uml/SKILL.md#L35-L42)
 
 ### Conceptual Overview
@@ -219,7 +219,7 @@ The agent selection process is straightforward: choose an agent, run the install
 
 ```mermaid
 flowchart TD
-ChooseAgent["Choose Agent"] --> Install["Run install-ctu-home.js"]
+ChooseAgent["Choose Agent"] --> Install["Run install.js"]
 Install --> SkillDir["Install skill into agent skill dir"]
 SkillDir --> PointAgent["Point agent to skills/code-to-uml/SKILL.md"]
 PointAgent --> Analyze["Ask agent to analyze codebase"]
@@ -231,13 +231,13 @@ Analyze --> Generate["Generate .ctu data and HTML report"]
 [No sources needed since this section doesn't analyze specific source files]
 
 ## Dependency Analysis
-- install-ctu-home.js maps agent tool names to their respective skill directories and installs the skill into each.
+- install.js maps agent tool names to their respective skill directories and installs the skill into each.
 - The skill definition depends on CTU_HOME being set to locate templates and data files.
 - Agent-specific YAML files provide interface metadata for certain agents.
 
 ```mermaid
 graph TB
-Installer["install-ctu-home.js"]
+Installer["install.js"]
 ToolMap["Tool Skill Dir Map"]
 Skill["skills/code-to-uml/SKILL.md"]
 OpenAIYAML["skills/code-to-uml/agents/openai.yaml"]
@@ -247,13 +247,13 @@ Installer --> OpenAIYAML
 ```
 
 **Diagram sources**
-- [install-ctu-home.js:15-25](file://install-ctu-home.js#L15-L25)
-- [install-ctu-home.js:116-130](file://install-ctu-home.js#L116-L130)
+- [install.js:15-25](file://install.js#L15-L25)
+- [install.js:116-130](file://install.js#L116-L130)
 - [skills/code-to-uml/agents/openai.yaml:1-5](file://skills/code-to-uml/agents/openai.yaml#L1-L5)
 
 **Section sources**
-- [install-ctu-home.js:15-25](file://install-ctu-home.js#L15-L25)
-- [install-ctu-home.js:116-130](file://install-ctu-home.js#L116-L130)
+- [install.js:15-25](file://install.js#L15-L25)
+- [install.js:116-130](file://install.js#L116-L130)
 - [skills/code-to-uml/agents/openai.yaml:1-5](file://skills/code-to-uml/agents/openai.yaml#L1-L5)
 
 ## Performance Considerations
@@ -280,8 +280,8 @@ Installer --> OpenAIYAML
 **Section sources**
 - [README.md:97-101](file://README.md#L97-L101)
 - [README.md:26-28](file://README.md#L26-L28)
-- [test/install-ctu-home.test.js:40-44](file://test/install-ctu-home.test.js#L40-L44)
-- [test/install-ctu-home.test.js:76-82](file://test/install-ctu-home.test.js#L76-L82)
+- [test/install.test.js:40-44](file://test/install.test.js#L40-L44)
+- [test/install.test.js:76-82](file://test/install.test.js#L76-L82)
 
 ## Conclusion
 By setting CTU_HOME and installing the skill into agent-specific directories, you enable Cursor, Claude Code, Qwen Coder, and OpenAI Codex to consistently generate UML-backed HTML reports. The skill definition standardizes the process, while agent-specific YAML files provide interface metadata. Follow the troubleshooting steps to resolve common setup issues and adhere to best practices for optimal performance.
@@ -306,5 +306,5 @@ By setting CTU_HOME and installing the skill into agent-specific directories, yo
 - Keep the skill definition and templates within the project root to prevent accidental exposure outside the repository.
 
 **Section sources**
-- [install-ctu-home.js:204-220](file://install-ctu-home.js#L204-L220)
+- [install.js:204-220](file://install.js#L204-L220)
 - [README.md:277-295](file://README.md#L277-L295)

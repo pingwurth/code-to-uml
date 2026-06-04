@@ -25,7 +25,7 @@ jobs:
         node --check serve.js
         node --check demo.js
         node --check i18n-config.js
-        node --check install-ctu-home.js
+        node --check install.js
         
     - name: Check HTML validity
       run: |

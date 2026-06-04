@@ -7,7 +7,7 @@
 - [AGENTS.md](file://AGENTS.md)
 - [SKILL.md](file://skills/code-to-uml/SKILL.md)
 - [openai.yaml](file://skills/code-to-uml/agents/openai.yaml)
-- [install-ctu-home.js](file://install-ctu-home.js)
+- [install.js](file://install.js)
 - [serve.js](file://serve.js)
 - [_TEMPLATE.html](file://cache/_TEMPLATE.html)
 - [_TEMPLATE.ctu](file://data/_TEMPLATE.ctu)
@@ -51,7 +51,7 @@ end
 subgraph "AI Integration"
 E["skills/code-to-uml/SKILL.md"]
 F["agents/openai.yaml"]
-G["install-ctu-home.js"]
+G["install.js"]
 end
 A --> C
 B --> C
@@ -65,7 +65,7 @@ F --> G
 - [serve.js:454-561](file://serve.js#L454-L561)
 - [SKILL.md:1-174](file://skills/code-to-uml/SKILL.md#L1-L174)
 - [openai.yaml:1-5](file://skills/code-to-uml/agents/openai.yaml#L1-L5)
-- [install-ctu-home.js:15-25](file://install-ctu-home.js#L15-L25)
+- [install.js:15-25](file://install.js#L15-L25)
 
 **Section sources**
 - [README.md:166-198](file://README.md#L166-L198)
@@ -220,12 +220,12 @@ Below is a comparative decision framework for Cursor, Claude Code, Qwen Coder, a
   - Recommendation: Establish governance around agent selection, data handling, and retention.
 
 - Migration Strategy
-  - Use install-ctu-home.js to register CTU_HOME and install the skill for multiple agents.
+  - Use install.js to register CTU_HOME and install the skill for multiple agents.
   - Switch agents by pointing them to the same skill and verifying the workflow.
   - Recommendation: Standardize agent configuration and run verification checks after migration.
 
 - Best Practices for Configuration Management
-  - Centralize agent configuration via install-ctu-home.js.
+  - Centralize agent configuration via install.js.
   - Keep templates immutable and version-controlled.
   - Automate verification post-generation (server start, API checks).
   - Recommendation: Document agent-specific settings and maintain a changelog for configuration updates.
@@ -235,7 +235,7 @@ Below is a comparative decision framework for Cursor, Claude Code, Qwen Coder, a
 - [CLAUDE.md:1-100](file://CLAUDE.md#L1-L100)
 - [AGENTS.md:1-46](file://AGENTS.md#L1-L46)
 - [openai.yaml:1-5](file://skills/code-to-uml/agents/openai.yaml#L1-L5)
-- [install-ctu-home.js:15-25](file://install-ctu-home.js#L15-L25)
+- [install.js:15-25](file://install.js#L15-L25)
 
 ## Agent-Specific Strengths and Limitations
 - Cursor
@@ -262,7 +262,7 @@ Below is a comparative decision framework for Cursor, Claude Code, Qwen Coder, a
 
 ## Migration Strategies Between Agents
 - Preparation
-  - Register CTU_HOME and install the skill for the target agents using install-ctu-home.js.
+  - Register CTU_HOME and install the skill for the target agents using install.js.
   - Confirm agent permissions and tool access.
 - Execution
   - Point the new agent to the skill and run the workflow.
@@ -271,11 +271,11 @@ Below is a comparative decision framework for Cursor, Claude Code, Qwen Coder, a
   - Compare generated .ctu files and HTML against the template.
   - Validate API endpoints and navigation links.
 - Rollback
-  - Re-run install-ctu-home.js for the previous agent if needed.
+  - Re-run install.js for the previous agent if needed.
   - Maintain logs and artifacts for comparison.
 
 **Section sources**
-- [install-ctu-home.js:116-136](file://install-ctu-home.js#L116-L136)
+- [install.js:116-136](file://install.js#L116-L136)
 - [SKILL.md:84-94](file://skills/code-to-uml/SKILL.md#L84-L94)
 
 ## Security, Privacy, and Compliance

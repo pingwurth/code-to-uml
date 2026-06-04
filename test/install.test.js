@@ -26,7 +26,7 @@ const env = Object.assign({}, process.env, {
 
 try {
 	const result = spawnSync(process.execPath, [
-		"install-ctu-home.js",
+		"install.js",
 		"codex",
 		"--profile",
 		profile,
@@ -47,7 +47,7 @@ try {
 	const existing = fs.readFileSync(path.join(home, ".codex", "skills", "code-to-uml", "SKILL.md"), "utf8");
 	fs.writeFileSync(path.join(home, ".codex", "skills", "code-to-uml", "SKILL.md"), "custom local skill");
 	const second = spawnSync(process.execPath, [
-		"install-ctu-home.js",
+		"install.js",
 		"codex",
 		"--profile",
 		profile,
@@ -68,7 +68,7 @@ try {
 	);
 
 	const overwrite = spawnSync(process.execPath, [
-		"install-ctu-home.js",
+		"install.js",
 		"codex",
 		"--profile",
 		profile,
@@ -88,7 +88,7 @@ try {
 	);
 
 	const allTools = spawnSync(process.execPath, [
-		"install-ctu-home.js",
+		"install.js",
 		"--profile",
 		profile,
 	], {

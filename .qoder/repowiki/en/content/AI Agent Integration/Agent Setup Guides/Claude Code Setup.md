@@ -7,7 +7,7 @@
 - [SKILL.md](file://skills/code-to-uml/SKILL.md)
 - [code-to-uml-template.md](file://skills/code-to-uml/references/code-to-uml-template.md)
 - [openai.yaml](file://skills/code-to-uml/agents/openai.yaml)
-- [install-ctu-home.js](file://install-ctu-home.js)
+- [install.js](file://install.js)
 - [serve.js](file://serve.js)
 - [demo.html](file://demo.html)
 - [demo.js](file://demo.js)
@@ -46,7 +46,7 @@ E["demo.js"]
 F["serve.js"]
 end
 subgraph "Setup Utilities"
-G["install-ctu-home.js"]
+G["install.js"]
 end
 A --> B
 A --> C
@@ -62,7 +62,7 @@ G --> A
 - [demo.html:1-116](file://demo.html#L1-L116)
 - [demo.js:1-816](file://demo.js#L1-L816)
 - [serve.js:1-567](file://serve.js#L1-L567)
-- [install-ctu-home.js:1-228](file://install-ctu-home.js#L1-L228)
+- [install.js:1-228](file://install.js#L1-L228)
 
 **Section sources**
 - [CLAUDE.md:1-100](file://CLAUDE.md#L1-L100)
@@ -79,7 +79,7 @@ G --> A
 - [SKILL.md:1-174](file://skills/code-to-uml/SKILL.md#L1-L174)
 - [code-to-uml-template.md:1-95](file://skills/code-to-uml/references/code-to-uml-template.md#L1-L95)
 - [openai.yaml:1-5](file://skills/code-to-uml/agents/openai.yaml#L1-L5)
-- [install-ctu-home.js:1-228](file://install-ctu-home.js#L1-L228)
+- [install.js:1-228](file://install.js#L1-L228)
 - [serve.js:1-567](file://serve.js#L1-L567)
 
 ## Architecture Overview
@@ -88,7 +88,7 @@ The Claude Code integration centers on installing the skill into Claude Code’s
 ```mermaid
 sequenceDiagram
 participant User as "Developer"
-participant Installer as "install-ctu-home.js"
+participant Installer as "install.js"
 participant Claude as "Claude Code"
 participant Skill as "code-to-uml skill"
 participant Server as "serve.js"
@@ -103,7 +103,7 @@ Skill-->>User : Provide browser URL for generated report
 ```
 
 **Diagram sources**
-- [install-ctu-home.js:1-228](file://install-ctu-home.js#L1-L228)
+- [install.js:1-228](file://install.js#L1-L228)
 - [SKILL.md:1-174](file://skills/code-to-uml/SKILL.md#L1-L174)
 - [openai.yaml:1-5](file://skills/code-to-uml/agents/openai.yaml#L1-L5)
 - [serve.js:1-567](file://serve.js#L1-L567)
@@ -147,8 +147,8 @@ Error --> End
   - Ensure the environment variable is exported in your shell profile or use the printed command for the current shell session.
 
 **Section sources**
-- [install-ctu-home.js:27-49](file://install-ctu-home.js#L27-L49)
-- [install-ctu-home.js:158-165](file://install-ctu-home.js#L158-L165)
+- [install.js:27-49](file://install.js#L27-L49)
+- [install.js:158-165](file://install.js#L158-L165)
 - [openai.yaml:1-5](file://skills/code-to-uml/agents/openai.yaml#L1-L5)
 
 ### Local Server and Rendering Pipeline
@@ -217,7 +217,7 @@ StartServer --> End(["Report ready"])
 
 **Section sources**
 - [openai.yaml:1-5](file://skills/code-to-uml/agents/openai.yaml#L1-L5)
-- [install-ctu-home.js:1-228](file://install-ctu-home.js#L1-L228)
+- [install.js:1-228](file://install.js#L1-L228)
 
 ### Claude Code Settings and Environment Variables
 - Required environment variable: The skill expects a specific environment variable to resolve the project root. The installer sets this variable and can print the appropriate command for the current shell.
@@ -280,7 +280,7 @@ Server --> Java["plantuml.jar (optional)"]
 **Section sources**
 - [demo.js:395-439](file://demo.js#L395-L439)
 - [serve.js:56-88](file://serve.js#L56-L88)
-- [install-ctu-home.js:182-202](file://install-ctu-home.js#L182-L202)
+- [install.js:182-202](file://install.js#L182-L202)
 
 ## Conclusion
 Claude Code integration with the Code-To-UML project is streamlined through a dedicated skill definition, a clear template contract, and a local server that supports robust rendering. By installing the skill, setting the environment variable, and following the report generation workflow, developers can efficiently produce consistent UML-backed HTML reports tailored to their needs.
@@ -295,7 +295,7 @@ Claude Code integration with the Code-To-UML project is streamlined through a de
 - Generate a report and validate the rendered diagrams and navigation.
 
 **Section sources**
-- [install-ctu-home.js:132-136](file://install-ctu-home.js#L132-L136)
+- [install.js:132-136](file://install.js#L132-L136)
 - [openai.yaml:1-5](file://skills/code-to-uml/agents/openai.yaml#L1-L5)
 - [code-to-uml-template.md:81-88](file://skills/code-to-uml/references/code-to-uml-template.md#L81-L88)
 - [SKILL.md:84-94](file://skills/code-to-uml/SKILL.md#L84-L94)

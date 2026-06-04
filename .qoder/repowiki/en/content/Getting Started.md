@@ -6,14 +6,14 @@
 - [serve.js](file://serve.js)
 - [serve.sh](file://serve.sh)
 - [serve.bat](file://serve.bat)
-- [install-ctu-home.js](file://install-ctu-home.js)
+- [install.js](file://install.js)
 - [demo.html](file://demo.html)
 - [index.html](file://index.html)
 - [main.css](file://main.css)
 - [AGENTS.md](file://AGENTS.md)
 - [CLAUDE.md](file://CLAUDE.md)
 - [SKILL.md](file://skills/code-to-uml/SKILL.md)
-- [install-ctu-home.test.js](file://test/install-ctu-home.test.js)
+- [install.test.js](file://test/install.test.js)
 - [serve-scripts-static.test.js](file://test/serve-scripts-static.test.js)
 </cite>
 
@@ -125,10 +125,10 @@ Supported tools include several popular AI coding assistants. The installer copi
 
 **Section sources**
 - [README.md:97–101:97-101](file://README.md#L97-L101)
-- [install-ctu-home.js:27–49:27-49](file://install-ctu-home.js#L27-L49)
-- [install-ctu-home.js:158–165:158-165](file://install-ctu-home.js#L158-L165)
-- [install-ctu-home.js:167–180:167-180](file://install-ctu-home.js#L167-L180)
-- [install-ctu-home.js:182–202:182-202](file://install-ctu-home.js#L182-L202)
+- [install.js:27–49:27-49](file://install.js#L27-L49)
+- [install.js:158–165:158-165](file://install.js#L158-L165)
+- [install.js:167–180:167-180](file://install.js#L167-L180)
+- [install.js:182–202:182-202](file://install.js#L182-L202)
 - [SKILL.md:14–28:14-28](file://skills/code-to-uml/SKILL.md#L14-L28)
 
 ## Architecture Overview

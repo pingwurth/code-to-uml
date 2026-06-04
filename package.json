@@ -9,7 +9,7 @@
   "scripts": {
     "start": "node serve.js",
     "test": "node test/run-all.js",
-    "lint": "node --check serve.js demo.js i18n-config.js install-ctu-home.js",
+    "lint": "node --check serve.js demo.js i18n-config.js install.js",
     "serve": "node serve.js 5401",
     "prepublishOnly": "npm run lint && npm test",
     "preversion": "npm run lint",
@@ -64,7 +64,7 @@
     "js/",
     "skills/",
     "plantuml-official-demo/",
-    "install-ctu-home.js",
+    "install.js",
     "favicon.svg",
     "favicon.ico",
     "logo.png",

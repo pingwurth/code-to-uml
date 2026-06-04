@@ -26,9 +26,9 @@ const TOOL_SKILL_DIRS = {
 
 function usage() {
 	console.log(`Usage:
-  node install-ctu-home.js [tool ...] [--profile <file>] [--print]
-  node install-ctu-home.js codex
-  node install-ctu-home.js claude vscode
+  node install.js [tool ...] [--profile <file>] [--print]
+  node install.js codex
+  node install.js claude vscode
 
 Sets ${VAR_NAME} to this project root:
   ${PROJECT_ROOT}

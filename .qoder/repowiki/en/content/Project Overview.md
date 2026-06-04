@@ -11,7 +11,7 @@
 - [i18n-config.js](file://i18n-config.js)
 - [component/docs-page-core.js](file://component/docs-page-core.js)
 - [component/toc-component.js](file://component/toc-component.js)
-- [install-ctu-home.js](file://install-ctu-home.js)
+- [install.js](file://install.js)
 - [skills/code-to-uml/SKILL.md](file://skills/code-to-uml/SKILL.md)
 - [skills/code-to-uml/references/code-to-uml-template.md](file://skills/code-to-uml/references/code-to-uml-template.md)
 - [AGENTS.md](file://AGENTS.md)
@@ -287,12 +287,12 @@ Serve --> Done(["Return browser URL and status"])
 **Diagram sources**
 - [skills/code-to-uml/SKILL.md:30-94](file://skills/code-to-uml/SKILL.md#L30-L94)
 - [skills/code-to-uml/references/code-to-uml-template.md:1-95](file://skills/code-to-uml/references/code-to-uml-template.md#L1-L95)
-- [install-ctu-home.js:1-228](file://install-ctu-home.js#L1-L228)
+- [install.js:1-228](file://install.js#L1-L228)
 
 **Section sources**
 - [skills/code-to-uml/SKILL.md:30-94](file://skills/code-to-uml/SKILL.md#L30-L94)
 - [skills/code-to-uml/references/code-to-uml-template.md:1-95](file://skills/code-to-uml/references/code-to-uml-template.md#L1-L95)
-- [install-ctu-home.js:1-228](file://install-ctu-home.js#L1-L228)
+- [install.js:1-228](file://install.js#L1-L228)
 
 ## Dependency Analysis
 - Frontend depends on:
@@ -315,7 +315,7 @@ DEMOJS --> SERVE["serve.js"]
 SERVE --> FS["File System"]
 SERVE --> JAVA["Java Runtime"]
 SKILL["SKILL.md"] --> SERVE
-INSTALL["install-ctu-home.js"] --> SKILL
+INSTALL["install.js"] --> SKILL
 ```
 
 **Diagram sources**
@@ -324,13 +324,13 @@ INSTALL["install-ctu-home.js"] --> SKILL
 - [component/toc-component.js:1-84](file://component/toc-component.js#L1-L84)
 - [i18n-config.js:1-58](file://i18n-config.js#L1-L58)
 - [serve.js:1-567](file://serve.js#L1-L567)
-- [install-ctu-home.js:1-228](file://install-ctu-home.js#L1-L228)
+- [install.js:1-228](file://install.js#L1-L228)
 - [skills/code-to-uml/SKILL.md:1-174](file://skills/code-to-uml/SKILL.md#L1-L174)
 
 **Section sources**
 - [demo.js:1-816](file://demo.js#L1-L816)
 - [serve.js:1-567](file://serve.js#L1-L567)
-- [install-ctu-home.js:1-228](file://install-ctu-home.js#L1-L228)
+- [install.js:1-228](file://install.js#L1-L228)
 
 ## Performance Considerations
 - Browser-first rendering minimizes server round-trips for typical diagrams, improving perceived responsiveness.

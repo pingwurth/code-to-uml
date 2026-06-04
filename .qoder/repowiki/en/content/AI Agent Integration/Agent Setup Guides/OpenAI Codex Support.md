@@ -5,7 +5,7 @@
 - [README.md](file://README.md)
 - [AGENTS.md](file://AGENTS.md)
 - [CLAUDE.md](file://CLAUDE.md)
-- [install-ctu-home.js](file://install-ctu-home.js)
+- [install.js](file://install.js)
 - [openai.yaml](file://skills/code-to-uml/agents/openai.yaml)
 - [SKILL.md](file://skills/code-to-uml/SKILL.md)
 </cite>
@@ -39,7 +39,7 @@ B["skills/code-to-uml/agents/openai.yaml"]
 C["skills/code-to-uml/references/code-to-uml-template.md"]
 end
 subgraph "Installer"
-D["install-ctu-home.js"]
+D["install.js"]
 end
 subgraph "Docs"
 E["README.md"]
@@ -56,13 +56,13 @@ G --> D
 
 **Diagram sources**
 - [README.md:277-295](file://README.md#L277-L295)
-- [install-ctu-home.js:112-130](file://install-ctu-home.js#L112-L130)
+- [install.js:112-130](file://install.js#L112-L130)
 - [openai.yaml:1-5](file://skills/code-to-uml/agents/openai.yaml#L1-L5)
 - [SKILL.md:1-174](file://skills/code-to-uml/SKILL.md#L1-L174)
 
 **Section sources**
 - [README.md:81-120](file://README.md#L81-L120)
-- [install-ctu-home.js:150-202](file://install-ctu-home.js#L150-L202)
+- [install.js:150-202](file://install.js#L150-L202)
 
 ## Core Components
 - Skill definition: Defines the purpose, constraints, workflow, and output format for generating Code-To-UML reports.
@@ -76,7 +76,7 @@ Key responsibilities:
 
 **Section sources**
 - [SKILL.md:6-28](file://skills/code-to-uml/SKILL.md#L6-L28)
-- [install-ctu-home.js:112-130](file://install-ctu-home.js#L112-L130)
+- [install.js:112-130](file://install.js#L112-L130)
 - [openai.yaml:1-5](file://skills/code-to-uml/agents/openai.yaml#L1-L5)
 
 ## Architecture Overview
@@ -85,7 +85,7 @@ The integration pathway for OpenAI Codex with Code-To-UML:
 ```mermaid
 sequenceDiagram
 participant User as "User"
-participant Installer as "install-ctu-home.js"
+participant Installer as "install.js"
 participant Env as "Environment Variables"
 participant Agent as "OpenAI Codex"
 participant Skill as "SKILL.md"
@@ -100,7 +100,7 @@ Repo-->>User : Report URL and artifacts
 ```
 
 **Diagram sources**
-- [install-ctu-home.js:204-220](file://install-ctu-home.js#L204-L220)
+- [install.js:204-220](file://install.js#L204-L220)
 - [README.md:289-294](file://README.md#L289-L294)
 - [SKILL.md:164-174](file://skills/code-to-uml/SKILL.md#L164-L174)
 
@@ -117,8 +117,8 @@ Step-by-step:
 
 **Section sources**
 - [README.md:97-101](file://README.md#L97-L101)
-- [install-ctu-home.js:204-220](file://install-ctu-home.js#L204-L220)
-- [install-ctu-home.js:150-202](file://install-ctu-home.js#L150-L202)
+- [install.js:204-220](file://install.js#L204-L220)
+- [install.js:150-202](file://install.js#L150-L202)
 
 ### OpenAI Agent Configuration
 - The repository includes a minimal OpenAI agent interface definition alongside the skill.
@@ -155,7 +155,7 @@ Best practices:
 - Use separate credentials for agent access if your platform supports it.
 
 **Section sources**
-- [install-ctu-home.js:112-130](file://install-ctu-home.js#L112-L130)
+- [install.js:112-130](file://install.js#L112-L130)
 - [SKILL.md:14-28](file://skills/code-to-uml/SKILL.md#L14-L28)
 
 ### OpenAI-Specific YAML Settings
@@ -192,7 +192,7 @@ The integration depends on:
 
 ```mermaid
 graph LR
-Installer["install-ctu-home.js"] --> CTU["CTU_HOME"]
+Installer["install.js"] --> CTU["CTU_HOME"]
 Installer --> Skill["SKILL.md"]
 AgentCfg["openai.yaml"] --> Agent["OpenAI Codex"]
 Agent --> Skill
@@ -201,12 +201,12 @@ Templates --> Reports["Generated Reports"]
 ```
 
 **Diagram sources**
-- [install-ctu-home.js:204-220](file://install-ctu-home.js#L204-L220)
+- [install.js:204-220](file://install.js#L204-L220)
 - [openai.yaml:1-5](file://skills/code-to-uml/agents/openai.yaml#L1-L5)
 - [SKILL.md:164-174](file://skills/code-to-uml/SKILL.md#L164-L174)
 
 **Section sources**
-- [install-ctu-home.js:112-130](file://install-ctu-home.js#L112-L130)
+- [install.js:112-130](file://install.js#L112-L130)
 - [openai.yaml:1-5](file://skills/code-to-uml/agents/openai.yaml#L1-L5)
 - [SKILL.md:6-28](file://skills/code-to-uml/SKILL.md#L6-L28)
 
@@ -225,7 +225,7 @@ Common issues and resolutions:
 - Workspace permissions: Verify that the agent can read the project root and write to the cache directory.
 
 **Section sources**
-- [install-ctu-home.js:150-202](file://install-ctu-home.js#L150-L202)
+- [install.js:150-202](file://install.js#L150-L202)
 - [SKILL.md:14-28](file://skills/code-to-uml/SKILL.md#L14-L28)
 
 ## Conclusion
@@ -245,4 +245,4 @@ Integrating OpenAI Codex with Code-To-UML involves registering the project root,
 **Section sources**
 - [README.md:97-101](file://README.md#L97-L101)
 - [README.md:289-294](file://README.md#L289-L294)
-- [install-ctu-home.js:204-220](file://install-ctu-home.js#L204-L220)
+- [install.js:204-220](file://install.js#L204-L220)

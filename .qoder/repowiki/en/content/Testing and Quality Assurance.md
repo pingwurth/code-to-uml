@@ -6,7 +6,7 @@
 - [test/demo-tabs-static.test.js](file://test/demo-tabs-static.test.js)
 - [test/detail-markdown.test.js](file://test/detail-markdown.test.js)
 - [test/index-actions-layout-static.test.js](file://test/index-actions-layout-static.test.js)
-- [test/install-ctu-home.test.js](file://test/install-ctu-home.test.js)
+- [test/install.test.js](file://test/install.test.js)
 - [test/logo-home-link-static.test.js](file://test/logo-home-link-static.test.js)
 - [test/markdown-code-block-css.test.js](file://test/markdown-code-block-css.test.js)
 - [test/markdown-render-code-block.test.js](file://test/markdown-render-code-block.test.js)
@@ -62,7 +62,7 @@ T1["cache-html-api.test.js"]
 T2["demo-tabs-static.test.js"]
 T3["detail-markdown.test.js"]
 T4["index-actions-layout-static.test.js"]
-T5["install-ctu-home.test.js"]
+T5["install.test.js"]
 T6["logo-home-link-static.test.js"]
 T7["markdown-code-block-css.test.js"]
 T8["markdown-render-code-block.test.js"]
@@ -104,7 +104,7 @@ V1 --> V3
 - [test/demo-tabs-static.test.js:1-41](file://test/demo-tabs-static.test.js#L1-L41)
 - [test/detail-markdown.test.js:1-172](file://test/detail-markdown.test.js#L1-L172)
 - [test/index-actions-layout-static.test.js:1-37](file://test/index-actions-layout-static.test.js#L1-L37)
-- [test/install-ctu-home.test.js:1-95](file://test/install-ctu-home.test.js#L1-L95)
+- [test/install.test.js:1-95](file://test/install.test.js#L1-L95)
 - [test/logo-home-link-static.test.js:1-34](file://test/logo-home-link-static.test.js#L1-L34)
 - [test/markdown-code-block-css.test.js:1-36](file://test/markdown-code-block-css.test.js#L1-L36)
 - [test/markdown-render-code-block.test.js:1-28](file://test/markdown-render-code-block.test.js#L1-L28)
@@ -124,7 +124,7 @@ V1 --> V3
 - [test/demo-tabs-static.test.js:1-41](file://test/demo-tabs-static.test.js#L1-L41)
 - [test/detail-markdown.test.js:1-172](file://test/detail-markdown.test.js#L1-L172)
 - [test/index-actions-layout-static.test.js:1-37](file://test/index-actions-layout-static.test.js#L1-L37)
-- [test/install-ctu-home.test.js:1-95](file://test/install-ctu-home.test.js#L1-L95)
+- [test/install.test.js:1-95](file://test/install.test.js#L1-L95)
 - [test/logo-home-link-static.test.js:1-34](file://test/logo-home-link-static.test.js#L1-L34)
 - [test/markdown-code-block-css.test.js:1-36](file://test/markdown-code-block-css.test.js#L1-L36)
 - [test/markdown-render-code-block.test.js:1-28](file://test/markdown-render-code-block.test.js#L1-L28)
@@ -151,7 +151,7 @@ Coverage highlights:
 - [test/detail-markdown.test.js:127-172](file://test/detail-markdown.test.js#L127-L172)
 - [test/render-failure-common.test.js:18-77](file://test/render-failure-common.test.js#L18-L77)
 - [test/markdown-render-code-block.test.js:14-28](file://test/markdown-render-code-block.test.js#L14-L28)
-- [test/install-ctu-home.test.js:20-95](file://test/install-ctu-home.test.js#L20-L95)
+- [test/install.test.js:20-95](file://test/install.test.js#L20-L95)
 - [test/serve-scripts-static.test.js:6-18](file://test/serve-scripts-static.test.js#L6-L18)
 - [skills/code-to-uml/scripts/validate-report.js:134-222](file://skills/code-to-uml/scripts/validate-report.js#L134-L222)
 - [skills/code-to-uml/scripts/validate-report.js:325-370](file://skills/code-to-uml/scripts/validate-report.js#L325-L370)
@@ -312,7 +312,7 @@ These tests validate:
 ```mermaid
 sequenceDiagram
 participant Test as "Node Test Runner"
-participant Install as "install-ctu-home.js"
+participant Install as "install.js"
 participant FS as "File System"
 Test->>Install : Run with tool and profile
 Install->>FS : Write skill files to HOME
@@ -325,10 +325,10 @@ Install-->>Test : Assert all paths exist
 ```
 
 **Diagram sources**
-- [test/install-ctu-home.test.js:27-95](file://test/install-ctu-home.test.js#L27-L95)
+- [test/install.test.js:27-95](file://test/install.test.js#L27-L95)
 
 **Section sources**
-- [test/install-ctu-home.test.js:27-95](file://test/install-ctu-home.test.js#L27-L95)
+- [test/install.test.js:27-95](file://test/install.test.js#L27-L95)
 
 ### Render Failure Handling and Jar Fallback
 These tests validate:
@@ -442,7 +442,7 @@ T2["demo-tabs-static.test.js"] --> D["demo.js"]
 T3["detail-markdown.test.js"] --> C1["demo-example-component.js"]
 T3 --> C2["docs-page-core.js"]
 T4["index-actions-layout-static.test.js"] --> D
-T5["install-ctu-home.test.js"] --> S
+T5["install.test.js"] --> S
 T6["logo-home-link-static.test.js"] --> D
 T7["markdown-code-block-css.test.js"] --> D
 T8["markdown-render-code-block.test.js"] --> D
@@ -460,7 +460,7 @@ V1 --> K["SKILL.md"]
 - [test/demo-tabs-static.test.js:1-41](file://test/demo-tabs-static.test.js#L1-L41)
 - [test/detail-markdown.test.js:1-172](file://test/detail-markdown.test.js#L1-L172)
 - [test/index-actions-layout-static.test.js:1-37](file://test/index-actions-layout-static.test.js#L1-L37)
-- [test/install-ctu-home.test.js:1-95](file://test/install-ctu-home.test.js#L1-L95)
+- [test/install.test.js:1-95](file://test/install.test.js#L1-L95)
 - [test/logo-home-link-static.test.js:1-34](file://test/logo-home-link-static.test.js#L1-L34)
 - [test/markdown-code-block-css.test.js:1-36](file://test/markdown-code-block-css.test.js#L1-L36)
 - [test/markdown-render-code-block.test.js:1-28](file://test/markdown-render-code-block.test.js#L1-L28)
@@ -499,7 +499,7 @@ Common issues and resolutions:
 
 **Section sources**
 - [test/cache-html-api.test.js:25-50](file://test/cache-html-api.test.js#L25-L50)
-- [test/install-ctu-home.test.js:57-63](file://test/install-ctu-home.test.js#L57-L63)
+- [test/install.test.js:57-63](file://test/install.test.js#L57-L63)
 - [component/render-failure-common.js:86-115](file://component/render-failure-common.js#L86-L115)
 - [component/docs-page-core.js:404-433](file://component/docs-page-core.js#L404-L433)
 - [skills/code-to-uml/scripts/validate-report.js:372-397](file://skills/code-to-uml/scripts/validate-report.js#L372-L397)

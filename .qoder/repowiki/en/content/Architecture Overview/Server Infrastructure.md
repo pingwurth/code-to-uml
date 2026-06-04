@@ -11,7 +11,7 @@
 - [demo.js](file://demo.js)
 - [docs-page-core.js](file://component/docs-page-core.js)
 - [cache-html-api.test.js](file://test/cache-html-api.test.js)
-- [install-ctu-home.js](file://install-ctu-home.js)
+- [install.js](file://install.js)
 - [i18n-config.js](file://i18n-config.js)
 </cite>
 
@@ -253,14 +253,14 @@ Security notes:
 - Port management:
   - PORT environment variable or CLI argument; defaults to 5401.
 - Project root:
-  - CTU_HOME can be set via install-ctu-home.js to register the project path for AI agent integration.
+  - CTU_HOME can be set via install.js to register the project path for AI agent integration.
 - Maintenance:
   - Use cache index UI or /api/cache-html/all to clear generated content.
   - Use serve.sh/serve.bat to start/stop the server across platforms.
 
 **Section sources**
 - [README.md:226-234](file://README.md#L226-L234)
-- [install-ctu-home.js:1-228](file://install-ctu-home.js#L1-L228)
+- [install.js:1-228](file://install.js#L1-L228)
 
 ## Dependency Analysis
 The server depends on Node.js built-ins and external tools:
@@ -332,9 +332,9 @@ The server infrastructure provides a lightweight, cross-platform development env
 
 ### Integration Patterns
 - CI/CD: Use serve.sh to start the server on ephemeral ports for preview deployments.
-- AI agent integration: Configure CTU_HOME via install-ctu-home.js to enable agent skills.
+- AI agent integration: Configure CTU_HOME via install.js to enable agent skills.
 - Local development: Use serve.sh/serve.bat to quickly spin up the server and open demo.html or index.html.
 
 **Section sources**
 - [README.md:81-120](file://README.md#L81-L120)
-- [install-ctu-home.js:204-228](file://install-ctu-home.js#L204-L228)
+- [install.js:204-228](file://install.js#L204-L228)

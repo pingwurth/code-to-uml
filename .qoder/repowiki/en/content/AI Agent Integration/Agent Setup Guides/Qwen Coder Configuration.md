@@ -4,10 +4,10 @@
 **Referenced Files in This Document**
 - [README.md](file://README.md)
 - [AGENTS.md](file://AGENTS.md)
-- [install-ctu-home.js](file://install-ctu-home.js)
+- [install.js](file://install.js)
 - [SKILL.md](file://skills/code-to-uml/SKILL.md)
 - [openai.yaml](file://skills/code-to-uml/agents/openai.yaml)
-- [install-ctu-home.test.js](file://test/install-ctu-home.test.js)
+- [install.test.js](file://test/install.test.js)
 </cite>
 
 ## Table of Contents
@@ -36,7 +36,7 @@ Repo["Repository Root"]
 Skills["skills/code-to-uml/"]
 SkillMD["SKILL.md"]
 AgentYAML["agents/openai.yaml"]
-Install["install-ctu-home.js"]
+Install["install.js"]
 AgentsDoc["AGENTS.md"]
 Readme["README.md"]
 Repo --> Skills
@@ -50,7 +50,7 @@ Repo --> Readme
 **Diagram sources**
 - [README.md](file://README.md)
 - [AGENTS.md](file://AGENTS.md)
-- [install-ctu-home.js](file://install-ctu-home.js)
+- [install.js](file://install.js)
 - [SKILL.md](file://skills/code-to-uml/SKILL.md)
 - [openai.yaml](file://skills/code-to-uml/agents/openai.yaml)
 
@@ -64,12 +64,12 @@ Repo --> Readme
 - Qwen workspace integration: The installation script places the skill into Qwen’s skills directory so the agent can discover and use it.
 
 Key responsibilities:
-- install-ctu-home.js: Sets CTU_HOME and installs the bundled skill into Qwen’s workspace.
+- install.js: Sets CTU_HOME and installs the bundled skill into Qwen’s workspace.
 - SKILL.md: Provides the instruction set and rules for Qwen to generate reports consistently.
 - openai.yaml: Demonstrates the interface configuration format used by agents; Qwen consumes the same skill semantics.
 
 **Section sources**
-- [install-ctu-home.js](file://install-ctu-home.js)
+- [install.js](file://install.js)
 - [SKILL.md](file://skills/code-to-uml/SKILL.md)
 - [openai.yaml](file://skills/code-to-uml/agents/openai.yaml)
 
@@ -83,7 +83,7 @@ The Qwen integration follows a simple, deterministic flow:
 ```mermaid
 sequenceDiagram
 participant User as "User"
-participant Installer as "install-ctu-home.js"
+participant Installer as "install.js"
 participant OS as "Operating System"
 participant Qwen as "Qwen Workspace"
 participant Skill as "Code-To-UML Skill"
@@ -100,7 +100,7 @@ Server-->>User : Serve report at localhost
 ```
 
 **Diagram sources**
-- [install-ctu-home.js](file://install-ctu-home.js)
+- [install.js](file://install.js)
 - [SKILL.md](file://skills/code-to-uml/SKILL.md)
 
 ## Detailed Component Analysis
@@ -116,7 +116,7 @@ Best practices:
 - Confirm CTU_HOME points to a directory containing cache/_TEMPLATE.html and data/_TEMPLATE.ctu.
 
 **Section sources**
-- [install-ctu-home.js](file://install-ctu-home.js)
+- [install.js](file://install.js)
 - [AGENTS.md](file://AGENTS.md)
 
 ### Skill Activation and Credential Management
@@ -128,7 +128,7 @@ Note: The skill’s hard rules emphasize resolving CTU_HOME, preserving template
 
 **Section sources**
 - [SKILL.md](file://skills/code-to-uml/SKILL.md)
-- [install-ctu-home.js](file://install-ctu-home.js)
+- [install.js](file://install.js)
 
 ### Qwen-Specific YAML Settings
 - The repository includes an example agent interface definition under agents/openai.yaml. While this file targets OpenAI-style agents, Qwen consumes the same semantic skill definition.
@@ -227,8 +227,8 @@ Common issues and resolutions:
   - Check that the server is listening on the expected port and that firewall rules allow connections.
 
 **Section sources**
-- [install-ctu-home.js](file://install-ctu-home.js)
-- [install-ctu-home.test.js](file://test/install-ctu-home.test.js)
+- [install.js](file://install.js)
+- [install.test.js](file://test/install.test.js)
 - [SKILL.md](file://skills/code-to-uml/SKILL.md)
 - [AGENTS.md](file://AGENTS.md)
 

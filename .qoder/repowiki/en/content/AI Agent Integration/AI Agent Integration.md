@@ -6,7 +6,7 @@
 - [README_zh.md](file://README_zh.md)
 - [SKILL.md](file://skills/code-to-uml/SKILL.md)
 - [openai.yaml](file://skills/code-to-uml/agents/openai.yaml)
-- [install-ctu-home.js](file://install-ctu-home.js)
+- [install.js](file://install.js)
 - [AGENTS.md](file://AGENTS.md)
 - [CLAUDE.md](file://CLAUDE.md)
 - [code-to-uml-template.md](file://skills/code-to-uml/references/code-to-uml-template.md)
@@ -55,7 +55,7 @@ This document explains how Code-To-UML integrates AI coding assistants to automa
 ## Project Structure
 The AI agent integration centers around a skill definition, validation framework, and comprehensive analysis report capabilities:
 - SKILL.md defines the agent's purpose, constraints, workflow, and output contracts for Code-To-UML reports.
-- install-ctu-home.js registers the project path as CTU_HOME and installs the bundled skill into agent skill directories.
+- install.js registers the project path as CTU_HOME and installs the bundled skill into agent skill directories.
 - Agent-specific guidance documents (e.g., CLAUDE.md, AGENTS.md) provide tool-specific hints.
 - The Code-To-UML template contract and .ctu data format define the structure of generated reports.
 - **New**: validate-report.js provides sophisticated validation logic for ensuring report quality and consistency.
@@ -71,7 +71,7 @@ C["Agent Guidance<br/>CLAUDE.md / AGENTS.md"]
 end
 subgraph "Project Root Discovery"
 D["CTU_HOME Env Var"]
-E["install-ctu-home.js"]
+E["install.js"]
 end
 subgraph "Report Generation"
 F["Template Contract<br/>code-to-uml-template.md"]
@@ -106,7 +106,7 @@ H --> L
 
 **Diagram sources**
 - [SKILL.md:1-80](file://skills/code-to-uml/SKILL.md#L1-L80)
-- [install-ctu-home.js:1-228](file://install-ctu-home.js#L1-L228)
+- [install.js:1-228](file://install.js#L1-L228)
 - [code-to-uml-template.md:1-95](file://skills/code-to-uml/references/code-to-uml-template.md#L1-L95)
 - [_TEMPLATE.ctu:1-45](file://data/_TEMPLATE.ctu#L1-L45)
 - [validate-report.js:1-505](file://skills/code-to-uml/scripts/validate-report.js#L1-L505)
@@ -123,7 +123,7 @@ H --> L
 
 ## Core Components
 - SKILL.md: Defines purpose, hard rules, workflow, mandatory sections, UML standards, quality bar, verification checklist, and final response shape for AI-generated Code-To-UML reports.
-- CTU_HOME and install-ctu-home.js: Centralizes project root resolution and installs the bundled skill into agent skill directories.
+- CTU_HOME and install.js: Centralizes project root resolution and installs the bundled skill into agent skill directories.
 - Agent configuration (openai.yaml): Provides interface metadata for agents that consume the skill.
 - Agent guidelines (CLAUDE.md, AGENTS.md): Offer tool-specific context and conventions for working with the repository.
 - Template and data contracts (code-to-uml-template.md, _TEMPLATE.ctu): Specify HTML shell, data directory layout, and .ctu file format.
@@ -133,7 +133,7 @@ H --> L
 
 **Section sources**
 - [SKILL.md:1-80](file://skills/code-to-uml/SKILL.md#L1-L80)
-- [install-ctu-home.js:112-130](file://install-ctu-home.js#L112-L130)
+- [install.js:112-130](file://install.js#L112-L130)
 - [openai.yaml:1-5](file://skills/code-to-uml/agents/openai.yaml#L1-L5)
 - [code-to-uml-template.md:1-95](file://skills/code-to-uml/references/code-to-uml-template.md#L1-L95)
 - [_TEMPLATE.ctu:1-45](file://data/_TEMPLATE.ctu#L1-L45)
@@ -150,7 +150,7 @@ sequenceDiagram
 participant User as "User"
 participant Agent as "AI Agent"
 participant Skill as "SKILL.md"
-participant Installer as "install-ctu-home.js"
+participant Installer as "install.js"
 participant Env as "CTU_HOME"
 participant Template as "code-to-uml-template.md"
 participant Data as ".ctu Files"
@@ -172,7 +172,7 @@ Agent-->>User : Report URL and artifacts
 ```
 
 **Diagram sources**
-- [install-ctu-home.js:204-220](file://install-ctu-home.js#L204-L220)
+- [install.js:204-220](file://install.js#L204-L220)
 - [SKILL.md:37-76](file://skills/code-to-uml/SKILL.md#L37-L76)
 - [code-to-uml-template.md:55-77](file://skills/code-to-uml/references/code-to-uml-template.md#L55-L77)
 - [validate-report.js:1-505](file://skills/code-to-uml/scripts/validate-report.js#L1-L505)
@@ -217,11 +217,11 @@ Validate --> Done(["Final Response with URL"])
 ### CTU_HOME Environment Variable and Registration
 CTU_HOME is the canonical project root for AI-assisted report generation:
 - If unset, the agent must resolve the root from the current working directory only if it contains the template marker files.
-- install-ctu-home.js sets CTU_HOME and installs the bundled skill into agent skill directories. It supports Unix shells and Windows environments and can print commands for the current shell.
+- install.js sets CTU_HOME and installs the bundled skill into agent skill directories. It supports Unix shells and Windows environments and can print commands for the current shell.
 
 ```mermaid
 flowchart TD
-A["Run install-ctu-home.js"] --> B{"Platform?"}
+A["Run install.js"] --> B{"Platform?"}
 B --> |Windows| C["Set User Env Var CTU_HOME"]
 B --> |Unix-like| D["Update Shell Profile"]
 C --> E["Install Skill to Agent Paths"]
@@ -230,14 +230,14 @@ E --> F["Export CTU_HOME for New Sessions"]
 ```
 
 **Diagram sources**
-- [install-ctu-home.js:204-220](file://install-ctu-home.js#L204-L220)
-- [install-ctu-home.js:167-180](file://install-ctu-home.js#L167-L180)
-- [install-ctu-home.js:182-202](file://install-ctu-home.js#L182-L202)
+- [install.js:204-220](file://install.js#L204-L220)
+- [install.js:167-180](file://install.js#L167-L180)
+- [install.js:182-202](file://install.js#L182-L202)
 
 **Section sources**
 - [SKILL.md:24-29](file://skills/code-to-uml/SKILL.md#L24-L29)
-- [install-ctu-home.js:27-49](file://install-ctu-home.js#L27-L49)
-- [install-ctu-home.js:204-220](file://install-ctu-home.js#L204-L220)
+- [install.js:27-49](file://install.js#L27-L49)
+- [install.js:204-220](file://install.js#L204-L220)
 
 ### Agent Configuration Files and YAML-Based Skill Definitions
 - openai.yaml: Declares the skill's display name, short description, and default prompt for agents that consume the skill definition.
@@ -513,7 +513,7 @@ This leverages the specialized framework analysis capabilities to provide detail
 ## Dependency Analysis
 The AI agent integration depends on:
 - Agent tooling consuming SKILL.md and optional agent-specific guidance.
-- install-ctu-home.js to set CTU_HOME and install the skill into agent skill directories.
+- install.js to set CTU_HOME and install the skill into agent skill directories.
 - Template and data contracts to validate generated artifacts.
 - **New**: validate-report.js for comprehensive report validation and quality assurance.
 - **New**: Enhanced reference materials for decision tables, contracts, and standards compliance.
@@ -523,7 +523,7 @@ The AI agent integration depends on:
 graph LR
 Agent["Agent Tool"] --> SKILL["SKILL.md"]
 Agent --> Guides["CLAUDE.md / AGENTS.md"]
-Installer["install-ctu-home.js"] --> Env["CTU_HOME"]
+Installer["install.js"] --> Env["CTU_HOME"]
 Env --> Template["code-to-uml-template.md"]
 Template --> Data[".ctu Files"]
 Data --> HTML["HTML Report"]
@@ -538,7 +538,7 @@ References --> Standards["UML Standards"]
 
 **Diagram sources**
 - [SKILL.md:1-80](file://skills/code-to-uml/SKILL.md#L1-L80)
-- [install-ctu-home.js:112-130](file://install-ctu-home.js#L112-L130)
+- [install.js:112-130](file://install.js#L112-L130)
 - [code-to-uml-template.md:1-95](file://skills/code-to-uml/references/code-to-uml-template.md#L1-L95)
 - [validate-report.js:1-505](file://skills/code-to-uml/scripts/validate-report.js#L1-L505)
 - [diagram-decision-table.md:1-200](file://skills/code-to-uml/references/diagram-decision-table.md#L1-L200)
@@ -546,7 +546,7 @@ References --> Standards["UML Standards"]
 - [uml-standards.md:1-180](file://skills/code-to-uml/references/uml-standards.md#L1-L180)
 
 **Section sources**
-- [install-ctu-home.js:112-130](file://install-ctu-home.js#L112-L130)
+- [install.js:112-130](file://install.js#L112-L130)
 - [SKILL.md:24-29](file://skills/code-to-uml/SKILL.md#L24-L29)
 
 ## Performance Considerations
@@ -561,7 +561,7 @@ References --> Standards["UML Standards"]
 ## Troubleshooting Guide
 Common integration issues and resolutions:
 - CTU_HOME not set or incorrect:
-  - Ensure install-ctu-home.js was run and that the environment variable is exported in new terminals or use the printed command for the current shell.
+  - Ensure install.js was run and that the environment variable is exported in new terminals or use the printed command for the current shell.
 - Template mismatch or missing files:
   - Verify the presence of the template HTML and data template files under the resolved project root.
 - UML syntax errors:

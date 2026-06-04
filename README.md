@@ -149,7 +149,7 @@ cd code-to-uml
 2. Set up `CTU_HOME` for AI agent integration:
 
 ```bash
-node install-ctu-home.js
+node install.js
 ```
 
 3. Start the server:
@@ -279,7 +279,7 @@ code-to-uml/
 │   └── SKILL.md             # AI agent skill definition
 ├── CLAUDE.md                # Claude Code guidance
 ├── AGENTS.md                # Agent documentation
-└── install-ctu-home.js      # CTU_HOME setup script
+└── install.js      # CTU_HOME setup script
 ```
 
 ---
@@ -313,7 +313,7 @@ Server-side PlantUML rendering fallback.
 | Setting | Mechanism | Default |
 |---------|-----------|---------|
 | Server port | `PORT` env var or CLI argument | `5401` |
-| Project root | `CTU_HOME` env var (set by `install-ctu-home.js`) | CWD |
+| Project root | `CTU_HOME` env var (set by `install.js`) | CWD |
 | UI language | `localStorage` key `plantuml-docs-lang` | Browser locale |
 | Theme | CSS custom properties in `main.css` | Light |
 
@@ -373,7 +373,7 @@ Code-To-UML ships with a skill definition at [`skills/code-to-uml/SKILL.md`](ski
 
 ### Setup
 
-1. Run `node install-ctu-home.js` to register the project path.
+1. Run `node install.js` to register the project path.
 2. Point your AI agent to `skills/code-to-uml/SKILL.md`.
 3. Ask the agent to analyze a codebase — it will produce `.ctu` data files and an HTML report.
 

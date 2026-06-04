@@ -15,7 +15,7 @@
 - [i18n/zh.js](file://i18n/zh.js)
 - [test/cache-html-api.test.js](file://test/cache-html-api.test.js)
 - [test/demo-tabs-static.test.js](file://test/demo-tabs-static.test.js)
-- [test/install-ctu-home.test.js](file://test/install-ctu-home.test.js)
+- [test/install.test.js](file://test/install.test.js)
 </cite>
 
 ## Table of Contents
@@ -280,7 +280,7 @@ Common issues and remedies:
 ## Contribution Workflow
 Development environment setup:
 - Prerequisites: Node.js 18+, Java (for server fallback).
-- Optional: Set CTU_HOME via install-ctu-home.js for AI agent integration.
+- Optional: Set CTU_HOME via install.js for AI agent integration.
 - Start the server with ./serve.sh or node serve.js and open http://localhost:5401/demo.html.
 
 Git workflow and branch management:
@@ -317,7 +317,7 @@ Test categories:
 **Section sources**
 - [test/cache-html-api.test.js:1-181](file://test/cache-html-api.test.js#L1-L181)
 - [test/demo-tabs-static.test.js:1-41](file://test/demo-tabs-static.test.js#L1-L41)
-- [test/install-ctu-home.test.js:1-95](file://test/install-ctu-home.test.js#L1-L95)
+- [test/install.test.js:1-95](file://test/install.test.js#L1-L95)
 
 ## Pull Request and Review Process
 Guidelines:

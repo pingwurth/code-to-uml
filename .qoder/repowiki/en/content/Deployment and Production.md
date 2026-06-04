@@ -6,7 +6,7 @@
 - [serve.js](file://serve.js)
 - [serve.sh](file://serve.sh)
 - [serve.bat](file://serve.bat)
-- [install-ctu-home.js](file://install-ctu-home.js)
+- [install.js](file://install.js)
 - [index.html](file://index.html)
 - [demo.html](file://demo.html)
 - [main.css](file://main.css)
