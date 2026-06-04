@@ -101,6 +101,23 @@
 		return cleanText(example && example.sectionDescription ? example.sectionDescription : "");
 	}
 
+	function renderIntroMarkdown() {
+		const intro = document.querySelector(".intro > p[data-markdown]");
+		if (!intro || !demoExample || typeof demoExample.renderMarkdown !== "function") return;
+		const markdown = String(intro.dataset.markdownSource || intro.textContent || "").trim();
+		if (!markdown) return;
+		const summary = document.createElement("div");
+		summary.className = intro.className || "";
+		summary.classList.add("intro-summary");
+		for (const attr of Array.from(intro.attributes)) {
+			if (attr.name === "class") continue;
+			summary.setAttribute(attr.name, attr.value);
+		}
+		summary.dataset.markdownSource = markdown;
+		summary.innerHTML = demoExample.renderMarkdown(markdown);
+		intro.replaceWith(summary);
+	}
+
 	initLanguageSwitcher();
 	if (i18n && typeof i18n.apply === "function") {
 		i18n.apply(i18n.getMode());
@@ -115,6 +132,7 @@
 	}
 
 	initPreviewLightbox();
+	renderIntroMarkdown();
 	if (renderFailureBuffer && typeof renderFailureBuffer.dispose === "function") {
 		window.addEventListener("beforeunload", () => {
 			renderFailureBuffer.dispose();

@@ -4,11 +4,13 @@
 const fs = require("fs");
 const path = require("path");
 const { spawnSync } = require("child_process");
+const { TextDecoder } = require("util");
 
 const DEFAULT_LANG = "zh";
 const VALID_NAME_RE = /^[A-Za-z0-9_-]+$/;
 const CTU_FILE_RE = /^([A-Za-z0-9_-]+)--([1-9][0-9]*)_(zh|en)\.ctu$/;
 const SEP_RE = /^-{60,}\s*$/m;
+const UTF8_DECODER = new TextDecoder("utf-8", { fatal: true });
 
 function printUsage() {
 	console.log(`Usage:
@@ -88,8 +90,22 @@ function resolveUnderRoot(root, inputPath) {
 	return path.isAbsolute(inputPath) ? inputPath : path.join(root, inputPath);
 }
 
-function readText(filePath) {
-	return fs.readFileSync(filePath, "utf8");
+function readText(filePath, issues) {
+	const bytes = fs.readFileSync(filePath);
+	let text = "";
+	let invalidUtf8 = false;
+	try {
+		text = UTF8_DECODER.decode(bytes);
+	} catch {
+		invalidUtf8 = true;
+		text = bytes.toString("utf8");
+	}
+	if (issues && invalidUtf8) {
+		addIssue(issues, "error", filePath, "File is not valid UTF-8. On Windows, write reports with explicit UTF-8 encoding; do not use the shell default ANSI/GBK encoding.");
+	} else if (issues && text.includes("\uFFFD")) {
+		addIssue(issues, "error", filePath, "File contains Unicode replacement characters, which usually means text was decoded with the wrong encoding before writing.");
+	}
+	return text;
 }
 
 function normalizeField(value) {
@@ -137,7 +153,7 @@ function validateHtml(root, htmlPath, issues) {
 		return null;
 	}
 
-	const html = readText(htmlPath);
+	const html = readText(htmlPath, issues);
 	const bodyAttrs = extractBodyAttrs(html);
 	if (!bodyAttrs) {
 		addIssue(issues, "error", htmlPath, "Missing <body> tag.");
@@ -240,7 +256,7 @@ function extractField(group, marker, nextMarkers) {
 }
 
 function parseCtuFile(filePath, issues) {
-	const text = readText(filePath);
+	const text = readText(filePath, issues);
 	if (!SEP_RE.test(text)) {
 		addIssue(issues, "error", filePath, "Missing separator line with at least 60 hyphens.");
 		return [];

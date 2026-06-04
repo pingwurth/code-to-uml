@@ -6,6 +6,18 @@ Reference document for deciding when and how to use diagrams in Code-To-UML repo
 
 This document decides whether a diagram is useful and which diagram type best fits the reader's question. It does not define PlantUML syntax quality; use `uml-standards.md` for valid PlantUML authoring and rendering checks. It also does not redefine required report coverage; use `report-contract.md` for section IDs, scope applicability, and merge rules.
 
+## Table of Contents
+
+- [Responsibility Boundary](#responsibility-boundary)
+- [Golden Rule](#golden-rule)
+- [Diagram Value Gate](#diagram-value-gate)
+- [What Diagrams Are Good At](#what-diagrams-are-good-at)
+- [Complexity Scoring](#complexity-scoring)
+- [Report Section Mapping](#report-section-mapping)
+- [Choose by Problem](#choose-by-problem)
+- [Anti-Patterns](#anti-patterns)
+- [Quick Decision Rule](#quick-decision-rule)
+
 ## Golden Rule
 
 Text must provide full coverage. Diagrams are added only when they reduce cognitive load. A useful diagram makes complex relationships simpler; a diagram for simple behavior can make the report harder to read.

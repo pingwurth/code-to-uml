@@ -2,6 +2,20 @@
 
 Use this reference whenever planning, generating, or validating Code-To-UML report content.
 
+## Table of Contents
+
+- [Contract Goals](#contract-goals)
+- [Category Model](#category-model)
+- [Section Catalog](#section-catalog)
+- [Scope Applicability](#scope-applicability)
+- [Responsibility Boundaries](#responsibility-boundaries)
+- [Scope-Specific Depth](#scope-specific-depth)
+- [Analysis Playbook](#analysis-playbook)
+- [Evidence and Quality Bar](#evidence-and-quality-bar)
+- [Validation Checklist](#validation-checklist)
+- [Maintenance Rules](#maintenance-rules)
+- [Final Response Shape](#final-response-shape)
+
 ## Contract Goals
 
 - Keep one consistent report model across project, module/package, file, class, and function scopes.
@@ -127,12 +141,14 @@ Merge rule: if an `M` section would produce no more than two useful sentences or
 ## Evidence and Quality Bar
 
 - Be concrete: mention real function/class names, files, directories, constants, state files, environment variables, routes, commands, or line numbers from the target.
+- Generated HTML and `.ctu` files must be valid UTF-8. If a report contains Chinese mojibake or Unicode replacement characters, treat it as a blocking artifact error and regenerate or re-save with explicit UTF-8 encoding.
 - Tie architecture claims, risk claims, and call/data-flow claims back to observed source evidence. If a conclusion is inferred rather than directly visible, say so.
 - Be proportional: broad targets get more architectural synthesis; narrow targets get deeper branch/call/side-effect analysis.
 - Prefer code snippets under 30 lines; surround snippets with explanation.
 - Avoid marketing prose, generic compliments, and vague "can be optimized" statements. Name the specific risk and the specific improvement.
 - Text must cover the core information even if the reader skips every diagram.
-- Use content-driven line breaks in `[Description]` and `[Detail]`. Short content may stay on one line; break lines when content contains sentence-ending punctuation such as periods and semicolons, or at meaningful list, step, caveat, or comparison boundaries.
+- The page introduction `<p data-markdown>` must be a concise whole-report overview, not a category overview. Keep it within 500 Chinese characters or a similarly concise English length, and cover implemented functionality, basic framework, core principles, and design philosophy using Markdown layout when helpful. Do not hard-wrap prose by length; in prose, start a new line only after `。`, `；`, `.`, or `;`.
+- Use content-driven line breaks in `[Description]` and `[Detail]`. Short content may stay on one line. Do not hard-wrap prose by character count or visual line length; in prose, start a new line only after sentence-ending punctuation (`。`, `；`, `.`, or `;`). Lists, steps, caveats, comparisons, and tables may use one line per item or row.
 - Organize `[Description]` and `[Detail]` with Markdown structures that match the content: paragraphs, bullet lists, numbered steps, indentation, and Markdown tables. Use lists for peer items, numbered steps for ordered workflows, indentation for nested context, and tables for comparison, indexes, or dense reference data.
 - The maintainer reference table must use Markdown table syntax and include line numbers or symbol locations whenever available.
 
@@ -148,6 +164,7 @@ Before creating or finalizing report artifacts, verify:
 - [ ] Merged sections are intentionally merged and still mentioned in the section summary.
 - [ ] `S12_REVIEWER_QUESTIONS` includes answers for every learning review question and ties them to the analyzed target scope.
 - [ ] `S13_MAINTAINER_REFERENCE` is written as a Markdown table, not prose or bullets.
+- [ ] Page introduction `<p data-markdown>` gives a <= 500-character whole-report overview covering functionality, framework, core principles, and design philosophy.
 - [ ] `[Description]` and `[Detail]` use appropriate Markdown layout such as paragraphs, lists, indentation, or tables rather than unstructured prose.
 - [ ] Every architecture, risk, call-flow, and data-flow claim is backed by source evidence or marked as inference.
 - [ ] Code snippets are focused, explained, and not pasted as long unexplained source blocks.
@@ -157,6 +174,7 @@ Before creating or finalizing report artifacts, verify:
 Before runtime checks, verify:
 
 - [ ] HTML output exists at the requested path.
+- [ ] HTML and `.ctu` files are valid UTF-8 and contain no mojibake/replacement characters from wrong decoding.
 - [ ] Data directory exists.
 - [ ] `.ctu` filenames match `{category}--{n}_{lang}.ctu`.
 - [ ] Categories match tab `data-diagram` values and `data-diagram-overview` values.

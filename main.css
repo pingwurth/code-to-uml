@@ -174,12 +174,26 @@ a:hover {
 	text-align: center;
 }
 
-.intro p {
+.intro > p,
+.intro-summary {
 	margin: 0.5rem 0 0.8rem;
 	max-width: 760px;
 }
 
-.intro ul {
+.intro-summary > :first-child {
+	margin-top: 0;
+}
+
+.intro-summary > :last-child {
+	margin-bottom: 0;
+}
+
+.intro-summary p {
+	margin: 0.4rem 0;
+}
+
+.intro ul,
+.intro ol {
 	padding-left: 1.2rem;
 	margin: 0 0 1rem;
 }

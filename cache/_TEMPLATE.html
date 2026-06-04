@@ -120,13 +120,18 @@
 
 			<!-- =============================================================
 			  [EDIT] Section: Page Introduction
-			 Freely edit the <h1> title and <p> summary text.
-			 You can describe project name, analysis scope, version info, etc.
-			 Do not change class="intro".
+			 Freely edit the <h1> title and <p data-markdown> report overview.
+			 The <p> must summarize the whole project/module/class/function in
+			 <= 500 Chinese characters (or similarly concise English): what it
+			 implements, its basic framework, core principles, and design philosophy.
+			 Markdown is supported; do not hard-wrap prose by line length.
+			 In prose, start a new line only after 。, ；, ., or ;.
+			 Lists, numbered steps, and tables may use one line per item/row.
+			 Do not change class="intro"; keep data-markdown on the overview <p>.
 			=============================================================== -->
 			<section class="intro">
 				<h1>Code-To-UML Template</h1>
-				<p>Project/Code Overview</p>
+				<p data-markdown>Project/Code Overview</p>
 			</section>
 
 			<!-- =============================================================

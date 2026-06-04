@@ -2,6 +2,17 @@
 
 Reference document for authoring valid, readable, and reviewable PlantUML blocks in Code-To-UML reports.
 
+## Table of Contents
+
+- [Responsibility Boundary](#responsibility-boundary)
+- [Mandatory UML Block Contract](#mandatory-uml-block-contract)
+- [Common Escaping and Safety Rules](#common-escaping-and-safety-rules)
+- [Diagram-Type Specific Rules](#diagram-type-specific-rules)
+- [Readability Budget](#readability-budget)
+- [Detail Writing Template](#detail-writing-template)
+- [UML Cannot Replace Text](#uml-cannot-replace-text)
+- [Validation Checklist](#validation-checklist)
+
 ## Responsibility Boundary
 
 This document defines PlantUML authoring quality: syntax safety, readability, diagram-specific conventions, detail-writing rules, and validation checks.

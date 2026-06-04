@@ -8,10 +8,24 @@ This file owns only the HTML, `.ctu`, and runtime loading contract. For content 
 - `diagram-decision-table.md`: when to use diagrams and which type to choose.
 - `uml-standards.md`: PlantUML syntax and detail-writing rules.
 
+## Table of Contents
+
+- [Quick Checklist](#quick-checklist)
+- [Root Resolution](#root-resolution)
+- [Artifact and Naming Contract](#artifact-and-naming-contract)
+- [Category Contract](#category-contract)
+- [HTML Runtime Contract](#html-runtime-contract)
+- [Topbar Link Contract](#topbar-link-contract)
+- [`.ctu` Contract](#ctu-contract)
+- [Runtime API Contract](#runtime-api-contract)
+- [Verification](#verification)
+- [Port Cleanup Location](#port-cleanup-location)
+
 ## Quick Checklist
 
 - Resolve `$CTU_HOME`; all paths below are relative to it.
 - Put HTML in `cache/<report-slug>.html` and content in `data/<report-slug>/{category}--{n}_{lang}.ctu`.
+- Save HTML and `.ctu` files as valid UTF-8. On Windows, avoid shell-default ANSI/GBK writes; use explicit UTF-8 encoding.
 - Use ASCII `report-slug` and `category` values: `a-z`, `0-9`, `_`, `-`.
 - Set `<body class="demo-page" data-dir="<report-slug>">` for custom report data.
 - Keep required selectors, script order, tabs, overviews, `.ctu` prefixes, and API keys aligned.
@@ -58,6 +72,7 @@ Preserve the template's fixed structure and script order. These selectors are ru
 
 - `body class="demo-page"`.
 - `main class="content"`.
+- `section.intro > p[data-markdown]` for the report-level Markdown overview.
 - `nav class="demo-tabs"`.
 - `button class="demo-tab"` with `data-diagram`.
 - `h2 id="demo-title"`.
@@ -75,11 +90,20 @@ Alignment rules:
 - Every expected API category key must have one matching `button[data-diagram]`.
 - Remove tabs whose `.ctu` data does not exist.
 
+Page introduction rules:
+
+- Replace the template `<h1>` with the analyzed target title.
+- Replace `section.intro > p[data-markdown]` with a whole-report overview, not a tab/category overview.
+- Keep the overview within 500 Chinese characters or a similarly concise English length.
+- The overview must make the target immediately understandable: implemented functionality, basic framework, core principles, and design philosophy.
+- Markdown is supported, but prose must not be hard-wrapped by character count or visual line length. In prose, start a new line only after sentence-ending punctuation (`。`, `；`, `.`, or `;`). Lists, numbered steps, and tables may use one line per item or row.
+
 Path rules:
 
 - Reports under `cache/` usually need `../favicon.svg`, `../main.css`, `../demo.js`, and `../js` or `../component` script paths.
 - A root-level page such as `demo.html` uses paths without `../`.
 - If custom scripts are necessary, append them after `demo.js` unless the template explicitly says otherwise.
+- Do not save generated HTML with Windows ANSI/GBK encoding while declaring `<meta charset="utf-8">`; browsers will render Chinese as mojibake. The validator rejects non-UTF-8 files.
 
 ## Topbar Link Contract
 
@@ -145,7 +169,7 @@ Parser behavior to respect:
 - A field containing only `None` is normalized to empty. This applies to card title, description, UML source, detail, `Title:`, and `Describe:`.
 - Empty `[UML]` or `[UML]` containing only `None` means the card is text-only and should not render a diagram.
 - UML syntax validation applies only to non-empty `[UML]` content after `None` normalization.
-- For generated report cards, every non-`None` `[Description]` and `[Detail]` must use Markdown text with line breaks chosen by content. Short content may stay on one line. Break lines when content contains sentence-ending punctuation such as periods and semicolons, or at meaningful bullet, numbered-step, or caveat boundaries so the UI renders readable text.
+- For generated report cards, every non-`None` `[Description]` and `[Detail]` must use Markdown text with content-driven line breaks. Short content may stay on one line. Do not hard-wrap prose by character count or visual line length; in prose, start a new line only after sentence-ending punctuation (`。`, `；`, `.`, or `;`). Lists, numbered steps, caveats, and tables may use one line per item or row.
 - Organize `[Description]` and `[Detail]` with Markdown structures that match the content: paragraphs, bullet lists, numbered steps, indentation, and Markdown tables. Use lists for parallel points, numbered steps for ordered procedures, indentation for nested context, and tables for comparison or dense reference data.
 - Generated files should still include separators between cards, even though the parser can split on a later `[Example]`.
 
