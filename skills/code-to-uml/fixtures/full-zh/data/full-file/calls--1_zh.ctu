@@ -1,0 +1,28 @@
+Title: 调用
+Describe: 调用关系
+------------------------------------------------------------
+[Example]
+调用链
+
+[Description]
+<!-- Section-ID: S06_CALL_RELATIONSHIPS -->
+完整调用链是 `main()` -> `loadConfig()` -> `buildModel()` -> `renderView()`。
+
+[UML]
+None
+
+[Detail]
+fixture 使用文字表示简单调用链，避免重复架构图。
+
+------------------------------------------------------------
+[Example]
+边界调用
+
+[Description]
+`renderView()` 是文件内最后一个有意义的调用边界。
+
+[UML]
+None
+
+[Detail]
+真实报告中应说明外部调用方。

@@ -1,0 +1,29 @@
+Title: 概览
+Describe: 文件目标
+------------------------------------------------------------
+[Example]
+目标概览
+
+[Description]
+<!-- Section-ID: S01_TARGET_OVERVIEW -->
+`demo-file.js` fixture 表示一个文件级报告目标，用来验证 full 模式的中文内容、Section-ID 覆盖和分类对齐。
+
+[UML]
+None
+
+[Detail]
+证据基线：该 fixture 不是实际业务源码，只用于验证报告契约。
+报告范围固定为 file，语言后缀为 `_zh`。
+
+------------------------------------------------------------
+[Example]
+范围说明
+
+[Description]
+补充说明目标边界：只验证 `.ctu` 结构、tab 对齐和内容标记，不声明真实运行系统。
+
+[UML]
+None
+
+[Detail]
+该卡用于满足 full file 模式的深度分布，不引入额外 Section-ID。

@@ -1,0 +1,97 @@
+Title: 子系统边界与运行时假设
+Describe: 各子系统的职责边界、运行时假设和部署约束。
+------------------------------------------------------------
+
+[Example]
+子系统职责边界
+
+[Description]
+<!-- Section-ID: S04_ARCHITECTURE -->
+**子系统职责矩阵：**
+
+| 子系统 | 核心职责 | 状态存储 | 并发模型 |
+|--------|----------|----------|----------|
+| 任务系统 | 任务 CRUD、依赖管理 | `.tasks/*.json` | 文件级原子 |
+| 工作树 | Git worktree 隔离 | `.worktrees/` | 文件系统 |
+| 技能加载 | SKILL.md 解析注册 | 内存字典 | 只读 |
+| 提示组装 | 动态系统提示 | 内存 | 只读 |
+| 钩子系统 | 权限、日志管道 | 内存列表 | 同步调用 |
+| 子代理 | 受限执行环境 | 内存 | 独立线程 |
+| 上下文压缩 | 历史管理、摘要 | 文件+内存 | 同步调用 |
+| 错误恢复 | 重试、模型切换 | 内存状态 | 同步调用 |
+| 后台任务 | 异步工具执行 | 内存字典 | 独立线程 |
+| Cron 调度 | 定时任务管理 | `.scheduled_tasks.json` | 独立线程 |
+| MCP 系统 | 外部工具集成 | 内存字典 | 同步调用 |
+| 消息总线 | 代理间通信 | `.mailboxes/*.jsonl` | 文件追加 |
+| 协议状态 | 请求-响应匹配 | 内存字典 | 同步调用 |
+
+**运行时假设：**
+
+1. **单进程模型**：所有子系统在同一进程内
+2. **文件系统可用**：依赖本地文件读写
+3. **Git 可用**：工作树功能需要 Git
+4. **网络可用**：API 调用需要网络连接
+5. **Python 3.10+**：使用现代 Python 语法
+
+[UML]
+@startuml
+node "单进程" {
+  package "内存状态" {
+    [SKILL_REGISTRY]
+    [HOOKS]
+    [active_teammates]
+    [scheduled_jobs]
+    [pending_requests]
+    [mcp_clients]
+    [background_tasks]
+  }
+  
+  package "文件持久化" {
+    folder ".tasks" as tasks_dir
+    folder ".worktrees" as wt_dir
+    folder ".mailboxes" as mail_dir
+    folder ".memory" as mem_dir
+    folder ".transcripts" as trans_dir
+    file ".scheduled_tasks.json" as cron_file
+  }
+  
+  package "外部依赖" {
+    [Anthropic API] as api
+    [Git] as git
+    [FileSystem] as fs
+  }
+}
+
+[SKILL_REGISTRY] --> fs : reads
+[tasks_dir] --> fs : reads/writes
+[wt_dir] --> git : manages
+[mail_dir] --> fs : appends
+[cron_file] --> fs : reads/writes
+[api] --> network : requires
+[git] --> fs : requires
+@enduml
+
+[Detail]
+**状态生命周期：**
+
+| 状态类型 | 创建时机 | 更新时机 | 消亡时机 |
+|----------|----------|----------|----------|
+| 内存状态 | 模块加载 | 运行时 | 进程退出 |
+| 文件持久化 | 首次写入 | 每次操作 | 显式删除 |
+| 临时状态 | 会话开始 | 运行时 | 会话结束 |
+
+**并发约束：**
+
+- `agent_lock`：保护主循环，防止重入
+- `cron_lock`：保护 Cron 任务数据
+- `background_lock`：保护后台任务状态
+- 文件操作：依赖文件系统原子性
+
+**故障模式：**
+
+| 故障 | 影响 | 恢复方式 |
+|------|------|----------|
+| API 不可用 | 无法调用 LLM | 重试、模型切换 |
+| 磁盘满 | 无法持久化 | 清理缓存 |
+| Git 不可用 | 工作树功能失败 | 降级处理 |
+| 网络中断 | API 调用超时 | 重试机制 |

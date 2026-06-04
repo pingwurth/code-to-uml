@@ -1,0 +1,130 @@
+Title: 核心数据结构
+Describe: CronJob、ProtocolState、MCPClient 等核心数据类。
+------------------------------------------------------------
+
+[Example]
+CronJob 与 ProtocolState
+
+[Description]
+<!-- Section-ID: S03_CORE_OBJECTS -->
+**CronJob 数据类（第 1282-1288 行）：**
+
+```python
+@dataclass
+class CronJob:
+    id: str
+    cron: str
+    prompt: str
+    recurring: bool
+    durable: bool
+```
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `id` | str | 唯一标识符，格式：`cron_{random}` |
+| `cron` | str | 5 字段 cron 表达式 |
+| `prompt` | str | 触发时注入的提示 |
+| `recurring` | bool | 是否重复执行 |
+| `durable` | bool | 是否持久化到文件 |
+
+**ProtocolState 数据类（第 506-514 行）：**
+
+```python
+@dataclass
+class ProtocolState:
+    request_id: str
+    type: str
+    sender: str
+    target: str
+    status: str
+    payload: str
+    created_at: float = field(default_factory=time.time)
+```
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `request_id` | str | 请求唯一标识 |
+| `type` | str | 请求类型：`shutdown` / `plan_approval` |
+| `sender` | str | 发送者名称 |
+| `target` | str | 目标名称 |
+| `status` | str | 状态：`pending` / `approved` / `rejected` |
+| `payload` | str | 请求负载（如计划内容） |
+| `created_at` | float | 创建时间戳 |
+
+**MCPClient 类（第 1480-1500 行）：**
+
+```python
+class MCPClient:
+    def __init__(self, name: str):
+        self.name = name
+        self.tools: list[dict] = []
+        self._handlers: dict[str, callable] = {}
+    
+    def register(self, tool_defs: list[dict],
+                 handlers: dict[str, callable]):
+        self.tools = tool_defs
+        self._handlers = handlers
+    
+    def call_tool(self, tool_name: str, args: dict) -> str:
+        handler = self._handlers.get(tool_name)
+        if not handler:
+            return f"MCP error: unknown tool '{tool_name}'"
+        try:
+            return handler(**args)
+        except Exception as e:
+            return f"MCP error: {e}"
+```
+
+[UML]
+@startuml
+class CronJob {
+  +id: str
+  +cron: str
+  +prompt: str
+  +recurring: bool
+  +durable: bool
+}
+
+class ProtocolState {
+  +request_id: str
+  +type: str
+  +sender: str
+  +target: str
+  +status: str
+  +payload: str
+  +created_at: float
+}
+
+class MCPClient {
+  +name: str
+  +tools: List
+  -_handlers: Map
+  +register(tool_defs, handlers)
+  +call_tool(tool_name, args): str
+}
+@enduml
+
+[Detail]
+**CronJob 设计特点：**
+
+- **持久化选项**：`durable=True` 时保存到 `.scheduled_tasks.json`
+- **重复控制**：`recurring=False` 为一次性任务
+- **表达式验证**：`validate_cron()` 检查 5 字段格式
+
+**ProtocolState 设计特点：**
+
+- **请求-响应匹配**：通过 `request_id` 关联请求和响应
+- **类型安全**：`type` 字段区分不同协议类型
+- **状态追踪**：`status` 字段跟踪审批状态
+
+**MCPClient 设计特点：**
+
+- **延迟绑定**：工具在运行时注册
+- **统一接口**：所有工具通过 `call_tool()` 调用
+- **错误处理**：捕获异常并返回错误信息
+
+**使用场景：**
+
+- `CronJob`：定时提醒、周期性任务
+- `ProtocolState`：关机请求、计划审批
+- `MCPClient`：外部工具集成（docs、deploy 服务器）

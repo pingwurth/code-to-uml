@@ -1,0 +1,113 @@
+Title: 数据流/状态流图
+Describe: 数据在系统中的流动、状态转换和持久化机制。
+------------------------------------------------------------
+
+[Example]
+上下文数据流
+
+[Description]
+<!-- Section-ID: S07_DATA_OR_STATE_FLOW -->
+**上下文生命周期：**
+
+用户输入 → 消息历史 → 上下文准备 → LLM 调用 → 工具结果 → 消息历史
+
+**数据流节点：**
+
+| 节点 | 数据类型 | 存储位置 | 生命周期 |
+|------|----------|----------|----------|
+| 用户输入 | str | messages[-1] | 会话 |
+| 消息历史 | list[dict] | 内存 | 会话 |
+| 系统提示 | str | 内存 | 每次调用 |
+| LLM 响应 | list[Block] | messages[-1] | 会话 |
+| 工具结果 | str | messages[-1] | 会话 |
+| 上下文摘要 | str | 内存 | 压缩后 |
+
+**上下文压缩数据流：**
+
+```
+原始消息历史 (可能 > 50000 字符)
+  └── tool_result_budget()  # 大型结果持久化
+      └── persist_large_output()
+          └── .task_outputs/tool-results/{id}.txt
+  └── snip_compact()  # 截断旧消息
+      └── 保留前 3 + 后 47 条
+  └── micro_compact()  # 压缩旧工具结果
+      └── 保留最近 3 条完整结果
+  └── compact_history()  # LLM 摘要
+      └── write_transcript()  # 保存完整历史
+      └── summarize_history()  # 生成摘要
+```
+
+[UML]
+@startuml
+|用户|
+start
+:输入查询;
+
+|代理循环|
+:添加到 messages;
+
+:prepare_context;
+note right
+  tool_result_budget
+  snip_compact
+  micro_compact
+  compact_history
+end note
+
+:call_llm;
+note right
+  组装系统提示
+  with_retry
+  Anthropic API
+end note
+
+:添加助手响应;
+
+if (有工具调用?) then (yes)
+  :遍历工具调用;
+  
+  if (后台任务?) then (yes)
+    :start_background_task;
+    :添加占位结果;
+  else (no)
+    :call_tool_handler;
+    :添加工具结果;
+  endif
+  
+  :继续循环;
+else (no)
+  :触发 Stop 钩子;
+  :返回;
+endif
+
+|用户|
+:显示响应;
+stop
+@enduml
+
+[Detail]
+**阅读入口：** 从顶部的用户输入开始，跟随数据流动。
+
+**关键数据转换：**
+
+1. **用户输入 → 消息**：`history.append({"role": "user", "content": query})`
+2. **消息 → 系统提示**：`assemble_system_prompt()` 动态构建
+3. **LLM 响应 → 工具调用**：解析 `response.content` 中的 `tool_use` 块
+4. **工具结果 → 消息**：`results.append({"type": "tool_result", ...})`
+
+**持久化点：**
+
+| 数据 | 路径 | 触发条件 |
+|------|------|----------|
+| 大型工具输出 | `.task_outputs/tool-results/{id}.txt` | 输出 > 30000 字符 |
+| 对话记录 | `.transcripts/transcript_{ts}.jsonl` | 上下文压缩时 |
+| 任务状态 | `.tasks/{task_id}.json` | 任务 CRUD 操作 |
+| 消息 | `.mailboxes/{agent}.jsonl` | 消息发送时 |
+
+**状态所有权：**
+
+- `messages`：由 `agent_loop` 管理，传入传出
+- `context`：由 CLI 主循环管理，每次更新
+- `RecoveryState`：由 `agent_loop` 创建，局部使用
+- `ProtocolState`：全局 `pending_requests` 字典

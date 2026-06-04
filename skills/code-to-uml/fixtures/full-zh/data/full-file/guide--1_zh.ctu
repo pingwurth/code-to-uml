@@ -1,0 +1,47 @@
+Title: 指南
+Describe: 上手和维护
+------------------------------------------------------------
+[Example]
+上手指南
+
+[Description]
+<!-- Section-ID: S10_ONBOARDING_GUIDE -->
+阅读顺序：先看 `main()`，再看 `loadConfig()`，然后看 `buildModel()` 和 `renderView()`。
+
+[UML]
+None
+
+[Detail]
+验证时先确认 tab 和 `.ctu` 分类对齐。
+
+------------------------------------------------------------
+[Example]
+复盘问答
+
+[Description]
+<!-- Section-ID: S12_REVIEWER_QUESTIONS -->
+Q: 为什么要拆分读取、建模和渲染？
+答：这样可以让每个阶段的输入输出独立验证，减少定位成本。
+
+[UML]
+None
+
+[Detail]
+Q&A 必须服务于当前分析范围，不能是通用 FAQ。
+
+------------------------------------------------------------
+[Example]
+维护速查
+
+[Description]
+<!-- Section-ID: S13_MAINTAINER_REFERENCE -->
+| Name | Kind | Location | Purpose | Notes |
+| --- | --- | --- | --- | --- |
+| `main` | Function | fixture concept | 串联主流程 | 调用读取、建模和渲染 |
+| `buildModel` | Function | fixture concept | 构建模型 | 不应修改输入配置 |
+
+[UML]
+None
+
+[Detail]
+维护速查必须是 Markdown 表格。

@@ -1,0 +1,36 @@
+Title: 代码
+Describe: 代码片段
+------------------------------------------------------------
+[Example]
+片段分析
+
+[Description]
+<!-- Section-ID: S08_CODE_SNIPPETS -->
+关键片段展示入口如何串联读取、建模和渲染。
+
+[UML]
+None
+
+[Detail]
+```js
+function main() {
+	const config = loadConfig();
+	const model = buildModel(config);
+	return renderView(model);
+}
+```
+
+该片段短于 30 行，并配有设计说明。
+
+------------------------------------------------------------
+[Example]
+边界用法
+
+[Description]
+调用方不应绕过 `buildModel()` 直接调用 `renderView()`。
+
+[UML]
+None
+
+[Detail]
+真实报告中应说明错误示例。

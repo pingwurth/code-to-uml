@@ -10,6 +10,7 @@ Use this reference whenever planning, generating, or validating Code-To-UML repo
 - [Scope Applicability](#scope-applicability)
 - [Responsibility Boundaries](#responsibility-boundaries)
 - [Scope-Specific Depth](#scope-specific-depth)
+- [Coverage Depth Gate](#coverage-depth-gate)
 - [Analysis Playbook](#analysis-playbook)
 - [Evidence and Quality Bar](#evidence-and-quality-bar)
 - [Validation Checklist](#validation-checklist)
@@ -22,6 +23,8 @@ Use this reference whenever planning, generating, or validating Code-To-UML repo
 - Measure report coverage by stable section IDs, not by tab labels or physical `.ctu` filenames.
 - Keep the HTML template data-driven: report cards, diagrams, descriptions, and details belong in `.ctu` files.
 - Let the reader understand the target from text alone; diagrams reduce cognitive load but never replace explanation.
+- Make section coverage machine-checkable by placing `Section-ID: Sxx_...` markers in generated `.ctu` Markdown.
+- Keep generated coverage truthful: section markers prove placement, not depth or correctness.
 
 ## Category Model
 
@@ -65,6 +68,18 @@ Each standard category owns the primary content for these section IDs:
 ## Section Catalog
 
 Use stable section IDs in planning notes, validation, and summaries. Display titles may be localized or adapted. Match display titles to the report language; for Chinese reports, prefer the Chinese titles below.
+
+Generated report cards must include one or more section markers for the content they cover. Prefer an HTML comment at the top of `[Description]` or `[Detail]` when the marker should not be visible:
+
+```markdown
+<!-- Section-ID: S01_TARGET_OVERVIEW -->
+```
+
+Merged sections must list every covered ID, for example:
+
+```markdown
+<!-- Section-ID: S06_CALL_RELATIONSHIPS, S07_DATA_OR_STATE_FLOW -->
+```
 
 | ID | Default title | Chinese title | Required content |
 | --- | --- | --- | --- |
@@ -110,6 +125,8 @@ Legend:
 
 Merge rule: if an `M` section would produce no more than two useful sentences or one trivial diagram, merge it into the nearest owning section rather than creating a shallow tab/card. Still mention the section ID in the final section summary.
 
+Compact report rule: for small functions, classes, or low-complexity files, merged sections are preferred over artificial standalone tabs. A compact report should still include the useful required section IDs, but it may validate with `--mode compact` and lower card floors. Do not add a section marker unless the same card contains concrete target-specific evidence for that section or explicitly explains why the section has no meaningful separate content for the target.
+
 ## Responsibility Boundaries
 
 - `S03_CORE_OBJECTS` is a local view. It explains each important object's responsibility, interface, side effects, and immediate callers/callees in text.
@@ -127,6 +144,76 @@ Merge rule: if an `M` section would produce no more than two useful sentences or
 - **Class**: include constructor/state, public methods, invariants, lifecycle, collaborators, subclass/consumer risks, and state transitions.
 - **Function**: include signature, preconditions, algorithm, branches, exceptions/errors, side effects, callers/callees, and examples of correct/incorrect use.
 
+## Coverage Depth Gate
+
+Section coverage is necessary but not sufficient. A report that places one representative item in each tab is a validation sample, not a full analysis report.
+
+Classify the target before generating content:
+
+Score the target across six dimensions. Give each dimension 0-2 points, then map the total to a complexity level.
+
+| Dimension | 0 points | 1 point | 2 points |
+| --- | --- | --- | --- |
+| Scale | Small function/file | Medium file or module | Large file, multi-module target, or project |
+| Symbol count | 1-3 core symbols | 4-10 meaningful symbols | 10+ meaningful symbols |
+| Call relationships | Mostly linear | Multi-step local calls | Cross-module, cross-process, async, or callback-heavy |
+| State/data flow | Stateless | Local state or simple data movement | Persistence, shared state, cache, workflow, or explicit state machine |
+| Branch/error paths | Few branches | Several branches or exceptions | Retries, recovery, fallback, partial failure, concurrency, or transactions |
+| Subsystem count | One responsibility | 2-3 related responsibilities | Multiple independent subsystems |
+
+Complexity mapping:
+
+- `0-3`: `low`
+- `4-7`: `medium`
+- `8-12`: `high`
+
+Escalate to at least `high` when any of these are true: the target is over ~1000 lines, has 10+ meaningful functions/classes, has 4+ independent subsystems, or combines several of persistence, concurrency, permissions/security, state machines, external integrations, and error recovery.
+
+| Complexity | Use when | Minimum card count by scope |
+| --- | --- | --- |
+| `low` | Small and local target with few symbols and little branching. | project 13, module 13, file 13, class 8, function 5 |
+| `medium` | Normal production file/module with several responsibilities. | project 20, module 18, file 16, class 10, function 6 |
+| `high` | Large target over ~1000 lines, 10+ meaningful symbols, multiple independent subsystems, or dense state/call flows. | project 32, module 26, file 24, class 14, function 8 |
+
+Depth must also be distributed. For `medium` and `high` reports, several categories should contain multiple cards rather than concentrating all detail in one tab. The validator checks this with `--complexity`.
+
+Compact mode keeps the same evidence bar but lowers the artifact shape requirement. Use it when the target is narrow enough that full-report card floors would force repetitive or speculative content.
+
+| Scope | Compact card floor | Typical compact shape |
+| --- | --- | --- |
+| Function | 3 | Overview/flow, code/evidence, risks/reference |
+| Class | 5 | Overview/state, methods, flow/calls, risks, reference |
+| File | 8 | Overview, structure, objects, flow, data/calls, snippets, risks, guide/reference |
+| Module/package | 10 | Overview, structure, API, architecture, flow, calls/data, code, principles, risks, guide |
+| Project | 13 | Use compact only for a small project or an index report; otherwise use full mode |
+
+Recommended soft upper bounds:
+
+| Scope | Recommended upper bound |
+| --- | --- |
+| Function | 12 cards |
+| Class | 18 cards |
+| File | 35 cards |
+| Module/package | 45 cards |
+| Project | 60 cards; split into multiple HTML pages when substantially above this |
+
+Typical high-complexity file distribution:
+
+| Category | Suggested cards | Purpose |
+| --- | --- | --- |
+| `overview` | 2-3 | Target, boundaries, source/version baseline, complexity score. |
+| `structure` | 2-4 | Imports, globals, constants, entrypoints, file sections. |
+| `objects` | 3-6 | Core classes/functions and responsibility groups. |
+| `architecture` | 2-4 | Layers, dependency direction, runtime boundaries. |
+| `flow` | 3-5 | Main path, error path, async/background path. |
+| `calls` | 2-4 | End-to-end call chains across meaningful boundaries. |
+| `dataflow` | 2-4 | State ownership, persistence, lifecycle, cache or workflow. |
+| `code` | 3-6 | Focused snippets with design intent and cautions. |
+| `principles` | 2-4 | Mechanisms, tradeoffs, risks, improvements. |
+| `guide` | 3-5 | Onboarding path, Q&A, maintainer reference. |
+
+For high-complexity file reports, explicitly cover the major subsystems visible in the target. Examples include task/state management, public API/tool handlers, permissions, lifecycle, background/concurrency, persistence, integrations, main runtime loop, error handling, and onboarding/debug paths. If a subsystem is intentionally omitted, state why in `S01_TARGET_OVERVIEW` or `S11_RISKS_AND_IMPROVEMENTS`.
+
 ## Analysis Playbook
 
 - Use a five-layer progression when the target is non-trivial: system map -> flow walkthrough -> design decisions -> pattern recognition -> pitfalls and boundaries.
@@ -142,17 +229,26 @@ Merge rule: if an `M` section would produce no more than two useful sentences or
 
 - Be concrete: mention real function/class names, files, directories, constants, state files, environment variables, routes, commands, or line numbers from the target.
 - Generated HTML and `.ctu` files must be valid UTF-8. If a report contains Chinese mojibake or Unicode replacement characters, treat it as a blocking artifact error and regenerate or re-save with explicit UTF-8 encoding.
+- Generated `.ctu` cards must include `Section-ID: ...` markers so `--mode compact` or `--mode full` with `--scope <scope>` can verify required coverage.
+- Section markers are not a substitute for analysis. A card that lists a section ID but contains only generic prose, guessed architecture, invented state flow, or a placeholder risk fails the content bar even if the validator accepts it.
 - Tie architecture claims, risk claims, and call/data-flow claims back to observed source evidence. If a conclusion is inferred rather than directly visible, say so.
 - Be proportional: broad targets get more architectural synthesis; narrow targets get deeper branch/call/side-effect analysis.
 - Prefer code snippets under 30 lines; surround snippets with explanation.
 - Avoid marketing prose, generic compliments, and vague "can be optimized" statements. Name the specific risk and the specific improvement.
 - Text must cover the core information even if the reader skips every diagram.
-- The page introduction `<p data-markdown>` must be a concise whole-report overview, not a category overview. Keep it within 500 Chinese characters or a similarly concise English length, and cover implemented functionality, basic framework, core principles, and design philosophy using Markdown layout when helpful. Do not hard-wrap prose by length; in prose, start a new line only after `。`, `；`, `.`, or `;`.
+- The page introduction `<p data-markdown>` must be a concise whole-report Markdown overview block, not a category overview. Keep it within 500 Chinese characters or a similarly concise English length, and cover implemented functionality, basic framework, core principles, working mechanism, and design philosophy when relevant.
+- The page introduction layout must follow the content: use paragraphs for a simple target, bullets for parallel concepts, numbered steps for mechanisms, and compact tables for dense dimension summaries. Do not compress multiple semantic roles into one long line.
+- Do not hard-wrap prose by length; in prose, start a new line only after `。`, `；`, `.`, or `;`. Lists, steps, and tables may use one line per item/step/row.
 - Use content-driven line breaks in `[Description]` and `[Detail]`. Short content may stay on one line. Do not hard-wrap prose by character count or visual line length; in prose, start a new line only after sentence-ending punctuation (`。`, `；`, `.`, or `;`). Lists, steps, caveats, comparisons, and tables may use one line per item or row.
 - Organize `[Description]` and `[Detail]` with Markdown structures that match the content: paragraphs, bullet lists, numbered steps, indentation, and Markdown tables. Use lists for peer items, numbered steps for ordered workflows, indentation for nested context, and tables for comparison, indexes, or dense reference data.
 - The maintainer reference table must use Markdown table syntax and include line numbers or symbol locations whenever available.
 
 ## Validation Checklist
+
+Validator boundary:
+
+- Machine gates check artifact shape, UTF-8, selector/data alignment, section markers, card floors, selected Markdown forms, and PlantUML syntax/rendering when requested.
+- Human/content gates still require source-grounded analysis: evidence accuracy, useful risk claims, non-invented architecture/state flow, and whether merged compact sections are truthful.
 
 ### Content Validation
 
@@ -161,10 +257,15 @@ Before creating or finalizing report artifacts, verify:
 - [ ] Target source read-only constraint respected.
 - [ ] Scope identified as project, module/package, file, class, or function.
 - [ ] Required section IDs are covered according to the scope applicability matrix.
+- [ ] Required coverage is machine-checkable with `Section-ID: ...` markers in `.ctu` content.
+- [ ] Target complexity is classified as `low`, `medium`, or `high`, and the report has enough cards and multi-card categories for that complexity.
+- [ ] High-complexity targets cover all major subsystems, not only one representative item per tab.
+- [ ] Compact reports merge only thin sections and do not use section IDs to pad empty cards.
 - [ ] Merged sections are intentionally merged and still mentioned in the section summary.
 - [ ] `S12_REVIEWER_QUESTIONS` includes answers for every learning review question and ties them to the analyzed target scope.
 - [ ] `S13_MAINTAINER_REFERENCE` is written as a Markdown table, not prose or bullets.
-- [ ] Page introduction `<p data-markdown>` gives a <= 500-character whole-report overview covering functionality, framework, core principles, and design philosophy.
+- [ ] Page introduction `<p data-markdown>` gives a <= 500-character whole-report Markdown overview covering functionality, framework, core principles, working mechanism, and design philosophy when relevant.
+- [ ] Page introduction layout matches the content instead of piling every idea into one prose line.
 - [ ] `[Description]` and `[Detail]` use appropriate Markdown layout such as paragraphs, lists, indentation, or tables rather than unstructured prose.
 - [ ] Every architecture, risk, call-flow, and data-flow claim is backed by source evidence or marked as inference.
 - [ ] Code snippets are focused, explained, and not pasted as long unexplained source blocks.
@@ -180,7 +281,7 @@ Before runtime checks, verify:
 - [ ] Categories match tab `data-diagram` values and `data-diagram-overview` values.
 - [ ] `.ctu` syntax follows the template.
 - [ ] Topbar links are intentionally preserved, adapted, or removed.
-- [ ] `node <skill-dir>/scripts/validate-report.js --root <CTU_HOME> --html cache/<report-file>.html --lang <zh|en> --strict` returns zero errors and zero warnings.
+- [ ] `node <skill-dir>/scripts/validate-report.js --root <CTU_HOME> --html cache/<report-file>.html --lang <zh|en> --scope <scope> --complexity <low|medium|high> --mode <compact|full> --strict` returns zero errors and zero warnings.
 
 ### Runtime Validation
 

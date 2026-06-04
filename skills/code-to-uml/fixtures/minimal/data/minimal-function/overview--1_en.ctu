@@ -1,0 +1,18 @@
+Title: Overview
+Describe: Compact function overview and flow coverage
+------------------------------------------------------------
+[Example]
+Purpose and execution path
+
+[Description]
+<!-- Section-ID: S01_TARGET_OVERVIEW, S02_TOP_LEVEL_STRUCTURE, S03_CORE_OBJECTS, S05_CORE_FLOW -->
+`normalizeName(value)` accepts one input value, verifies that it is a string, trims surrounding whitespace, and returns the cleaned display name.
+For this compact fixture, the function itself is the only core object and the top-level structure is the signature, guard branch, trim operation, and return path.
+
+[UML]
+None
+
+[Detail]
+Evidence baseline: fixture source concept `normalizeName(value)` has no module import, no global state, and no external service dependency.
+Flow: receive value -> reject non-string input -> trim string -> return normalized name.
+The merged section IDs are intentional because a standalone architecture diagram would repeat the same three function steps.

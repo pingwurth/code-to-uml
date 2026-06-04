@@ -1,0 +1,116 @@
+Title: 入口逻辑与模块级副作用
+Describe: 文件的入口点、模块级初始化和线程启动。
+------------------------------------------------------------
+
+[Example]
+入口逻辑与模块级副作用
+
+[Description]
+<!-- Section-ID: S02_TOP_LEVEL_STRUCTURE -->
+**模块级副作用（导入时执行）：**
+
+1. **环境变量加载**（第 29-31 行）：
+   - `load_dotenv(override=True)` 加载 `.env` 文件
+   - 如果设置了 `ANTHROPIC_BASE_URL`，移除 `ANTHROPIC_AUTH_TOKEN`
+
+2. **目录创建**（第 74-75、174-175、475-476 行）：
+   - `.tasks/`、`.worktrees/`、`.mailboxes/` 目录自动创建
+
+3. **技能扫描**（第 323 行）：
+   - `scan_skills()` 在模块加载时执行
+   - 扫描 `skills/` 目录下的 `SKILL.md` 文件
+
+4. **Cron 任务加载**（第 1472 行）：
+   - `load_durable_jobs()` 从 `.scheduled_tasks.json` 恢复任务
+
+5. **Cron 调度线程**（第 1473 行）：
+   - `threading.Thread(target=cron_scheduler_loop, daemon=True).start()`
+   - 守护线程，每秒检查一次定时任务
+
+**CLI 入口（第 2034-2068 行）：**
+
+```python
+if __name__ == "__main__":
+    CLI_ACTIVE = True
+    print("s20: comprehensive agent")
+    print("Enter a question, press Enter to send. Type q to quit.\n")
+    history = []
+    context = update_context({}, [])
+    threading.Thread(target=cron_autorun_loop,
+                     args=(history, context), daemon=True).start()
+    while True:
+        try:
+            query = input(PROMPT)
+        except (EOFError, KeyboardInterrupt):
+            break
+        if query.strip().lower() in ("q", "exit", ""):
+            break
+        trigger_hooks("UserPromptSubmit", query)
+        history.append({"role": "user", "content": query})
+        with agent_lock:
+            agent_loop(history, context)
+            context = update_context(context, history)
+            print_last_assistant(history)
+        # ... 收件箱处理
+```
+
+[UML]
+@startuml
+start
+:加载 .env 文件;
+:初始化 Anthropic 客户端;
+:创建必要目录;
+:扫描技能目录;
+:加载持久化 Cron 任务;
+:启动 Cron 调度线程;
+
+if (__name__ == "__main__") then (yes)
+  :设置 CLI_ACTIVE = True;
+  :启动 cron_autorun_loop 线程;
+  repeat
+    :等待用户输入;
+    if (输入 q/exit/空) then (yes)
+      stop
+    endif
+    :触发 UserPromptSubmit 钩子;
+    :添加到历史记录;
+    :执行 agent_loop;
+    :更新上下文;
+    :打印最后助手响应;
+    :检查收件箱;
+  repeat while (继续) is (yes)
+else (no)
+  :模块可被导入使用;
+  stop
+endif
+@enduml
+
+[Detail]
+**入口点设计：**
+
+文件有两个入口点：
+1. **CLI 模式**：`__name__ == "__main__"` 时启动交互式命令行
+2. **模块导入**：其他文件可导入使用各个子系统
+
+**线程模型：**
+
+| 线程 | 启动位置 | 类型 | 职责 |
+|------|----------|------|------|
+| Cron 调度器 | 第 1473 行 | 守护线程 | 每秒检查定时任务 |
+| Cron 自动运行 | 第 2040 行 | 守护线程 | 处理触发的 Cron 任务 |
+| 队友线程 | 第 808 行 | 守护线程 | 独立执行队友任务 |
+
+**全局锁：**
+
+- `agent_lock`（第 1858 行）：保护主代理循环
+- `cron_lock`（第 1293 行）：保护 Cron 任务数据
+- `background_lock`（第 1211 行）：保护后台任务状态
+
+**CLI 交互流程：**
+
+1. 显示欢迎信息
+2. 启动 Cron 自动运行线程
+3. 进入主循环等待输入
+4. 处理用户查询并执行代理循环
+5. 检查队友消息收件箱
+6. 重复直到用户退出

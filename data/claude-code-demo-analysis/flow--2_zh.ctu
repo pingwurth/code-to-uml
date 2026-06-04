@@ -1,0 +1,118 @@
+Title: 任务认领与队友执行流程
+Describe: 自主代理的任务认领、队友线程的执行流程。
+------------------------------------------------------------
+
+[Example]
+自主任务认领流程
+
+[Description]
+<!-- Section-ID: S05_CORE_FLOW -->
+**idle_poll 函数（第 566-600 行）：**
+
+自主代理在空闲时轮询，优先处理收件箱消息，其次认领未分配任务。
+
+**轮询策略：**
+
+- 轮询间隔：`IDLE_POLL_INTERVAL = 5` 秒
+- 超时时间：`IDLE_TIMEOUT = 60` 秒
+- 最大轮询次数：60 / 5 = 12 次
+
+**优先级顺序：**
+
+1. **收件箱消息**：处理直接通信
+2. **关机请求**：发送响应并退出
+3. **未认领任务**：自动认领并开始工作
+4. **超时**：返回 `timeout` 状态
+
+**队友线程执行（第 634-809 行）：**
+
+队友线程是独立的执行环境，有自己的：
+- 消息历史
+- 工具集（受限子集）
+- 工作目录（可能绑定到 worktree）
+
+[UML]
+@startuml
+|#lightblue|自主代理|
+start
+:进入 idle_poll;
+repeat
+  :等待 5 秒;
+  :检查收件箱;
+  if (有消息?) then (yes)
+    if (关机请求?) then (yes)
+      :发送关机响应;
+      stop
+    else (no)
+      :添加到消息历史;
+      :返回 "work";
+    endif
+  else (no)
+    :扫描未认领任务;
+    if (有可认领任务?) then (yes)
+      :认领任务;
+      if (有 worktree?) then (yes)
+        :设置工作目录;
+      endif
+      :返回 "work";
+    endif
+  endif
+repeat while (未超时) is (yes)
+:返回 "timeout";
+stop
+
+|#lightgreen|队友线程|
+start
+:初始化消息和工具;
+repeat
+  :检查收件箱;
+  if (关机请求?) then (yes)
+    :发送响应;
+    stop
+  endif
+  
+  if (等待计划审批?) then (yes)
+    :等待审批;
+    -> 返回循环开始;
+  endif
+  
+  :调用 LLM;
+  if (有工具调用?) then (yes)
+    :执行工具;
+    :添加结果;
+  else (no)
+    :跳出内循环;
+  endif
+repeat while (继续) is (yes)
+
+:执行 idle_poll;
+if (shutdown/timeout?) then (yes)
+  stop
+endif
+:发送最终结果;
+stop
+@enduml
+
+[Detail]
+**阅读入口：** 从左上角的自主代理开始，了解任务认领流程。
+
+**关键决策点：**
+
+1. **收件箱优先**：直接消息优先于任务认领
+2. **关机处理**：收到关机请求立即响应并退出
+3. **任务认领**：检查依赖、设置所有者、绑定 worktree
+4. **计划审批**：队友提交计划后等待 lead 审批
+
+**工作目录隔离：**
+
+- 认领带 worktree 的任务时，设置 `wt_ctx["path"]`
+- 所有文件工具（bash、read、write）使用 worktree 路径
+- 实现代码隔离，避免冲突
+
+**协议流程：**
+
+1. 队友调用 `submit_plan` 工具
+2. 发送 `plan_approval_request` 到 lead
+3. 设置 `protocol_ctx["waiting_plan"]`
+4. 轮询等待 `plan_approval_response`
+5. 收到响应后继续或修改计划

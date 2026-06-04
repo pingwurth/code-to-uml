@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Minimal Function Report</title>
+</head>
+<body class="demo-page" data-dir="minimal-function">
+	<main class="content">
+		<section class="intro">
+			<h1>Minimal Function Report</h1>
+			<p data-markdown>Analyze `normalizeName(value)` as a compact function report.
+- Function: trims input and returns a stable display name.
+- Framework: plain JavaScript helper with no external dependency.
+- Principle, mechanism, and design: normalize at the boundary, keep invalid input explicit, and avoid hidden state.</p>
+		</section>
+		<nav class="demo-tabs">
+			<button class="demo-tab is-active" type="button" data-diagram="overview">Overview</button>
+			<button class="demo-tab" type="button" data-diagram="evidence">Evidence</button>
+			<button class="demo-tab" type="button" data-diagram="reference">Reference</button>
+		</nav>
+		<section>
+			<h2 id="demo-title">Overview</h2>
+			<p class="demo-section-overview is-active" data-diagram-overview="overview">Function purpose, local structure, and direct flow.</p>
+			<p class="demo-section-overview" data-diagram-overview="evidence">Focused code evidence and state/call boundaries.</p>
+			<p class="demo-section-overview" data-diagram-overview="reference">Risks, learning questions, and maintainer reference.</p>
+			<div class="demo-examples" data-examples></div>
+		</section>
+	</main>
+	<aside data-demo-toc></aside>
+</body>
+</html>

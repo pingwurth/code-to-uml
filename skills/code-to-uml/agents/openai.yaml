@@ -1,4 +1,4 @@
 interface:
   display_name: "Code UML Report"
-  short_description: "Analyze code into consistent Code-To-UML HTML reports."
-  default_prompt: "Use $code-to-uml to analyze the specified project, module, class, or function and generate a validated Code-To-UML HTML report."
+  short_description: "Work on Code-To-UML .ctu/HTML source-analysis reports."
+  default_prompt: "Use $code-to-uml to analyze the specified project, module, file, class, or function, choose compact or full report mode, generate or update a Code-To-UML .ctu/HTML report, and validate the matching artifact/content/runtime scope."

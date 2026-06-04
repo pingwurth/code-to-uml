@@ -1,0 +1,15 @@
+Title: Overview
+Describe: Intentionally incomplete content
+------------------------------------------------------------
+[Example]
+Only overview
+
+[Description]
+<!-- Section-ID: S01_TARGET_OVERVIEW -->
+This fixture intentionally omits required function-scope section IDs.
+
+[UML]
+None
+
+[Detail]
+The validator should report missing markers when run with `--mode compact --scope function --strict`.

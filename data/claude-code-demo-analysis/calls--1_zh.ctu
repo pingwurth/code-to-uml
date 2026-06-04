@@ -1,0 +1,106 @@
+Title: 调用关系图
+Describe: 主要函数间的调用链和跨边界调用关系。
+------------------------------------------------------------
+
+[Example]
+工具调用链
+
+[Description]
+<!-- Section-ID: S06_CALL_RELATIONSHIPS -->
+**工具调用流程：**
+
+从 LLM 响应到工具执行的完整调用链：
+
+```
+agent_loop
+  └── assemble_tool_pool()  # 合并内置和 MCP 工具
+  └── call_llm()
+      └── with_retry()
+          └── client.messages.create()
+  └── 遍历 response.content
+      └── trigger_hooks("PreToolUse")
+          └── permission_hook()  # 权限检查
+          └── log_hook()  # 日志记录
+      └── should_run_background()  # 判断后台执行
+          └── is_slow_operation()
+      └── start_background_task()  # 后台执行
+          └── call_tool_handler()
+      └── call_tool_handler()  # 同步执行
+          └── BUILTIN_HANDLERS[name]()
+      └── trigger_hooks("PostToolUse")
+          └── large_output_hook()
+```
+
+**跨边界调用：**
+
+| 调用方 | 被调用方 | 边界类型 | 说明 |
+|--------|----------|----------|------|
+| agent_loop | Anthropic API | 进程-网络 | LLM 调用 |
+| run_bash | subprocess | 进程-进程 | Shell 命令 |
+| create_worktree | Git | 进程-进程 | Git 操作 |
+| MessageBus.send | 文件系统 | 进程-IO | 消息持久化 |
+| MCPClient.call_tool | 外部服务 | 进程-网络 | MCP 工具调用 |
+
+[UML]
+@startuml
+participant "agent_loop" as loop
+participant "assemble_tool_pool" as pool
+participant "call_llm" as llm
+participant "with_retry" as retry
+participant "Anthropic API" as api
+participant "trigger_hooks" as hooks
+participant "permission_hook" as perm
+participant "call_tool_handler" as handler
+participant "BUILTIN_HANDLERS" as tools
+
+loop -> pool: 合并工具
+pool --> loop: tools, handlers
+
+loop -> llm: 调用 LLM
+llm -> retry: 带重试
+retry -> api: messages.create()
+api --> retry: response
+retry --> llm: response
+llm --> loop: response
+
+loop -> hooks: PreToolUse
+hooks -> perm: 权限检查
+perm --> hooks: 允许/拒绝
+hooks --> loop: 结果
+
+loop -> handler: 执行工具
+handler -> tools: 查找处理函数
+tools --> handler: 处理函数
+handler --> loop: 输出
+
+loop -> hooks: PostToolUse
+hooks --> loop: 完成
+@enduml
+
+[Detail]
+**阅读入口：** 从左侧的 `agent_loop` 开始，跟随工具调用流程。
+
+**关键调用路径：**
+
+1. **工具池组装**：`assemble_tool_pool()` 合并 `BUILTIN_TOOLS` 和 MCP 工具
+2. **LLM 调用**：`call_llm()` → `with_retry()` → `client.messages.create()`
+3. **权限检查**：`trigger_hooks("PreToolUse")` → `permission_hook()`
+4. **工具执行**：`call_tool_handler()` → `BUILTIN_HANDLERS[name]()`
+
+**Hook 执行顺序：**
+
+- `PreToolUse`：`permission_hook` → `log_hook`
+- `PostToolUse`：`large_output_hook`
+- `UserPromptSubmit`：`user_prompt_hook`
+- `Stop`：`stop_hook`
+
+**后台任务路径：**
+
+- `should_run_background()` 判断是否后台执行
+- `start_background_task()` 创建后台线程
+- `collect_background_results()` 收集完成结果
+
+**MCP 工具路径：**
+
+- `assemble_tool_pool()` 添加 `mcp__server__tool` 前缀
+- `handlers[prefixed]` 调用 `MCPClient.call_tool()`

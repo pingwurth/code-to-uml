@@ -177,7 +177,7 @@ a:hover {
 .intro > p,
 .intro-summary {
 	margin: 0.5rem 0 0.8rem;
-	max-width: 760px;
+	max-width: none;
 }
 
 .intro-summary > :first-child {

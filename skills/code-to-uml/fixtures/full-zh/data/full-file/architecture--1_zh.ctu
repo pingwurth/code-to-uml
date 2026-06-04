@@ -1,0 +1,23 @@
+Title: 架构
+Describe: 架构边界
+------------------------------------------------------------
+[Example]
+架构边界
+
+[Description]
+<!-- Section-ID: S04_ARCHITECTURE -->
+文件内部被划分为输入解析、模型构建和视图渲染三层，依赖方向从入口流向渲染。
+
+[UML]
+@startuml
+left to right direction
+component "输入解析" as Input
+component "模型构建" as Model
+component "视图渲染" as View
+Input --> Model
+Model --> View
+@enduml
+
+[Detail]
+从左到右读取：`Input` 表示读取配置，`Model` 表示构建中间对象，`View` 表示最终渲染。
+箭头表示调用方向。

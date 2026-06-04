@@ -1,0 +1,125 @@
+Title: 整体架构图
+Describe: 文件的架构层次、模块边界和依赖方向。
+------------------------------------------------------------
+
+[Example]
+代理系统架构层次
+
+[Description]
+<!-- Section-ID: S04_ARCHITECTURE -->
+**架构分层：**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    CLI 入口层                                │
+│  __main__ block, 用户交互, cron_autorun_loop               │
+└─────────────────────────┬───────────────────────────────────┘
+                          │ 调用
+┌─────────────────────────▼───────────────────────────────────┐
+│                    代理循环层                                │
+│  agent_loop, prepare_context, call_llm, 错误恢复            │
+└─────────────────────────┬───────────────────────────────────┘
+                          │ 使用
+┌─────────────────────────▼───────────────────────────────────┐
+│                    工具执行层                                │
+│  BUILTIN_HANDLERS, 工具调度, 权限检查, 后台任务              │
+└─────────────────────────┬───────────────────────────────────┘
+                          │ 依赖
+┌─────────────────────────▼───────────────────────────────────┐
+│                    子系统层                                  │
+│  任务系统, 工作树, 技能加载, MCP, 消息总线, Cron            │
+└─────────────────────────┬───────────────────────────────────┘
+                          │ 使用
+┌─────────────────────────▼───────────────────────────────────┐
+│                    基础设施层                                │
+│  文件系统, Git, Anthropic API, 环境变量                     │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**依赖方向：**
+
+- 上层依赖下层，下层不依赖上层
+- 子系统之间通过消息总线通信
+- 基础设施层无业务逻辑
+
+[UML]
+@startuml
+package "CLI 入口层" {
+  [__main__] as cli
+  [cron_autorun_loop] as cron_loop
+}
+
+package "代理循环层" {
+  [agent_loop] as loop
+  [prepare_context] as prep
+  [call_llm] as llm
+  [RecoveryState] as recovery
+}
+
+package "工具执行层" {
+  [BUILTIN_HANDLERS] as handlers
+  [permission_hook] as perm
+  [start_background_task] as bg
+}
+
+package "子系统层" {
+  [Task System] as tasks
+  [Worktree System] as wt
+  [Skill Loading] as skills
+  [MCP System] as mcp
+  [MessageBus] as bus
+  [Cron Scheduler] as cron
+}
+
+package "基础设施层" {
+  [FileSystem] as fs
+  [Git] as git
+  [Anthropic API] as api
+  [Environment] as env
+}
+
+cli --> loop
+cron_loop --> loop
+loop --> prep
+loop --> llm
+loop --> handlers
+handlers --> perm
+handlers --> bg
+handlers --> tasks
+handlers --> wt
+handlers --> skills
+handlers --> mcp
+handlers --> bus
+handlers --> cron
+tasks --> fs
+wt --> git
+skills --> fs
+mcp --> api
+bus --> fs
+cron --> fs
+llm --> api
+prep --> fs
+@enduml
+
+[Detail]
+**层间接口：**
+
+| 层 | 主要接口 | 下层依赖 |
+|----|----------|----------|
+| CLI 入口 | `agent_loop()`, `consume_cron_queue()` | 代理循环层 |
+| 代理循环 | `call_llm()`, `assemble_tool_pool()` | 工具执行层 |
+| 工具执行 | `BUILTIN_HANDLERS`, `trigger_hooks()` | 子系统层 |
+| 子系统 | `create_task()`, `BUS.send()`, `connect_mcp()` | 基础设施层 |
+
+**横向通信：**
+
+- 子系统间通过 `MessageBus` 异步通信
+- 协议状态通过 `pending_requests` 字典共享
+- 全局状态通过模块级变量访问
+
+**扩展点：**
+
+- 新工具：添加到 `BUILTIN_TOOLS` 和 `BUILTIN_HANDLERS`
+- 新钩子：使用 `register_hook()` 注册
+- 新 MCP 服务器：添加到 `MOCK_SERVERS`
+- 新消息类型：扩展 `MessageBus.send()` 的 `msg_type`

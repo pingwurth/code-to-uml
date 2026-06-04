@@ -1,0 +1,27 @@
+Title: Evidence
+Describe: Compact evidence for calls, data flow, snippets, and principles
+------------------------------------------------------------
+[Example]
+Data and code evidence
+
+[Description]
+<!-- Section-ID: S06_CALL_RELATIONSHIPS, S07_DATA_OR_STATE_FLOW, S08_CODE_SNIPPETS, S09_CORE_PRINCIPLES -->
+The only meaningful call relationship is the local use of `value.trim()`, so the compact report records it as text instead of drawing a trivial caller/callee diagram.
+Data moves from raw `value` to a validated string and then to the trimmed return value; no state is stored between calls.
+
+[UML]
+None
+
+[Detail]
+Focused snippet:
+
+```js
+function normalizeName(value) {
+	if (typeof value !== "string") {
+		throw new TypeError("name must be a string");
+	}
+	return value.trim();
+}
+```
+
+Core principle: keep input validation next to normalization so callers receive a predictable failure instead of a silent conversion.

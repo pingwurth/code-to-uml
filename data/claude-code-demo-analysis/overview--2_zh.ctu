@@ -1,0 +1,67 @@
+Title: 运行环境与依赖
+Describe: 文件的运行时环境、外部依赖和配置要求。
+------------------------------------------------------------
+
+[Example]
+运行环境与依赖配置
+
+[Description]
+<!-- Section-ID: S01_TARGET_OVERVIEW -->
+**运行环境要求：**
+
+- Python 3.10+（使用 `str | None` 语法）
+- Anthropic API 密钥（`ANTHROPIC_API_KEY` 环境变量）
+- Git（用于工作树功能）
+- 可选：`readline` 模块（用于终端编辑）
+
+**外部依赖：**
+
+```python
+from anthropic import Anthropic      # LLM 客户端
+from dotenv import load_dotenv       # 环境变量加载
+```
+
+**配置常量（第 43-54 行）：**
+
+| 常量 | 值 | 用途 |
+|------|-----|------|
+| `DEFAULT_MAX_TOKENS` | 8000 | 单次响应最大 token |
+| `ESCALATED_MAX_TOKENS` | 16000 | 扩展响应 token |
+| `MAX_RETRIES` | 3 | API 调用重试次数 |
+| `MAX_CONSECUTIVE_529` | 2 | 连续 529 错误后切换模型 |
+| `MAX_RECOVERY_RETRIES` | 2 | 恢复重试次数 |
+| `BASE_DELAY_MS` | 500 | 重试基础延迟 |
+| `CONTEXT_LIMIT` | 50000 | 上下文大小限制 |
+| `KEEP_RECENT_TOOL_RESULTS` | 3 | 保留最近工具结果数 |
+| `PERSIST_THRESHOLD` | 30000 | 持久化阈值 |
+
+[UML]
+None
+
+[Detail]
+**环境变量：**
+
+- `ANTHROPIC_API_KEY`：必需，API 认证
+- `ANTHROPIC_BASE_URL`：可选，自定义 API 端点
+- `MODEL_ID`：必需，主模型标识
+- `FALLBACK_MODEL_ID`：可选，回退模型
+
+**文件系统目录：**
+
+- `.tasks/`：任务持久化存储
+- `.worktrees/`：Git worktree 管理
+- `.mailboxes/`：消息总线邮箱
+- `.memory/`：代理记忆存储
+- `.transcripts/`：对话历史存档
+- `.task_outputs/tool-results/`：大型工具输出缓存
+- `.scheduled_tasks.json`：持久化 Cron 任务
+
+**初始化流程：**
+
+1. 加载 `.env` 文件（第 29 行）
+2. 处理 `ANTHROPIC_BASE_URL`（第 30-31 行）
+3. 初始化 Anthropic 客户端（第 34 行）
+4. 创建必要目录（第 74-75、174-175、475-476 行）
+5. 扫描技能目录（第 323 行）
+6. 加载持久化 Cron 任务（第 1472 行）
+7. 启动 Cron 调度线程（第 1473 行）

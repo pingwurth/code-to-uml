@@ -1,0 +1,90 @@
+Title: 关键代码片段解析
+Describe: 核心函数的代码片段、设计意图和使用注意事项。
+------------------------------------------------------------
+
+[Example]
+agent_loop 核心循环
+
+[Description]
+<!-- Section-ID: S08_CODE_SNIPPETS -->
+**代理主循环（第 1907-2004 行）：**
+
+```python
+while True:
+    # 1. 注入定时任务
+    fired = consume_cron_queue()
+    for job in fired:
+        messages.append({"role": "user",
+                         "content": f"[Scheduled] {job.prompt}"})
+    
+    # 2. 收集后台通知
+    inject_background_notifications(messages)
+    
+    # 3. 准备上下文（多层压缩）
+    prepare_context(messages)
+    context = update_context(context, messages)
+    tools, handlers = assemble_tool_pool()
+    
+    # 4. 调用 LLM
+    try:
+        response = call_llm(messages, context, tools, state, max_tokens)
+    except Exception as e:
+        if is_prompt_too_long_error(e) and not state.has_attempted_reactive_compact:
+            messages[:] = reactive_compact(messages)
+            state.has_attempted_reactive_compact = True
+            continue
+        messages.append({"role": "assistant", "content": [
+            {"type": "text", "text": f"[Error] {type(e).__name__}: {e}"}]})
+        return
+    
+    # 5. 处理 max_tokens
+    if response.stop_reason == "max_tokens":
+        # ... 升级或继续
+    
+    # 6. 检查是否继续
+    if not has_tool_use(response.content):
+        trigger_hooks("Stop", messages)
+        return
+    
+    # 7. 执行工具
+    for block in response.content:
+        if block.type != "tool_use":
+            continue
+        # ... 权限检查、执行、结果收集
+```
+
+**设计意图：**
+
+- 单一循环处理所有逻辑，避免分散
+- 每轮迭代重新组装工具池，支持动态 MCP 连接
+- 错误恢复在循环内处理，保持会话连续性
+
+[UML]
+None
+
+[Detail]
+**关键设计决策：**
+
+1. **上下文准备在 LLM 调用前**：
+   - 确保每次调用都有最优的上下文大小
+   - 支持动态压缩策略
+
+2. **工具池动态组装**：
+   - `assemble_tool_pool()` 每次调用时重新构建
+   - 支持运行时连接新的 MCP 服务器
+
+3. **错误恢复在循环内**：
+   - `reactive_compact()` 后继续循环
+   - `max_tokens` 升级后继续循环
+   - 保持会话连续性
+
+4. **工具执行顺序处理**：
+   - 遍历 `response.content` 中的所有 `tool_use` 块
+   - 支持单次响应中的多个工具调用
+   - `compact` 工具特殊处理，中断当前迭代
+
+**注意事项：**
+
+- `messages[:] = reactive_compact(messages)` 原地修改列表
+- `compacted_now` 标志控制是否跳过结果收集
+- `rounds_since_todo` 跟踪 todo 更新频率

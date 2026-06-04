@@ -1,0 +1,113 @@
+Title: 团队通信调用链
+Describe: 消息总线、协议状态和团队协作的调用关系。
+------------------------------------------------------------
+
+[Example]
+团队通信与协议调用链
+
+[Description]
+<!-- Section-ID: S06_CALL_RELATIONSHIPS -->
+**消息发送流程：**
+
+```
+run_send_message(to, content)
+  └── BUS.send("lead", to, content)
+      └── 构造消息对象
+      └── 写入 .mailboxes/{to}.jsonl
+      └── terminal_print()  # 日志输出
+```
+
+**协议请求流程（关机）：**
+
+```
+run_request_shutdown(teammate)
+  └── new_request_id()
+  └── pending_requests[req_id] = ProtocolState(...)
+  └── BUS.send("lead", teammate, "Shut down.", "shutdown_request",
+               {"request_id": req_id})
+  └── 返回请求 ID
+```
+
+**协议响应流程：**
+
+```
+consume_lead_inbox(route_protocol=True)
+  └── BUS.read_inbox("lead")
+  └── 遍历消息
+      └── 提取 metadata.request_id
+      └── 如果 msg_type 以 "_response" 结尾
+          └── match_response(msg_type, req_id, approve)
+              └── pending_requests[req_id].status = "approved"/"rejected"
+```
+
+**计划审批流程：**
+
+```
+队友调用 submit_plan(plan)
+  └── _teammate_submit_plan(name, plan)
+      └── new_request_id()
+      └── pending_requests[req_id] = ProtocolState(...)
+      └── BUS.send(name, "lead", plan, "plan_approval_request",
+                   {"request_id": req_id})
+      └── protocol_ctx["waiting_plan"] = req_id
+      └── 轮询等待响应
+
+lead 调用 review_plan(request_id, approve, feedback)
+  └── run_review_plan(request_id, approve, feedback)
+      └── pending_requests[request_id].status = "approved"/"rejected"
+      └── BUS.send("lead", state.sender, feedback,
+                   "plan_approval_response",
+                   {"request_id": request_id, "approve": approve})
+```
+
+[UML]
+@startuml
+participant "Lead Agent" as lead
+participant "MessageBus" as bus
+participant "ProtocolState" as state
+participant "Teammate Agent" as team
+
+== 关机协议 ==
+lead -> bus: send("lead", team, "Shut down.", "shutdown_request")
+bus -> team: 写入收件箱
+team -> bus: send(team, "lead", "Shutting down.", "shutdown_response")
+bus -> lead: 写入收件箱
+lead -> state: match_response("shutdown_response", req_id, True)
+state --> lead: status = "approved"
+
+== 计划审批协议 ==
+team -> bus: send(team, "lead", plan, "plan_approval_request")
+bus -> lead: 写入收件箱
+lead -> state: 创建 ProtocolState
+lead -> bus: send("lead", team, "Approved", "plan_approval_response")
+bus -> team: 写入收件箱
+team -> state: 检查 waiting_plan
+team -> team: 继续执行
+@enduml
+
+[Detail]
+**阅读入口：** 从左侧的 Lead Agent 开始，了解协议交互流程。
+
+**关键调用路径：**
+
+1. **消息发送**：`run_send_message()` → `BUS.send()` → 写入文件
+2. **协议请求**：创建 `ProtocolState`，发送带 `request_id` 的消息
+3. **协议响应**：`consume_lead_inbox()` → `match_response()` 更新状态
+
+**协议状态机：**
+
+- `pending`：请求已发送，等待响应
+- `approved`：请求已批准
+- `rejected`：请求已拒绝
+
+**线程安全：**
+
+- `pending_requests` 是内存字典，无显式锁
+- 文件追加写入是原子操作
+- 适合单 lead 多 teammate 场景
+
+**扩展点：**
+
+- 新协议类型：扩展 `match_response()` 的类型检查
+- 新消息类型：扩展 `consume_lead_inbox()` 的处理逻辑
+- 多 lead 支持：需要为 `pending_requests` 添加锁

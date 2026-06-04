@@ -1,0 +1,95 @@
+Title: 消息总线与关键函数
+Describe: MessageBus 类和核心工具函数。
+------------------------------------------------------------
+
+[Example]
+MessageBus 类
+
+[Description]
+<!-- Section-ID: S03_CORE_OBJECTS -->
+**MessageBus 类（第 479-498 行）：**
+
+```python
+class MessageBus:
+    def send(self, from_agent: str, to_agent: str, content: str,
+             msg_type: str = "message", metadata: dict = None):
+        msg = {"from": from_agent, "to": to_agent,
+               "content": content, "type": msg_type,
+               "ts": time.time(), "metadata": metadata or {}}
+        inbox = MAILBOX_DIR / f"{to_agent}.jsonl"
+        with open(inbox, "a") as f:
+            f.write(json.dumps(msg) + "\n")
+        terminal_print(f"  \033[33m[bus] {from_agent} → {to_agent}: "
+                       f"({msg_type}) {content[:50]}\033[0m")
+
+    def read_inbox(self, agent: str) -> list[dict]:
+        inbox = MAILBOX_DIR / f"{agent}.jsonl"
+        if not inbox.exists():
+            return []
+        msgs = [json.loads(line) for line in inbox.read_text().splitlines()
+                if line.strip()]
+        inbox.unlink()
+        return msgs
+```
+
+**消息格式：**
+
+```json
+{
+  "from": "lead",
+  "to": "researcher",
+  "content": "请分析这个文件",
+  "type": "message",
+  "ts": 1234567890.123,
+  "metadata": {"request_id": "req_000001"}
+}
+```
+
+**消息类型：**
+
+| 类型 | 用途 | 典型发送者 |
+|------|------|------------|
+| `message` | 普通消息 | 任意代理 |
+| `shutdown_request` | 关机请求 | lead |
+| `shutdown_response` | 关机响应 | 队友 |
+| `plan_approval_request` | 计划审批请求 | 队友 |
+| `plan_approval_response` | 计划审批响应 | lead |
+| `result` | 任务结果 | 队友 |
+
+[UML]
+@startuml
+class MessageBus {
+  +send(from_agent, to_agent, content, msg_type, metadata)
+  +read_inbox(agent): List
+}
+
+class Message {
+  +from: str
+  +to: str
+  +content: str
+  +type: str
+  +ts: float
+  +metadata: Map
+}
+
+MessageBus --> Message : creates
+@enduml
+
+[Detail]
+**存储机制：**
+
+- 每个代理一个邮箱文件：`.mailboxes/{agent_name}.jsonl`
+- 追加写入模式，保证消息顺序
+- 读取时删除整个文件（一次性消费）
+
+**线程安全：**
+
+- 文件追加写入是原子操作
+- 读取时删除文件避免重复处理
+- 适合多线程环境
+
+**协议集成：**
+
+- `metadata.request_id` 用于关联协议请求和响应
+- `match_response()` 函数匹配响应到对应的请求
+- 支持关机和计划审批两种协议

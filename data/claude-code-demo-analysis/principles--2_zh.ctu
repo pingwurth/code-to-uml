@@ -1,0 +1,96 @@
+Title: 风险与改进建议
+Describe: 系统的潜在风险、已知问题和具体改进建议。
+------------------------------------------------------------
+
+[Example]
+并发与状态管理风险
+
+[Description]
+<!-- Section-ID: S11_RISKS_AND_IMPROVEMENTS -->
+**并发风险：**
+
+| 风险 | 位置 | 影响 | 严重程度 |
+|------|------|------|----------|
+| 无锁任务操作 | `claim_task()`、`complete_task()` | 多代理竞争条件 | 中 |
+| 全局状态共享 | `pending_requests`、`active_teammates` | 数据竞争 | 中 |
+| 文件读写竞争 | `MessageBus.send()` | 消息丢失 | 低 |
+| 线程安全输出 | `terminal_print()` | 输出混乱 | 低 |
+
+**状态管理风险：**
+
+| 风险 | 位置 | 影响 | 严重程度 |
+|------|------|------|----------|
+| 内存泄漏 | `background_tasks`、`background_results` | 内存增长 | 中 |
+| 状态不一致 | `protocol_ctx` 与 `pending_requests` | 协议失败 | 中 |
+| 持久化失败 | 磁盘满、权限问题 | 数据丢失 | 高 |
+
+**改进建议：**
+
+1. **添加任务操作锁**：
+   ```python
+   task_lock = threading.Lock()
+   
+   def claim_task(task_id: str, owner: str = "agent") -> str:
+       with task_lock:
+           # ... 现有逻辑
+   ```
+
+2. **使用线程安全集合**：
+   ```python
+   from queue import Queue
+   background_results: Queue[str] = Queue()
+   ```
+
+3. **添加持久化错误处理**：
+   ```python
+   def save_task(task: Task):
+       try:
+           _task_path(task.id).write_text(json.dumps(asdict(task), indent=2))
+       except OSError as e:
+           terminal_print(f"\033[31m[error] Failed to save task: {e}\033[0m")
+   ```
+
+4. **限制内存使用**：
+   ```python
+   MAX_BACKGROUND_TASKS = 100
+   
+   def start_background_task(block, handlers: dict) -> str:
+       if len(background_tasks) >= MAX_BACKGROUND_TASKS:
+           return "Error: Too many background tasks"
+       # ... 现有逻辑
+   ```
+
+[UML]
+None
+
+[Detail]
+**风险优先级排序：**
+
+1. **高优先级**：
+   - 持久化失败：添加错误处理和重试机制
+   - 状态不一致：添加事务或补偿机制
+
+2. **中优先级**：
+   - 并发竞争：添加锁或使用线程安全集合
+   - 内存泄漏：添加限制和清理机制
+
+3. **低优先级**：
+   - 输出混乱：使用线程安全输出队列
+   - 文件竞争：使用文件锁或原子写入
+
+**具体改进路径：**
+
+| 改进 | 工作量 | 影响范围 | 建议优先级 |
+|------|--------|----------|------------|
+| 任务锁 | 小 | 任务系统 | 高 |
+| 错误处理 | 中 | 全局 | 高 |
+| 内存限制 | 小 | 后台任务 | 中 |
+| 线程安全集合 | 中 | 全局 | 中 |
+| 文件锁 | 大 | 文件操作 | 低 |
+
+**测试建议：**
+
+- 并发测试：多线程同时认领任务
+- 压力测试：大量后台任务
+- 故障测试：磁盘满、网络中断
+- 状态测试：协议状态一致性

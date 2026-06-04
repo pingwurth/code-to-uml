@@ -11,6 +11,49 @@ const VALID_NAME_RE = /^[A-Za-z0-9_-]+$/;
 const CTU_FILE_RE = /^([A-Za-z0-9_-]+)--([1-9][0-9]*)_(zh|en)\.ctu$/;
 const SEP_RE = /^-{60,}\s*$/m;
 const UTF8_DECODER = new TextDecoder("utf-8", { fatal: true });
+const VALID_LANGS = new Set(["zh", "en"]);
+const VALID_MODES = new Set(["artifact", "compact", "full"]);
+const VALID_SCOPES = new Set(["project", "module", "file", "class", "function"]);
+const VALID_COMPLEXITIES = new Set(["low", "medium", "high"]);
+const SECTION_IDS = [
+	"S01_TARGET_OVERVIEW",
+	"S02_TOP_LEVEL_STRUCTURE",
+	"S03_CORE_OBJECTS",
+	"S04_ARCHITECTURE",
+	"S05_CORE_FLOW",
+	"S06_CALL_RELATIONSHIPS",
+	"S07_DATA_OR_STATE_FLOW",
+	"S08_CODE_SNIPPETS",
+	"S09_CORE_PRINCIPLES",
+	"S10_ONBOARDING_GUIDE",
+	"S11_RISKS_AND_IMPROVEMENTS",
+	"S12_REVIEWER_QUESTIONS",
+	"S13_MAINTAINER_REFERENCE"
+];
+const SCOPE_REQUIRED_SECTIONS = {
+	project: SECTION_IDS,
+	module: SECTION_IDS,
+	file: SECTION_IDS,
+	class: SECTION_IDS.filter((id) => id !== "S04_ARCHITECTURE"),
+	function: SECTION_IDS.filter((id) => id !== "S04_ARCHITECTURE")
+};
+const COMPLEXITY_CARD_FLOORS = {
+	low: { project: 13, module: 13, file: 13, class: 8, function: 5 },
+	medium: { project: 20, module: 18, file: 16, class: 10, function: 6 },
+	high: { project: 32, module: 26, file: 24, class: 14, function: 8 }
+};
+const COMPLEXITY_MULTI_CATEGORY_FLOORS = {
+	low: { project: 0, module: 0, file: 0, class: 0, function: 0 },
+	medium: { project: 5, module: 4, file: 3, class: 1, function: 0 },
+	high: { project: 7, module: 6, file: 4, class: 2, function: 1 }
+};
+const COMPACT_CARD_FLOORS = {
+	project: 13,
+	module: 10,
+	file: 8,
+	class: 5,
+	function: 3
+};
 
 function printUsage() {
 	console.log(`Usage:
@@ -21,15 +64,31 @@ Options:
   --html <path>       Report HTML path, absolute or relative to root.
   --data-dir <path>   Data directory path or report slug. Defaults to body[data-dir].
   --lang <zh|en>      Language suffix to validate. Default: ${DEFAULT_LANG}.
+  --mode <mode>       Validation mode: artifact, compact, or full. Default: artifact.
+  --scope <scope>     Content scope: project, module, file, class, or function.
+  --complexity <level> Content depth level: low, medium, or high. Default: medium.
+  --min-cards <n>     Override the minimum card count for compact/full checks.
+  --content-strict    Deprecated alias for --mode full when --mode is omitted.
   --render            Render non-empty UML blocks with plantuml.jar when available.
   --strict            Treat warnings as failures.
   --help              Show this help.
+
+Examples:
+  # Artifact shape only
+  node skills/code-to-uml/scripts/validate-report.js --html cache/report.html --strict
+
+  # Compact source-analysis report
+  node skills/code-to-uml/scripts/validate-report.js --html cache/report.html --lang en --scope function --complexity low --mode compact --strict
+
+  # Full source-analysis report with PlantUML rendering
+  node skills/code-to-uml/scripts/validate-report.js --html cache/report.html --lang zh --scope module --complexity medium --mode full --strict --render
 `);
 }
 
 function parseArgs(argv) {
 	const args = {
 		lang: DEFAULT_LANG,
+		complexity: "medium",
 		render: false,
 		strict: false
 	};
@@ -48,7 +107,11 @@ function parseArgs(argv) {
 			args.strict = true;
 			continue;
 		}
-		if (["--root", "--html", "--data-dir", "--lang"].includes(arg)) {
+		if (arg === "--content-strict") {
+			args.contentStrict = true;
+			continue;
+		}
+		if (["--root", "--html", "--data-dir", "--lang", "--mode", "--scope", "--complexity", "--min-cards"].includes(arg)) {
 			const value = argv[++i];
 			if (!value) {
 				throw new Error(`Missing value for ${arg}`);
@@ -117,6 +180,19 @@ function addIssue(issues, kind, file, message) {
 	issues.push({ kind, file, message });
 }
 
+function decodeHtmlEntities(text) {
+	return String(text || "")
+		.replace(/&lt;/g, "<")
+		.replace(/&gt;/g, ">")
+		.replace(/&amp;/g, "&")
+		.replace(/&quot;/g, "\"")
+		.replace(/&#39;/g, "'");
+}
+
+function stripHtml(text) {
+	return decodeHtmlEntities(String(text || "").replace(/<[^>]+>/g, "")).trim();
+}
+
 function parseAttrs(tag) {
 	const attrs = {};
 	const re = /([A-Za-z_:][-A-Za-z0-9_:.]*)\s*=\s*(?:"([^"]*)"|'([^']*)')/g;
@@ -147,7 +223,40 @@ function extractBodyAttrs(html) {
 	return match ? parseAttrs(match[0]) : null;
 }
 
-function validateHtml(root, htmlPath, issues) {
+function extractIntroMarkdown(html) {
+	const match = /<section\b[^>]*class=["'][^"']*\bintro\b[^"']*["'][^>]*>[\s\S]*?<p\b[^>]*\bdata-markdown\b[^>]*>([\s\S]*?)<\/p>/i.exec(html);
+	return match ? decodeHtmlEntities(match[1].trim()) : "";
+}
+
+function validateIntro(html, htmlPath, lang, issues) {
+	const intro = extractIntroMarkdown(html);
+	if (!intro) {
+		addIssue(issues, "error", htmlPath, "Missing section.intro > p[data-markdown] content.");
+		return;
+	}
+
+	const plain = stripHtml(intro);
+	const compactLength = Array.from(plain.replace(/\s+/g, "")).length;
+	const limit = lang === "zh" ? 500 : 900;
+	if (compactLength > limit) {
+		addIssue(issues, "warning", htmlPath, `Intro overview is too long for ${lang}: ${compactLength} characters, limit ${limit}.`);
+	}
+
+	const hasStructuredLayout = /\n\s*(?:[-*]|\d+\.|\|)/.test(intro);
+	if (compactLength > 240 && !hasStructuredLayout) {
+		addIssue(issues, "warning", htmlPath, "Intro overview is long but not semantically structured with bullets, steps, or a table.");
+	}
+
+	const signals = lang === "zh"
+		? ["功能", "框架", "核心", "机制", "设计"]
+		: ["function", "framework", "principle", "mechanism", "design"];
+	const matchedSignals = signals.filter((signal) => plain.toLowerCase().includes(signal.toLowerCase()));
+	if (matchedSignals.length < 3 && process.env.CTU_ADVISORY === "1") {
+		addIssue(issues, "warning", htmlPath, "Intro overview may not cover enough of functionality, framework, core principles, mechanism, and design philosophy.");
+	}
+}
+
+function validateHtml(root, htmlPath, lang, contentStrict, issues) {
 	if (!exists(htmlPath)) {
 		addIssue(issues, "error", htmlPath, "HTML file does not exist.");
 		return null;
@@ -172,6 +281,7 @@ function validateHtml(root, htmlPath, issues) {
 
 	const selectorChecks = [
 		[/<main\b[^>]*class=["'][^"']*\bcontent\b/i, "Missing main.content runtime container."],
+		[/<section\b[^>]*class=["'][^"']*\bintro\b[\s\S]*?<p\b[^>]*\bdata-markdown\b/i, "Missing section.intro > p[data-markdown] overview."],
 		[/<nav\b[^>]*class=["'][^"']*\bdemo-tabs\b/i, "Missing nav.demo-tabs runtime container."],
 		[/\bid=["']demo-title["']/i, "Missing #demo-title runtime heading."],
 		[/\bdata-examples\b/i, "Missing [data-examples] runtime container."],
@@ -227,6 +337,10 @@ function validateHtml(root, htmlPath, issues) {
 		if (!href || href === "#" || /placeholder/i.test(href)) {
 			addIssue(issues, "error", htmlPath, "official-demo-link exists but does not have a truthful href.");
 		}
+	}
+
+	if (contentStrict) {
+		validateIntro(html, htmlPath, lang, issues);
 	}
 
 	return {
@@ -291,13 +405,15 @@ function parseCtuFile(filePath, issues) {
 			addIssue(issues, "error", filePath, `Card ${index + 1} marker order should be ${expected.join(">")}, found ${markerOrder}.`);
 		}
 
+		const example = normalizeField(extractField(group, "Example", ["Description"]));
+		const description = normalizeField(extractField(group, "Description", ["UML"]));
 		const uml = normalizeField(extractField(group, "UML", ["Detail"]));
 		const detail = normalizeField(extractField(group, "Detail", []));
 		if (uml && !detail) {
 			addIssue(issues, "warning", filePath, `Card ${index + 1} has UML but no [Detail] explanation.`);
 		}
 
-		cards.push({ index: index + 1, uml, detail });
+		cards.push({ index: index + 1, example, description, uml, detail });
 	}
 
 	if (cards.length === 0) {
@@ -305,6 +421,98 @@ function parseCtuFile(filePath, issues) {
 	}
 
 	return cards;
+}
+
+function cardText(card) {
+	return [card.example, card.description, card.detail].filter(Boolean).join("\n");
+}
+
+function extractSectionIds(text) {
+	return new Set([...String(text || "").matchAll(/\bS\d{2}_[A-Z0-9_]+\b/g)].map((match) => match[0]));
+}
+
+function hasMarkdownTable(text) {
+	return /\|[^\n]+\|\s*\n\s*\|(?:\s*:?-{3,}:?\s*\|)+/.test(String(text || ""));
+}
+
+function categoryFromFileName(fileName) {
+	const match = CTU_FILE_RE.exec(fileName || "");
+	return match ? match[1] : "";
+}
+
+function validateContentDepth(cards, mode, scope, complexity, minCards, issues) {
+	const floor = minCards !== undefined
+		? minCards
+		: mode === "compact"
+			? COMPACT_CARD_FLOORS[scope]
+			: COMPLEXITY_CARD_FLOORS[complexity][scope];
+	if (cards.length < floor) {
+		const modeLabel = mode === "compact" ? "compact" : complexity;
+		addIssue(issues, "warning", "(content)", `Report depth is too shallow for ${modeLabel} ${scope} scope: ${cards.length} cards, minimum ${floor}.`);
+	}
+
+	if (mode === "compact") {
+		return;
+	}
+
+	const categoryCounts = new Map();
+	for (const card of cards) {
+		const category = categoryFromFileName(card.fileName);
+		if (category) {
+			categoryCounts.set(category, (categoryCounts.get(category) || 0) + 1);
+		}
+	}
+	const multiCategoryCount = [...categoryCounts.values()].filter((count) => count >= 2).length;
+	const multiCategoryFloor = COMPLEXITY_MULTI_CATEGORY_FLOORS[complexity][scope];
+	if (multiCategoryCount < multiCategoryFloor) {
+		addIssue(issues, "warning", "(content)", `Report distributes too little depth across tabs: ${multiCategoryCount} categories have 2+ cards, minimum ${multiCategoryFloor} for ${complexity} ${scope} scope.`);
+	}
+}
+
+function validateContentContract(cards, mode, scope, complexity, minCards, issues) {
+	if (!scope) {
+		addIssue(issues, "warning", "(content)", `--mode ${mode} was used without --scope; skipped required section coverage checks.`);
+		return;
+	}
+	if (!VALID_SCOPES.has(scope)) {
+		addIssue(issues, "error", "(content)", `Unsupported --scope '${scope}'. Use one of: ${[...VALID_SCOPES].join(", ")}.`);
+		return;
+	}
+	if (!VALID_COMPLEXITIES.has(complexity)) {
+		addIssue(issues, "error", "(content)", `Unsupported --complexity '${complexity}'. Use one of: ${[...VALID_COMPLEXITIES].join(", ")}.`);
+		return;
+	}
+
+	const allIds = new Set();
+	for (const card of cards) {
+		for (const id of extractSectionIds(cardText(card))) {
+			allIds.add(id);
+		}
+	}
+
+	for (const id of SCOPE_REQUIRED_SECTIONS[scope]) {
+		if (!allIds.has(id)) {
+			addIssue(issues, "warning", "(content)", `Missing required section marker for ${scope} scope: ${id}.`);
+		}
+	}
+
+	const s12Cards = cards.filter((card) => extractSectionIds(cardText(card)).has("S12_REVIEWER_QUESTIONS"));
+	if (SCOPE_REQUIRED_SECTIONS[scope].includes("S12_REVIEWER_QUESTIONS")) {
+		const s12Text = s12Cards.map(cardText).join("\n");
+		if (!s12Cards.length || !/[?？]/.test(s12Text) || !/(答|answer|答案)/i.test(s12Text)) {
+			addIssue(issues, "warning", "(content)", "S12_REVIEWER_QUESTIONS should contain learning questions and concrete answers.");
+		}
+	}
+
+	const s13Cards = cards.filter((card) => extractSectionIds(cardText(card)).has("S13_MAINTAINER_REFERENCE"));
+	if (SCOPE_REQUIRED_SECTIONS[scope].includes("S13_MAINTAINER_REFERENCE")) {
+		const s13Text = s13Cards.map(cardText).join("\n");
+		if (!s13Cards.length || !hasMarkdownTable(s13Text)) {
+			addIssue(issues, "warning", "(content)", "S13_MAINTAINER_REFERENCE should be a Markdown table with symbol/file locations.");
+		}
+	}
+
+	validateContentDepth(cards, mode, scope, complexity, minCards, issues);
 }
 
 function listCtuFiles(dataDir, lang, issues) {
@@ -377,8 +585,8 @@ function validateUmlBlock(uml, filePath, cardIndex, issues) {
 		}
 	}
 
-	if (/[<>]/.test(uml)) {
-		addIssue(issues, "warning", filePath, `Card ${cardIndex} UML contains raw < or > characters; verify escaping.`);
+	if (/<\/?[A-Za-z][^>]*>/.test(uml)) {
+		addIssue(issues, "warning", filePath, `Card ${cardIndex} UML contains HTML-like raw angle markup; verify escaping.`);
 	}
 	if (/\bcontinue\b/i.test(uml)) {
 		addIssue(issues, "warning", filePath, `Card ${cardIndex} UML contains "continue"; prefer explicit activity wording.`);
@@ -412,9 +620,10 @@ function renderUmlBlock(root, uml, filePath, cardIndex, issues) {
 	}
 }
 
-function validateData(root, dataDir, tabs, lang, render, issues) {
+function validateData(root, dataDir, tabs, lang, render, mode, scope, complexity, minCards, issues) {
 	const fileNames = listCtuFiles(dataDir, lang, issues);
 	const categories = new Set();
+	const allCards = [];
 	let cardCount = 0;
 	let umlCount = 0;
 
@@ -424,7 +633,8 @@ function validateData(root, dataDir, tabs, lang, render, issues) {
 			categories.add(match[1]);
 		}
 		const filePath = path.join(dataDir, fileName);
-		const cards = parseCtuFile(filePath, issues);
+		const cards = parseCtuFile(filePath, issues).map((card) => ({ ...card, fileName }));
+		allCards.push(...cards);
 		cardCount += cards.length;
 		for (const card of cards) {
 			if (!card.uml) {
@@ -452,6 +662,10 @@ function validateData(root, dataDir, tabs, lang, render, issues) {
 		}
 	}
 
+	if (mode !== "artifact") {
+		validateContentContract(allCards, mode, scope, complexity, minCards, issues);
+	}
+
 	return { categories: [...categories], cardCount, umlCount };
 }
 
@@ -476,11 +690,31 @@ function main() {
 	if (!args.html) {
 		throw new Error("--html is required.");
 	}
+	if (!VALID_LANGS.has(args.lang)) {
+		throw new Error(`Unsupported --lang '${args.lang}'. Use one of: ${[...VALID_LANGS].join(", ")}`);
+	}
+	const mode = args.mode || (args.contentStrict ? "full" : "artifact");
+	if (!VALID_MODES.has(mode)) {
+		throw new Error(`Unsupported --mode '${mode}'. Use one of: ${[...VALID_MODES].join(", ")}`);
+	}
+	if (args.scope && !VALID_SCOPES.has(args.scope)) {
+		throw new Error(`Unsupported --scope '${args.scope}'. Use one of: ${[...VALID_SCOPES].join(", ")}`);
+	}
+	if (args.complexity && !VALID_COMPLEXITIES.has(args.complexity)) {
+		throw new Error(`Unsupported --complexity '${args.complexity}'. Use one of: ${[...VALID_COMPLEXITIES].join(", ")}`);
+	}
+	let minCards;
+	if (args.minCards !== undefined) {
+		minCards = Number(args.minCards);
+		if (!Number.isInteger(minCards) || minCards < 1) {
+			throw new Error("--min-cards must be a positive integer.");
+		}
+	}
 
 	const root = resolveRoot(args.root);
 	const htmlPath = resolveUnderRoot(root, args.html);
 	const issues = [];
-	const htmlInfo = validateHtml(root, htmlPath, issues);
+	const htmlInfo = validateHtml(root, htmlPath, args.lang, mode !== "artifact", issues);
 
 	let dataDir = "";
 	if (args.dataDir) {
@@ -491,7 +725,7 @@ function main() {
 
 	let dataSummary = { categories: [], cardCount: 0, umlCount: 0 };
 	if (dataDir) {
-		dataSummary = validateData(root, dataDir, htmlInfo ? htmlInfo.tabs : [], args.lang, args.render, issues);
+		dataSummary = validateData(root, dataDir, htmlInfo ? htmlInfo.tabs : [], args.lang, args.render, mode, args.scope, args.complexity, minCards, issues);
 	} else {
 		addIssue(issues, "error", root, "Cannot resolve data directory. Pass --data-dir or set body data-dir.");
 	}
@@ -501,6 +735,7 @@ function main() {
 	printIssues(issues);
 
 	console.log(`Validated report: ${path.relative(root, htmlPath) || htmlPath}`);
+	console.log(`Mode: ${mode}`);
 	console.log(`Data directory: ${dataDir ? path.relative(root, dataDir) : "(unresolved)"}`);
 	console.log(`Categories: ${dataSummary.categories.length ? dataSummary.categories.join(", ") : "(none)"}`);
 	console.log(`Cards: ${dataSummary.cardCount}`);

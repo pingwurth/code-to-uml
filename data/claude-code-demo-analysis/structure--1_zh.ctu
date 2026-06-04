@@ -1,0 +1,72 @@
+Title: 顶层结构
+Describe: 文件的导入、常量、类/函数定义和入口逻辑。
+------------------------------------------------------------
+
+[Example]
+导入与常量定义
+
+[Description]
+<!-- Section-ID: S02_TOP_LEVEL_STRUCTURE -->
+**导入语句（第 1-28 行）：**
+
+```python
+import os, subprocess, json, time, random, threading, re
+from pathlib import Path
+from datetime import datetime
+from dataclasses import dataclass, asdict, field
+
+# 可选导入
+try:
+    import readline
+    readline.parse_and_bind('set bind-tty-special-chars off')
+    READLINE_AVAILABLE = True
+except ImportError:
+    READLINE_AVAILABLE = False
+
+from anthropic import Anthropic
+from dotenv import load_dotenv
+```
+
+**模块级常量（第 33-54 行）：**
+
+| 常量 | 类型 | 用途 |
+|------|------|------|
+| `WORKDIR` | Path | 工作目录根路径 |
+| `client` | Anthropic | API 客户端实例 |
+| `MODEL` | str | 主模型 ID |
+| `PRIMARY_MODEL` | str | 主模型（同 MODEL） |
+| `FALLBACK_MODEL` | str | 回退模型 ID |
+| `SKILLS_DIR` | Path | 技能目录路径 |
+| `TRANSCRIPT_DIR` | Path | 对话记录目录 |
+| `TOOL_RESULTS_DIR` | Path | 工具结果缓存目录 |
+
+[UML]
+None
+
+[Detail]
+**文件结构布局：**
+
+| 行号范围 | 内容 | 说明 |
+|----------|------|------|
+| 1-28 | 导入和环境配置 | 标准库、第三方库、环境变量 |
+| 33-54 | 模块级常量 | 配置参数和路径定义 |
+| 57-68 | `terminal_print` | 线程安全的终端输出 |
+| 70-168 | 任务系统 | Task 数据类和 CRUD 操作 |
+| 170-281 | 工作树系统 | Git worktree 管理 |
+| 283-339 | 技能加载 | SKILL.md 解析和注册 |
+| 342-373 | 提示组装 | 系统提示构建 |
+| 376-468 | 基础工具 | bash、文件操作、glob |
+| 471-547 | 消息总线 | 团队通信基础设施 |
+| 549-601 | 自主代理 | 空闲轮询和任务认领 |
+| 603-809 | 队友线程 | 独立执行环境 |
+| 811-853 | 铅协议工具 | 关机、计划请求 |
+| 855-940 | 钩子系统 | 权限和日志管道 |
+| 943-1033 | 子代理 | 受限执行环境 |
+| 1036-1148 | 上下文压缩 | 多层压缩策略 |
+| 1151-1201 | 错误恢复 | 重试和模型切换 |
+| 1204-1272 | 后台任务 | 异步工具执行 |
+| 1275-1473 | Cron 调度 | 定时任务管理 |
+| 1476-1590 | MCP 系统 | 外部工具集成 |
+| 1593-1835 | 工具定义 | BUILTIN_TOOLS 和处理函数 |
+| 1838-1853 | 上下文管理 | 记忆和状态更新 |
+| 1855-2068 | 代理循环 | 主执行循环和 CLI |

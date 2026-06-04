@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<!-- [EDIT] Page title shown in the browser tab. Update based on report topic. -->
+	<title>claude_code_demo.py 代码分析报告</title>
+	<!-- [FIXED] Keep the following two links unchanged -->
+	<link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+	<link rel="stylesheet" href="../main.css">
+</head>
+
+<body class="demo-page" data-dir="claude_code_demo_analysis">
+	<!-- [FIXED] Top navigation structure. Only href / aria-label / visible text can be changed. -->
+	<header class="demo-topbar">
+		<a class="demo-topbar-logo" href="../index.html" aria-label="Code-To-UML Home">
+			<img src="../favicon.svg" alt="" />
+			<!-- [EDIT] Brand name -->
+			<span>Code-To-UML</span>
+		</a>
+	</header>
+
+	<!-- [FIXED] page-shell layout container -->
+	<div class="page-shell demo-shell">
+
+		<!-- [FIXED] main.content primary content area -->
+		<main class="content">
+
+			<!-- =============================================================
+			  [EDIT] Section: Page Introduction
+			 Freely edit the <h1> title and <p data-markdown> report overview.
+			 The <p> must summarize the whole project/module/class/function in
+			 <= 500 Chinese characters (or similarly concise English): what it
+			 implements, its basic framework, core principles, and design philosophy.
+			 Markdown is supported; do not hard-wrap prose by line length.
+			 In prose, start a new line only after 。, ；, ., or ;.
+			 Lists, numbered steps, and tables may use one line per item/row.
+			 Do not change class="intro"; keep data-markdown on the overview <p>.
+			=============================================================== -->
+			<section class="intro">
+				<h1>claude_code_demo.py 代码分析报告</h1>
+				<p data-markdown>该报告分析 `claude_code_demo.py` 的综合代理系统实现，它是一个包含 2069 行代码的教学示例，展示了现代 AI 代理系统的核心架构。
+
+**功能实现**：任务管理、团队协作、定时调度、MCP 集成、上下文压缩、错误恢复等 17 个子系统。
+
+**基础框架**：基于 Anthropic SDK 和 Python 标准库，使用文件系统作为状态存储。
+
+**核心原理**：分层架构设计，从基础设施到应用层逐层抽象；钩子系统实现横切关注点；多层压缩策略管理上下文。
+
+**工作机制**：主循环协调 LLM 调用、工具执行、钩子触发和状态管理；队友线程支持自主任务认领；后台任务处理慢操作。
+
+**设计取向**：教学优先，可检查性和可调试性优于性能；所有状态持久化到文件系统，便于理解和调试。</p>
+			</section>
+
+			<!-- =============================================================
+			  [CONFIG] Section: Category Tabs (Navigation)
+
+			  ★ Most important configuration section ★
+			  Each <button> represents one category and loads matching .ctu data.
+
+			  Button attributes:
+			    class="demo-tab"       — [FIXED] Required for JS event binding
+			    type="button"           — [FIXED] Prevents form submission
+			    data-diagram="xxx"      — [CONFIG] Category identifier.
+			                              Must match the {category} prefix in
+			                              .ctu filenames.
+			                              ("data-diagram" is historical naming and
+			                              can represent modules, functions,
+			                              principles, etc.)
+			    Button text (e.g. "Sequence")
+			                            — [EDIT] Display label in UI; freely editable
+			    class="... is-active"   — [CONFIG] Marks default active tab.
+			                              Only one button can have this class.
+
+			  Add / remove / rename rules:
+			    Add:    add a <button> + matching .ctu file
+			    Remove: remove the <button>; matching .ctu data will no longer load
+			    Rename: update data-diagram value + rename .ctu filename prefix
+			=============================================================== -->
+			<nav class="demo-tabs" aria-label="Demo Diagram Types">
+				<!-- [CONFIG] Tab button list — add/remove/update using the rules above -->
+				<button class="demo-tab is-active" type="button" data-diagram="overview">概览</button>
+				<button class="demo-tab" type="button" data-diagram="structure">结构</button>
+				<button class="demo-tab" type="button" data-diagram="objects">对象</button>
+				<button class="demo-tab" type="button" data-diagram="architecture">架构</button>
+				<button class="demo-tab" type="button" data-diagram="flow">流程</button>
+				<button class="demo-tab" type="button" data-diagram="calls">调用</button>
+				<button class="demo-tab" type="button" data-diagram="dataflow">数据流</button>
+				<button class="demo-tab" type="button" data-diagram="code">代码</button>
+				<button class="demo-tab" type="button" data-diagram="principles">原理</button>
+				<button class="demo-tab" type="button" data-diagram="guide">指南</button>
+			</nav>
+
+
+			<!-- =============================================================
+			  Section: Content Display Panel
+
+			  Structure:
+			    <section>              — [FIXED] Outer container; do not change class
+			    #demo-title            — [EDIT] Default title text (matches is-active
+			                              tab), dynamically updated by JS after load
+			    .demo-section-overview — [CONFIG] One <p> per tab.
+			                              data-diagram-overview must match the
+			                              corresponding tab's data-diagram value.
+			                              Text inside <p> is [EDIT] and freely editable.
+			                              The first one (for is-active tab) has
+			                              class is-active; others use hidden.
+			                              Add/remove matching <p> when tabs change.
+			    [data-examples]        — [FIXED] Container where JS appends report cards.
+			                              Each card includes:
+			                               · title + description
+			                                 (from .ctu [Example] / [Description])
+			                               · <textarea>: editable PlantUML source
+			                               · <div>: rendered SVG preview
+			                               · details (from .ctu [Detail], Markdown supported)
+			                                 for in-depth explanation of UML elements,
+			                                 arrows, and relationships.
+			                                 Use "None" or leave blank to hide.
+			                               · action buttons:
+			                                 copy source, copy SVG, download SVG
+			=============================================================== -->
+			<section class="doc-section demo-panel">
+				<!-- [EDIT] Default title, aligned with the is-active tab -->
+				<h2 id="demo-title">概览</h2>
+				<!-- [CONFIG] Tab overviews — data-diagram-overview maps 1:1 to data-diagram -->
+				<p class="demo-section-overview is-active" data-diagram-overview="overview">文件/目标概览：整体定位、功能范围和复杂度评估</p>
+				<p class="demo-section-overview" data-diagram-overview="structure" hidden>顶层结构：导入、常量、全局变量和主要分区</p>
+				<p class="demo-section-overview" data-diagram-overview="objects" hidden>核心对象/函数说明：关键类、数据结构和核心函数的职责与接口</p>
+				<p class="demo-section-overview" data-diagram-overview="architecture" hidden>整体架构图：系统的层次结构、模块边界和依赖方向</p>
+				<p class="demo-section-overview" data-diagram-overview="flow" hidden>核心流程图：主执行路径、错误处理路径和后台任务路径</p>
+				<p class="demo-section-overview" data-diagram-overview="calls" hidden>调用关系图：跨组件的调用链和交互序列</p>
+				<p class="demo-section-overview" data-diagram-overview="dataflow" hidden>数据流/状态流图：数据移动、状态所有权和生命周期</p>
+				<p class="demo-section-overview" data-diagram-overview="code" hidden>关键代码片段解析：核心算法和设计模式的代码片段分析</p>
+				<p class="demo-section-overview" data-diagram-overview="principles" hidden>核心原理说明：运行时机制、设计模式和权衡取舍</p>
+				<p class="demo-section-overview" data-diagram-overview="guide" hidden>开发上手指南：阅读顺序、运行调试步骤和扩展点</p>
+				<div class="demo-examples" data-examples></div>
+			</section>
+
+		</main>
+		<!-- [FIXED] Sidebar TOC container, populated dynamically by JS -->
+		<aside data-demo-toc></aside>
+	</div>
+
+	<!-- =================================================================
+	  [FIXED] Script dependencies (load order must not change)
+	  All <script> tags must remain and keep their order and src paths.
+	  If you need custom scripts, append them after demo.js.
+	=================================================================== -->
+	<script src="../js/viz-global.js"></script>
+	<script src="../js/plantuml.js"></script>
+	<script src="../component/docs-page-core.js"></script>
+	<script src="../component/render-failure-common.js"></script>
+	<script src="../component/toc-component.js"></script>
+	<script src="../js/markdown-it.js"></script>
+	<script src="../component/demo-example-component.js"></script>
+	<script src="../demo.js"></script>
+</body>
+
+</html>

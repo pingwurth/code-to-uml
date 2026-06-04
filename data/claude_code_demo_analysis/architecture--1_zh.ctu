@@ -1,0 +1,158 @@
+Title: 整体架构图
+Describe: 系统的层次结构、模块边界和依赖方向
+------------------------------------------------------------
+[Example]
+系统层次架构
+
+[Description]
+<!-- Section-ID: S04_ARCHITECTURE -->
+该系统采用分层架构，从底向上分为四个层次：
+
+1. **基础设施层**：文件系统、Git、线程、进程
+2. **数据层**：任务、邮箱、技能、定时任务、记忆
+3. **服务层**：消息总线、协议状态、钩子系统、MCP
+4. **应用层**：主导循环、队友线程、子代理
+
+**依赖方向**：上层依赖下层，同层组件可相互调用。
+
+[UML]
+@startuml
+package "应用层" {
+  [主导循环] as Lead
+  [队友线程] as Teammate
+  [子代理] as Subagent
+  [自主代理] as AutoAgent
+}
+
+package "服务层" {
+  [消息总线] as Bus
+  [协议状态] as Protocol
+  [钩子系统] as Hooks
+  [MCP系统] as MCP
+  [上下文压缩] as Compaction
+  [错误恢复] as Recovery
+  [后台任务] as Background
+}
+
+package "数据层" {
+  [任务系统] as Tasks
+  [邮箱] as Mailbox
+  [技能注册] as Skills
+  [定时任务] as Cron
+  [记忆] as Memory
+}
+
+package "基础设施层" {
+  [文件系统] as FS
+  [Git] as Git
+  [线程] as Thread
+  [进程] as Process
+}
+
+Lead --> Bus
+Lead --> Protocol
+Lead --> Hooks
+Lead --> MCP
+Lead --> Compaction
+Lead --> Recovery
+Lead --> Background
+
+Teammate --> Bus
+Teammate --> Protocol
+Teammate --> Tasks
+
+Subagent --> Hooks
+
+AutoAgent --> Bus
+AutoAgent --> Tasks
+
+Bus --> Mailbox
+Protocol --> Mailbox
+Tasks --> FS
+Cron --> FS
+Skills --> FS
+Memory --> FS
+@enduml
+
+[Detail]
+**层次边界**：
+- **基础设施层**：封装操作系统交互，提供文件读写、Git 操作、线程管理
+- **数据层**：定义数据结构和持久化逻辑，所有状态都存储为文件
+- **服务层**：提供跨组件的公共服务，如通信、权限、错误处理
+- **应用层**：实现代理的核心逻辑，包括主循环、团队协作、任务调度
+
+**关键依赖关系**：
+- 主导循环依赖所有服务层组件
+- 队友线程依赖消息总线和任务系统
+- 子代理依赖钩子系统（权限检查）
+- 自主代理依赖消息总线和任务系统
+
+**设计决策**：
+- 所有状态都持久化到文件系统，便于调试和检查
+- 使用 JSONL 格式存储消息，支持追加写入和顺序读取
+- 钩子系统提供横切关注点的扩展点
+
+------------------------------------------------------------
+[Example]
+组件依赖图
+
+[Description]
+<!-- Section-ID: S04_ARCHITECTURE -->
+展示主要组件之间的依赖关系和数据流向。
+
+**核心组件**：
+- `agent_loop()`：主循环，协调所有组件
+- `assemble_tool_pool()`：动态组装工具池
+- `prepare_context()`：上下文预算管理
+- `call_llm()`：LLM 调用和错误处理
+
+[UML]
+@startuml
+component "agent_loop" as Loop
+component "prepare_context" as Context
+component "call_llm" as LLM
+component "assemble_tool_pool" as Tools
+component "trigger_hooks" as Hooks
+component "call_tool_handler" as Handler
+component "build_user_content" as Content
+component "collect_background_results" as BG
+component "tool_result_budget" as Budget
+component "snip_compact" as Snip
+component "micro_compact" as Micro
+component "compact_history" as Compact
+component "with_retry" as Retry
+component "assemble_system_prompt" as Prompt
+
+Loop --> Context
+Loop --> LLM
+Loop --> Tools
+Loop --> Hooks
+Loop --> Handler
+Loop --> Content
+Loop --> BG
+
+Context --> Budget
+Context --> Snip
+Context --> Micro
+Context --> Compact
+
+LLM --> Retry
+LLM --> Prompt
+@enduml
+
+[Detail]
+**主循环流程**：
+1. 消费定时任务队列
+2. 注入后台任务通知
+3. 准备上下文（压缩、裁剪）
+4. 更新上下文（记忆、技能、MCP）
+5. 组装工具池
+6. 调用 LLM
+7. 处理工具调用
+8. 构建用户内容
+9. 循环
+
+**错误处理**：
+- `with_retry()` 处理 429 和 529 错误
+- `reactive_compact()` 处理上下文过长错误
+- `is_prompt_too_long_error()` 检测特定错误类型

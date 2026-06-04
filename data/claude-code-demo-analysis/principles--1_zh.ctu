@@ -1,0 +1,106 @@
+Title: 核心原理说明
+Describe: 系统设计的核心原理、机制和设计权衡。
+------------------------------------------------------------
+
+[Example]
+单文件架构设计原理
+
+[Description]
+<!-- Section-ID: S09_CORE_PRINCIPLES -->
+**设计哲学：教学优先**
+
+`claude_code_demo.py` 采用单文件架构，将所有子系统集中在一个 2069 行的文件中。这种设计选择基于以下考量：
+
+1. **可读性**：所有代码在同一文件，便于理解整体架构
+2. **可修改性**：无需跨文件导航，降低修改成本
+3. **自包含性**：单文件可独立运行，无外部依赖
+4. **教学性**：展示完整代理系统的所有组件
+
+**核心设计原则：**
+
+| 原则 | 实现方式 | 权衡 |
+|------|----------|------|
+| 单一职责 | 每个函数/类负责一个功能 | 文件较大 |
+| 依赖倒置 | 上层依赖下层接口 | 增加间接层 |
+| 开闭原则 | 通过钩子和注册表扩展 | 增加复杂度 |
+| 接口隔离 | 工具集按角色分离 | 增加代码量 |
+
+**消息驱动架构：**
+
+- 子系统间通过 `MessageBus` 异步通信
+- 协议状态通过 `ProtocolState` 管理
+- 事件通过钩子系统广播
+
+**文件系统即数据库：**
+
+- 任务存储：`.tasks/*.json`
+- 消息存储：`.mailboxes/*.jsonl`
+- 配置存储：`.scheduled_tasks.json`
+- 日志存储：`.worktrees/events.jsonl`
+
+[UML]
+@startuml
+package "设计原则" {
+  [单一职责] as srp
+  [依赖倒置] as dip
+  [开闭原则] as ocp
+  [接口隔离] as isp
+}
+
+package "实现机制" {
+  [函数/类] as impl
+  [钩子系统] as hooks
+  [注册表] as registry
+  [消息总线] as bus
+}
+
+[srp] --> [impl]
+[dip] --> [hooks]
+[ocp] --> [registry]
+[isp] --> [bus]
+
+package "存储机制" {
+  [文件系统] as fs
+  [JSON] as json
+  [JSONL] as jsonl
+}
+
+[impl] --> [fs]
+[bus] --> [jsonl]
+[registry] --> [json]
+@enduml
+
+[Detail]
+**阅读入口：** 从左侧的设计原则开始，了解系统的设计哲学。
+
+**核心机制说明：**
+
+1. **钩子系统**：
+   - 事件驱动：`UserPromptSubmit`、`PreToolUse`、`PostToolUse`、`Stop`
+   - 管道模式：多个钩子按顺序执行
+   - 阻断能力：钩子可返回非 None 阻断执行
+
+2. **注册表模式**：
+   - `SKILL_REGISTRY`：技能注册表
+   - `BUILTIN_HANDLERS`：工具处理函数注册表
+   - `MOCK_SERVERS`：MCP 服务器注册表
+   - `HOOKS`：钩子注册表
+
+3. **消息总线**：
+   - 发布-订阅：通过邮箱文件实现
+   - 一次性消费：读取后删除
+   - 协议支持：通过 `metadata.request_id` 关联
+
+4. **状态管理**：
+   - 内存状态：`pending_requests`、`active_teammates`
+   - 持久化状态：任务、消息、配置
+   - 临时状态：`RecoveryState`、`protocol_ctx`
+
+**设计权衡：**
+
+| 决策 | 优点 | 缺点 |
+|------|------|------|
+| 单文件架构 | 简单、可读 | 难以维护大型项目 |
+| 文件系统存储 | 简单、可检查 | 性能较低 |
+| 同步钩子 | 简单、可预测 | 阻塞执行 |
+| 全局状态 | 简单、直接 | 难以测试 |

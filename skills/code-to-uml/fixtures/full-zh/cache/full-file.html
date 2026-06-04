@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+	<meta charset="utf-8">
+	<title>完整文件报告 fixture</title>
+</head>
+<body class="demo-page" data-dir="full-file">
+	<main class="content">
+		<section class="intro">
+			<h1>完整文件报告 fixture</h1>
+			<p data-markdown>该报告分析 `demo-file.js` 的文件级结构，用中文验证 full 模式。
+- 功能：展示文件目标、结构、流程、调用、数据、风险和维护索引。
+- 框架：使用 Code-To-UML `.ctu` 数据和 HTML 薄壳。
+- 核心机制与设计：内容在数据文件中表达，页面只负责按分类加载。</p>
+		</section>
+		<nav class="demo-tabs">
+			<button class="demo-tab is-active" type="button" data-diagram="overview">概览</button>
+			<button class="demo-tab" type="button" data-diagram="structure">结构</button>
+			<button class="demo-tab" type="button" data-diagram="objects">对象</button>
+			<button class="demo-tab" type="button" data-diagram="architecture">架构</button>
+			<button class="demo-tab" type="button" data-diagram="flow">流程</button>
+			<button class="demo-tab" type="button" data-diagram="calls">调用</button>
+			<button class="demo-tab" type="button" data-diagram="dataflow">数据</button>
+			<button class="demo-tab" type="button" data-diagram="code">代码</button>
+			<button class="demo-tab" type="button" data-diagram="principles">原则</button>
+			<button class="demo-tab" type="button" data-diagram="guide">指南</button>
+		</nav>
+		<section>
+			<h2 id="demo-title">概览</h2>
+			<p class="demo-section-overview is-active" data-diagram-overview="overview">目标概览。</p>
+			<p class="demo-section-overview" data-diagram-overview="structure">顶层结构。</p>
+			<p class="demo-section-overview" data-diagram-overview="objects">核心对象。</p>
+			<p class="demo-section-overview" data-diagram-overview="architecture">架构边界。</p>
+			<p class="demo-section-overview" data-diagram-overview="flow">核心流程。</p>
+			<p class="demo-section-overview" data-diagram-overview="calls">调用关系。</p>
+			<p class="demo-section-overview" data-diagram-overview="dataflow">数据流。</p>
+			<p class="demo-section-overview" data-diagram-overview="code">代码片段。</p>
+			<p class="demo-section-overview" data-diagram-overview="principles">原则与风险。</p>
+			<p class="demo-section-overview" data-diagram-overview="guide">上手与维护。</p>
+			<div class="demo-examples" data-examples></div>
+		</section>
+	</main>
+	<aside data-demo-toc></aside>
+</body>
+</html>

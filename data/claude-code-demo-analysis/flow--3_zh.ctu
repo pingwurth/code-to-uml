@@ -1,0 +1,107 @@
+Title: 错误恢复流程
+Describe: API 调用重试、模型切换和上下文压缩的恢复机制。
+------------------------------------------------------------
+
+[Example]
+错误恢复与重试机制
+
+[Description]
+<!-- Section-ID: S05_CORE_FLOW -->
+**RecoveryState 类（第 1153-1159 行）：**
+
+```python
+class RecoveryState:
+    def __init__(self):
+        self.has_escalated = False
+        self.recovery_count = 0
+        self.consecutive_529 = 0
+        self.has_attempted_reactive_compact = False
+        self.current_model = PRIMARY_MODEL
+```
+
+**with_retry 函数（第 1167-1194 行）：**
+
+重试逻辑处理三种错误类型：
+
+| 错误类型 | 识别方式 | 处理策略 |
+|----------|----------|----------|
+| 429 Rate Limit | `ratelimit` in name or `429` in msg | 指数退避重试 |
+| 529 Overloaded | `overloaded` in name or `529` in msg | 指数退避 + 模型切换 |
+| 其他异常 | 无匹配 | 直接抛出 |
+
+**重试延迟计算：**
+
+```python
+def retry_delay(attempt: int) -> float:
+    base = min(BASE_DELAY_MS * (2 ** attempt), 32000) / 1000
+    return base + random.uniform(0, base * 0.25)
+```
+
+- 第 1 次：0.5-0.625 秒
+- 第 2 次：1-1.25 秒
+- 第 3 次：2-2.5 秒
+
+**模型切换策略：**
+
+- 连续 2 次 529 错误后切换到 `FALLBACK_MODEL`
+- 切换后重置 `consecutive_529` 计数
+- 仅在 `FALLBACK_MODEL` 已配置时生效
+
+[UML]
+@startuml
+start
+:调用 API;
+repeat
+  :尝试请求;
+  if (成功?) then (yes)
+    :重置 consecutive_529;
+    :返回结果;
+    stop
+  endif
+  
+  if (429 Rate Limit?) then (yes)
+    :计算延迟;
+    :等待;
+    :attempt++;
+  elseif (529 Overloaded?) then (yes)
+    :consecutive_529++;
+    if (consecutive_529 >= 2 且有回退模型?) then (yes)
+      :切换到 FALLBACK_MODEL;
+      :重置 consecutive_529;
+    endif
+    :计算延迟;
+    :等待;
+    :attempt++;
+  else (no)
+    :抛出异常;
+    stop
+  endif
+repeat while (attempt < MAX_RETRIES) is (yes)
+:抛出 MaxRetriesExceeded;
+stop
+@enduml
+
+[Detail]
+**阅读入口：** 从顶部开始，了解 API 调用的重试流程。
+
+**关键决策点：**
+
+1. **错误识别**：通过异常类型和消息内容判断
+2. **延迟计算**：指数退避 + 随机抖动
+3. **模型切换**：连续 529 错误触发
+4. **重试限制**：最多 `MAX_RETRIES` 次
+
+**与其他恢复机制的协作：**
+
+- **prompt-too-long**：由 `agent_loop` 处理，调用 `reactive_compact()`
+- **max_tokens**：由 `agent_loop` 处理，升级 token 限制或添加继续提示
+- **429/529**：由 `with_retry()` 处理，重试或切换模型
+
+**配置参数：**
+
+| 参数 | 值 | 用途 |
+|------|-----|------|
+| `MAX_RETRIES` | 3 | 最大重试次数 |
+| `MAX_CONSECUTIVE_529` | 2 | 触发模型切换的连续 529 次数 |
+| `BASE_DELAY_MS` | 500 | 基础延迟（毫秒） |
+| `MAX_DELAY_MS` | 32000 | 最大延迟（毫秒） |

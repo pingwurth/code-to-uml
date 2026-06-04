@@ -30,7 +30,9 @@ This file owns only the HTML, `.ctu`, and runtime loading contract. For content 
 - Set `<body class="demo-page" data-dir="<report-slug>">` for custom report data.
 - Keep required selectors, script order, tabs, overviews, `.ctu` prefixes, and API keys aligned.
 - Use `None` only to mean "empty/hidden"; `[UML]` may be `None` for text-only cards. Handle `official-demo-link` deliberately.
-- Run `scripts/validate-report.js --strict`, then verify page route, API payload, card counts, topbar behavior, and UML rendering.
+- Put `Section-ID: Sxx_...` markers in generated `.ctu` card Markdown so content validation can verify required report coverage.
+- Choose `--mode <compact|full>` and `--complexity <low|medium|high>` from `report-contract.md`, then run `scripts/validate-report.js --strict --mode <mode> --complexity <level>`.
+- Verify page route, API payload, card counts, topbar behavior, and UML rendering.
 
 ## Root Resolution
 
@@ -93,10 +95,33 @@ Alignment rules:
 Page introduction rules:
 
 - Replace the template `<h1>` with the analyzed target title.
-- Replace `section.intro > p[data-markdown]` with a whole-report overview, not a tab/category overview.
+- Replace `section.intro > p[data-markdown]` with a whole-report Markdown overview block, not a tab/category overview.
 - Keep the overview within 500 Chinese characters or a similarly concise English length.
-- The overview must make the target immediately understandable: implemented functionality, basic framework, core principles, and design philosophy.
-- Markdown is supported, but prose must not be hard-wrapped by character count or visual line length. In prose, start a new line only after sentence-ending punctuation (`。`, `；`, `.`, or `;`). Lists, numbered steps, and tables may use one line per item or row.
+- The overview must make the target immediately understandable: implemented functionality, basic framework, core principles, working mechanism, and design philosophy.
+- Choose the Markdown layout from the content: use 2-3 short paragraphs for a simple target, bullets for parallel modules/capabilities/phases, numbered steps for working mechanisms, and a compact table for dense "dimension -> summary" information.
+- Do not compress functionality, framework, core principles, working mechanism, and design philosophy into one long sentence. Split by semantic role when multiple roles are present.
+- Prose must not be hard-wrapped by character count or visual line length. In prose, start a new line only after sentence-ending punctuation (`。`, `；`, `.`, or `;`). Lists, numbered steps, and tables may use one line per item/step/row.
+- Prefer labels such as `核心原理` and `工作机制` when they help readers scan the overview, especially for project, module, framework, or complex file reports.
+
+Good intro patterns:
+
+```markdown
+该报告分析 `serve.js` 的本地报告服务，它同时承担静态文件托管、`.ctu` 解析和 PlantUML 后端渲染兜底。
+
+- 核心原理：把文件系统中的报告数据规范化为浏览器可消费的 JSON。
+- 工作机制：前端请求 `/api/demo-examples` 获取分类卡片，请求 `/api/plantuml-svg` 时调用 `plantuml.jar` 生成 SVG。
+- 设计取向：服务端只做轻量解析和渲染兜底，主要交互仍留在浏览器端完成。
+```
+
+```markdown
+该报告分析 `demo.js` 驱动的 Code-To-UML 前端运行层，重点覆盖数据加载、Markdown 渲染、PlantUML 预览和交互状态同步。
+
+| 维度 | 概述 |
+|---|---|
+| 核心原理 | 以 `.ctu` 数据为源，通过统一 API 转成分类卡片，再由前端组件渲染。 |
+| 工作机制 | 页面初始化后读取语言和目录参数，加载分类数据，绑定 tab、TOC、渲染和复制操作。 |
+| 设计取向 | HTML 保持薄壳，内容沉入数据文件，运行时逻辑集中在组件和 `demo.js`。 |
+```
 
 Path rules:
 
@@ -142,6 +167,24 @@ Each card uses:
 [Detail]
 <markdown detail or None>
 ```
+
+Generated cards should include their report-contract section ID in `[Description]` or `[Detail]`. Use an HTML comment when the marker should stay invisible in the rendered page:
+
+```text
+[Description]
+<!-- Section-ID: S05_CORE_FLOW -->
+This card explains the main runtime path and failure branches.
+```
+
+Merged cards may list multiple IDs:
+
+```text
+[Description]
+<!-- Section-ID: S06_CALL_RELATIONSHIPS, S07_DATA_OR_STATE_FLOW -->
+This card combines call and state movement because the target is a small function.
+```
+
+Do not use section markers as placeholders. If a compact report merges `S06_CALL_RELATIONSHIPS` into a flow card, that card still needs real caller/callee evidence or an explicit reason why no meaningful external call relationship exists.
 
 Text-only cards are valid. Use `None` in `[UML]` when the card should not render a diagram:
 
@@ -208,7 +251,7 @@ Use port `5401` unless the user specified another port.
 First run the bundled artifact validator from the skill directory. Set `--lang` to the report language suffix selected from the user's question language:
 
 ```text
-node <skill-dir>/scripts/validate-report.js --root <CTU_HOME> --html cache/<report-slug>.html --lang <zh|en> --strict
+node <skill-dir>/scripts/validate-report.js --root <CTU_HOME> --html cache/<report-slug>.html --lang <zh|en> --scope <project|module|file|class|function> --complexity <low|medium|high> --mode <compact|full> --strict
 ```
 
 Add `--render` when `plantuml.jar` exists in `<CTU_HOME>` and Java is available on `PATH`.

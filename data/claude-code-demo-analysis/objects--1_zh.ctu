@@ -1,0 +1,93 @@
+Title: 核心对象/函数说明
+Describe: 文件中定义的主要类、数据结构和关键函数。
+------------------------------------------------------------
+
+[Example]
+Task 数据类与任务管理
+
+[Description]
+<!-- Section-ID: S03_CORE_OBJECTS -->
+**Task 数据类（第 78-86 行）：**
+
+```python
+@dataclass
+class Task:
+    id: str
+    subject: str
+    description: str
+    status: str
+    owner: str | None
+    blockedBy: list[str]
+    worktree: str | None = None
+```
+
+**任务状态流转：**
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `id` | str | 唯一标识符，格式：`task_{timestamp}_{random}` |
+| `subject` | str | 任务标题 |
+| `description` | str | 任务描述 |
+| `status` | str | 状态：`pending` / `in_progress` / `completed` |
+| `owner` | str \| None | 任务所有者（代理名称） |
+| `blockedBy` | list[str] | 依赖的任务 ID 列表 |
+| `worktree` | str \| None | 关联的 Git worktree 名称 |
+
+**核心任务函数：**
+
+| 函数 | 行号 | 职责 |
+|------|------|------|
+| `create_task` | 93-102 | 创建新任务并持久化 |
+| `save_task` | 105-106 | 保存任务到 JSON 文件 |
+| `load_task` | 109-110 | 从文件加载任务 |
+| `list_tasks` | 113-115 | 列出所有任务 |
+| `claim_task` | 134-152 | 认领待处理任务 |
+| `complete_task` | 155-167 | 完成任务并解锁依赖 |
+| `can_start` | 122-131 | 检查任务是否可开始 |
+
+[UML]
+@startuml
+class Task {
+  +id: str
+  +subject: str
+  +description: str
+  +status: str
+  +owner: str
+  +blockedBy: List
+  +worktree: str
+}
+
+enum TaskStatus {
+  pending
+  in_progress
+  completed
+}
+
+Task --> TaskStatus : status
+@enduml
+
+[Detail]
+**任务生命周期：**
+
+1. **创建**：`create_task()` 生成唯一 ID，状态为 `pending`
+2. **依赖检查**：`can_start()` 验证所有 `blockedBy` 任务已完成
+3. **认领**：`claim_task()` 检查状态、所有者和依赖，设置为 `in_progress`
+4. **完成**：`complete_task()` 设置为 `completed`，返回解锁的任务列表
+
+**持久化机制：**
+
+- 存储位置：`.tasks/{task_id}.json`
+- 格式：JSON，使用 `dataclasses.asdict()` 序列化
+- 文件命名：使用任务 ID 作为文件名
+
+**依赖管理：**
+
+- `blockedBy` 字段存储依赖任务的 ID 列表
+- `can_start()` 检查所有依赖是否已完成
+- 完成任务时自动检查并返回解锁的任务
+
+**并发安全：**
+
+- 任务操作没有显式锁保护
+- 依赖文件系统的原子写入
+- 适合单代理场景，多代理需要额外同步

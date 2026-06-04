@@ -1,0 +1,28 @@
+Title: 对象
+Describe: 核心对象
+------------------------------------------------------------
+[Example]
+核心函数
+
+[Description]
+<!-- Section-ID: S03_CORE_OBJECTS -->
+核心函数包括 `loadConfig()`、`buildModel()` 和 `renderView()`，分别承担读取、建模和渲染职责。
+
+[UML]
+None
+
+[Detail]
+每个函数的输入、输出和副作用都应在真实报告中绑定到源码位置。
+
+------------------------------------------------------------
+[Example]
+接口关系
+
+[Description]
+`buildModel()` 接收配置对象并返回视图模型；`renderView()` 只消费模型，不修改配置。
+
+[UML]
+None
+
+[Detail]
+该卡验证对象分类可以包含多张文字卡。

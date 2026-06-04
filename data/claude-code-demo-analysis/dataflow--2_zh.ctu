@@ -1,0 +1,100 @@
+Title: 任务与工作树状态流
+Describe: 任务状态转换、工作树生命周期和持久化机制。
+------------------------------------------------------------
+
+[Example]
+任务状态机
+
+[Description]
+<!-- Section-ID: S07_DATA_OR_STATE_FLOW -->
+**任务状态转换：**
+
+```
+pending ──(claim_task)──> in_progress ──(complete_task)──> completed
+    │                          │
+    │                          │
+    └──(blocked by deps)───────┘
+```
+
+**状态转换规则：**
+
+| 当前状态 | 目标状态 | 触发条件 | 前置检查 |
+|----------|----------|----------|----------|
+| - | pending | `create_task()` | 无 |
+| pending | in_progress | `claim_task()` | 无 owner、依赖满足 |
+| in_progress | completed | `complete_task()` | 当前状态为 in_progress |
+
+**工作树生命周期：**
+
+```
+创建 ──(create_worktree)──> 存在 ──(remove_worktree)──> 删除
+  │                          │
+  │                          │
+  └──(bind task)─────────────┘
+```
+
+**工作树事件日志：**
+
+| 事件 | 触发函数 | 日志位置 |
+|------|----------|----------|
+| create | `create_worktree()` | `.worktrees/events.jsonl` |
+| remove | `remove_worktree()` | `.worktrees/events.jsonl` |
+| keep | `keep_worktree()` | `.worktrees/events.jsonl` |
+
+[UML]
+@startuml
+[*] --> pending : create_task
+
+pending --> in_progress : claim_task
+note right of pending : 检查 owner\n检查依赖
+
+in_progress --> completed : complete_task
+note right of in_progress : 检查状态\n返回解锁任务
+
+completed --> [*]
+
+@enduml
+
+[Detail]
+**阅读入口：** 从顶部的 `[*]` 开始，了解任务状态转换流程。
+
+**关键状态检查：**
+
+1. **claim_task 前置检查**：
+   - `task.status != "pending"`：拒绝认领
+   - `task.owner`：拒绝重复认领
+   - `can_start(task_id)`：检查依赖是否满足
+
+2. **complete_task 前置检查**：
+   - `task.status != "in_progress"`：拒绝完成
+
+**依赖解锁机制：**
+
+```python
+def complete_task(task_id: str) -> str:
+    # ... 完成任务
+    unblocked = [t.subject for t in list_tasks()
+                 if t.status == "pending" and t.blockedBy and can_start(t.id)]
+    # 返回解锁的任务列表
+```
+
+**工作树绑定：**
+
+- `create_worktree(name, task_id)`：创建时绑定任务
+- `bind_task_to_worktree()`：更新任务的 `worktree` 字段
+- 队友线程根据 `worktree` 字段设置工作目录
+
+**持久化格式：**
+
+任务文件示例：
+```json
+{
+  "id": "task_1234567890_1234",
+  "subject": "分析代码",
+  "description": "分析 claude_code_demo.py",
+  "status": "in_progress",
+  "owner": "researcher",
+  "blockedBy": [],
+  "worktree": "analysis-task"
+}
+```

@@ -1,0 +1,211 @@
+Title: 核心原理说明
+Describe: 运行时机制、设计模式和权衡取舍
+------------------------------------------------------------
+[Example]
+文件系统即状态
+
+[Description]
+<!-- Section-ID: S09_CORE_PRINCIPLES -->
+**核心机制**：所有状态都持久化到文件系统，而不是内存数据库。
+
+**实现**：
+- 任务：`.tasks/{task_id}.json`
+- 邮箱：`.mailboxes/{agent}.jsonl`
+- 技能：`skills/{name}/SKILL.md`
+- 定时任务：`.scheduled_tasks.json`
+- 记忆：`.memory/MEMORY.md`
+- 事件：`.worktrees/events.jsonl`
+- 工具结果：`.task_outputs/tool-results/{id}.txt`
+- 转录：`.transcripts/transcript_{ts}.jsonl`
+
+**优势**：
+- 可检查性：可以直接查看文件了解系统状态
+- 可调试性：出现问题时可以检查文件
+- 简单性：不需要数据库或外部服务
+
+**劣势**：
+- 性能：文件 I/O 比内存慢
+- 并发：需要文件锁或原子操作
+- 一致性：没有事务保证
+
+[UML]
+None
+
+[Detail]
+**设计哲学**：
+这是一个教学示例，优先考虑可理解性和可检查性，而不是性能和可扩展性。
+
+**文件格式选择**：
+- JSON：人类可读，易于调试
+- JSONL：支持追加写入，适合日志和消息
+- Markdown：技能文件使用 Markdown，便于编辑
+
+**并发处理**：
+- 大多数操作是单线程的（主导循环）
+- 队友线程有独立的工作目录
+- 定时任务使用 `cron_lock` 保护
+- 后台任务使用 `background_lock` 保护
+
+**实际应用考虑**：
+- 生产环境应该使用数据库
+- 需要事务支持时应该使用 SQLite
+- 需要高性能时应该使用 Redis
+
+------------------------------------------------------------
+[Example]
+钩子系统设计
+
+[Description]
+<!-- Section-ID: S09_CORE_PRINCIPLES -->
+**核心机制**：使用钩子系统实现横切关注点，避免在每个工具中重复代码。
+
+**钩子类型**：
+- `UserPromptSubmit`：用户输入时触发
+- `PreToolUse`：工具执行前触发
+- `PostToolUse`：工具执行后触发
+- `Stop`：代理停止时触发
+
+**钩子行为**：
+- 返回 `None`：继续执行
+- 返回字符串：停止执行，返回值作为错误消息
+
+**注册的钩子**：
+1. `permission_hook`：权限检查（PreToolUse）
+2. `log_hook`：日志记录（PreToolUse）
+3. `large_output_hook`：大输出警告（PostToolUse）
+4. `user_prompt_hook`：用户输入记录（UserPromptSubmit）
+5. `stop_hook`：停止统计（Stop）
+
+[UML]
+None
+
+[Detail]
+**设计模式**：责任链模式
+
+**实现**：
+```python
+HOOKS = {"UserPromptSubmit": [], "PreToolUse": [],
+         "PostToolUse": [], "Stop": []}
+
+def register_hook(event: str, callback):
+    HOOKS[event].append(callback)
+
+def trigger_hooks(event: str, *args):
+    for callback in HOOKS[event]:
+        result = callback(*args)
+        if result is not None:
+            return result
+    return None
+```
+
+**钩子执行顺序**：
+- 按注册顺序执行
+- 第一个返回非 None 的钩子中断执行
+- 用于权限检查、日志记录、输出监控
+
+**扩展点**：
+- 可以添加更多的钩子类型
+- 可以实现钩子优先级
+- 可以支持异步钩子
+
+**权衡**：
+- 优点：解耦、可扩展、可测试
+- 缺点：调试困难、性能开销、隐式依赖
+
+------------------------------------------------------------
+[Example]
+多层压缩策略
+
+[Description]
+<!-- Section-ID: S09_CORE_PRINCIPLES -->
+**核心机制**：使用多层压缩策略管理上下文大小，防止单次 LLM 调用超出限制。
+
+**压缩层次**：
+1. **工具结果预算**：限制单条消息的工具结果总大小
+2. **消息裁剪**：保留最近的消息，丢弃旧消息
+3. **工具结果压缩**：压缩旧工具结果为占位符
+4. **完全压缩**：调用 LLM 生成摘要
+
+**设计原则**：
+- 渐进式：从轻量级到重量级
+- 保最近：优先保留最近的上下文
+- 可恢复：压缩前保存转录文件
+
+[UML]
+None
+
+[Detail]
+**压缩阈值**：
+- `CONTEXT_LIMIT = 50000`：触发完全压缩的上下文大小
+- `tool_result_budget()`：200KB 单条消息限制
+- `snip_compact()`：50 条消息限制
+- `micro_compact()`：保留最近 3 个工具结果
+- `PERSIST_THRESHOLD = 30000`：单个工具结果的持久化阈值
+
+**压缩策略**：
+1. `tool_result_budget()`：持久化超过 30KB 的工具结果
+2. `snip_compact()`：保留前 3 条和后 47 条消息
+3. `micro_compact()`：压缩超过 120 字符的旧工具结果
+4. `compact_history()`：完全压缩，只保留摘要
+
+**响应式压缩**：
+- 当 LLM 返回 "prompt too long" 错误时触发
+- 保留最近 5 条消息 + 摘要
+- 只尝试一次，避免无限循环
+
+**权衡**：
+- 优点：防止上下文溢出、保留重要信息
+- 缺点：信息丢失、压缩延迟、摘要质量依赖 LLM
+
+------------------------------------------------------------
+[Example]
+协议状态匹配
+
+[Description]
+<!-- Section-ID: S09_CORE_PRINCIPLES -->
+**核心机制**：使用 request_id 匹配请求和响应，防止协议混乱。
+
+**协议类型**：
+- `shutdown`：关闭请求/响应
+- `plan_approval`：计划审批请求/响应
+
+**匹配规则**：
+- 请求和响应必须有相同的 request_id
+- 响应类型必须匹配请求类型
+- 一个响应不能批准另一个请求
+
+**实现**：
+- `pending_requests: dict[str, ProtocolState]`：待处理请求
+- `match_response()`：匹配响应到请求
+- `consume_lead_inbox()`：路由协议响应
+
+[UML]
+None
+
+[Detail]
+**协议状态结构**：
+```python
+@dataclass
+class ProtocolState:
+    request_id: str
+    type: str  # "shutdown" | "plan_approval"
+    sender: str
+    target: str
+    status: str  # "pending" | "approved" | "rejected"
+    payload: str
+    created_at: float
+```
+
+**安全边界**：
+- request_id 是随机生成的 6 位数字
+- 响应必须匹配 request_id 和 type
+- 防止消息重放攻击
+
+**扩展点**：
+- 可以添加更多的协议类型
+- 可以实现协议超时
+- 可以添加协议审计日志
+
+**权衡**：
+- 优点：简单、安全、可扩展
+- 缺点：单点故障（主导进程）、无持久化

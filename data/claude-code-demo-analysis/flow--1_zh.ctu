@@ -1,0 +1,112 @@
+Title: 核心流程图
+Describe: 代理主循环、工具执行和错误处理的核心流程。
+------------------------------------------------------------
+
+[Example]
+代理主循环流程
+
+[Description]
+<!-- Section-ID: S05_CORE_FLOW -->
+**agent_loop 主循环（第 1901-2004 行）：**
+
+代理循环是整个系统的核心，负责：
+1. 注入定时任务和后台通知
+2. 准备上下文（压缩、预算）
+3. 调用 LLM
+4. 执行工具调用
+5. 处理错误和恢复
+
+**循环控制：**
+
+- `while True`：持续运行直到 LLM 停止调用工具
+- `max_tokens`：控制响应长度，可升级
+- `recovery_count`：限制恢复重试次数
+
+**关键决策点：**
+
+1. **Cron 注入**：检查并注入定时任务
+2. **后台通知**：收集完成的后台任务结果
+3. **上下文准备**：多层压缩策略
+4. **LLM 调用**：带重试的 API 调用
+5. **工具执行**：权限检查、后台判断、执行
+6. **错误处理**：prompt-too-long、max_tokens、重试
+
+[UML]
+@startuml
+start
+repeat
+  :注入 Cron 任务;
+  :收集后台通知;
+  :检查 todo 提醒;
+  :准备上下文;
+  :更新上下文;
+  :组装工具池;
+  
+  :调用 LLM;
+  
+  if (prompt-too-long?) then (yes)
+    if (已尝试 reactive compact?) then (no)
+      :执行 reactive_compact;
+      -> 返回循环开始;
+    else (yes)
+      :记录错误;
+      stop
+    endif
+  endif
+  
+  if (max_tokens?) then (yes)
+    if (未升级?) then (no)
+      :升级 max_tokens;
+      -> 返回循环开始;
+    else (yes)
+      if (recovery_count < max?) then (yes)
+        :添加继续提示;
+        :recovery_count++;
+        -> 返回循环开始;
+      else (no)
+        stop
+      endif
+    endif
+  endif
+  
+  :重置 max_tokens;
+  :添加助手响应;
+  
+  if (有工具调用?) then (no)
+    :触发 Stop 钩子;
+    stop
+  endif
+  
+  :重置 recovery_count;
+  
+  fork
+    :处理工具调用;
+  fork again
+    :compact 工具;
+  end fork
+  
+  :添加工具结果;
+repeat while (继续) is (yes)
+@enduml
+
+[Detail]
+**阅读入口：** 从左上角开始，跟随主循环的执行流程。
+
+**关键节点说明：**
+
+- **准备上下文**：调用 `prepare_context()`，包含 `tool_result_budget`、`snip_compact`、`micro_compact`、`compact_history` 四层压缩
+- **调用 LLM**：`call_llm()` 包装了 `with_retry()` 重试逻辑
+- **工具执行**：遍历 `response.content` 中的 `tool_use` 块
+
+**错误恢复路径：**
+
+1. **prompt-too-long**：执行 `reactive_compact()`，保留最近 5 条消息
+2. **max_tokens**：先升级到 `ESCALATED_MAX_TOKENS`，再尝试继续提示
+3. **429/529 错误**：`with_retry()` 指数退避重试，529 连续失败切换模型
+
+**分支条件：**
+
+- `has_tool_use(response.content)`：决定是否继续循环
+- `block.name == "compact"`：特殊处理压缩工具
+- `should_run_background()`：判断是否后台执行
+- `trigger_hooks("PreToolUse")`：权限检查

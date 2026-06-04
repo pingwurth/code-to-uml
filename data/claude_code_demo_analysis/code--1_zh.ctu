@@ -1,0 +1,198 @@
+Title: 关键代码片段解析
+Describe: 核心算法和设计模式的代码片段分析
+------------------------------------------------------------
+[Example]
+权限检查钩子
+
+[Description]
+<!-- Section-ID: S08_CODE_SNIPPETS -->
+**permission_hook()**（行 879-904）实现了多层权限检查：
+
+1. **Deny List**：直接拒绝危险命令
+2. **Destructive 命令**：需要用户确认
+3. **路径检查**：防止路径逃逸
+4. **MCP deploy**：需要用户确认
+
+**设计意图**：在工具执行前拦截，提供安全边界。
+
+```python
+def permission_hook(block):
+    if block.name == "bash":
+        command = block.input.get("command", "")
+        for pattern in DENY_LIST:
+            if pattern in command:
+                return f"Permission denied: '{pattern}' is on the deny list"
+        if any(token in command for token in DESTRUCTIVE):
+            print(f"\n\033[33m[permission] destructive command\033[0m")
+            print(f"  {command}")
+            choice = input("  Allow? [y/N] ").strip().lower()
+            if choice not in ("y", "yes"):
+                return "Permission denied by user"
+    if block.name in ("write_file", "edit_file"):
+        path = block.input.get("path", "")
+        try:
+            safe_path(path)
+        except Exception:
+            return f"Permission denied: path escapes workspace: {path}"
+    if block.name.startswith("mcp__") and "deploy" in block.name:
+        print(f"\n\033[33m[permission] MCP destructive-looking tool: {block.name}\033[0m")
+        choice = input("  Allow? [y/N] ").strip().lower()
+        if choice not in ("y", "yes"):
+            return "Permission denied by user"
+    return None
+```
+
+[UML]
+None
+
+[Detail]
+**安全边界**：
+- `DENY_LIST`：绝对危险的命令，永远不允许
+- `DESTRUCTIVE`：可能危险的命令，需要用户确认
+- `safe_path()`：防止路径逃逸到工作区外
+- MCP deploy：需要用户确认的外部操作
+
+**用户体验**：
+- 使用 ANSI 颜色码突出显示警告
+- 默认拒绝（y/N，N 为默认）
+- 返回拒绝原因，供 LLM 理解
+
+**扩展点**：
+- 可以添加更多的 DENY_LIST 模式
+- 可以实现更细粒度的权限控制
+- 可以添加白名单机制
+
+------------------------------------------------------------
+[Example]
+with_retry 错误恢复
+
+[Description]
+<!-- Section-ID: S08_CODE_SNIPPETS -->
+**with_retry()**（行 1167-1194）实现了智能重试机制：
+
+1. **429 错误**：指数退避重试
+2. **529 错误**：连续失败后切换模型
+3. **其他错误**：直接抛出
+
+**关键逻辑**：
+- 使用 `RecoveryState` 跟踪状态
+- 指数退避 + 随机抖动
+- 模型降级作为最后手段
+
+```python
+def with_retry(fn, state: RecoveryState):
+    for attempt in range(MAX_RETRIES):
+        try:
+            result = fn()
+            state.consecutive_529 = 0
+            return result
+        except Exception as e:
+            name = type(e).__name__.lower()
+            msg = str(e).lower()
+            if "ratelimit" in name or "429" in msg:
+                delay = retry_delay(attempt)
+                print(f"  \033[33m[429] retry {attempt + 1}/{MAX_RETRIES} "
+                      f"after {delay:.1f}s\033[0m")
+                time.sleep(delay)
+                continue
+            if "overloaded" in name or "529" in msg or "overloaded" in msg:
+                state.consecutive_529 += 1
+                if state.consecutive_529 >= MAX_CONSECUTIVE_529 and FALLBACK_MODEL:
+                    state.current_model = FALLBACK_MODEL
+                    state.consecutive_529 = 0
+                    print(f"  \033[31m[529] switching to {FALLBACK_MODEL}\033[0m")
+                delay = retry_delay(attempt)
+                print(f"  \033[33m[529] retry {attempt + 1}/{MAX_RETRIES} "
+                      f"after {delay:.1f}s\033[0m")
+                time.sleep(delay)
+                continue
+            raise
+    raise RuntimeError(f"Max retries ({MAX_RETRIES}) exceeded")
+```
+
+[UML]
+None
+
+[Detail]
+**重试策略**：
+- 最大重试次数：`MAX_RETRIES = 3`
+- 基础延迟：`BASE_DELAY_MS = 500`
+- 指数退避：`min(500 * 2^attempt, 32000) / 1000`
+- 随机抖动：`+ random.uniform(0, base * 0.25)`
+
+**模型降级**：
+- 连续 529 错误次数：`MAX_CONSECUTIVE_529 = 2`
+- 降级条件：连续 2 次 529 且有备用模型
+- 降级后重置计数器
+
+**状态跟踪**：
+- `RecoveryState` 类跟踪：
+  - `has_escalated`：是否已升级 token 限制
+  - `recovery_count`：恢复尝试次数
+  - `consecutive_529`：连续 529 错误次数
+  - `has_attempted_reactive_compact`：是否已尝试响应式压缩
+  - `current_model`：当前使用的模型
+
+------------------------------------------------------------
+[Example]
+上下文预算管理
+
+[Description]
+<!-- Section-ID: S08_CODE_SNIPPETS -->
+**tool_result_budget()**（行 1068-1089）实现了工具结果的预算管理：
+
+**算法**：
+1. 检查最后一条消息是否包含工具结果
+2. 计算所有工具结果的总大小
+3. 如果超过 200KB，从最大的结果开始持久化
+4. 替换为预览文本
+
+**设计意图**：防止单条消息过大，同时保留最近的上下文。
+
+```python
+def tool_result_budget(messages: list, max_bytes: int = 200_000) -> list:
+    if not messages:
+        return messages
+    last = messages[-1]
+    content = last.get("content")
+    if last.get("role") != "user" or not isinstance(content, list):
+        return messages
+    blocks = [(i, b) for i, b in enumerate(content)
+              if isinstance(b, dict) and b.get("type") == "tool_result"]
+    total = sum(len(str(b.get("content", ""))) for _, b in blocks)
+    if total <= max_bytes:
+        return messages
+    for _, block in sorted(blocks,
+                           key=lambda pair: len(str(pair[1].get("content", ""))),
+                           reverse=True):
+        if total <= max_bytes:
+            break
+        text = str(block.get("content", ""))
+        block["content"] = persist_large_output(
+            block.get("tool_use_id", "unknown"), text)
+        total = sum(len(str(b.get("content", ""))) for _, b in blocks)
+    return messages
+```
+
+[UML]
+None
+
+[Detail]
+**预算常量**：
+- `max_bytes = 200_000`：单条消息的工具结果总大小限制
+- `PERSIST_THRESHOLD = 30_000`：单个工具结果的持久化阈值
+
+**持久化策略**：
+- 超过 30KB 的工具结果持久化到文件
+- 存储路径：`.task_outputs/tool-results/{tool_use_id}.txt`
+- 返回预览（前 2000 字符）+ 文件路径
+
+**优化**：
+- 从最大的结果开始持久化
+- 使用就地修改（`block["content"] = ...`）
+- 避免不必要的重新计算
+
+**边界情况**：
+- 空消息列表
+- 最后一条消息不是用户消息
+- 最后一条消息不包含工具结果
