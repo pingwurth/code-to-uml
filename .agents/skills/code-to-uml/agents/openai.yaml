@@ -1,0 +1,6 @@
+interface:
+  display_name: "Code To Uml"
+  short_description: "Repo-specific patterns and workflows for code-to-uml"
+  default_prompt: "Use the code-to-uml repo skill to follow existing architecture, testing, and workflow conventions."
+policy:
+  allow_implicit_invocation: true
