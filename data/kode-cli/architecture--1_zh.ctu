@@ -1,0 +1,167 @@
+Title: 系统架构
+Describe: Kode-CLI 的整体架构分层、依赖方向、运行时边界和部署模型。
+------------------------------------------------------------
+[Example]
+整体架构分层
+
+[Description]
+<!-- Section-ID: S04_ARCHITECTURE -->
+Kode-CLI 采用四层架构设计，从底向上依次为基础设施层、核心框架层、服务层和应用层。
+
+[UML]
+@startuml
+skinparam packageStyle rectangle
+skinparam backgroundColor #FEFEFE
+
+package "应用层 (Application)" as APP {
+  [CLI入口] as CLI
+  [ACP Agent] as ACP
+  [MCP服务] as MCP_SRV
+  [30+ 命令] as CMDS
+}
+
+package "服务层 (Services)" as SVC {
+  [AI/LLM] as LLM
+  [MCP客户端] as MCP
+  [插件运行时] as PLUGIN
+  [系统提示词] as SYSPROMPT
+  [Kode上下文] as CTX
+  [OAuth认证] as OAUTH
+}
+
+package "核心框架层 (Core)" as CORE {
+  [Tool注册表] as TOOL
+  [配置管理] as CONFIG
+  [权限引擎] as PERM
+  [成本追踪] as COST
+}
+
+package "基础设施层 (Infrastructure)" as INFRA {
+  [文件系统] as FS
+  [终端] as TERM
+  [网络] as NET
+  [Bun Shell] as SH
+}
+
+CLI --> TOOL : 注册/调用
+CLI --> LLM : 发起查询
+APP --> SVC : 依赖
+SVC --> CORE : 依赖
+CORE --> INFRA : 依赖
+ACP --> LLM : 直接调用
+ACP --> TOOL : 调用工具
+@enduml
+
+[Detail]
+- **应用层**：提供三种运行模式（CLI、ACP、MCP）和 30+ 内置命令，是用户和外部系统的接入点
+- **服务层**：封装 AI 模型交互、MCP 协议、插件加载、系统提示词构建等业务服务
+- **核心框架层**：定义 Tool 抽象、配置 Schema、权限校验规则和成本核算
+- **基础设施层**：提供文件系统、终端、网络、Bun Shell 等底层能力
+
+依赖方向严格从上到下：应用层 → 服务层 → 核心层 → 基础设施层。同一层内模块通过接口依赖，避免循环引用。
+
+------------------------------------------------------------
+[Example]
+三种运行模式
+
+[Description]
+<!-- Section-ID: S04_ARCHITECTURE -->
+Kode-CLI 支持三种运行模式，分别面向不同使用场景。
+
+[UML]
+@startuml
+left to right direction
+
+rectangle "Kode-CLI" {
+  (CLI模式) as CLI_MODE
+  (MCP服务) as MCP_MODE
+  (ACP Agent) as ACP_MODE
+}
+
+rectangle "用户/系统" {
+  actor "终端用户" as USER
+  actor "AI IDE" as IDE
+  actor "外部进程" as PROCESS
+}
+
+USER --> CLI_MODE : kode [prompt]
+IDE --> MCP_MODE : MCP Protocol
+PROCESS --> ACP_MODE : JSON-RPC via stdin/stdout
+
+note bottom of CLI_MODE
+  交互式终端 UI
+  Ink React 渲染
+  支持 /commands
+end note
+
+note bottom of MCP_MODE
+  实现 MCP 服务器
+  供 Cursor/VS Code 等 IDE 使用
+end note
+
+note bottom of ACP_MODE
+  Agent 间通信协议
+  kode --acp
+end note
+@enduml
+
+[Detail]
+- **CLI 模式**（默认）：通过 `kode` 命令启动交互式终端，使用 Ink React 组件构建 UI，支持 `/` 命令和 Tab 补全
+- **MCP 服务模式**（`src/entrypoints/mcp.ts`）：以 MCP 服务器形式运行，可由 IDE（如 Cursor、VS Code AI 插件）直接调用
+- **ACP Agent 模式**（`kode --acp`）：实现 Agent Communication Protocol，通过 JSON-RPC over stdio 与其他 Agent 或进程通信
+
+------------------------------------------------------------
+[Example]
+AI 模型适配架构
+
+[Description]
+<!-- Section-ID: S04_ARCHITECTURE -->
+AI 模型适配采用策略模式，通过 `ModelAdapterFactory` 根据模型能力自动选择 API 适配器。
+
+[UML]
+@startuml
+interface "ModelAPIAdapter" as Adapter {
+  +streamChat()
+  +streamCompletion()
+}
+
+class "ResponsesAPIAdapter" as Resp {
+  +streamChat()
+  +streamCompletion()
+}
+
+class "ChatCompletionsAdapter" as Chat {
+  +streamChat()
+  +streamCompletion()
+}
+
+class "ModelAdapterFactory" as Factory {
+  +createAdapter()
+  +shouldUseResponsesAPI()
+}
+
+class "ModelCapabilities" as Caps {
+  +apiArchitecture
+  +primary
+  +fallback
+}
+
+Factory --> Caps : 读取能力
+Factory --> Adapter : 创建
+Resp --|> Adapter
+Chat --|> Adapter
+
+note right of Factory
+  GPT-5 → Responses API
+  其他 → Chat Completions
+  非官方 OpenAI 端点
+  → 检查 fallback
+end note
+@enduml
+
+[Detail]
+`ModelAdapterFactory.determineAPIType()` 的决策逻辑：如果模型 `apiArchitecture.primary === 'responses_api'` 且是官方 OpenAI 端点，使用 Responses API；如果是非官方端点但 primary 为 responses_api，检查 `fallback` 决定是否降级。
+
+这保证了同一套代码可以同时支持 Anthropic、OpenAI 和其他兼容供应商的 API 差异。
+
+------------------------------------------------------------

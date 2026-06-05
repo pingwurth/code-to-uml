@@ -1,0 +1,106 @@
+Title: 核心对象与函数
+Describe: Kode-CLI 的关键类、函数、模块及其职责、接口和调用关系。
+------------------------------------------------------------
+[Example]
+工具系统 (Tool Registry)
+
+[Description]
+<!-- Section-ID: S03_CORE_OBJECTS -->
+工具系统是 AI Agent 操作能力的核心抽象。定义在 `src/core/tools/`，包含四个关键模块：
+
+- **`tool.ts`** — `Tool<TInput>` 接口定义：包含 `name`、`description`、`inputSchema`（Zod）、`isEnabled()`、`isReadOnly()`、`validate()`、`call()` 等方法
+- **`defineTool.ts`** — `defineTool()` 辅助函数，简化 Tool 创建
+- **`registry.ts`** — `createToolRegistry()` 和 `getToolByName()`，管理工具的注册与查找
+- **`executor.ts`** — `collectToolResult()` 执行工具并收集结果
+
+[UML]
+None
+
+[Detail]
+调用者：`src/tools/index.ts` 注册 22+ 内置工具。被调用者：各工具实现位于 `src/tools/` 子目录。
+
+当 AI 模型决定调用工具时，`app/query.ts` 中的查询循环根据 `toolUseId` 查找到对应的 Tool 实例，调用其 `validate()` 方法校验参数，再调用 `call()` 方法执行。
+
+------------------------------------------------------------
+[Example]
+AI/LLM 服务层
+
+[Description]
+<!-- Section-ID: S03_CORE_OBJECTS -->
+LLM 服务层位于 `src/services/ai/`，是项目与外部 AI 模型交互的核心：
+
+- **`llm.ts`** — 主 LLM 交互模块，支持 Anthropic SDK（含 Bedrock/Vertex）、OpenAI SDK，管理消息构建、Token 计数、重试逻辑和错误处理
+- **`llmLazy.ts`** — 按需延迟加载 LLM 工厂
+- **`modelAdapterFactory.ts`** — `ModelAdapterFactory.createAdapter()` 根据模型能力选择 Responses API 或 Chat Completions 适配器
+- **`adapters/`** — `ModelAPIAdapter` 抽象 + `ResponsesAPIAdapter` / `ChatCompletionsAdapter` 实现
+- **`openai.ts`** — OpenAI 兼容接口的请求/重试/中止逻辑
+- **`responseStateManager.ts`** — 管理 Response ID 和 Conversation ID 状态
+- **`llmConstants.ts`** — 常量定义（温度参数、错误消息模板等）
+
+[UML]
+None
+
+[Detail]
+该层支持 20+ AI 模型供应商，核心是通过 `ModelAdapterFactory` 自动选择 API 协议：GPT-5 系列使用 OpenAI Responses API，其他模型使用 Chat Completions。支持 `@ask-model-name` 语法在对话过程中动态切换模型。
+
+------------------------------------------------------------
+[Example]
+MCP 客户端
+
+[Description]
+<!-- Section-ID: S03_CORE_OBJECTS -->
+MCP (Model Context Protocol) 客户端位于 `src/services/mcp/`，支持四种传输协议：
+
+- **`client.ts`** — `Client` 连接管理，支持 stdio/SSE/Streamable HTTP/WebSocket 四种传输方式，包含批量连接、重连、心跳机制
+- **`discovery.ts`** — `.mprc` 配置文件发现和 `.kode/plugins/` MCP 服务器发现
+- **`tools-integration.ts`** — 将 MCP 服务器提供的能力暴露为 Tool，与内置工具统一调度
+- **`cli-utils.ts`** — CLI 的 MCP 配置管理工具函数
+- **`internal/`** — JSONC 解析等内部辅助
+
+[UML]
+None
+
+[Detail]
+MCP 客户端支持三种连接策略：stdio（本地进程）、SSE/HTTP（远程服务器）、WebSocket。运行时 `getMCPTools()` 将所有已连接的 MCP 工具合并到 `getTools()` 的返回结果中，与本地工具统一调度。
+
+------------------------------------------------------------
+[Example]
+插件运行时
+
+[Description]
+<!-- Section-ID: S03_CORE_OBJECTS -->
+插件系统位于 `src/services/plugins/`，支持从本地目录发现和加载插件：
+
+- **`pluginRuntime.ts`** — `loadSessionPlugins()` 从配置的插件目录加载插件，支持 glob 模式匹配、路径展开、Manifest 校验
+- **`pluginValidation.ts`** — 插件 Manifest 的 Schema 校验
+- **`skillMarketplace.ts`** — 技能市场，支持从 GitHub/URL 下载插件
+- **`customCommands.ts`** — 自定义命令的定义与执行
+
+[UML]
+None
+
+[Detail]
+插件目录通过全局配置 `pluginDirs` 指定，支持 `~` 展开和 glob 模式。启动时 `setSessionPlugins()` 注入会话插件。插件 Manifest 使用 `PluginManifestSchema`（Zod）校验，最少要求 `name` 字段。
+
+------------------------------------------------------------
+[Example]
+ACP Agent 协议
+
+[Description]
+<!-- Section-ID: S03_CORE_OBJECTS -->
+ACP (Agent Communication Protocol) 是项目自有的 Agent 间通信协议，定义在 `src/acp/`：
+
+- **`protocol.ts`** — 类型定义：`InitializeParams`、`AgentCapabilities`、`PromptCapabilities`、`Tool` 请求/响应等
+- **`jsonrpc.ts`** — `JsonRpcPeer` 实现 JSON-RPC 2.0 消息收发
+- **`kodeAcpAgent.ts`** — `KodeAcpAgent` 实现 ACP Agent 的具体行为
+- **`stdioTransport.ts`** — stdio 传输层适配
+- **`stdoutGuard.ts`** — stdout 保护（防止 JSON-RPC 与日志输出干扰）
+- **`index.ts`** — 协议常量和能力类型导出
+
+[UML]
+None
+
+[Detail]
+ACP 允许 Kode 作为 Agent 被其他进程调用（通过 `--acp` 标志）。它通过 stdin/stdout 交换 JSON-RPC 消息，支持文件系统操作、终端命令、提示词扩展、MCP 代理等能力。协议版本目前为 v1。
+
+------------------------------------------------------------

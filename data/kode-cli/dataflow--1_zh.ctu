@@ -1,0 +1,115 @@
+Title: 数据流/状态流
+Describe: 消息数据流、配置持久化、会话生命周期和状态管理。
+------------------------------------------------------------
+[Example]
+消息数据流
+
+[Description]
+<!-- Section-ID: S07_DATA_OR_STATE_FLOW -->
+从用户输入到 AI 模型、到工具结果、再到最终回复的完整数据流转。
+
+[UML]
+@startuml
+participant "用户输入" as INPUT
+participant "Message[]" as MSGS
+participant "API MessageParam[]" as PARAMS
+participant "AI 模型" as AI
+participant "StreamingEvent" as EVT
+participant "ToolUseBlock" as TUB
+participant "Tool 执行结果" as RESULT
+participant "最终回复" as REPLY
+participant "Session JSONL" as LOG
+
+INPUT -> MSGS : submitPrompt()
+MSGS -> MSGS : 追加 UserMessage
+MSGS -> PARAMS : normalizeMessagesForAPI()
+PARAMS -> AI : queryLLM()
+AI -> EVT : 流式事件
+
+alt text_delta
+  EVT -> REPLY : 逐块追加文本
+else tool_request
+  EVT -> TUB : 解析工具调用
+  TUB -> RESULT : Tool.call()
+  RESULT -> MSGS : appendSessionJsonlFromMessage()
+  RESULT -> PARAMS : 下一轮
+  PARAMS -> AI : 继续推理
+else message_stop
+  EVT -> REPLY : 完成
+end
+
+MSGS -> LOG : appendSessionJsonlFromMessage()
+note right of LOG
+  每轮对话追加到
+  session JSONL 文件
+  支持对话恢复
+end note
+@enduml
+
+[Detail]
+消息数据流以 `Message[]` 为核心数据结构。`app/messages.ts` 通过 `getMessages()` 和 `setMessages()` 管理全局消息状态。关键转换：
+
+- `normalizeMessagesForAPI()`：将内部 `Message` 格式转换为 Anthropic/OpenAI 的 `MessageParam` 格式
+- `normalizeContentFromAPI()`：将 API 返回的 `ContentBlock` 转换回内部格式
+- `appendSessionJsonlFromMessage()`：每轮对话写入 `.jsonl` 文件，支持 `ResumeConversation` 恢复
+- `createAssistantMessage()` / `createUserMessage()` / `createProgressMessage()`：构建不同类型消息
+
+------------------------------------------------------------
+[Example]
+配置持久化与状态管理
+
+[Description]
+<!-- Section-ID: S07_DATA_OR_STATE_FLOW -->
+配置和状态分为全局、项目和会话三个层级进行管理。
+
+[UML]
+@startuml
+rectangle "全局配置\n~/.kode/config.json" as GLOBAL {
+  (API Keys)
+  (模型指针)
+  (MCP 服务器定义)
+  (自动更新设置)
+  (主题/输出样式)
+}
+
+rectangle "项目配置\n[project]/.kode/config.json" as PROJECT {
+  (上下文变量)
+  (项目级 MCP)
+  (成本跟踪)
+  (自定义命令)
+}
+
+rectangle "会话状态\n(运行时内存)" as SESSION {
+  (CWD)
+  (消息列表)
+  (插件实例)
+  (Shell 会话)
+  (AGENTS.md 缓存)
+}
+
+rectangle "持久化日志\n[project]/.kode/logs/" as LOGS {
+  (对话 JSONL)
+  (调试日志)
+  (请求状态)
+}
+
+GLOBAL --> PROJECT : 继承/覆写
+PROJECT --> SESSION : 加载到运行时
+SESSION --> LOGS : 运行时写入
+
+note right of SESSION
+  getCwd() / setCwd()
+  getContext() / setContext()
+  getModelManager().getModel('main')
+end note
+@enduml
+
+[Detail]
+- **全局配置**：存储在用户目录的 `.kode/config.json`，包含 API Key、模型指针、全局 MCP 服务器定义
+- **项目配置**：存储在项目目录的 `.kode/config.json`，包含上下文变量、项目级 MCP 服务器、成本统计
+- **会话状态**：运行时内存状态，通过 `@utils/state` 和 `@context` 管理，包括 CWD、消息列表、插件实例
+- **日志文件**：对话记录以 JSONL 格式写入 `.kode/logs/`，支持 `resume` 命令恢复会话
+
+配置加载优先级：CLI 参数 > 环境变量 > 项目配置 > 全局配置。
+
+------------------------------------------------------------

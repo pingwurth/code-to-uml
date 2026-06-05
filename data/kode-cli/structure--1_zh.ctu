@@ -1,0 +1,78 @@
+Title: 项目结构
+Describe: Kode-CLI 的顶层目录结构、入口点和模块组织方式。
+------------------------------------------------------------
+[Example]
+顶层目录结构与入口点
+
+[Description]
+<!-- Section-ID: S02_TOP_LEVEL_STRUCTURE -->
+项目根目录包含以下核心文件：
+
+- `cli.js` — **npm 包装入口**，用于从 npm 包启动时找到构建目录并通过 Bun 运行实际 CLI
+- `cli-acp.js` — ACP 协议的 npm 包装入口
+- `src/entrypoints/cli.tsx` — **主 CLI 入口**，初始化 Sentry、运行时环境、Yoga WASM，然后调用 `runCli()`
+- `src/entrypoints/index.ts` — 参数分发器，根据 `--acp` 标志分流到 ACP 或 CLI 入口
+- `src/entrypoints/acp.ts` — **ACP Agent 模式入口**，启动 JSON-RPC 通信
+- `src/entrypoints/mcp.ts` — **MCP 服务入口**
+
+[UML]
+None
+
+[Detail]
+项目采用 TypeScript + Bun 技术栈，使用 `tsx` (TypeScript JSX) 作为组件模板引擎（Ink React 渲染），通过 Bun 构建工具编译为 `dist/` 目录分发给 npm 用户。
+
+------------------------------------------------------------
+[Example]
+源码模块组织
+
+[Description]
+<!-- Section-ID: S02_TOP_LEVEL_STRUCTURE -->
+`src/` 目录按职责分为 16 个子目录：
+
+| 目录 | 用途 |
+|---|---|
+| `entrypoints/` | CLI、ACP、MCP 三种运行模式入口 |
+| `core/` | 工具系统(Tool Registry)、配置管理、权限引擎、成本追踪 |
+| `services/` | AI/LLM 适配、MCP 客户端、上下文服务、插件运行时、Auth/OAuth |
+| `tools/` | 22+ 内置工具的声明与实现 |
+| `commands/` | 30+ 内置命令（`/help`, `/config`, `/agent` 等） |
+| `app/` | 消息管理、查询执行、二进制反馈 |
+| `context/` | 全局 Context 管理 |
+| `ui/` | Ink React 组件库、Hook、Screen |
+| `types/` | TypeScript 类型定义 |
+| `utils/` | 工具函数，覆盖 agent/配置/文件/日志/模型/权限/会话等 |
+| `acp/` | ACP Agent 协议实现（JSON-RPC、传输层） |
+| `constants/` | 常量定义（模型、宏、产品名、提示词等） |
+| `agent/` | Agent 加载/管理 |
+| `services/system/` | 系统提示词、VCR 录制、文件新鲜度 |
+| `services/auth/` | OAuth 认证流程 |
+| `services/telemetry/` | Sentry 错误追踪 |
+
+[UML]
+None
+
+[Detail]
+每个模块遵循单一职责原则。`core/` 提供底层框架，`services/` 实现外部集成，`tools/` 提供 AI Agent 可调用的能力，`commands/` 提供用户可交互的命令行操作。
+
+------------------------------------------------------------
+[Example]
+配置系统架构
+
+[Description]
+<!-- Section-ID: S02_TOP_LEVEL_STRUCTURE -->
+配置系统位于 `src/core/config/`，分为四层：
+
+1. **Schema 层** (`schema.ts`) — 用 TypeScript 类型定义 `GlobalConfig`、`ProjectConfig`、`ModelProfile`、`McpServerConfig` 等配置结构
+2. **默认值层** (`defaults.ts`) — 定义 `DEFAULT_GLOBAL_CONFIG` 等出厂配置
+3. **加载器层** (`loader.ts`) — `getGlobalConfig()`、`saveGlobalConfig()`、`getCurrentProjectConfig()` 等读写接口，支持全局与项目级配置隔离
+4. **校验器层** (`validator.ts`) — 验证并修复 GPT-5 配置档位，确保模型指针一致性
+
+配置存储格式为 JSON 文件，位于用户目录下的 `.kode/` 目录和项目目录下的 `.kode/` 目录。
+
+[UML]
+None
+
+[Detail]
+配置系统支持 CLI 参数覆写（`kode --config key=value`）、环境变量读取（`dotenv/config`）和 GUI 配置界面（`/config` 命令）。关键配置项包括 API Key、模型选择、MCP 服务器定义、权限模式等。
+
+------------------------------------------------------------

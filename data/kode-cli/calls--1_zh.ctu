@@ -1,0 +1,108 @@
+Title: 调用关系
+Describe: Kode-CLI 核心模块间的跨边界调用链和交互时序。
+------------------------------------------------------------
+[Example]
+查询请求端到端调用链
+
+[Description]
+<!-- Section-ID: S06_CALL_RELATIONSHIPS -->
+用户输入提示词到 AI 回复的完整调用链，跨越 UI、查询引擎、LLM 服务层和工具系统。
+
+[UML]
+@startuml
+actor "用户" as U
+participant "PromptInput\n(UI组件)" as PI
+participant "query.ts\n(查询引擎)" as Q
+participant "systemPrompt.ts\n(提示词构建)" as SP
+participant "llm.ts\n(LLM服务)" as LLM
+participant "openai.ts\n(OpenAI适配)" as OA
+participant "ToolRegistry\n(工具系统)" as TR
+participant "具体Tool\n(Bash等)" as TL
+
+U -> PI: 输入消息+Enter
+PI -> Q: submitPrompt(text)
+Q -> SP: formatSystemPromptWithContext()
+SP --> Q: 增强后的System Prompt
+Q -> LLM: queryLLM(messages, tools)
+LLM -> OA: streamChat() / create()
+
+alt Anthropic SDK
+  LLM -> LLM: Anthropic SDK 流式请求
+else OpenAI SDK
+  OA -> OA: 带重试的流式请求
+end
+
+LLM --> Q: StreamingEvent 流
+
+loop 每个 ToolUseBlock
+  Q -> TR: getToolByName(toolName)
+  TR --> Q: Tool 实例
+  Q -> Q: validate(input)
+  Q -> TL: call(input, context)
+  TL --> Q: ToolResult
+  Q -> LLM: 包含结果的下一轮请求
+end
+
+LLM --> Q: 最终文本响应
+Q --> PI: 更新消息列表
+PI --> U: 显示回复
+@enduml
+
+[Detail]
+该调用链展示了 Kode-CLI 中最核心的端到端路径。关键观察：
+
+- `llm.ts` 向上游对 `query.ts` 隐藏了 SDK 差异，通过 `ModelAdapterFactory` 统一适配 Anthropic 和 OpenAI
+- 工具调用循环可能迭代多次（模型 → 工具 → 结果 → 模型继续推理）
+- `responseStateManager` 追踪 `conversationId` 和 `previousResponseId`，支持持续对话
+- 错误处理在 `llm.ts` 中通过重试（指数退避 + 抖动）和 VCR 录制进行管理
+
+------------------------------------------------------------
+[Example]
+MCP 工具集成调用链
+
+[Description]
+<!-- Section-ID: S06_CALL_RELATIONSHIPS -->
+MCP 工具如何发现、连接并与内置工具统一调用的完整路径。
+
+[UML]
+@startuml
+participant "getTools()\n(工具收集)" as GT
+participant "mcpClient\n(getMCPTools)" as MC
+participant "Client\n(connectToServer)" as CL
+participant "MCPTool\n(包装器)" as MT
+participant "外部MCP\n服务器" as EX
+
+GT -> MC: getMCPTools()
+MC -> MC: discovery: .mprc / plugins
+MC -> CL: connectToServer(name, config)
+
+alt stdio 传输
+  CL -> CL: StdioClientTransport(command, args)
+else SSE 传输
+  CL -> CL: SSEClientTransport(url)
+else Streamable HTTP
+  CL -> CL: StreamableHTTPClientTransport(url)
+else WebSocket
+  CL -> CL: WebSocketClientTransport(url)
+end
+
+CL -> EX: initialize() 握手
+EX --> CL: capabilities / tools
+CL --> MC: Client 实例
+
+MC -> MT: 创建 MCPTool(client)
+MT -> GT: 返回 Tool 实例列表
+GT -> GT: 合并到 getAllTools()
+
+note right of GT
+  memoize 缓存结果
+  避免重复连接
+end note
+@enduml
+
+[Detail]
+MCP 工具与内置工具通过相同的 `Tool` 接口统一暴露给 AI 模型。`MCPTool` 包装器负责将标准 `Tool.call()` 转换为 MCP 协议的 `tools/call` 请求，并将 MCP `tools/list` 返回的工具描述适配为标准 `inputSchema` 格式。
+
+批量连接大小由环境变量 `MCP_SERVER_CONNECTION_BATCH_SIZE` 控制，默认每次最多并行连接 3 个服务器。
+
+------------------------------------------------------------

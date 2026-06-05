@@ -1,0 +1,160 @@
+Title: 核心流程
+Describe: CLI 启动、查询处理、工具执行和插件加载的主要流程。
+------------------------------------------------------------
+[Example]
+CLI 启动流程
+
+[Description]
+<!-- Section-ID: S05_CORE_FLOW -->
+从用户输入 `kode [prompt]` 到交互式终端就绪的完整启动链。
+
+[UML]
+@startuml
+start
+:用户执行 kode [prompt];
+:cli.js 查找 package root\n并调用 Bun;
+:src/entrypoints/index.ts\n解析参数;
+
+if (--acp?) then (是)
+  :进入 ACP Agent 模式\n(acp.ts);
+  stop
+else (否)
+  :进入 CLI 模式\n(cli.tsx);
+endif
+
+:initSentry() 初始化错误追踪;
+:ensurePackagedRuntimeEnv()\n检查运行时环境;
+:ensureYogaWasmPath()\n加载 Yoga WASM;
+:installProcessHandlers()\n注册 SIGINT/SIGTERM 处理;
+:runCli() 启动 CLI;
+
+partition setup {
+  :setup(cwd, safeMode)\n设置工作目录;
+  :grantReadPermissionForOriginalDir();
+  :startAgentWatcher()\n监听 AGENTS.md 变更;
+  if (safeMode && root) then (是)
+    :拒绝 root 下的 safe 模式\n并退出;
+    stop
+  endif
+  :cleanupOldMessageFilesInBackground();
+  :getContext() 初始化上下文;
+}
+
+:showSetupScreens()\n显示启动屏幕;
+:进入交互式\n消息循环;
+stop
+@enduml
+
+[Detail]
+启动流程分为三个阶段：参数解析（`index.ts`）→ 环境初始化（`cli.tsx`）→ 运行时设置（`setup.ts`）。关键注意点：
+
+- `ensurePackagedRuntimeEnv()` 验证 `KODE_PACKAGED` 环境变量，确保运行在正确版本
+- `startAgentWatcher()` 使用文件系统监听器跟踪 `AGENTS.md` / `AGENTS.override.md` 变更，支持热重载
+- `cleanupOldMessageFilesInBackground()` 在后台清理过期会话文件
+- `showSetupScreens()` 显示 ASCII Art Logo 和版本信息
+
+------------------------------------------------------------
+[Example]
+核心查询/响应循环
+
+[Description]
+<!-- Section-ID: S05_CORE_FLOW -->
+用户提交消息后，系统执行查询-工具-响应循环，这是 Kode 最核心的运行时路径。
+
+[UML]
+@startuml
+|UI|
+start
+:用户输入消息;
+:显示到消息列表;
+
+|Query Engine|
+:runUserPromptSubmitHooks();
+:formatSystemPromptWithContext()\n构建系统提示词;
+:queryLLM()\n发送到 AI 模型;
+
+|AI Model|
+:模型流式返回响应;
+
+|Query Engine|
+if (模型返回工具调用?) then (是)
+  :解析 ToolUseBlock;
+  :resolveToolNameAlias()\n解析工具别名;
+  :runPreToolUseHooks();
+  :hasPermissionsToUseTool()\n校验权限;
+  if (权限不足?) then (是)
+    :REJECT_MESSAGE\n拒绝执行;
+    else (通过)
+  endif
+  :Tool.call()\n执行工具;
+  :collectToolResult()\n收集结果;
+  :runPostToolUseHooks();
+  :将工具结果\n附加到消息列表;
+  :queryLLM()\n继续发送给模型;
+  else (否)
+endif
+
+if (用户中断?) then (是)
+  :INTERRUPT_MESSAGE;
+  else (查询完成)
+endif
+
+|UI|
+:更新界面显示\n最终响应;
+stop
+@enduml
+
+[Detail]
+该循环是 Kode 的"思考-行动-观察"（ReAct）模式的实现。关键子流程：
+
+- **系统提示词构建**：合并基础系统提示词 + 项目上下文（AGENTS.md/CLAUDE.md）+ 上下文变量 + 输出样式 + 计划模式提示
+- **权限校验**：YOLO 模式下跳过所有检查，Safe 模式下逐工具请求用户批准
+- **Hook 系统**：支持 `preToolUse`、`postToolUse`、`stop`、`userPromptSubmit` 等 Hook，用于插件扩展能力
+- **中断处理**：用户可通过 Ctrl+C 中断当前查询，系统发送 `INTERRUPT_MESSAGE` 给模型
+
+------------------------------------------------------------
+[Example]
+工具系统内部流程
+
+[Description]
+<!-- Section-ID: S05_CORE_FLOW -->
+从工具注册到 AI 模型调用的完整工具生命周期。
+
+[UML]
+@startuml
+start
+:Tool 实现定义\n(name, schema, call);
+
+:registerTools()\n注册到 Registry;
+
+:getTools()\n收集所有可用工具;
+
+:formatToolDescriptions()\n转换为模型可读格式\n(JSON Schema);
+
+:模型选择工具和参数;
+:createToolUseBlock();
+
+:resolveToolByName()\n查找工具实例;
+
+:Tool.validate(input)\n校验参数;
+
+if (校验失败?) then (是)
+  :返回校验错误;
+  stop
+endif
+
+:Tool.call(input, context)\n执行工具;
+
+:collectToolResult()\n格式化结果;
+
+:将结果返回模型\n继续对话循环;
+stop
+@enduml
+
+[Detail]
+- 内置工具与 MCP 工具在 `getTools()` 中合并，通过 `memoize` 缓存结果
+- `isEnabled()` 决定工具是否在当前上下文中可用（例如权限模式限制）
+- `isReadOnly()` 用于在只读模式（如审查）下过滤写操作工具
+- `ToolUseContext` 携带 `abortController`、`messageId`、`options` 等上下文，支持取消操作
+
+------------------------------------------------------------

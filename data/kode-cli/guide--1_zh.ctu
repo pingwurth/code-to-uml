@@ -1,0 +1,138 @@
+Title: 开发指南
+Describe: 开发者上手指南、复盘问答和维护者速查表。
+------------------------------------------------------------
+[Example]
+开发上手指南
+
+[Description]
+<!-- Section-ID: S10_ONBOARDING_GUIDE -->
+
+从零开始参与 Kode-CLI 开发的推荐路径。
+
+**1. 环境准备**
+- Node.js >= 20.18.1
+- Bun（推荐，用于开发和构建）
+- 了解 TypeScript + JSX (React/Ink) 基础
+
+**2. 项目搭建**
+```bash
+git clone https://github.com/shareAI-lab/kode.git
+cd kode
+bun install
+bun run dev --verbose
+```
+
+**3. 阅读顺序**
+1. `src/entrypoints/cli.tsx` — 入口点，理解启动流程
+2. `src/core/tools/tool.ts` — Tool 接口定义，核心抽象
+3. `src/tools/index.ts` — 所有内置工具一览
+4. `src/services/ai/llm.ts` — AI 模型交互核心
+5. `src/app/query.ts` — 查询引擎，理解 ReAct 循环
+6. `src/services/mcp/client.ts` — MCP 协议集成
+7. `src/entrypoints/acp.ts` — ACP Agent 协议
+
+**4. 调试技巧**
+- 使用 `--verbose` 标志查看详细的 API 请求和工具调用日志
+- 使用 `--print` 模式进行非交互式测试
+- 调试日志位于项目 `.kode/logs/` 目录
+- 使用 `kode messages-debug` 命令查看消息状态
+
+**5. 扩展开发**
+- 新增工具：在 `src/tools/` 下创建目录，实现 `Tool` 接口，在 `src/tools/index.ts` 中注册
+- 新增命令：在 `src/commands/` 下创建文件，实现命令处理逻辑
+- 新增 MCP 服务器：在项目或全局配置中添加 `mcpServers` 定义
+
+[UML]
+None
+
+[Detail]
+开发注意事项：
+- 代码风格采用 Prettier 格式化，ESLint 严格模式（`--max-warnings 0`）
+- 测试使用 Bun test runner，运行 `bun test`
+- 构建前运行 `bun run prepublishOnly` 进行完整检查
+- ACP 协议目前为 v1 版本，协议变更需要同步更新 `protocol.ts` 中的版本号
+
+------------------------------------------------------------
+[Example]
+复盘问答
+
+[Description]
+<!-- Section-ID: S12_REVIEWER_QUESTIONS -->
+
+**Q1: Kode-CLI 如何支持多种 AI 模型供应商？**
+
+通过 `ModelAdapterFactory` 策略模式。`ModelCapabilities` 静态注册每个模型的 API 架构能力（Responses API 或 Chat Completions）。工厂类根据 `modelProfile.modelName` 查找能力配置，自动实例化对应的 `ModelAPIAdapter` 实现。运行时还支持通过 `@ask-model-name` 语法在单次对话中动态切换模型。
+
+**Q2: "YOLO 模式"和"Safe 模式"的根本区别是什么？**
+
+YOLO 模式跳过所有权限检查，工具调用直接执行。Safe 模式在每次工具调用前通过 `hasPermissionsToUseTool()` 弹窗请求用户批准，其中 Bash 命令有精确匹配缓存机制减少重复审批。Safe 模式还禁止在 root 权限下运行。
+
+**Q3: 工具系统如何集成 MCP 协议的能力？**
+
+MCP 工具通过 `MCPTool` 包装器适配为标准 `Tool` 接口。`getMCPTools()` 连接所有已配置的 MCP 服务器，将 MCP 的 `tools/list` 响应转换为 `inputSchema`（Zod），`tools/call` 通过 `client.callTool()` 转发。两者在 `getTools()` 中合并返回。
+
+**Q4: ACP 协议与 MCP 协议有何不同？**
+
+ACP（Agent Communication Protocol）是 Kode 自有的 Agent 间通信协议，基于 JSON-RPC 2.0 over stdin/stdout，面向 Agent 间的协作场景。MCP 是开放的 Model Context Protocol，面向 AI 模型与外部工具/资源的集成。ACP 支持 Agent 生命周期管理、会话恢复、文件系统操作代理等更高级的 Agent 间交互功能。
+
+**Q5: Kode 如何解析和缓存项目指令文件（AGENTS.md）？**
+
+从 Git 根目录到工作目录逐级搜索 `AGENTS.md` 或 `AGENTS.override.md`。`KodeContextManager` 单例缓存加载结果，总大小上限 32 KiB。通过 `startAgentWatcher()` 监听文件变更支持热重载。`formatSystemPromptWithContext()` 在每次 AI 查询时注入上下文到系统提示词中。
+
+[UML]
+None
+
+[Detail]
+
+**Q6: 配置系统如何处理全局配置和项目配置的冲突？**
+
+全局配置存储在 `~/.kode/config.json`，项目配置存储在 `<project>/.kode/config.json`。加载时项目配置会覆写全局配置的同名键（merge 语义）。CLI 参数（通过 `kode --config key=value`）的优先级高于两者。
+
+**Q7: 三种运行模式（CLI/MCP/ACP）共享哪些核心组件？**
+
+三者共享完整的核心框架层：Tool 系统、配置管理、权限引擎、成本追踪。AI 服务层（LLM 交互）也被共享。不同之处在于：CLI 使用 Ink React UI，MCP 暴露服务器接口，ACP 实现 JSON-RPC Agent 协议。
+
+**Q8: 插件系统和 Hook 系统的关系是什么？**
+
+插件系统负责插件的发现、加载和生命周期管理。Hook 系统是插件与查询引擎的集成点。插件通过注册 Hook 回调（如 `preToolUse`、`postToolUse`）来扩展 Kode 的行为。两者配合实现了不修改核心代码即可扩展功能的能力。
+
+------------------------------------------------------------
+[Example]
+维护者速查表
+
+[Description]
+<!-- Section-ID: S13_MAINTAINER_REFERENCE -->
+
+| 名称 | 类型 | 位置 | 用途 | 备注 |
+|---|---|---|---|---|
+| `cli.tsx` | 入口 | `src/entrypoints/cli.tsx` | CLI 模式主入口 | 初始化 Sentry/环境后调用 `runCli()` |
+| `index.ts` | 入口 | `src/entrypoints/index.ts` | 参数分发器 | 根据 `--acp` 分流到 ACP 或 CLI |
+| `acp.ts` | 入口 | `src/entrypoints/acp.ts` | ACP Agent 模式入口 | JSON-RPC over stdio |
+| `mcp.ts` | 入口 | `src/entrypoints/mcp.ts` | MCP 服务模式入口 | 供 IDE 集成 |
+| `runCli.tsx` | 模块 | `src/entrypoints/cli/runCli.tsx` | CLI 启动逻辑 | Commander 参数解析、子命令路由 |
+| `setup.ts` | 模块 | `src/entrypoints/cli/setup.ts` | 运行时初始化 | CWD、权限、Agent Watcher |
+| `Tool` | 接口 | `src/core/tools/tool.ts` | 工具抽象接口 | `name`/`schema`/`validate()`/`call()` |
+| `defineTool()` | 函数 | `src/core/tools/defineTool.ts` | 工具创建辅助 | 简化 Tool 实现 |
+| `createToolRegistry()` | 函数 | `src/core/tools/registry.ts` | 工具注册表 | 管理工具查找 |
+| `getAllTools()` | 函数 | `src/tools/index.ts` | 内置工具注册 | 22+ 工具 + MCP 工具合并 |
+| `queryLLM()` | 函数 | `src/services/ai/llm.ts` | AI 模型交互 | Anthropic + OpenAI 统一适配 |
+| `ModelAdapterFactory` | 类 | `src/services/ai/modelAdapterFactory.ts` | 适配器工厂 | 策略模式选择 API 适配器 |
+| `query()` | 函数 | `src/app/query.ts` | 查询执行引擎 | ReAct 循环（消息→工具→消息） |
+| `formatSystemPromptWithContext()` | 函数 | `src/services/system/systemPrompt.ts` | 系统提示词构建 | 注入项目上下文和 Agent 指令 |
+| `KodeContextManager` | 类 | `src/services/context/kodeContext.ts` | 项目文档缓存 | 单例缓存 AGENTS.md 内容 |
+| `loadSessionPlugins()` | 函数 | `src/services/plugins/pluginRuntime.ts` | 插件加载 | Glob 展开 + Manifest 校验 |
+| `Client` | 类 | `src/services/mcp/client.ts` | MCP 客户端 | 四传输协议支持 |
+| `KodeAcpAgent` | 类 | `src/acp/kodeAcpAgent.ts` | ACP Agent 实现 | Agent 间通信处理 |
+| `JsonRpcPeer` | 类 | `src/acp/jsonrpc.ts` | JSON-RPC 对等体 | 消息收发核心 |
+| `getGlobalConfig()` | 函数 | `src/core/config/loader.ts` | 全局配置加载 | `~/.kode/config.json` |
+| `getCurrentProjectConfig()` | 函数 | `src/core/config/loader.ts` | 项目配置加载 | `<project>/.kode/config.json` |
+| `Message` | 类型 | `src/app/query.ts` | 消息类型 | 内部消息表示 |
+| `getTools()` | 函数 | `src/tools/index.ts` | 可用工具收集 | 合并内置 + MCP 工具并过滤 |
+
+[UML]
+None
+
+[Detail]
+上表涵盖了 Kode-CLI 项目中最核心的 24 个符号。对于每个符号，可以通过在 `src/` 目录中搜索其名称定位到具体的实现行号。
+
+------------------------------------------------------------

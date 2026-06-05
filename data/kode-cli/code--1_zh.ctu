@@ -1,0 +1,191 @@
+Title: 关键代码片段分析
+Describe: 选取 Kode-CLI 中最具代表性的代码片段，分析其设计意图、边界条件和注意事项。
+------------------------------------------------------------
+[Example]
+ModelAdapterFactory：多模型适配策略
+
+[Description]
+<!-- Section-ID: S08_CODE_SNIPPETS -->
+`ModelAdapterFactory` 是 Kode-CLI 支持多 AI 模型供应商的核心设计。它通过读取 `ModelCapabilities` 中的 `apiArchitecture` 配置，动态选择合适的 API 适配器。
+
+```typescript
+// src/services/ai/modelAdapterFactory.ts
+export class ModelAdapterFactory {
+  static createAdapter(modelProfile: ModelProfile): ModelAPIAdapter {
+    const capabilities = getModelCapabilities(modelProfile.modelName)
+    const apiType = this.determineAPIType(modelProfile, capabilities)
+    switch (apiType) {
+      case 'responses_api':
+        return new ResponsesAPIAdapter(capabilities, modelProfile)
+      case 'chat_completions':
+      default:
+        return new ChatCompletionsAdapter(capabilities, modelProfile)
+    }
+  }
+
+  private static determineAPIType(
+    modelProfile: ModelProfile,
+    capabilities: ModelCapabilities,
+  ): 'responses_api' | 'chat_completions' {
+    if (capabilities.apiArchitecture.primary !== 'responses_api') {
+      return 'chat_completions'
+    }
+    const isOfficialOpenAI = !modelProfile.baseURL ||
+      modelProfile.baseURL.includes('api.openai.com')
+    if (!isOfficialOpenAI) {
+      if (capabilities.apiArchitecture.fallback === 'chat_completions')
+        return capabilities.apiArchitecture.primary
+      return capabilities.apiArchitecture.primary
+    }
+    return capabilities.apiArchitecture.primary
+  }
+}
+```
+
+[UML]
+None
+
+[Detail]
+设计意图：通过策略模式消除对不同 AI 供应商 API 差异的耦合。
+
+关键边界条件：
+- **官方端点优先**：GPT-5 模型在官方 OpenAI 端点使用 Responses API（支持更高级的交互模式）
+- **非官方端点容错**：如果使用第三方兼容端点（如代理），即使模型 primary 为 responses_api，也检查 fallback 选项
+- **ModelCapabilities**：定义在 `@constants/modelCapabilities`，每个模型的 API 架构能力通过常量的方式静态注册
+
+注意事项：如果第三方端点不支持 Responses API 但 primary 为 responses_api，且未正确配置 fallback，可能导致 API 调用失败。
+
+------------------------------------------------------------
+[Example]
+Tool 接口定义：能力抽象层
+
+[Description]
+<!-- Section-ID: S08_CODE_SNIPPETS -->
+`Tool<TInput>` 是所有内置工具和 MCP 工具的统一接口，它通过 Zod Schema 定义输入约束，通过生命周期方法管理可用性。
+
+```typescript
+// src/core/tools/tool.ts
+export interface Tool<TInput extends z.ZodTypeAny = z.ZodTypeAny> {
+  name: string
+  description: string
+  inputSchema: TInput
+  isEnabled: () => Promise<boolean> | boolean
+  isReadOnly: () => boolean
+  validate: (
+    input: z.infer<TInput>,
+    context: ToolUseContext,
+  ) => Promise<ValidationResult> | ValidationResult
+  call: (
+    input: z.infer<TInput>,
+    context: ExtendedToolUseContext,
+  ) => Promise<any>
+}
+```
+
+[UML]
+None
+
+[Detail]
+设计意图：定义统一的工具契约，使 AI 模型可以通过标准化的方式发现和调用任何能力。
+
+关键设计点：
+- **Zod Schema 输入校验**：每个工具声明自己的 `inputSchema`，`validate()` 在调用前执行校验，AI 模型的 JSON 参数会被自动类型检查
+- **isEnabled() 动态可用性**：某些工具只在特定上下文可用（如命令行工具只在终端模式可用），通过此方法运行时判断
+- **isReadOnly() 安全边界**：只读模式下（如代码审查），写操作工具（FileEdit、Bash）被自动过滤
+- **ExtendedToolUseContext**：携带 `setToolJSX` 允许工具在 UI 中渲染自定义 JSX，实现富交互反馈
+
+------------------------------------------------------------
+[Example]
+OpenAI 重试与中止机制
+
+[Description]
+<!-- Section-ID: S08_CODE_SNIPPETS -->
+Kode 的 OpenAI 适配层实现了指数退避 + 随机抖动的重试策略，以及对 AbortSignal 的完整支持。
+
+```typescript
+// src/services/ai/openai.ts
+const RETRY_CONFIG = {
+  BASE_DELAY_MS: 1000,
+  MAX_DELAY_MS: 32000,
+  MAX_SERVER_DELAY_MS: 60000,
+  JITTER_FACTOR: 0.1,
+} as const
+
+function getRetryDelay(attempt: number, retryAfter?: string | null): number {
+  if (retryAfter) {
+    const retryAfterMs = parseInt(retryAfter) * 1000
+    if (!isNaN(retryAfterMs) && retryAfterMs > 0) {
+      return Math.min(retryAfterMs, RETRY_CONFIG.MAX_SERVER_DELAY_MS)
+    }
+  }
+  const delay = RETRY_CONFIG.BASE_DELAY_MS * Math.pow(2, attempt - 1)
+  const jitter = Math.random() * RETRY_CONFIG.JITTER_FACTOR * delay
+  return Math.min(delay + jitter, RETRY_CONFIG.MAX_DELAY_MS)
+}
+
+function abortableDelay(delayMs: number, signal?: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(new Error('Request was aborted'))
+      return
+    }
+    const timeoutId = setTimeout(() => resolve(), delayMs)
+    if (signal) {
+      signal.addEventListener('abort', () => {
+        clearTimeout(timeoutId)
+        reject(new Error('Request was aborted'))
+      }, { once: true })
+    }
+  })
+}
+```
+
+[UML]
+None
+
+[Detail]
+设计意图：在面对临时性 API 故障时提供可靠的自动恢复能力。
+
+关键边界条件：
+- **Retry-After 头优先**：如果服务端返回 `Retry-After` 头，优先使用服务器建议的等待时间（上限 60s）
+- **指数退避**：基础延迟 = 1000ms × 2^(attempt-1)，第 1 次 1s、第 2 次 2s、第 3 次 4s、第 4 次 8s……
+- **随机抖动**：每次延迟叠加 0-10% 的随机因子，防止"惊群效应"（多个请求同时重试）
+- **AbortSignal 集成**：`abortableDelay()` 支持通过 `AbortController` 取消等待中的延迟，用户 Ctrl+C 可即时中断
+
+------------------------------------------------------------
+[Example]
+权限引擎核心逻辑
+
+[Description]
+<!-- Section-ID: S08_CODE_SNIPPETS -->
+权限系统通过 `hasPermissionsToUseTool()` 在 Safe 模式下拦截危险操作。YOLO 模式完全跳过。
+
+```typescript
+// src/core/permissions/index.ts (导出接口)
+export { hasPermissionsToUseTool } from './engine'
+export { savePermission } from './store'
+export {
+  isToolAllowedInPlanMode,
+  bashToolCommandHasExactMatchPermission,
+  bashToolCommandHasPermission,
+  bashToolHasPermission,
+} from './rules'
+```
+
+[UML]
+None
+
+[Detail]
+核心规则 (`src/core/permissions/rules.ts`)：
+- **`isToolAllowedInPlanMode()`** — 在计划模式下限制可用的工具集，只允许只读操作（文件读取、搜索等）
+- **`bashToolCommandHasPermission()`** — 对 Bash 工具执行的每条命令进行校验，通过历史批准匹配和命令模式白名单判断
+- **`bashToolCommandHasExactMatchPermission()`** — 精确匹配已批准的 Bash 命令缓存，减少重复审批
+
+权限状态通过 `src/core/permissions/store.ts` 管理，已批准的操作会在会话期间缓存，避免频繁弹窗。
+
+Safe 模式使用限制：
+- 禁止在 root/sudo 下使用 `--safe` 模式
+- 每个工具调用前弹出 TrustDialog 要求用户确认
+- 存储的批准在用户明确撤销或会话结束前有效
+
+------------------------------------------------------------

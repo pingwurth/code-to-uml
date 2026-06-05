@@ -1,0 +1,34 @@
+Title: 分析范围与边界
+Describe: Kode-CLI 项目分析的范围定义、包含和排除的子系统说明。
+------------------------------------------------------------
+[Example]
+分析范围
+
+[Description]
+<!-- Section-ID: S01_TARGET_OVERVIEW -->
+本次分析覆盖 Kode-CLI 项目的全部主要子系统。
+
+**分析范围内：**
+- CLI 主入口和参数分发（`src/entrypoints/`）
+- AI 服务层和模型适配（`src/services/ai/`）
+- 工具系统和 MCP 集成（`src/core/tools/` + `src/tools/`）
+- 配置管理和持久化（`src/core/config/`）
+- 权限引擎和安全模型（`src/core/permissions/`）
+- 插件系统和 Hook 机制（`src/services/plugins/`）
+- ACP Agent 协议（`src/acp/`）
+- 上下文管理和项目指令发现（`src/services/context/`）
+- 查询引擎和消息管理（`src/app/`）
+- Ink React UI 组件（`src/ui/`）
+
+**分析范围外：**
+- 测试用例的具体覆盖度分析（`tests/`）
+- 构建脚本和发布流水线（`scripts/`）
+- 文档和配置文件（`docs/`、`*.md`）
+
+[UML]
+None
+
+[Detail]
+源版本为 `package.json` 中定义的 v2.0.2。分析基于 2026-06-05 的代码快照。如有后续版本变更，建议重新生成报告以保持准确性。
+
+------------------------------------------------------------

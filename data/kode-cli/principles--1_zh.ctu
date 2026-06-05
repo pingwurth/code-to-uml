@@ -1,0 +1,194 @@
+Title: 核心原理
+Describe: Kode-CLI 的设计思想、工作机制、安全模型和风险改进建议。
+------------------------------------------------------------
+[Example]
+多模型协作架构
+
+[Description]
+<!-- Section-ID: S09_CORE_PRINCIPLES -->
+Kode-CLI 的核心设计思想之一是**多模型协作**。它不限于单一 AI 提供商，而是通过统一的抽象层支持 20+ 模型。
+
+[UML]
+@startuml
+rectangle "Kode-CLI" {
+  rectangle "模型管理层" as MGR {
+    (ModelManager)
+    (ModelProfile)
+    (ModelCapabilities)
+  }
+  rectangle "查询引擎" as QE {
+    (main 模型: 核心推理)
+  }
+}
+
+rectangle "模型池" as POOL {
+  (Claude Sonnet/Opus)
+  (GPT-4o/4.1/4.5)
+  (GPT-5)
+  (Gemini)
+  (DeepSeek)
+  (自定义模型)
+}
+
+rectangle "对话语法" as SYNTAX {
+  (默认为 main 模型)
+  (@ask-gpt5 → GPT-5)
+  (@run-agent-dao → DAO Agent)
+}
+
+MGR --> POOL : 管理模型配置
+QE --> MGR : getModel('main')
+SYNTAX --> QE : @ask-xxx 切换模型
+
+note right of POOL
+  每个模型有独立配置:
+  API Key, Base URL,
+  最大 Token, 思考预算
+end note
+@enduml
+
+[Detail]
+工作机制：
+1. **主模型配置**：通过 `ModelManager.getModel('main')` 获取默认推理模型
+2. **动态切换**：用户输入 `@ask-gpt5` 时，`mentionProcessor.ts` 解析提及语法，查询引擎临时切换到指定模型
+3. **模型能力检测**：`ModelCapabilities` 定义每个模型支持的 API 架构、上下文窗口、思考能力等，用于适配器选择
+
+设计意图：不将项目绑定在单一 AI 供应商上，用户可以根据任务特点选择最合适的模型（如编码用 Claude、推理用 GPT-5）。
+
+------------------------------------------------------------
+[Example]
+YOLO 模式与安全模型
+
+[Description]
+<!-- Section-ID: S09_CORE_PRINCIPLES, S11_RISKS_AND_IMPROVEMENTS -->
+Kode-CLI 提供两种安全运行模式，以及计划模式下的工具限制。
+
+[UML]
+@startuml
+state "运行模式" as MODE
+
+state "YOLO 模式\n(默认)" as YOLO {
+  state "跳过所有权限检查" as NOCHECK
+  state "Bash 直接执行" as BASH
+  state "文件直接写入" as WRITE
+}
+
+state "Safe 模式\n(--safe)" as SAFE {
+  state "逐操作审批" as APPROVAL
+  state "TrustDialog 弹窗" as DIALOG
+  state "Bash 命令匹配\n历史批准缓存" as CACHE
+}
+
+state "计划模式\n(/plan)" as PLAN {
+  state "只允许只读工具" as READONLY
+  state "禁止 Bash/写入" as BLOCKED
+}
+
+MODE --> YOLO : 默认
+MODE --> SAFE : --safe 标志
+MODE --> PLAN : /plan 命令
+
+note right of YOLO
+  推荐仅在可信环境
+  使用可信模型
+end note
+
+note right of SAFE
+  禁止 root 下使用
+  每个操作需确认
+end note
+@enduml
+
+[Detail]
+**YOLO 模式**（默认）：`--dangerously-skip-permissions` 的等同物。适合快速开发，但 README 明确警告不应用于重要文件或能力不足的模型。
+
+**Safe 模式**：使用 `kode --safe` 启用。每个工具调用前弹出 `TrustDialog` 要求用户确认。Bash 命令有精确匹配缓存机制，已批准的同一命令不会重复弹窗。
+
+**风险与改进建议**：
+- **风险**：YOLO 默认模式可能被用于执行恶意命令，尤其是在不信任的代码库中使用不可信模型时
+- **风险**：Safe 模式在 root 下被禁止，但用户可能通过 `sudo kode` 绕过安全检查
+- **改进**：考虑增加可选的"仅只读"模式，用于代码审查场景
+- **改进**：Bash 命令批准缓存应考虑命令参数的差异（如 `rm -rf /` 和 `rm -rf ./tmp` 不应共享缓存）
+
+------------------------------------------------------------
+[Example]
+插件与 Hook 系统
+
+[Description]
+<!-- Section-ID: S09_CORE_PRINCIPLES -->
+Kode-CLI 通过插件运行时代码和 Hook 系统实现了灵活的扩展机制。
+
+[UML]
+@startuml
+package "插件发现" {
+  (配置目录) --> (Glob 展开)
+  (Glob 展开) --> (Manifest 校验)
+  (Manifest 校验) --> (加载到会话)
+}
+
+package "Hook 系统" {
+  (userPromptSubmit) --> (用户提交消息时)
+  (preToolUse) --> (工具执行前)
+  (postToolUse) --> (工具执行后)
+  (stop) --> (会话停止时)
+}
+
+package "扩展能力" {
+  (自定义命令) --> (kode 扩展)
+  (MCP 服务器) --> (外部工具)
+  (技能市场) --> (社区插件)
+}
+
+note right of "Hook 系统"
+  在 query.ts 中调用
+  runUserPromptSubmitHooks()
+  runPreToolUseHooks()
+  runPostToolUseHooks()
+  runStopHooks()
+end note
+@enduml
+
+[Detail]
+**插件运行时** (`src/services/plugins/pluginRuntime.ts`)：
+- 支持从用户配置的目录加载插件，路径支持 `~` 展开和 glob 模式
+- 每个插件需要提供有效的 Manifest（最小要求 `name` 字段）
+- 通过 `setSessionPlugins()` 在会话启动时注入
+
+**Hook 系统** (`@utils/session/kodeHooks`)：
+- 与查询引擎的生命周期紧密绑定
+- `runUserPromptSubmitHooks()`：在用户消息提交后、AI 模型调用前执行
+- `runPreToolUseHooks()`：在每个工具执行前执行，可实现参数修改或拦截
+- `runPostToolUseHooks()`：在工具执行后执行，可实现结果处理或日志记录
+- `runStopHooks()`：在会话停止时执行，用于清理资源
+
+设计意图：提供比 MCP 更轻量级的扩展方式。插件可直接访问 Kode 内部 API，而 MCP 工具通过标准协议通信。
+
+------------------------------------------------------------
+[Example]
+AGENTS.md 标准支持
+
+[Description]
+<!-- Section-ID: S09_CORE_PRINCIPLES -->
+Kode-CLI 支持 [AGENTS.md 标准](https://agents.md)，这是项目指令发现机制的核心。
+
+工作机制（根据 `src/services/kodeContext.ts` 和 `@utils/config/projectInstructions`）：
+
+1. **发现阶段**：从 Git 仓库根目录到工作目录逐级查找 `AGENTS.md` 或 `AGENTS.override.md`
+2. **加载阶段**：同级目录中 `AGENTS.override.md` 优先级高于 `AGENTS.md`；`CLAUDE.md` 作为遗留兼容格式也被读取
+3. **合并阶段**：所有发现的指令文件从根到叶拼接，总大小上限 32 KiB（可通过 `KODE_PROJECT_DOC_MAX_BYTES` 覆盖）
+4. **缓存阶段**：`KodeContextManager` 使用单例模式缓存项目文档，支持 `refreshCache()` 热更新
+5. **注入阶段**：`formatSystemPromptWithContext()` 将项目上下文注入到 AI 模型的系统提示词中
+
+[UML]
+None
+
+[Detail]
+设计意图：标准化项目- Agent 通信协议，使 AI 编码工具无需手动配置即可理解项目约定。
+
+边界条件：
+- 如果在非 Git 目录运行，只搜索当前目录
+- 发现到加载之间通过 `startAgentWatcher()` 支持文件变更热重载
+- 缓存最大容量可配置，防止大型项目的指令文件溢出上下文窗口
+- Kode 还会读取 `.claude/` 目录（如存在）作为兼容格式的支持
+
+------------------------------------------------------------
