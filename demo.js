@@ -13,6 +13,7 @@
 	const examplesContainer = document.querySelector("[data-examples]");
 	const sideToc = document.querySelector("[data-demo-toc]");
 	const DEMO_EXAMPLES_API_PATH = "/api/demo-examples";
+	const SAVE_UML_API_PATH = "/api/demo-uml";
 	const dataDir = document.body.getAttribute("data-dir") || "";
 	const RENDER_WAIT_MS = 2500;
 	const UNKNOWN_RECHECK_DELAY_MS = 800;
@@ -471,6 +472,10 @@
 		const action = button.dataset.action;
 		const preview = example.querySelector("[data-preview]");
 		try {
+			if (action === "save-uml") {
+				await saveCurrentUml(example, button);
+				return;
+			}
 			if (action === "copy-source") {
 				await navigator.clipboard.writeText(core.readExampleSource(example));
 				showActionState(example, button, tr("copySourceDone"), "success");
@@ -500,6 +505,43 @@
 		} catch (err) {
 			console.error("Action failed:", err);
 			showActionState(example, button, tr("actionFailed"), "error");
+		}
+	}
+
+	async function saveCurrentUml(example, button) {
+		const dir = example.dataset.ctuDir || "";
+		const file = example.dataset.ctuFile || "";
+		const groupIndex = Number.parseInt(example.dataset.ctuGroupIndex || "", 10);
+		if (!dir || !file || !Number.isInteger(groupIndex)) {
+			throw new Error("Missing CTU save target");
+		}
+
+		button.disabled = true;
+		core.setExampleMessage(example, tr("savingUml"), "");
+		try {
+			const response = await fetch(SAVE_UML_API_PATH, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					dir,
+					file,
+					groupIndex,
+					source: core.readExampleSource(example)
+				})
+			});
+			const bodyText = await response.text();
+			let payload = {};
+			try {
+				payload = bodyText ? JSON.parse(bodyText) : {};
+			} catch {
+				payload = {};
+			}
+			if (!response.ok) {
+				throw new Error(payload.error || `Save failed: ${response.status}`);
+			}
+			showActionState(example, button, tr("saveUmlDone"), "success");
+		} finally {
+			button.disabled = false;
 		}
 	}
 
@@ -783,6 +825,10 @@
 			}
 		}
 		if (hasI18n) {
+			for (const button of document.querySelectorAll('.icon-button[data-action="save-uml"]')) {
+				button.setAttribute("aria-label", tr("saveUml"));
+				button.dataset.tooltip = tr("saveUml");
+			}
 			for (const button of document.querySelectorAll('.icon-button[data-action="copy-source"]')) {
 				button.setAttribute("aria-label", tr("copySource"));
 				button.dataset.tooltip = tr("copySource");

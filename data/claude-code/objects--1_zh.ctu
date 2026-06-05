@@ -1,0 +1,309 @@
+﻿Title: 核心对象/函数说明
+Describe: 核心类/函数/方法，包括职责、参数、返回值、副作用和本地调用关系
+------------------------------------------------------------
+[Example]
+入口点对象
+
+[Description]
+<!-- Section-ID: S03_CORE_OBJECTS -->
+**cli.tsx 入口点**：
+- **职责**：处理命令行参数，快速路径判断，启动完整 CLI
+- **参数**：process.argv（命令行参数）
+- **返回值**：Promise
+- **副作用**：设置环境变量，加载模块，启动 REPL
+
+**关键函数**：
+- `main()`：主函数，处理快速路径和完整 CLI 启动
+- `profileCheckpoint()`：性能检查点，用于启动分析
+- `startMdmRawRead()`：启动 MDM 原始读取
+- `startKeychainPrefetch()`：启动钥匙串预取
+
+[UML]
+@startuml
+class "cli.tsx 入口点" as CLI {
+  +main(): Promise
+  +profileCheckpoint(name: string): void
+  +startMdmRawRead(): void
+  +startKeychainPrefetch(): void
+}
+
+class "main.tsx CLI 定义" as Main {
+  +CommanderCommand: Command
+  +registerSubcommands(): void
+  +actionHandler(): Promise
+}
+
+class "query.ts 核心查询" as Query {
+  +query(): Promise
+  +processToolCalls(): Promise
+  +handleStreamingResponse(): Promise
+}
+
+CLI --> Main
+Main --> Query
+@enduml
+
+[Detail]
+**入口点详解**：
+
+1. **cli.tsx**：
+   - 处理快速路径（--version、--dump-system-prompt 等）
+   - 设置环境变量（COREPACK_ENABLE_AUTO_PIN、NODE_OPTIONS）
+   - 启动性能分析（profileCheckpoint）
+   - 加载完整 CLI（main.tsx）
+
+2. **main.tsx**：
+   - Commander.js CLI 定义
+   - 注册子命令（mcp、server、ssh、open、auth 等）
+   - 处理权限、MCP、会话恢复
+   - 分发 REPL/Headless 模式
+
+3. **query.ts**：
+   - 核心 API 查询函数
+   - 处理流式响应
+   - 处理工具调用
+   - 管理对话轮次循环
+
+------------------------------------------------------------
+[Example]
+工具系统对象
+
+[Description]
+<!-- Section-ID: S03_CORE_OBJECTS -->
+**Tool.ts 工具接口**：
+- **职责**：定义工具接口，提供工具查找和匹配功能
+- **类型**：ToolInputJSONSchema、QueryChainTracking、ValidationResult
+- **函数**：findToolByName、toolMatchesName
+
+**tools.ts 工具注册表**：
+- **职责**：组装工具列表，条件加载工具
+- **依赖**：feature() 标志、process.env.USER_TYPE
+- **工具数量**：60 个内置工具
+
+**builtin-tools 包**：
+- **职责**：提供所有内置工具实现
+- **目录**：packages/builtin-tools/src/tools/
+- **工具类型**：文件操作、Shell 执行、Agent 系统、Web 工具等
+
+[UML]
+@startuml
+class "Tool.ts" as Tool {
+  +ToolInputJSONSchema: type
+  +findToolByName(name: string): Tool
+  +toolMatchesName(tool: Tool, name: string): boolean
+}
+
+class "tools.ts" as Tools {
+  +getTools(): Tool[]
+  +isDeferredTool(name: string): boolean
+  +CORE_TOOLS: string[]
+}
+
+class "builtin-tools" as Builtin {
+  +FileEditTool: Tool
+  +BashTool: Tool
+  +AgentTool: Tool
+  +WebFetchTool: Tool
+}
+
+Tool --> Tools
+Tools --> Builtin
+@enduml
+
+[Detail]
+**工具系统详解**：
+
+1. **Tool.ts**：
+   - 定义 Tool 类型和接口
+   - 提供工具查找和匹配功能
+   - 支持工具输入 JSON Schema 验证
+
+2. **tools.ts**：
+   - 组装工具列表
+   - 条件加载工具（通过 feature() 标志）
+   - 管理工具注册表
+
+3. **builtin-tools**：
+   - 60 个内置工具实现
+   - 包括：文件操作、Shell 执行、Agent 系统、Web 工具等
+   - 通过 @claude-code-best/builtin-tools 包导出
+
+------------------------------------------------------------
+[Example]
+状态管理对象
+
+[Description]
+<!-- Section-ID: S03_CORE_OBJECTS -->
+**AppState.tsx 应用状态**：
+- **职责**：中央应用状态类型和上下文提供者
+- **内容**：消息、工具、权限、MCP 连接等
+- **模式**：Zustand 风格状态管理
+
+**AppStateStore.ts 状态工厂**：
+- **职责**：默认状态和存储工厂
+- **方法**：createStore、getState、setState
+
+**store.ts 存储**：
+- **职责**：Zustand 风格存储实现
+- **方法**：createStore、subscribe、getState
+
+[UML]
+@startuml
+class "AppState.tsx" as AppState {
+  +messages: Message[]
+  +tools: Tool[]
+  +permissions: PermissionMode
+  +mcpConnections: MCPServerConnection[]
+}
+
+class "AppStateStore.ts" as Store {
+  +createStore(): Store
+  +getState(): AppState
+  +setState(state: Partial): void
+}
+
+class "store.ts" as ZustandStore {
+  +createStore(initializer: StateCreator): StoreApi
+  +subscribe(listener: (state: T) => void): () => void
+}
+
+AppState --> Store
+Store --> ZustandStore
+@enduml
+
+[Detail]
+**状态管理详解**：
+
+1. **AppState.tsx**：
+   - 中央应用状态类型
+   - 包含消息、工具、权限、MCP 连接等
+   - 提供上下文提供者
+
+2. **AppStateStore.ts**：
+   - 默认状态和存储工厂
+   - 创建 Zustand 风格存储
+   - 管理状态更新
+
+3. **store.ts**：
+   - Zustand 风格存储实现
+   - 提供订阅和状态管理功能
+   - 支持状态选择器
+
+------------------------------------------------------------
+
+
+
+
+------------------------------------------------------------
+[Example]
+API 客户端对象
+
+[Description]
+<!-- Section-ID: S03_CORE_OBJECTS -->
+**claude.ts API 客户端**：
+- **职责**：构建请求参数，调用 Anthropic SDK 流式端点
+- **参数**：系统 prompt、消息、工具、betas
+- **返回值**：BetaRawMessageStreamEvent 流
+- **副作用**：发送 API 请求，处理流式响应
+
+**providers.ts 提供商选择**：
+- **职责**：选择模型提供商
+- **优先级**：modelType 参数 > 环境变量 > 默认 firstParty
+- **提供商**：firstParty、bedrock、vertex、foundry、openai、gemini、grok
+
+[UML]
+@startuml
+class "claude.ts" as Claude {
+  +buildRequestParams(): RequestParams
+  +callStreamingEndpoint(): Stream
+  +processStreamEvents(): void
+}
+
+class "providers.ts" as Providers {
+  +getProvider(modelType: string): Provider
+  +firstParty: Provider
+  +bedrock: Provider
+  +vertex: Provider
+}
+
+Claude --> Providers
+@enduml
+
+[Detail]
+**API 客户端详解**：
+
+1. **claude.ts**：
+   - 构建请求参数（系统 prompt、消息、工具、betas）
+   - 调用 Anthropic SDK 流式端点
+   - 处理 BetaRawMessageStreamEvent 事件
+
+2. **providers.ts**：
+   - 选择模型提供商
+   - 优先级：modelType 参数 > 环境变量 > 默认 firstParty
+   - 支持 7 个提供商：firstParty、bedrock、vertex、foundry、openai、gemini、grok
+
+
+------------------------------------------------------------
+[Example]
+UI 组件对象
+
+[Description]
+<!-- Section-ID: S03_CORE_OBJECTS -->
+**App.tsx 根组件**：
+- **职责**：根 Provider，提供 AppState、Stats、FpsMetrics
+- **依赖**：AppState.tsx、Stats.tsx、FpsMetrics.tsx
+- **渲染**：React 树根节点
+
+**Messages.tsx 消息组件**：
+- **职责**：渲染对话消息
+- **属性**：messages: Message[]
+- **子组件**：MessageRow.tsx
+
+**PromptInput/ 输入组件**：
+- **职责**：用户输入处理
+- **功能**：文本输入、历史记录、自动补全
+
+[UML]
+@startuml
+class "App.tsx" as App {
+  +AppState: Context
+  +Stats: Context
+  +FpsMetrics: Context
+}
+
+class "Messages.tsx" as Messages {
+  +messages: Message[]
+  +renderMessage(): JSX
+}
+
+class "PromptInput" as Input {
+  +value: string
+  +onChange(): void
+  +onSubmit(): void
+}
+
+App --> Messages
+App --> Input
+@enduml
+
+[Detail]
+**UI 组件详解**：
+
+1. **App.tsx**：
+   - 根 Provider，提供全局状态
+   - 包含 AppState、Stats、FpsMetrics 上下文
+   - 渲染 React 树根节点
+
+2. **Messages.tsx**：
+   - 渲染对话消息列表
+   - 使用 MessageRow 子组件
+   - 支持消息滚动和加载
+
+3. **PromptInput/**：
+   - 用户输入处理组件
+   - 支持文本输入、历史记录、自动补全
+   - 处理键盘快捷键
+
+
+
+

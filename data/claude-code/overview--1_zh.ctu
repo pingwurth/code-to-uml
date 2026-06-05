@@ -1,0 +1,239 @@
+﻿Title: 文件/目标概览
+Describe: 项目整体概述，包括目标、角色、解决的问题、范围边界、源代码版本和证据基线
+------------------------------------------------------------
+[Example]
+项目概述
+
+[Description]
+<!-- Section-ID: S01_TARGET_OVERVIEW -->
+Claude Code Best (CCB) 是 Anthropic 官方 Claude Code CLI 工具的源码反编译/逆向还原项目。
+项目目标是将 Claude Code 大部分功能及工程化能力复现，实现技术普惠。
+
+**核心定位**：
+- 交互式 AI 编程助手，运行在终端环境中
+- 支持多种 AI 模型提供商（Anthropic、AWS Bedrock、Google Vertex、OpenAI、Gemini、Grok）
+- 提供丰富的工具系统（文件操作、Shell 执行、Agent 系统、Web 工具等）
+- 支持多种部署模式（本地、远程控制、ACP 协议、Daemon 模式）
+
+**解决的问题**：
+- 降低 AI 编程助手的使用门槛
+- 提供企业级功能（Langfuse 监控、Sentry 错误追踪、GrowthBook 特性开关）
+- 支持多种模型提供商，避免供应商锁定
+- 提供完整的开发工具链（构建、测试、部署）
+
+**范围边界**：
+- 包含：CLI 工具核心功能、工具系统、UI 层、状态管理、API 层、Bridge/Remote Control
+- 不包含：官方 Anthropic SDK 的完整实现、付费功能的实际授权
+- 运行时：Bun（非 Node.js）
+- 构建系统：Bun.build() 和 Vite 双构建管道
+
+[UML]
+@startuml
+package "Claude Code Best (CCB)" {
+  [CLI 入口] as CLI
+  [核心循环] as Core
+  [工具系统] as Tools
+  [UI 层] as UI
+  [API 层] as API
+  [状态管理] as State
+  [Bridge/Remote] as Bridge
+}
+
+package "外部依赖" {
+  [Anthropic SDK] as Anthropic
+  [Bun 运行时] as Bun
+  [Ink 框架] as Ink
+  [MCP 协议] as MCP
+}
+
+CLI --> Core
+Core --> Tools
+Core --> UI
+Core --> API
+Core --> State
+UI --> Ink
+API --> Anthropic
+Bridge --> MCP
+@enduml
+
+[Detail]
+**图表说明**：
+1. **入口点**：`src/entrypoints/cli.tsx` 是真正的入口，处理快速路径和完整 CLI 启动
+2. **核心循环**：`src/query.ts` 和 `src/QueryEngine.ts` 管理 API 查询和对话状态
+3. **工具系统**：60 个内置工具，支持文件操作、Shell 执行、Agent 系统等
+4. **UI 层**：基于 Ink 框架的终端 UI，149 个组件
+5. **API 层**：支持 7 个模型提供商的统一接口
+6. **状态管理**：Zustand 风格的状态管理，包含会话状态、工具状态、权限状态
+7. **Bridge/Remote Control**：支持远程控制和 ACP 协议
+
+**关键文件**：
+- `src/entrypoints/cli.tsx`：入口点，处理命令行参数和快速路径
+- `src/main.tsx`：Commander.js CLI 定义，注册所有子命令
+- `src/query.ts`：核心 API 查询函数，处理流式响应和工具调用
+- `src/Tool.ts`：工具接口定义和工具类型
+- `src/tools.ts`：工具注册表，组装工具列表
+
+------------------------------------------------------------
+[Example]
+技术栈
+
+[Description]
+<!-- Section-ID: S01_TARGET_OVERVIEW -->
+项目使用的主要技术栈和运行时环境。
+
+**运行时**：
+- **Bun**：主要运行时，提供快速启动和模块加载
+- **Node.js**：构建产物兼容 Node.js
+
+**构建系统**：
+- **Bun.build()**：主要构建工具，支持代码分割
+- **Vite**：替代构建管道，提供更好的开发体验
+
+**前端框架**：
+- **React 19**：UI 组件框架
+- **Ink**：终端 UI 框架（forked 版本）
+- **React Compiler**：自动记忆化优化
+
+**包管理**：
+- **Bun Workspaces**：Monorepo 管理
+- **17 个 workspace packages**：模块化架构
+
+**开发工具**：
+- **Biome**：代码格式化和 lint
+- **TypeScript**：类型检查（strict 模式）
+- **Husky + lint-staged**：Git hooks
+
+**监控和可观测性**：
+- **Langfuse**：AI Agent 监控
+- **Sentry**：错误追踪
+- **GrowthBook**：特性开关
+
+[UML]
+@startuml
+skinparam packageStyle rectangle
+
+package "技术栈" {
+  package "运行时" {
+    [Bun] as Bun
+    [Node.js] as Node
+  }
+  
+  package "构建" {
+    [Bun.build()] as BunBuild
+    [Vite] as Vite
+  }
+  
+  package "前端" {
+    [React 19] as React
+    [Ink] as Ink
+    [React Compiler] as Compiler
+  }
+  
+  package "包管理" {
+    [Bun Workspaces] as Workspaces
+    [17 个 packages] as Packages
+  }
+  
+  package "开发工具" {
+    [Biome] as Biome
+    [TypeScript] as TS
+    [Husky] as Husky
+  }
+  
+  package "监控" {
+    [Langfuse] as Langfuse
+    [Sentry] as Sentry
+    [GrowthBook] as GrowthBook
+  }
+}
+
+Bun --> BunBuild
+Bun --> React
+React --> Ink
+Compiler --> React
+Workspaces --> Packages
+@enduml
+
+[Detail]
+**技术栈详解**：
+
+1. **运行时选择**：
+   - Bun 作为主要运行时，提供快速启动（~35ms RSS vs Node.js ~220MB）
+   - 构建产物自动处理 `import.meta.require` 兼容性，支持 Node.js 运行
+
+2. **构建系统**：
+   - `build.ts` 执行 `Bun.build()` with `splitting: true`
+   - 代码分割解决 Bun/JSC 全量解析导致的内存问题
+   - Vite 构建管道提供更好的开发体验和热重载
+
+3. **前端架构**：
+   - React 19 提供组件化 UI
+   - Ink 框架（forked 版本）提供终端渲染能力
+   - React Compiler 自动优化组件记忆化
+
+4. **Monorepo 结构**：
+   - 17 个 workspace packages，模块化设计
+   - 包括：`@ant/ink`、`builtin-tools`、`mcp-client`、`acp-link` 等
+
+5. **代码质量**：
+   - Biome 提供快速 lint 和格式化
+   - TypeScript strict 模式确保类型安全
+   - Husky + lint-staged 自动化代码检查
+
+6. **企业级功能**：
+   - Langfuse 提供 AI Agent 监控和可观测性
+   - Sentry 提供错误追踪和性能监控
+   - GrowthBook 提供特性开关和 A/B 测试
+
+------------------------------------------------------------
+[Example]
+版本信息
+
+[Description]
+<!-- Section-ID: S01_TARGET_OVERVIEW -->
+项目版本信息和证据基线。
+
+**当前版本**：
+- **版本号**：2.6.5（package.json）
+- **Git 提交**：8462599937897dbb2974bf3bdf4801393e139570
+- **最新提交**：feat(team): implement persistent teammate agents with mailbox communication
+
+**构建信息**：
+- **构建时间**：动态生成（MACRO.BUILD_TIME）
+- **版本变更日志**：MACRO.VERSION_CHANGELOG
+- **包大小**：约 17MB（单文件）→ 代码分割后 ~35MB（600+ chunks）
+
+**证据基线**：
+- **源代码分析**：基于当前 Git 提交
+- **文件数量**：src/ 目录包含 40 个子目录，约 341 个工具文件
+- **工具数量**：60 个内置工具（packages/builtin-tools/src/tools/）
+- **组件数量**：149 个 UI 组件（src/components/）
+- **API 提供商**：7 个（firstParty、bedrock、vertex、foundry、openai、gemini、grok）
+
+[UML]
+None
+
+[Detail]
+**版本信息说明**：
+
+1. **版本管理**：
+   - 版本号在 `scripts/defines.ts` 中定义，当前为 2.2.1
+   - Git 提供版本控制，使用 Conventional Commits 规范
+   - 构建时通过 MACRO.* 注入版本信息
+
+2. **构建产物**：
+   - 单文件构建：约 17MB（导致内存问题）
+   - 代码分割后：约 35MB（600+ chunks），显著降低内存使用
+   - `--version` 命令 RSS 从 966MB 降至 35MB
+
+3. **证据基线**：
+   - 源代码分析基于当前 Git 提交
+   - 文件统计来自 `Get-ChildItem` 命令
+   - 工具和组件数量来自目录结构分析
+
+4. **版本兼容性**：
+   - 运行时：Bun >= 1.3.0
+   - 构建：支持 Bun 和 Vite 双管道
+   - 部署：支持 Bun 和 Node.js 运行时
+
+------------------------------------------------------------

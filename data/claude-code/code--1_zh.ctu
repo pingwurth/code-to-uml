@@ -1,0 +1,168 @@
+﻿Title: 关键代码片段解析
+Describe: 解决问题、设计意图、边界情况和使用注意事项
+------------------------------------------------------------
+[Example]
+入口点代码
+
+[Description]
+<!-- Section-ID: S08_CODE_SNIPPETS -->
+**cli.tsx 入口点代码**：
+
+```typescript
+async function main(): Promise<void> {
+  const args = process.argv.slice(2);
+  
+  // Fast-path for --version/-v
+  if (args.length === 1 && (args[0] === '--version' || args[0] === '-v')) {
+    console.log(`${MACRO.VERSION} (Claude Code)`);
+    return;
+  }
+  
+  // Load startup profiler
+  const { profileCheckpoint } = await import('../utils/startupProfiler.js');
+  profileCheckpoint('cli_entry');
+  
+  // Fast-path for --dump-system-prompt
+  if (feature('DUMP_SYSTEM_PROMPT') && args[0] === '--dump-system-prompt') {
+    // ... 处理 dump-system-prompt
+  }
+  
+  // Load full CLI
+  await import('./main.js');
+}
+```
+
+**设计意图**：
+- 快速路径：零模块加载，快速响应
+- 性能分析：profileCheckpoint 记录启动时间
+- Feature gating：通过 feature() 标志控制功能
+
+[UML]
+None
+
+[Detail]
+**代码解析**：
+
+1. **快速路径**：
+   - --version/-v：直接输出版本号，零模块加载
+   - 性能优化：避免加载完整 CLI
+
+2. **性能分析**：
+   - profileCheckpoint：记录启动时间
+   - 用于性能优化和调试
+
+3. **Feature gating**：
+   - feature('DUMP_SYSTEM_PROMPT')：控制功能启用
+   - 运行时通过环境变量控制
+
+------------------------------------------------------------
+[Example]
+工具注册代码
+
+[Description]
+<!-- Section-ID: S08_CODE_SNIPPETS -->
+**tools.ts 工具注册代码**：
+
+```typescript
+export function getTools(): Tool[] {
+  const tools: Tool[] = [];
+  
+  // 核心工具
+  tools.push(FileEditTool);
+  tools.push(BashTool);
+  tools.push(AgentTool);
+  tools.push(WebFetchTool);
+  
+  // 条件加载工具
+  if (feature('EXPERIMENTAL_SKILL_SEARCH')) {
+    tools.push(SkillTool);
+  }
+  
+  if (process.env.USER_TYPE === 'internal') {
+    tools.push(InternalTool);
+  }
+  
+  return tools;
+}
+```
+
+**设计意图**：
+- 核心工具：始终加载
+- 条件加载：通过 feature() 标志控制
+- 用户类型：通过环境变量控制
+
+[UML]
+None
+
+[Detail]
+**代码解析**：
+
+1. **核心工具**：
+   - FileEditTool：文件编辑工具
+   - BashTool：Shell 执行工具
+   - AgentTool：Agent 系统工具
+   - WebFetchTool：Web 抓取工具
+
+2. **条件加载**：
+   - feature('EXPERIMENTAL_SKILL_SEARCH')：实验性功能
+   - 运行时通过环境变量控制
+
+3. **用户类型**：
+   - process.env.USER_TYPE：用户类型
+   - 内部用户可以访问额外工具
+
+------------------------------------------------------------
+[Example]
+状态管理代码
+
+[Description]
+<!-- Section-ID: S08_CODE_SNIPPETS -->
+**store.ts 状态管理代码**：
+
+```typescript
+export function createStore<T>(initializer: StateCreator<T>): StoreApi<T> {
+  let state: T;
+  const listeners = new Set<(state: T) => void>();
+  
+  const getState = () => state;
+  const setState = (partial: Partial<T>) => {
+    state = { ...state, ...partial };
+    listeners.forEach(listener => listener(state));
+  };
+  const subscribe = (listener: (state: T) => void) => {
+    listeners.add(listener);
+    return () => listeners.delete(listener);
+  };
+  
+  state = initializer(setState, getState);
+  return { getState, setState, subscribe };
+}
+```
+
+**设计意图**：
+- Zustand 风格：轻量级状态管理
+- 发布-订阅：状态变更通知
+- 不可变更新：浅拷贝合并
+
+[UML]
+None
+
+[Detail]
+**代码解析**：
+
+1. **Zustand 风格**：
+   - createStore：创建状态存储
+   - StateCreator：状态创建器
+   - StoreApi：状态 API
+
+2. **发布-订阅**：
+   - listeners：监听器集合
+   - subscribe：订阅状态变更
+   - setState：触发监听器
+
+3. **不可变更新**：
+   - 浅拷贝合并：{ ...state, ...partial }
+   - 避免直接修改状态
+   - 支持 React 状态更新
+
+------------------------------------------------------------

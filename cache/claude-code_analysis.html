@@ -1,0 +1,78 @@
+﻿<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Claude Code Best (CCB) 项目分析报告</title>
+	<link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+	<link rel="stylesheet" href="../main.css">
+</head>
+
+<body class="demo-page" data-dir="claude-code">
+	<header class="demo-topbar">
+		<a class="demo-topbar-logo" href="../index.html" aria-label="Code-To-UML Home">
+			<img src="../favicon.svg" alt="" />
+			<span>Code-To-UML</span>
+		</a>
+	</header>
+
+	<div class="page-shell demo-shell">
+		<main class="content">
+			<section class="intro">
+				<h1>Claude Code Best (CCB) 项目分析报告</h1>
+				<p data-markdown>本报告分析 Claude Code Best (CCB) 项目的整体架构、核心组件和设计原理。
+
+**核心功能**：交互式 AI 编程助手，支持多种 AI 模型提供商，提供 60 个内置工具和终端 UI 框架。
+
+**技术架构**：运行时 Bun，构建系统 Bun.build() 和 Vite，前端 React 19 + Ink，包管理 Bun Workspaces。
+
+**核心原理**：模块化设计、插件化架构、企业级功能（Langfuse 监控、Sentry 错误追踪）。
+
+**工作机制**：入口点处理命令行参数，核心循环管理 API 查询，工具系统提供功能扩展，UI 层提供交互界面。
+
+**设计哲学**：技术普惠、企业级功能、多模型支持、开发友好。</p>
+			</section>
+
+			<nav class="demo-tabs" aria-label="Demo Diagram Types">
+				<button class="demo-tab is-active" type="button" data-diagram="overview">项目概览</button>
+				<button class="demo-tab" type="button" data-diagram="structure">顶层结构</button>
+				<button class="demo-tab" type="button" data-diagram="objects">核心对象</button>
+				<button class="demo-tab" type="button" data-diagram="architecture">架构设计</button>
+				<button class="demo-tab" type="button" data-diagram="flow">核心流程</button>
+				<button class="demo-tab" type="button" data-diagram="calls">调用关系</button>
+				<button class="demo-tab" type="button" data-diagram="dataflow">数据流</button>
+				<button class="demo-tab" type="button" data-diagram="code">代码片段</button>
+				<button class="demo-tab" type="button" data-diagram="principles">核心原理</button>
+				<button class="demo-tab" type="button" data-diagram="guide">开发指南</button>
+			</nav>
+
+			<section class="doc-section demo-panel">
+				<h2 id="demo-title">项目概览</h2>
+				<p class="demo-section-overview is-active" data-diagram-overview="overview">项目整体概述，包括目标、角色、解决的问题、范围边界、源代码版本和证据基线</p>
+				<p class="demo-section-overview" data-diagram-overview="structure" hidden>项目顶层结构，包括导入、常量、文件、类/函数和入口逻辑</p>
+				<p class="demo-section-overview" data-diagram-overview="objects" hidden>核心对象和函数说明，包括职责、参数、返回值和副作用</p>
+				<p class="demo-section-overview" data-diagram-overview="architecture" hidden>整体架构图，包括主要模块、对象、层、运行时/部署假设和依赖方向</p>
+				<p class="demo-section-overview" data-diagram-overview="flow" hidden>核心流程图，包括主执行路径、重要分支、失败/错误路径、重试和回退行为</p>
+				<p class="demo-section-overview" data-diagram-overview="calls" hidden>调用关系图，包括跨模块/服务/对象边界的完整跟踪路径</p>
+				<p class="demo-section-overview" data-diagram-overview="dataflow" hidden>数据流/状态流图，包括输入、转换、持久化、输出、状态所有权和生命周期转换</p>
+				<p class="demo-section-overview" data-diagram-overview="code" hidden>关键代码片段解析，包括解决问题、设计意图、边界情况和使用注意事项</p>
+				<p class="demo-section-overview" data-diagram-overview="principles" hidden>核心原理说明，包括运行时机制、模式、设计权衡和实现方式</p>
+				<p class="demo-section-overview" data-diagram-overview="guide" hidden>开发上手指南，包括阅读顺序、运行/调试步骤、手动验证、扩展点和故障排除路径</p>
+				<div class="demo-examples" data-examples></div>
+			</section>
+		</main>
+		<aside data-demo-toc></aside>
+	</div>
+
+	<script src="../js/viz-global.js"></script>
+	<script src="../js/plantuml.js"></script>
+	<script src="../component/docs-page-core.js"></script>
+	<script src="../component/render-failure-common.js"></script>
+	<script src="../component/toc-component.js"></script>
+	<script src="../js/markdown-it.js"></script>
+	<script src="../component/demo-example-component.js"></script>
+	<script src="../demo.js"></script>
+</body>
+
+</html>

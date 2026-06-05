@@ -36,6 +36,8 @@
     File structure: Title / Describe header + multiple data blocks.
       Separate blocks with at least 60 hyphens.
       See data/_TEMPLATE.ctu for details.
+    The generated save action writes the edited textarea content back to the
+      matching .ctu block's [UML] section.
   ─────────────────────────────────────────────────────────────────────────────
 
   ─────────────────────────────────────────────────────────────────────────────
@@ -43,6 +45,7 @@
     ┌─────────────────────────────────────────────────────────────────┐
     │ serve.js (server)                                               │
     │  ├─ GET  /api/demo-examples?lang=zh  → JSON {category: [items]} │
+    │  ├─ POST /api/demo-uml               → update .ctu [UML] source │
     │  ├─ POST /api/plantuml-svg           → plantuml.jar fallback    │
     │  └─ Static file hosting (HTML / CSS / JS)                       │
     └─────────────────────────────┬───────────────────────────────────┘
@@ -213,7 +216,7 @@
 			                                 arrows, and relationships.
 			                                 Use "None" or leave blank to hide.
 			                               · action buttons:
-			                                 copy source, copy SVG, download SVG
+			                                 save UML, copy source, copy SVG, download SVG
 			=============================================================== -->
 			<section class="doc-section demo-panel">
 				<!-- [EDIT] Default title, aligned with the is-active tab -->

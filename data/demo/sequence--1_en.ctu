@@ -13,10 +13,11 @@ To improve readability without affecting the visual representation, use reverse 
 
 [UML]
 @startuml
-Alice -> Bob: Authentication Request
-Bob --> Alice: Authentication Response
+Alice -> Ping: Authentication Request
+Ping --> Alice: Authentication Response
 
-Alice -> Bob: Another authentication Request
-Alice <-- Bob: Another authentication Response
+Alice -> Ping: Another authentication Request
+Alice <-- Ping: Another authentication Response
 @enduml
+
 ------------------------------------------------------------

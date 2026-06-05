@@ -1,0 +1,179 @@
+﻿Title: 整体架构图
+Describe: 主要模块、对象、层、运行时/部署假设和依赖方向
+------------------------------------------------------------
+[Example]
+系统架构
+
+[Description]
+<!-- Section-ID: S04_ARCHITECTURE -->
+Claude Code Best 采用分层架构，主要层次包括：
+
+**表现层**：
+- Ink 框架（forked 版本）提供终端 UI
+- React 19 组件系统
+- 149 个 UI 组件
+
+**业务逻辑层**：
+- 核心循环（query.ts、QueryEngine.ts）
+- 工具系统（60 个内置工具）
+- 状态管理（Zustand 风格）
+
+**数据访问层**：
+- API 层（支持 7 个模型提供商）
+- MCP 协议客户端
+- ACP 协议客户端
+
+**基础设施层**：
+- Bun 运行时
+- 构建系统（Bun.build()、Vite）
+- 监控和可观测性（Langfuse、Sentry、GrowthBook）
+
+[UML]
+@startuml
+skinparam packageStyle rectangle
+
+package "表现层" {
+  [Ink 框架] as Ink
+  [React 组件] as React
+  [UI 组件] as UI
+}
+
+package "业务逻辑层" {
+  [核心循环] as Core
+  [工具系统] as Tools
+  [状态管理] as State
+}
+
+package "数据访问层" {
+  [API 层] as API
+  [MCP 客户端] as MCP
+  [ACP 客户端] as ACP
+}
+
+package "基础设施层" {
+  [Bun 运行时] as Bun
+  [构建系统] as Build
+  [监控系统] as Monitor
+}
+
+Ink --> Core
+React --> Core
+Core --> API
+Core --> MCP
+Core --> ACP
+API --> Bun
+MCP --> Bun
+ACP --> Bun
+@enduml
+
+[Detail]
+**架构层次详解**：
+
+1. **表现层**：
+   - Ink 框架提供终端渲染能力
+   - React 19 提供组件化 UI
+   - 149 个 UI 组件覆盖各种交互场景
+
+2. **业务逻辑层**：
+   - 核心循环管理 API 查询和对话状态
+   - 工具系统提供 60 个内置工具
+   - 状态管理使用 Zustand 风格
+
+3. **数据访问层**：
+   - API 层支持 7 个模型提供商
+   - MCP 协议客户端支持工具扩展
+   - ACP 协议客户端支持代理通信
+
+4. **基础设施层**：
+   - Bun 运行时提供快速启动
+   - 构建系统支持 Bun.build() 和 Vite
+   - 监控系统提供企业级功能
+
+------------------------------------------------------------
+[Example]
+部署架构
+
+[Description]
+<!-- Section-ID: S04_ARCHITECTURE -->
+Claude Code Best 支持多种部署模式：
+
+**本地部署**：
+- 直接运行 CLI 工具
+- 支持 Bun 和 Node.js 运行时
+- 本地工具执行
+
+**远程控制部署**：
+- Remote Control Server（Docker 部署）
+- Web UI 控制面板
+- 支持 ACP agent 接入
+
+**ACP 协议部署**：
+- ACP 代理服务器
+- WebSocket 桥接
+- 支持 Zed、Cursor 等 IDE
+
+**Daemon 模式**：
+- 长驻 supervisor
+- Worker 管理
+- 后台任务执行
+
+[UML]
+@startuml
+skinparam packageStyle rectangle
+
+package "本地部署" {
+  [CLI 工具] as CLI
+  [本地工具] as LocalTools
+}
+
+package "远程控制部署" {
+  [Remote Control Server] as RCS
+  [Web UI] as WebUI
+  [ACP Agent] as ACPAgent
+}
+
+package "ACP 协议部署" {
+  [ACP 代理服务器] as ACPProxy
+  [WebSocket 桥接] as WebSocket
+  [IDE 集成] as IDE
+}
+
+package "Daemon 模式" {
+  [Supervisor] as Supervisor
+  [Worker 管理] as Worker
+  [后台任务] as Background
+}
+
+CLI --> LocalTools
+RCS --> WebUI
+RCS --> ACPAgent
+ACPProxy --> WebSocket
+ACPProxy --> IDE
+Supervisor --> Worker
+Supervisor --> Background
+@enduml
+
+[Detail]
+**部署模式详解**：
+
+1. **本地部署**：
+   - 直接运行 CLI 工具
+   - 支持 Bun 和 Node.js 运行时
+   - 本地工具执行，无需网络
+
+2. **远程控制部署**：
+   - Remote Control Server 提供 Web UI
+   - 支持 Docker 部署
+   - 支持 ACP agent 接入
+
+3. **ACP 协议部署**：
+   - ACP 代理服务器提供 WebSocket 桥接
+   - 支持 Zed、Cursor 等 IDE
+   - 提供会话恢复和权限桥接
+
+4. **Daemon 模式**：
+   - 长驻 supervisor 管理 worker
+   - 支持后台任务执行
+   - 提供进程管理和监控
+
+------------------------------------------------------------

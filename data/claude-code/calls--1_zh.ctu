@@ -1,0 +1,133 @@
+﻿Title: 调用关系图
+Describe: 跨模块/服务/对象边界的完整跟踪路径
+------------------------------------------------------------
+[Example]
+入口点调用链
+
+[Description]
+<!-- Section-ID: S06_CALL_RELATIONSHIPS -->
+Claude Code Best 的主要调用链：
+
+**CLI 入口调用链**：
+1. cli.tsx → main()
+2. main.tsx → Commander.js CLI 定义
+3. main.tsx → actionHandler()
+4. actionHandler() → init()
+5. init() → launchRepl()
+
+**API 查询调用链**：
+1. QueryEngine.ts → query()
+2. query.ts → claude.ts (API 客户端)
+3. claude.ts → Anthropic SDK
+4. Anthropic SDK → 流式响应
+5. 流式响应 → 工具调用处理
+
+**工具执行调用链**：
+1. 工具调用 → findToolByName()
+2. findToolByName() → Tool.validate()
+3. Tool.validate() → Tool.execute()
+4. Tool.execute() → 工具实现
+5. 工具实现 → 返回结果
+
+[UML]
+@startuml
+participant "cli.tsx" as CLI
+participant "main.tsx" as Main
+participant "QueryEngine.ts" as QE
+participant "query.ts" as Query
+participant "claude.ts" as API
+participant "Tool.ts" as Tool
+
+CLI -> Main: main()
+Main -> QE: launchRepl()
+QE -> Query: query()
+Query -> API: 发送 API 请求
+API -> Query: 流式响应
+Query -> Tool: 工具调用
+Tool -> Query: 工具结果
+Query -> QE: 查询结果
+@enduml
+
+[Detail]
+**调用链详解**：
+
+1. **CLI 入口调用链**：
+   - cli.tsx 是真正的入口点
+   - main.tsx 是 Commander.js CLI 定义
+   - actionHandler() 处理主要逻辑
+   - init() 进行初始化
+   - launchRepl() 启动 REPL
+
+2. **API 查询调用链**：
+   - QueryEngine.ts 管理查询状态
+   - query.ts 处理 API 查询
+   - claude.ts 是 API 客户端
+   - Anthropic SDK 处理流式响应
+   - 工具调用处理在 query.ts 中
+
+3. **工具执行调用链**：
+   - findToolByName() 查找工具
+   - Tool.validate() 验证工具输入
+   - Tool.execute() 执行工具
+   - 工具实现返回结果
+
+------------------------------------------------------------
+[Example]
+跨模块调用关系
+
+[Description]
+<!-- Section-ID: S06_CALL_RELATIONSHIPS -->
+跨模块调用关系：
+
+**状态管理调用**：
+1. AppState.tsx → AppStateStore.ts
+2. AppStateStore.ts → store.ts
+3. store.ts → Zustand 状态管理
+
+**MCP 协议调用**：
+1. MCPTool → mcp-client 包
+2. mcp-client → MCP SDK
+3. MCP SDK → MCP 服务器
+
+**ACP 协议调用**：
+1. AcpAgent → acp-link 包
+2. acp-link → ACP SDK
+3. ACP SDK → ACP 服务器
+
+[UML]
+@startuml
+participant "AppState.tsx" as AppState
+participant "AppStateStore.ts" as Store
+participant "store.ts" as Zustand
+participant "MCPTool" as MCPTool
+participant "mcp-client" as MCPClient
+participant "AcpAgent" as ACPAgent
+participant "acp-link" as ACPLink
+
+AppState -> Store: 状态管理
+Store -> Zustand: Zustand 存储
+MCPTool -> MCPClient: MCP 调用
+MCPClient -> MCPTool: MCP 响应
+ACPAgent -> ACPLink: ACP 调用
+ACPLink -> ACPAgent: ACP 响应
+@enduml
+
+[Detail]
+**跨模块调用详解**：
+
+1. **状态管理调用**：
+   - AppState.tsx 定义状态类型
+   - AppStateStore.ts 创建状态存储
+   - store.ts 提供 Zustand 状态管理
+
+2. **MCP 协议调用**：
+   - MCPTool 是 MCP 工具实现
+   - mcp-client 包提供 MCP 客户端功能
+   - MCP SDK 实现 MCP 协议
+
+3. **ACP 协议调用**：
+   - AcpAgent 是 ACP 代理实现
+   - acp-link 包提供 ACP 代理功能
+   - ACP SDK 实现 ACP 协议
+
+------------------------------------------------------------

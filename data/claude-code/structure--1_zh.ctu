@@ -1,0 +1,176 @@
+﻿Title: 顶层结构
+Describe: 项目顶层结构，包括导入、常量、文件、类/函数和入口逻辑
+------------------------------------------------------------
+[Example]
+项目目录结构
+
+[Description]
+<!-- Section-ID: S02_TOP_LEVEL_STRUCTURE -->
+Claude Code Best 项目采用 Monorepo 结构，主要目录包括：
+
+**核心目录**：
+- `src/`：主要源代码目录，包含 40 个子目录
+- `packages/`：workspace packages，包含 17 个包
+- `scripts/`：构建和开发脚本
+- `docs/`：项目文档
+- `tests/`：测试文件
+
+**入口文件**：
+- `src/entrypoints/cli.tsx`：真正的入口点
+- `src/main.tsx`：Commander.js CLI 定义
+- `src/query.ts`：核心 API 查询函数
+
+**配置文件**：
+- `package.json`：项目配置和依赖
+- `tsconfig.json`：TypeScript 配置
+- `biome.json`：Biome lint 配置
+- `vite.config.ts`：Vite 构建配置
+
+[UML]
+@startuml
+skinparam packageStyle rectangle
+
+package "项目根目录" {
+  [src/] as src
+  [packages/] as packages
+  [scripts/] as scripts
+  [docs/] as docs
+  [tests/] as tests
+}
+
+package "src/ 子目录" {
+  [entrypoints/] as entrypoints
+  [components/] as components
+  [services/] as services
+  [utils/] as utils
+  [state/] as state
+  [tools/] as tools
+}
+
+package "packages/ 子目录" {
+  [@ant/ink] as ink
+  [builtin-tools] as builtin
+  [mcp-client] as mcp
+  [acp-link] as acp
+  [remote-control-server] as rcs
+}
+
+src --> entrypoints
+src --> components
+src --> services
+src --> utils
+src --> state
+src --> tools
+
+packages --> ink
+packages --> builtin
+packages --> mcp
+packages --> acp
+packages --> rcs
+@enduml
+
+[Detail]
+**目录结构详解**：
+
+1. **src/ 目录**：
+   - `entrypoints/`：入口点文件，包括 cli.tsx、init.ts
+   - `components/`：149 个 UI 组件，基于 Ink 框架
+   - `services/`：API 服务、MCP 服务、ACP 服务等
+   - `utils/`：工具函数和辅助模块
+   - `state/`：状态管理（Zustand 风格）
+   - `tools/`：工具定义和注册
+
+2. **packages/ 目录**：
+   - `@ant/ink`：forked 的 Ink 框架
+   - `builtin-tools`：60 个内置工具实现
+   - `mcp-client`：MCP 客户端库
+   - `acp-link`：ACP 代理服务器
+   - `remote-control-server`：远程控制服务器
+
+3. **入口文件**：
+   - `cli.tsx`：处理命令行参数和快速路径
+   - `main.tsx`：Commander.js CLI 定义，注册所有子命令
+   - `query.ts`：核心 API 查询函数
+
+------------------------------------------------------------
+[Example]
+主要依赖关系
+
+[Description]
+<!-- Section-ID: S02_TOP_LEVEL_STRUCTURE -->
+项目的主要依赖关系和模块边界。
+
+**核心依赖**：
+- `@anthropic-ai/sdk`：Anthropic 官方 SDK
+- `@modelcontextprotocol/sdk`：MCP 协议 SDK
+- `@agentclientprotocol/sdk`：ACP 协议 SDK
+- `react`：UI 框架
+- `ink`：终端 UI 框架
+
+**内部依赖**：
+- `@claude-code-best/builtin-tools`：内置工具包
+- `@claude-code-best/mcp-client`：MCP 客户端
+- `@claude-code-best/acp-link`：ACP 代理
+- `@claude-code-best/remote-control-server`：远程控制服务器
+
+**开发依赖**：
+- `typescript`：类型检查
+- `biome`：代码格式化和 lint
+- `vite`：构建工具
+- `bun`：运行时和包管理器
+
+[UML]
+@startuml
+skinparam packageStyle rectangle
+
+package "外部依赖" {
+  [Anthropic SDK] as Anthropic
+  [MCP SDK] as MCP
+  [ACP SDK] as ACP
+  [React] as React
+  [Ink] as Ink
+}
+
+package "内部依赖" {
+  [builtin-tools] as builtin
+  [mcp-client] as mcp
+  [acp-link] as acp
+  [remote-control-server] as rcs
+}
+
+package "开发依赖" {
+  [TypeScript] as TS
+  [Biome] as Biome
+  [Vite] as Vite
+  [Bun] as Bun
+}
+
+Anthropic --> builtin
+MCP --> mcp
+ACP --> acp
+React --> Ink
+@enduml
+
+[Detail]
+**依赖关系说明**：
+
+1. **外部依赖**：
+   - Anthropic SDK：提供 Claude API 访问
+   - MCP SDK：实现 MCP 协议
+   - ACP SDK：实现 ACP 协议
+   - React：UI 组件框架
+   - Ink：终端 UI 渲染
+
+2. **内部依赖**：
+   - builtin-tools：提供 60 个内置工具
+   - mcp-client：提供 MCP 客户端功能
+   - acp-link：提供 ACP 代理功能
+   - remote-control-server：提供远程控制功能
+
+3. **开发依赖**：
+   - TypeScript：提供类型检查
+   - Biome：提供代码格式化和 lint
+   - Vite：提供构建工具
+   - Bun：提供运行时和包管理
+
+------------------------------------------------------------

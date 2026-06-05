@@ -97,6 +97,13 @@
 		wrapper.id = `demo-example-${safeDiagramKey}-${index + 1}`;
 		wrapper.dataset.filename = `demo-${safeDiagramKey}-${index + 1}`;
 		wrapper.dataset.hasUml = hasUml ? "true" : "false";
+		const saveTarget = exampleItem.saveTarget && typeof exampleItem.saveTarget === "object" ? exampleItem.saveTarget : null;
+		if (saveTarget) {
+			wrapper.dataset.ctuDir = String(saveTarget.dir || "");
+			wrapper.dataset.ctuFile = String(saveTarget.file || "");
+			wrapper.dataset.ctuGroupIndex = String(Number.isInteger(saveTarget.groupIndex) ? saveTarget.groupIndex : "");
+			wrapper.dataset.ctuLang = String(saveTarget.lang || "");
+		}
 
 		const heading = document.createElement("h3");
 		heading.className = "demo-example-title";
@@ -115,6 +122,24 @@
 		actions.setAttribute("data-i18n-role", "example-actions");
 		actions.setAttribute("aria-label", "示例操作");
 		actions.innerHTML = '<button class="icon-button" type="button" data-action="copy-source" aria-label="复制源码" data-tooltip="复制源码"><span class="button-icon" aria-hidden="true"></span></button><button class="icon-button" type="button" data-action="copy-svg" aria-label="复制 SVG" data-tooltip="复制 SVG"><span class="button-icon" aria-hidden="true"></span></button><button class="icon-button" type="button" data-action="download-svg" aria-label="下载 SVG" data-tooltip="下载 SVG"><span class="button-icon" aria-hidden="true"></span></button>';
+		if (wrapper.dataset.ctuDir && wrapper.dataset.ctuFile && wrapper.dataset.ctuGroupIndex) {
+			const saveButton = document.createElement("button");
+			saveButton.className = "icon-button";
+			saveButton.setAttribute("type", "button");
+			saveButton.setAttribute("data-action", "save-uml");
+			saveButton.setAttribute("aria-label", "Save UML");
+			saveButton.setAttribute("data-tooltip", "Save UML");
+			const saveIcon = document.createElement("span");
+			saveIcon.className = "button-icon";
+			saveIcon.setAttribute("aria-hidden", "true");
+			saveButton.appendChild(saveIcon);
+			const firstAction = actions.querySelector("[data-action]");
+			if (firstAction && typeof actions.insertBefore === "function") {
+				actions.insertBefore(saveButton, firstAction);
+			} else {
+				actions.appendChild(saveButton);
+			}
+		}
 		wrapper.appendChild(actions);
 
 		const grid = document.createElement("div");

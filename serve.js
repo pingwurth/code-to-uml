@@ -194,6 +194,183 @@ function createHttpError(statusCode, message) {
 	return err;
 }
 
+function splitCtuLines(content) {
+	const text = String(content || "");
+	const eol = text.includes("\r\n") ? "\r\n" : "\n";
+	const hadFinalNewline = /\r?\n$/.test(text);
+	const lines = text.split(/\r?\n/);
+	if (hadFinalNewline) {
+		lines.pop();
+	}
+	return { lines, eol, hadFinalNewline };
+}
+
+function normalizeCtuLines(blockLines) {
+	const arr = Array.isArray(blockLines) ? blockLines.slice() : [];
+	while (arr.length && !String(arr[0]).trim()) arr.shift();
+	while (arr.length && !String(arr[arr.length - 1]).trim()) arr.pop();
+	const text = arr.join("\n");
+	if (/^none$/i.test(text.trim())) return "";
+	return text;
+}
+
+function createCtuRangeGroup() {
+	return {
+		title: [],
+		description: [],
+		detail: [],
+		source: [],
+		sections: {},
+		startLine: -1,
+		endLine: -1
+	};
+}
+
+function parseCtuGroupRanges(content) {
+	const parsed = splitCtuLines(content);
+	const groups = [];
+	let current = createCtuRangeGroup();
+	let section = "";
+	let headerDescriptionLines = [];
+	let headerParsed = false;
+
+	function sectionKey(token) {
+		if (token === "example") return "title";
+		if (token === "description") return "description";
+		if (token === "detail") return "detail";
+		if (token === "uml") return "source";
+		return "";
+	}
+
+	function closeSection(endLine) {
+		if (!section || !current.sections[section]) return;
+		current.sections[section].endLine = endLine;
+	}
+
+	function hasFlushableGroup() {
+		const title = normalizeCtuLines(current.title);
+		const description = normalizeCtuLines(current.description);
+		const detail = normalizeCtuLines(current.detail);
+		const source = normalizeCtuLines(current.source);
+		return Boolean(title || description || detail || source);
+	}
+
+	function flushGroup(endLine) {
+		closeSection(endLine);
+		if (hasFlushableGroup()) {
+			current.endLine = endLine;
+			groups.push(current);
+		}
+		current = createCtuRangeGroup();
+		section = "";
+	}
+
+	function beginSection(nextSection, lineIndex) {
+		closeSection(lineIndex);
+		section = nextSection;
+		if (current.startLine < 0) {
+			current.startLine = lineIndex;
+		}
+		current.sections[section] = {
+			headerLine: lineIndex,
+			startLine: lineIndex + 1,
+			endLine: lineIndex + 1
+		};
+	}
+
+	for (let i = 0; i < parsed.lines.length; i += 1) {
+		const line = parsed.lines[i];
+		if (/^\s*#/.test(line)) {
+			continue;
+		}
+		if (!headerParsed) {
+			const titleMatch = line.match(/^\s*Title\s*:\s*(.*)\s*$/i);
+			if (titleMatch) {
+				continue;
+			}
+			const describeMatch = line.match(/^\s*Describe\s*:\s*(.*)\s*$/i);
+			if (describeMatch) {
+				headerDescriptionLines.push(describeMatch[1] || "");
+				continue;
+			}
+			if (headerDescriptionLines.length > 0 && !/^-{60,}\s*$/.test(line)) {
+				headerDescriptionLines.push(line);
+				continue;
+			}
+		}
+		if (/^-{60,}\s*$/.test(line)) {
+			if (!headerParsed) {
+				headerParsed = true;
+				continue;
+			}
+			flushGroup(i);
+			continue;
+		}
+		const header = line.match(/^\[(Example|Description|Detail|UML)\]\s*$/i);
+		if (header) {
+			const token = header[1].toLowerCase();
+			if (token === "example" && (current.title.length || current.description.length || current.source.length)) {
+				flushGroup(i);
+			}
+			beginSection(sectionKey(token), i);
+			continue;
+		}
+		if (!section) continue;
+		current[section].push(line);
+	}
+	flushGroup(parsed.lines.length);
+	return Object.assign(parsed, { groups });
+}
+
+function sourceToCtuLines(source) {
+	const text = String(source || "").replace(/\r\n?/g, "\n");
+	const lines = text.split("\n");
+	while (lines.length && !String(lines[0]).trim()) lines.shift();
+	while (lines.length && !String(lines[lines.length - 1]).trim()) lines.pop();
+	return lines;
+}
+
+function joinCtuLines(lines, eol, hadFinalNewline) {
+	const text = lines.join(eol);
+	return hadFinalNewline ? `${text}${eol}` : text;
+}
+
+function replaceCtuGroupUml(content, groupIndex, source) {
+	const parsed = parseCtuGroupRanges(content);
+	const index = Number.parseInt(groupIndex, 10);
+	if (!Number.isInteger(index) || index < 0 || index >= parsed.groups.length) {
+		throw createHttpError(404, "CTU group not found");
+	}
+
+	const group = parsed.groups[index];
+	const sourceLines = sourceToCtuLines(source);
+	const sourceBlock = sourceLines.slice();
+	const section = group.sections.source;
+	if (section) {
+		if (section.endLine < parsed.lines.length) {
+			sourceBlock.push("");
+		}
+		const nextLines = parsed.lines
+			.slice(0, section.startLine)
+			.concat(sourceBlock, parsed.lines.slice(section.endLine));
+		return joinCtuLines(nextLines, parsed.eol, parsed.hadFinalNewline);
+	}
+
+	const insertAt = group.sections.detail ? group.sections.detail.headerLine : group.endLine;
+	const insertLines = [];
+	if (insertAt > 0 && String(parsed.lines[insertAt - 1] || "").trim()) {
+		insertLines.push("");
+	}
+	insertLines.push("[UML]", ...sourceLines);
+	if (insertAt < parsed.lines.length) {
+		insertLines.push("");
+	}
+	const nextLines = parsed.lines
+		.slice(0, insertAt)
+		.concat(insertLines, parsed.lines.slice(insertAt));
+	return joinCtuLines(nextLines, parsed.eol, parsed.hadFinalNewline);
+}
+
 function resolveCacheHtmlTarget(rootDir, requestedPath) {
 	const relativeInput = String(requestedPath || "").replace(/\\/g, "/");
 	if (!relativeInput || relativeInput.startsWith("/") || relativeInput.includes("\0")) {
@@ -216,6 +393,47 @@ function resolveCacheHtmlTarget(rootDir, requestedPath) {
 	const dataName = path.basename(absPath, ".html");
 	const dataDir = dataName === "demo" ? null : path.join(rootDir, "data", dataName);
 	return { absPath, relativePath, dataDir, dataName };
+}
+
+function resolveCtuFileTarget(rootDir, requestedDir, requestedFile) {
+	const dirName = String(requestedDir || "demo").trim();
+	const fileName = String(requestedFile || "").trim();
+	if (!/^[a-zA-Z0-9_-]+$/.test(dirName)) {
+		throw createHttpError(400, "Invalid data directory");
+	}
+	if (!fileName || fileName.includes("\0") || fileName !== path.basename(fileName)) {
+		throw createHttpError(400, "Invalid CTU file name");
+	}
+	if (path.extname(fileName).toLowerCase() !== ".ctu") {
+		throw createHttpError(400, "Target file must be a .ctu file");
+	}
+
+	const dataDir = path.join(rootDir, "data", dirName);
+	const absPath = path.resolve(dataDir, fileName);
+	if (!isPathInside(dataDir, absPath)) {
+		throw createHttpError(400, "CTU file must be inside the selected data directory");
+	}
+	const relativePath = path.relative(rootDir, absPath).split(path.sep).join("/");
+	return { absPath, relativePath, dirName, fileName };
+}
+
+async function saveDemoUmlSource(rootDir, body) {
+	const target = resolveCtuFileTarget(rootDir, body && body.dir, body && body.file);
+	let raw = "";
+	try {
+		raw = await fs.promises.readFile(target.absPath, "utf8");
+	} catch (err) {
+		if (err && err.code === "ENOENT") {
+			throw createHttpError(404, "CTU file not found");
+		}
+		throw err;
+	}
+	const next = replaceCtuGroupUml(raw, body && body.groupIndex, body && body.source);
+	await fs.promises.writeFile(target.absPath, next, "utf8");
+	return {
+		path: target.relativePath,
+		groupIndex: Number.parseInt(body && body.groupIndex, 10)
+	};
 }
 
 async function listCacheHtmlFiles(rootDir = ROOT_DIR) {
@@ -354,7 +572,8 @@ async function loadDemoExamplesFromData(lang, dataSubdir) {
 					titleI18n: {},
 					descriptionI18n: {},
 					detailI18n: {},
-					sourceByLang: {}
+					sourceByLang: {},
+					fileByLang: {}
 				};
 				itemMap.set(groupKey, item);
 			}
@@ -366,6 +585,7 @@ async function loadDemoExamplesFromData(lang, dataSubdir) {
 			item.sectionTitleI18n[fileLang] = group.sectionTitle || "";
 			item.sectionDescriptionI18n[fileLang] = group.sectionDescription || "";
 			item.sourceByLang[fileLang] = group.source;
+			item.fileByLang[fileLang] = name;
 		}
 	}
 
@@ -374,7 +594,10 @@ async function loadDemoExamplesFromData(lang, dataSubdir) {
 		const items = Array.from(itemMap.values())
 			.sort((a, b) => (a.id - b.id) || (a.groupIndex - b.groupIndex))
 				.map(item => {
-					const source = String(item.sourceByLang.zh || item.sourceByLang.en || "").trim();
+					const preferredLang = lang === "en" ? "en" : "zh";
+					const fallbackLang = preferredLang === "en" ? "zh" : "en";
+					const sourceLang = item.sourceByLang[preferredLang] ? preferredLang : (item.sourceByLang[fallbackLang] ? fallbackLang : "");
+					const source = sourceLang ? String(item.sourceByLang[sourceLang] || "").trim() : "";
 					const hasUml = Boolean(source);
 					return {
 						id: item.id + item.groupIndex,
@@ -389,7 +612,13 @@ async function loadDemoExamplesFromData(lang, dataSubdir) {
 						description: localizeValue(item.descriptionI18n, lang, "\n\n"),
 						detail: localizeValue(item.detailI18n, lang, "\n\n"),
 						hasUml,
-						source
+						source,
+						saveTarget: sourceLang && item.fileByLang[sourceLang] ? {
+							dir: safeDir,
+							file: item.fileByLang[sourceLang],
+							lang: sourceLang,
+							groupIndex: item.groupIndex
+						} : null
 					};
 				});
 		if (items.length) {
@@ -470,6 +699,29 @@ const server = http.createServer(async (req, res) => {
 				} catch (err) {
 					console.error("Failed to load demo examples from data directory:", err);
 					sendJson(res, 500, { error: err && err.message ? err.message : String(err) });
+				}
+				return;
+			}
+
+			if (method === "POST" && requestUrl.pathname === "/api/demo-uml") {
+				const bodyRaw = await readRequestBody(req);
+				let body = null;
+				try {
+					body = bodyRaw ? JSON.parse(bodyRaw) : {};
+				} catch {
+					sendJson(res, 400, { error: "Invalid JSON body" });
+					return;
+				}
+
+				try {
+					const result = await saveDemoUmlSource(ROOT_DIR, body);
+					sendJson(res, 200, result);
+				} catch (err) {
+					const statusCode = err && err.statusCode ? err.statusCode : 500;
+					if (statusCode >= 500) {
+						console.error("Failed to save demo UML source:", err);
+					}
+					sendJson(res, statusCode, { error: err && err.message ? err.message : String(err) });
 				}
 				return;
 			}
