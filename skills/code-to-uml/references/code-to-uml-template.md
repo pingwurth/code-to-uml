@@ -24,6 +24,7 @@ This file owns only the HTML, `.ctu`, and runtime loading contract. For content 
 ## Quick Checklist
 
 - Resolve `$CTU_HOME`; all paths below are relative to it.
+- Normalize relative HTML and data paths against the resolved `$CTU_HOME`, not the analyzed repository cwd, skill directory, or shell cwd.
 - Put HTML in `cache/<report-slug>.html` and content in `data/<report-slug>/{category}--{n}_{lang}.ctu`.
 - Save HTML and `.ctu` files as valid UTF-8. On Windows, avoid shell-default ANSI/GBK writes; use explicit UTF-8 encoding.
 - Use ASCII `report-slug` and `category` values: `a-z`, `0-9`, `_`, `-`.
@@ -42,6 +43,8 @@ Resolve the Code-To-UML project root as:
 2. A user-provided Code-To-UML project root path, when the request gives one.
 3. Current working directory, only if it contains `cache/_TEMPLATE.html` and `data/_TEMPLATE.ctu`.
 4. Otherwise stop and tell the user to run `node install.js` from the Code-To-UML project.
+
+After resolution, convert the CTU root and every artifact path to absolute paths before writing. A relative path such as `cache/report.html` means `<CTU_HOME>/cache/report.html`, even when the analyzed source lives in another repository. Do not write outside the CTU root unless the user explicitly provides an absolute external path.
 
 ## Artifact and Naming Contract
 

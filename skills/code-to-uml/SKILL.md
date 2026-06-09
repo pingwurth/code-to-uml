@@ -29,14 +29,16 @@ Choose the mode before reading references or changing files.
 - Report language: use the user's language; use `zh` for Chinese-dominant requests and `en` for English-dominant requests.
 - Report mode: explicit user mode wins; otherwise use compact for small functions/classes/low-complexity files, full for project/module/file or comprehensive requests.
 - Output path: if omitted for generated HTML, use `$CTU_HOME/cache/<target-slug>_analysis.html`.
-- CTU root: resolve as `CTU_HOME`, then user-provided root, then cwd only if it contains `cache/_TEMPLATE.html` and `data/_TEMPLATE.ctu`.
+- CTU root: resolve as `CTU_HOME`, then a user-provided Code-To-UML root, then cwd only if it contains `cache/_TEMPLATE.html` and `data/_TEMPLATE.ctu`.
+- Relative output paths such as `cache/report.html` and `data/report/` are always relative to the resolved CTU root, never the analyzed repository cwd, skill directory, or shell cwd.
+- An output path outside the resolved CTU root is allowed only when the user explicitly provides an absolute path and clearly requests external placement.
 - Ask only when the target/action cannot be inferred safely, multiple targets match, or an existing report cannot be mapped to source/data.
 
-State inferred defaults before generating artifacts.
+Before generating artifacts, state the resolved absolute CTU root and absolute HTML/data output paths.
 
 ## Required Workflow
 
-1. Resolve mode, target, scope, language, output path, CTU root, and read-only constraints.
+1. Resolve mode, target, scope, language, CTU root, output paths, and read-only constraints. Normalize every relative artifact path against the CTU root before any write.
 2. Read local project instructions, then only the required references from the Reference Map.
 3. Analyze source structurally first for definitions, callers, callees, signatures, impact, and subsystem boundaries; use `rg` and focused reads for literal text and snippets.
 4. Classify complexity from `report-contract.md`, then plan cards from real target mechanisms rather than minimum card counts.
@@ -47,6 +49,7 @@ State inferred defaults before generating artifacts.
 ## Non-Negotiable Checks
 
 - Preserve template structure, data conventions, CSS/JS dependencies, script order, `[FIXED]` selectors, and allowed `[EDIT]` / `[CONFIG]` boundaries.
+- Before writing, verify that normalized HTML and data paths are under the resolved CTU root unless the user explicitly requested an absolute external path.
 - Write generated HTML and `.ctu` files as valid UTF-8; do not rely on Windows shell-default encoding.
 - Use real target-specific content for every required `Section-ID: Sxx_...`; never use section markers as placeholders.
 - Full reports must pass coverage and depth. Large or multi-subsystem targets use `--complexity high` and cover all major subsystems.
