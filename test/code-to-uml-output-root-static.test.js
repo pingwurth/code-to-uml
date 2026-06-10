@@ -27,6 +27,34 @@ assert.match(
 );
 
 assert.match(
+	skill,
+	/Resolve `CTU_SKILL_ROOT` to the absolute directory containing this `SKILL\.md`/,
+	"SKILL.md should define an absolute root for its own resources."
+);
+
+assert.match(
+	skill,
+	/Do not use bare relative paths, `\.` paths, `\.\.` paths/,
+	"SKILL.md should explicitly reject working-directory-dependent paths."
+);
+
+for (const relativePathPattern of [
+	/`references\//,
+	/`scripts\//,
+	/`fixtures\//,
+	/`cache\//,
+	/`data\//,
+	/<skill-dir>\//,
+	/--html\s+["']?cache\//
+]) {
+	assert.doesNotMatch(
+		skill,
+		relativePathPattern,
+		`SKILL.md should not contain relative path form ${relativePathPattern}.`
+	);
+}
+
+assert.match(
 	template,
 	/A relative path such as `cache\/report\.html` means `<CTU_HOME>\/cache\/report\.html`/,
 	"Template guidance should define relative artifact paths against CTU_HOME."
