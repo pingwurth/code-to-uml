@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>LangGraph Pregel.stream() 源码学习笔记</title>
+	<link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+	<link rel="stylesheet" href="../main.css">
+</head>
+
+<body class="demo-page" data-dir="langgraph-pregel-stream-analysis">
+	<header class="demo-topbar">
+		<a class="demo-topbar-logo" href="../index.html" aria-label="Code-To-UML Home">
+			<img src="../favicon.svg" alt="" />
+			<span>Code-To-UML</span>
+		</a>
+	</header>
+
+	<div class="page-shell demo-shell">
+		<main class="content">
+			<section class="intro">
+				<h1>LangGraph Pregel.stream() 源码学习笔记</h1>
+				<p data-markdown>本报告解析本地 LangGraph 1.2.5 中 `Pregel.stream()`（`main.py:2670-3036`）。
+
+- **实现角色**：同步图执行编排器，负责规范化配置，建立 Runtime、回调和 SyncQueue，并驱动 SyncPregelLoop 与 PregelRunner。
+- **核心机制**：采用 Pregel/BSP superstep；步骤内读取不可变快照，并发节点只累计 writes，`after_tick()` 在步间屏障应用写入并创建 checkpoint。
+- **输出协议**：内部统一使用 `(namespace, mode, payload)`，最后转换成 v1/v2 输出；执行、状态提交和格式化彼此分离。</p>
+			</section>
+
+			<nav class="demo-tabs" aria-label="Demo Diagram Types">
+				<button class="demo-tab is-active" type="button" data-diagram="overview">入口概览</button>
+				<button class="demo-tab" type="button" data-diagram="architecture">对象架构</button>
+				<button class="demo-tab" type="button" data-diagram="flow">执行流程</button>
+				<button class="demo-tab" type="button" data-diagram="code">输出与代码</button>
+				<button class="demo-tab" type="button" data-diagram="principles">原理与风险</button>
+				<button class="demo-tab" type="button" data-diagram="guide">复盘与速查</button>
+			</nav>
+
+			<section class="doc-section demo-panel">
+				<h2 id="demo-title">入口概览</h2>
+				<p class="demo-section-overview is-active" data-diagram-overview="overview">定位实现入口、参数归一化和源码边界。</p>
+				<p class="demo-section-overview" data-diagram-overview="architecture" hidden>明确 stream、loop、runner、queue、callback 与 checkpointer 的职责边界。</p>
+				<p class="demo-section-overview" data-diagram-overview="flow" hidden>沿 generator 拉取、任务并发、队列唤醒、superstep 屏障和退出路径跟踪完整时序。</p>
+				<p class="demo-section-overview" data-diagram-overview="code" hidden>解释关键代码片段、v1/v2 输出形状和实际运行结果。</p>
+				<p class="demo-section-overview" data-diagram-overview="principles" hidden>总结 BSP、事件总线、持久化背压以及当前实现的具体边界。</p>
+				<p class="demo-section-overview" data-diagram-overview="guide" hidden>提供阅读顺序、复盘问答和可跳转的维护者速查表。</p>
+				<div class="demo-examples" data-examples></div>
+			</section>
+		</main>
+		<aside data-demo-toc></aside>
+	</div>
+
+	<script src="../js/viz-global.js"></script>
+	<script src="../js/plantuml.js"></script>
+	<script src="../component/docs-page-core.js"></script>
+	<script src="../component/render-failure-common.js"></script>
+	<script src="../component/toc-component.js"></script>
+	<script src="../js/markdown-it.js"></script>
+	<script src="../component/demo-example-component.js"></script>
+	<script src="../demo.js"></script>
+</body>
+
+</html>

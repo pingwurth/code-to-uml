@@ -1,0 +1,38 @@
+Title: 入口定位与结构概览
+Describe: stream() 是同步执行入口的编排层；真正的任务执行、状态提交和事件整形分别委托给 runner、loop 与 _output。
+------------------------------------------------------------
+[Example]
+实现入口、边界与参数归一化
+
+[Description]
+<!-- Section-ID: S01_TARGET_OVERVIEW, S02_TOP_LEVEL_STRUCTURE, S03_CORE_OBJECTS -->
+用户标注的第 2679 行是 `interrupt_before` 参数；本地已安装包中真正的实现体从 `main.py:2670` 开始，到 `main.py:3036` 结束。此前 `2631-2668` 是两个 `@overload` 类型签名。
+
+`stream()` 自身不实现节点业务逻辑。它完成五类编排工作：
+
+1. **归一化入口参数**：兼容已弃用的 `checkpoint_during`，解析默认 `stream_mode`，再通过 `_defaults()` 解析输出键、interrupt、checkpointer、store、cache 和 durability（`main.py:2740-2786`、`2558-2628`）。
+2. **建立观察通道**：创建 `SyncQueue`，挂载 messages/tools/custom callback writer，并把事件统一为 `(namespace, mode, payload)`（`main.py:2763`、`2825-2875`）。
+3. **建立执行上下文**：合并父 Runtime，注入 context、store、stream_writer、server_info 和 `RunControl`（`main.py:2881-2897`）。
+4. **驱动执行引擎**：以 `SyncPregelLoop` 管理 superstep 状态，以 `PregelRunner` 并发运行节点（`main.py:2914-3003`）。
+5. **整形和结束**：排空事件队列，转换 v1/v2 输出，处理递归上限、drain 和 callback 结束/异常（`main.py:3004-3036`、`4199-4258`）。
+
+[UML]
+None
+
+[Detail]
+**分析基线**：
+
+| 项目 | 值 |
+|---|---|
+| 本地包版本 | `langgraph 1.2.5`，`langchain-core 1.4.7` |
+| 主文件 | `.venv/Lib/site-packages/langgraph/pregel/main.py`，4379 行 |
+| 实现范围 | `Pregel.stream()`：`2670-3036` |
+| 主文件 SHA-256 | `77C39C786EC800E72890169B3684497B2C53CB8C74F13C4344CAE049F4CA6335` |
+| 动态验证 | 两个并行节点，分别验证 v1/v2 的 `updates + values` 输出 |
+| 源码约束 | 只读分析，未修改 `.venv` 中的 LangGraph 文件 |
+
+**复杂度评分：10/12，高复杂度函数。** 它跨越 main、loop、runner、queue、callback 和 checkpoint 边界，包含并发、状态机、interrupt、错误恢复和多种输出协议。报告采用 compact 函数范围，但保留 3 张真正降低理解成本的 UML 图。
+
+最重要的责任边界是：`Pregel.stream()` 负责“搭台和拉取”；`PregelRunner.tick()` 负责“并发执行”；`PregelLoop.after_tick()` 负责“屏障提交”；`_output()` 负责“对外协议”。
+
+------------------------------------------------------------

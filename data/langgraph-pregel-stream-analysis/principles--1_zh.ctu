@@ -1,0 +1,73 @@
+Title: 核心原理与实现边界
+Describe: stream() 的可维护性来自执行、状态、事件与协议四层分离；风险主要集中在实时唤醒和 v1 序列类型语义。
+------------------------------------------------------------
+[Example]
+四个核心设计原则
+
+[Description]
+<!-- Section-ID: S09_CORE_PRINCIPLES -->
+1. **BSP 隔离并发写入**：task 只产生 writes，不直接修改其他节点正在读取的 channels；`after_tick()` 是唯一的 step 提交屏障。
+2. **事件总线统一内部协议**：updates、values、messages、tools、custom、tasks、checkpoints 和 debug 都先转换为 `StreamChunk = (namespace, mode, payload)`。
+3. **generator 作为背压边界**：外部每次迭代驱动执行继续；Runner 在可观察点 yield，让 stream 排空 queue，而不是让 worker 线程直接调用用户代码。
+4. **持久化策略与计算解耦**：`_put_checkpoint()` 总是保持保存顺序，durability 只决定何时等待或何时最终提交。
+
+[UML]
+@startuml
+left to right direction
+rectangle "Step N 快照\nchannels 不变" as Snapshot
+rectangle "并发 tasks\n读取 Snapshot" as Tasks
+rectangle "pending writes\n按 task 收集" as Writes
+rectangle "after_tick() 屏障\napply_writes()" as Barrier
+rectangle "Step N+1 快照" as Next
+queue "StreamChunk 事件\n可在屏障前后发出" as Events
+
+Snapshot --> Tasks : 只读
+Tasks --> Writes : commit
+Writes --> Barrier : 全部 task 完成
+Barrier --> Next : 原子式 step 过渡
+Tasks --> Events : updates / messages / custom
+Barrier --> Events : values / checkpoints
+@enduml
+
+[Detail]
+从 `Step N 快照` 开始读。它表达的是逻辑可见性，而不是所有内存对象都不可变：节点在同一步内看不到其他节点本步刚产生的 channel writes；这些 writes 先进入 `checkpoint_pending_writes`，到 `apply_writes()` 才合并。
+
+箭头到 `Events` 表明观察事件不等同于状态提交。`updates` 可以在 task 完成时发出，`messages/custom/tools` 可以由 callback 在 task 内部发出；只有 `values` 表示输入阶段或屏障后的全量状态视图。
+
+这种分离允许一边实时观察，一边保持 Pregel 的确定性状态语义。代价是读者必须区分“事件发生顺序”“task 完成顺序”和“channel 在下一 step 的可见顺序”。
+
+------------------------------------------------------------
+[Example]
+具体边界、陷阱与改进建议
+
+[Description]
+<!-- Section-ID: S11_RISKS_AND_IMPROVEMENTS -->
+以下结论均来自当前本地 1.2.5 源码；其中标注“推断”的项目需要结合上游测试再决定是否修改框架。
+
+| 事项 | 证据与影响 | 建议 |
+|---|---|---|
+| v1 多 mode 对 `list` 有特殊判断 | 参数类型允许 `Sequence[StreamMode]`，但 `_output()` 只用 `isinstance(stream_mode, list)` 决定是否携带 mode 标签（`main.py:4251-4258`）。本地实测传 tuple 会得到裸 payload，丢失 mode 标签。 | 调用方按文档传 list；框架层可改为“非 str 即多 mode”或在入口统一归一化并保留 single/multi 标志。 |
+| `tools` 未进入同步 eager waiter 条件 | waiter 条件包含 eager、subgraphs、messages、custom，但不含 tools（`main.py:2952-2957`）。推断：默认 `stream_eager=False` 时，tool-output-delta 虽已入 queue，也可能要等 task/future 完成才被外层排空。 | 若依赖工具增量的低延迟，先做时序测试；框架层可评估把 tools 纳入 waiter 条件。 |
+| updates 不是拓扑顺序承诺 | 多任务路径等待 `FIRST_COMPLETED`，task commit 时立即发 updates（`_runner.py:282-335`、`_loop.py:499-501`）。 | 消费端不要用 updates 的到达顺序实现业务依赖；业务依赖应由图边和 channel reducer 表达。 |
+| `sync` durability 引入明确背压 | 每步在 `after_tick()` 后等待 checkpoint future（`main.py:3001-3003`）。慢 saver 会直接拉长流间隔。 | 需要强持久化保证时使用 sync；更看重吞吐时评估 async，并监控 saver 延迟。 |
+| 提前停止迭代需要资源收尾 | `stream()` 是含 `with SyncPregelLoop(...)` 的 generator；清理由 generator 退出触发。推断：若长期持有未关闭的 iterator，后台执行器和上下文退出会被推迟。 | 自定义消费器提前终止时显式调用 iterator.close()，或使用确保 close 的上下文封装。 |
+
+[UML]
+None
+
+[Detail]
+v1 tuple 陷阱已用本地最小图验证：
+
+```text
+stream_mode=['updates', 'values']
+=> ('values', {...}), ('updates', {...}), ('values', {...})
+
+stream_mode=('updates', 'values')
+=> {...}, {...}, {...}
+```
+
+这不是状态计算错误，但会让消费端无法区分裸字典属于 values 还是 updates。由于 docstring 明确写“pass a list”，当前最稳妥的使用规则是严格传 list；类型注解与运行时分支仍存在不一致。
+
+异常收口也值得注意：最外层捕获 `BaseException`，只要 run manager 已建立就调用 `on_chain_error(e)` 后重新抛出（`main.py:3033-3036`）。顶层 `GraphInterrupt` 在 Loop 的 context manager 内被抑制，所以它走正常 `on_chain_end`；真正的执行错误、recursion 和 drain 才向调用方传播。
+
+------------------------------------------------------------

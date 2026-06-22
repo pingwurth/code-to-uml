@@ -1,0 +1,55 @@
+Title: 核心对象与依赖边界
+Describe: stream() 把状态机、并发调度、事件队列和持久化组合成一个同步 generator。
+------------------------------------------------------------
+[Example]
+运行时组件关系
+
+[Description]
+<!-- Section-ID: S04_ARCHITECTURE -->
+这张图回答“谁真正执行节点、谁持有状态、事件如何到达调用方”。箭头表示调用、写入或事件传递方向，不表示继承关系。
+
+[UML]
+@startuml
+left to right direction
+skinparam componentStyle rectangle
+
+actor "调用方 / invoke()" as Caller
+component "Pregel.stream()\nmain.py:2670" as Stream
+queue "SyncQueue\n(ns, mode, payload)" as Queue
+component "SyncPregelLoop\n_loop.py" as Loop
+component "PregelRunner\n_runner.py" as Runner
+component "Node tasks\nrun_with_retry()" as Tasks
+component "Messages / Tools / Custom\ncallback writers" as Callbacks
+database "Checkpointer / Cache" as Storage
+
+Caller --> Stream : next() / for
+Stream --> Loop : create, tick(), after_tick()
+Stream --> Runner : create, tick(tasks)
+Runner --> Tasks : 并发执行
+Tasks --> Runner : writes / exception
+Runner --> Loop : put_writes()
+Loop --> Queue : StreamProtocol(...)
+Callbacks --> Queue : 流式事件
+Queue --> Stream : _output() 排空
+Loop --> Storage : pending writes / checkpoint
+Stream --> Caller : v1 tuple/payload 或 v2 StreamPart
+@enduml
+
+[Detail]
+从 `Caller` 开始读图。调用方每次请求 generator 的下一项时，`stream()` 才继续推进；因此这是 pull-based API，但内部节点、callback 和 checkpoint 可以并发生产事件。
+
+核心对象及证据：
+
+| 对象 | 责任 | 源码证据 |
+|---|---|---|
+| `SyncQueue` | 无界 FIFO；`put()` 释放 semaphore，`get()` 消费，`wait()` 只等待不消费 | `_internal/_queue.py:70-114` |
+| `StreamProtocol` | 保存启用的 mode 集合，把三元组事件转发给 queue | `pregel/protocol.py:272-288` |
+| `SyncPregelLoop` | 持有 checkpoint、channels、pending writes、step/status；实现上下文生命周期 | `_loop.py:1446-1695` |
+| `PregelRunner` | 调度任务、重试、等待 FIRST_COMPLETED、commit writes、传播错误 | `_runner.py:135-358`、`574-613` |
+| `_output()` | 排空队列，处理 print_mode、subgraphs、v1/v2 数据形状 | `main.py:4199-4258` |
+
+`SyncPregelLoop.__init__()` 遇到父图的 `CONFIG_KEY_STREAM` 时，用 `DuplexStream` 合并本地和父流（`_loop.py:316-317`、`147-153`）；这就是子图事件既能留在本图又能向外传播的基础。`subgraphs=True` 进一步把 namespace 保留在对外输出中。
+
+弱引用 `weakref.WeakMethod(loop.submit)` 和 `weakref.WeakMethod(loop.put_writes)`（`main.py:2938-2943`）避免 Runner 无意延长 Loop 生命周期；Loop 的上下文退出仍是资源清理的唯一所有者。
+
+------------------------------------------------------------

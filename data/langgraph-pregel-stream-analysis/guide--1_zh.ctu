@@ -1,0 +1,78 @@
+Title: 学习路径、复盘问答与维护速查
+Describe: 用最短路径复现关键输出，并把源码跳转点集中到一张表中。
+------------------------------------------------------------
+[Example]
+推荐阅读与复盘问答
+
+[Description]
+<!-- Section-ID: S10_ONBOARDING_GUIDE, S12_REVIEWER_QUESTIONS -->
+推荐按“外层骨架 → superstep → 并发调度 → 事件格式化”的顺序阅读：
+
+1. `main.py:2740-2897`：看参数、回调和 Runtime 如何装配。
+2. `main.py:2914-3003`：抓住 Loop、Runner、waiter 和 BSP 主循环。
+3. `_loop.py:592-714`：理解 tick/after_tick 的屏障边界。
+4. `_runner.py:176-358`、`574-613`：理解并发、重试、commit 和异常。
+5. `_loop.py:1357-1443`、`main.py:4199-4258`：从内部 StreamChunk 追到外部 v1/v2 输出。
+
+[UML]
+None
+
+[Detail]
+**Q1：`stream()` 是否每 yield 一次就完成一个图 step？**
+
+不是。`runner.tick()` 在调度前、future 完成或 queue waiter 唤醒后都能交回控制；一次 step 可以 yield 多个 updates/messages/custom，最后才由 `after_tick()` 完成屏障提交。
+
+**Q2：为什么并行节点在同一步内看不到彼此更新？**
+
+因为 task writes 先进入 `checkpoint_pending_writes`；channels 直到 `after_tick()->apply_writes()` 才更新。这正是 BSP 语义（`main.py:2974-2978`、`_loop.py:676-686`）。
+
+**Q3：`invoke()` 是另一套执行引擎吗？**
+
+不是。`invoke()` 直接消费 `self.stream()`，在 v1/v2 下收集 latest、chunks 和 interrupts，再组合最终返回值（`main.py:3904-3972`）。因此理解 stream 就理解了同步 invoke 的执行核心。
+
+**Q4：messages 为什么不需要节点显式 return token？**
+
+`StreamMessagesHandler` 作为 inheritable callback 捕获 chat model 流事件或节点输出，并直接调用 `stream.put((ns, "messages", ...))`（`main.py:2825-2842`、`_messages.py:50-104`）。
+
+**Q5：interrupt 为什么通常不会作为异常冒出 stream？**
+
+顶层 `GraphInterrupt` 在 `SyncPregelLoop.__exit__()` 展开的 `_suppress_interrupt()` 中被消费，同时补发 interrupt/values 并保存输出（`_loop.py:1294-1355`）。嵌套图不在此处抑制，让父图处理。
+
+**Q6：调试实时性时先检查什么？**
+
+先确认事件是否已经进入 SyncQueue，再确认 waiter 是否启用，最后看 Runner 在何处 yield。messages/custom 默认满足 waiter 条件；普通 updates 在 task commit 后通过 future 完成路径被排空。
+
+------------------------------------------------------------
+[Example]
+维护者速查表
+
+[Description]
+<!-- Section-ID: S13_MAINTAINER_REFERENCE -->
+| 名称 | 类型 | 位置 | 作用 | 调试关注点 |
+|---|---|---|---|---|
+| `Pregel._defaults` | method | `pregel/main.py:2558-2628` | 归一化 modes、keys、interrupt、store/cache/checkpointer/durability | print_mode 会并入内部 stream_modes |
+| `Pregel.stream` | generator method | `pregel/main.py:2670-3036` | 同步执行编排和对外流入口 | waiter 条件、BSP while、最终 drain |
+| `SyncQueue` | class | `_internal/_queue.py:70-124` | 线程间 FIFO 与非消费 wait | semaphore 释放/消费是否匹配 |
+| `StreamProtocol` | class | `pregel/protocol.py:272-288` | 内部三元组事件协议 | modes 集合是否包含目标事件 |
+| `DuplexStream` | function | `pregel/_loop.py:147-153` | 同时转发本地图与父图事件 | subgraph namespace 与 mode 过滤 |
+| `PregelLoop.tick` | method | `pregel/_loop.py:592-674` | 准备任务并检查终止/interrupt-before | status 和 pending writes 恢复 |
+| `PregelLoop.after_tick` | method | `pregel/_loop.py:676-714` | apply_writes、values、checkpoint、interrupt-after | superstep 屏障 |
+| `PregelLoop._emit` | method | `pregel/_loop.py:1357-1391` | mode 过滤和 debug 包装 | checkpoint/task 到 debug 的 remap |
+| `PregelLoop.output_writes` | method | `pregel/_loop.py:1393-1443` | 从 task writes 生成 updates/tasks/interrupt | cached、hidden tag、interrupt 特例 |
+| `SyncPregelLoop.__enter__/__exit__` | methods | `pregel/_loop.py:1606-1695` | checkpoint 恢复、executor、channels、退出清理 | replay/resume 与 GraphInterrupt 抑制 |
+| `PregelRunner.tick` | generator method | `pregel/_runner.py:176-358` | 运行 task、等待完成/queue、向 stream 交回控制 | 单任务 fast path、多任务 FIRST_COMPLETED |
+| `PregelRunner.commit` | method | `pregel/_runner.py:574-613` | 把成功、interrupt、error 转成 writes | error handler 与 NO_WRITES |
+| `_output` | function | `pregel/main.py:4199-4258` | print、v1/v2、subgraph 输出整形 | list/tuple 多 mode 差异 |
+| `Pregel.invoke` | method | `pregel/main.py:3851-3972` | 消费 stream 并聚合最终返回值 | v1/v2 interrupts 收集差异 |
+
+[UML]
+None
+
+[Detail]
+最小验证建议：构建 `START -> [a, b] -> END` 的并行图，状态字段使用 reducer，分别运行 `stream_mode=["updates", "values"]` 的 v1 和 v2。预期观察到输入 values、两个逐节点 updates、屏障后 values。
+
+若输出“晚到”，在 `SyncQueue.put()`、`get_waiter()`、`PregelRunner.tick()` 的三个 yield 点和 `_output()` 的 `getter()` 处打断点。若状态“不对”，不要先查 queue；应检查 task.writes、`checkpoint_pending_writes`、`apply_writes()` 和 channel reducer。
+
+若 interrupt 行为“不对”，从 `PregelRunner.commit()` 写入 INTERRUPT 开始，沿 `output_writes()`、`_suppress_interrupt()`、最终 `_output()` 追踪，区分顶层与嵌套图。
+
+------------------------------------------------------------

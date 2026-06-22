@@ -1,0 +1,130 @@
+Title: 完整时序与 Superstep 流程
+Describe: generator 的每次 yield 是执行器把控制权交回 stream() 后排空队列的结果；after_tick 是状态可见性的屏障。
+------------------------------------------------------------
+[Example]
+一次 superstep 的调用时序
+
+[Description]
+<!-- Section-ID: S05_CORE_FLOW, S06_CALL_RELATIONSHIPS -->
+`runner.tick()` 本身也是 generator。它在开始调度前、任务完成/事件唤醒后、最终检查异常前主动 `yield` 控制权；外层 `stream()` 利用这些暂停点调用 `_output()`，把此刻 queue 中积累的事件交给用户。
+
+[UML]
+@startuml
+participant "调用方" as Caller
+participant "Pregel.stream()" as Stream
+participant "SyncPregelLoop" as Loop
+participant "PregelRunner" as Runner
+participant "Node Task" as Task
+queue "SyncQueue" as Queue
+
+Caller -> Stream : next()
+Stream -> Loop : tick()
+activate Loop
+Loop -> Loop : prepare_next_tasks()
+alt 无任务 / drain / 超过上限
+  Loop --> Stream : false + status
+else 有可执行任务
+  Loop --> Stream : true
+end
+deactivate Loop
+
+Stream -> Loop : match_cached_writes()
+Stream -> Runner : tick(non-cached tasks)
+activate Runner
+Runner --> Stream : yield（调度前）
+Stream -> Queue : get() 直到 Empty
+Stream --> Caller : 现有 chunks
+Runner -> Task : run_with_retry()
+activate Task
+Task -> Runner : commit(writes / exception)
+Runner -> Loop : put_writes(task_id, writes)
+Loop -> Queue : updates / tasks 事件
+deactivate Task
+Runner --> Stream : yield（完成或 waiter 唤醒）
+Stream -> Queue : _output() 排空
+Stream --> Caller : chunks
+Runner --> Stream : 最终 yield / 完成
+deactivate Runner
+
+Stream -> Loop : after_tick()
+activate Loop
+Loop -> Loop : apply_writes()
+Loop -> Queue : values / checkpoint 事件
+Loop -> Loop : _put_checkpoint()
+Loop --> Stream : step 完成
+deactivate Loop
+@enduml
+
+[Detail]
+阅读入口是 `Caller -> Stream: next()`。外部看到的每个 chunk，不等于一个完整 superstep；它只代表 queue 中某个事件在一次排空时被取出。
+
+关键时序：
+
+1. `loop.tick()` 准备当前 step 的任务并检查终止、drain 和 `interrupt_before`（`_loop.py:592-674`）。
+2. 缓存命中的 task 先恢复 writes 并发出 cached updates（`main.py:2979-2981`、`_loop.py:1526-1539`）。
+3. `runner.tick()` 调用 `run_with_retry()`；单任务有同步 fast path，多任务使用 futures 并等待 `FIRST_COMPLETED`（`_runner.py:189-341`）。
+4. `commit()` 通过 `loop.put_writes()` 保存成功、interrupt 或 error writes；`put_writes()` 随即调用 `output_writes()`，因此 `updates` 可以在 step 屏障之前逐 task 出现（`_runner.py:574-613`、`_loop.py:499-501`）。
+5. 只有所有任务结束后，`after_tick()` 才调用 `apply_writes()`，清空 pending writes，安排 checkpoint，并检查 `interrupt_after`（`_loop.py:676-714`）。
+
+并发任务的 `updates` 是完成事件流，顺序可能受完成时间影响；最终 `values` 是屏障后的合并状态。不要把 updates 的到达顺序误认为节点间可见性顺序。
+
+------------------------------------------------------------
+[Example]
+BSP 循环、持久化与退出路径
+
+[Description]
+<!-- Section-ID: S07_DATA_OR_STATE_FLOW -->
+Pregel/BSP 的不变量写在 `main.py:2974-2978`：第 N 步的 channel 在整步执行期间保持不可变，第 N 步 writes 只在过渡到第 N+1 步时应用。
+
+[UML]
+@startuml
+start
+:SyncPregelLoop.__enter__();
+:加载 checkpoint，映射 input/Command;
+while (loop.tick() 返回 True?) is (是)
+  :准备任务并恢复 cached writes;
+  :PregelRunner.tick(tasks);
+  while (Runner 交回控制?) is (是)
+    :_output() 排空 SyncQueue;
+    :向调用方 yield chunks;
+  endwhile (否)
+  :after_tick() 调用 apply_writes;
+  :发出 values 并安排 checkpoint;
+  if (durability == sync?) then (是)
+    :等待 _put_checkpoint_fut.result();
+  endif
+endwhile (否)
+:退出 with，处理 interrupt/exit durability;
+:最终 _output() 排空;
+if (status == out_of_steps?) then (是)
+  :抛出 GraphRecursionError;
+  stop
+else (否)
+  if (status == draining?) then (是)
+    :抛出 GraphDrained;
+    stop
+  else (done / interrupt)
+    :on_chain_end(loop.output);
+  endif
+endif
+stop
+@enduml
+
+[Detail]
+状态所有权在 `SyncPregelLoop`，不是 queue。Queue 只保存观察事件；真正的运行状态是 `checkpoint + channels + checkpoint_pending_writes + tasks + step/status`（`_loop.py:156-260`）。
+
+`__enter__()` 读取指定 checkpoint、replay checkpoint 或最新 checkpoint；没有持久化状态时创建空 checkpoint，然后恢复 channels，初始化 BackgroundExecutor，调用 `_first()` 映射新输入或 resume Command（`_loop.py:1606-1686`）。
+
+`after_tick()` 先聚合所有 task writes，再通过 `apply_writes()` 更新 channels；只有输出 channel 被修改时才发 `values`（`_loop.py:676-695`）。随后 `_put_checkpoint()` 复制快照并把保存任务提交给后台执行器，且通过前一个 future 保证 checkpoint 顺序（`_loop.py:1173-1189`）。
+
+持久化策略影响屏障后的等待：
+
+| durability | 行为 |
+|---|---|
+| `sync` | `stream()` 在每个 step 后显式等待 `_put_checkpoint_fut.result()`，持久化完成后才进入下一步（`main.py:3001-3003`）。 |
+| `async` | checkpoint 按顺序后台保存，可与后续计算重叠；Loop 上下文负责收尾。 |
+| `exit` | 中间 step 不落完整 checkpoint；`_suppress_interrupt()` 在退出路径写 delta 与最终 checkpoint（`_loop.py:1294-1311`）。 |
+
+顶层 `GraphInterrupt` 会被 Loop 上下文抑制，并补发 interrupt/values、保存 `loop.output`（`_loop.py:1313-1355`）；递归上限和 cooperative drain 则在 with 退出后被转换成明确异常（`main.py:3017-3030`）。
+
+------------------------------------------------------------

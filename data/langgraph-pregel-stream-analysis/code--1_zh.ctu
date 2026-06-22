@@ -1,0 +1,76 @@
+Title: 关键代码与输出协议
+Describe: 从队列唤醒点和 _output() 的分支可以直接推导实时性、模式标签与 v1/v2 返回结构。
+------------------------------------------------------------
+[Example]
+为什么 messages/custom 能在节点结束前流出
+
+[Description]
+<!-- Section-ID: S08_CODE_SNIPPETS -->
+当启用 eager、subgraphs、messages 或 custom 时，`stream()` 把 `stream.wait` 作为一个额外 future 交给 Runner：
+
+```python
+if self.stream_eager or subgraphs or "messages" in stream_modes or "custom" in stream_modes:
+    waiter = None
+
+    def get_waiter():
+        nonlocal waiter
+        if waiter is None or waiter.done():
+            waiter = loop.submit(stream.wait)
+        return waiter
+```
+
+证据范围：`main.py:2950-2972`。
+
+[UML]
+None
+
+[Detail]
+`SyncQueue.put()` 在 append 后释放 semaphore；`wait()` 只观察 semaphore，不消费数据（`_internal/_queue.py:79-86`、`108-114`）。Runner 把 waiter 和节点 futures 放进同一等待集合，任意一个完成都会使 `runner.tick()` yield；外层随即调用 `_output()` 排空队列。
+
+这实现了“外部 pull + 内部 wake-up”的桥接：用户仍通过迭代器拉取数据，但 LLM token 或 custom writer 不必等整个节点结束才获得一次排空机会。
+
+`runner.tick()` 保证同一时刻只维护一个 waiter；Loop 退出时额外 release 一次 semaphore，避免不可取消的同步 future 永久阻塞（`main.py:2958-2969`）。
+
+------------------------------------------------------------
+[Example]
+_output() 如何决定最终形状
+
+[Description]
+<!-- Section-ID: S08_CODE_SNIPPETS -->
+Queue 内部始终是 `(ns, mode, payload)`，对外形状由 `version`、`stream_mode` 和 `subgraphs` 决定（`main.py:4199-4258`）。
+
+| 条件 | 对外输出 |
+|---|---|
+| v2，任意 mode | `{"type": mode, "ns": ns, "data": payload}`；values 另含 `interrupts` |
+| v1，mode 为 list，subgraphs=False | `(mode, payload)` |
+| v1，mode 为 list，subgraphs=True | `(ns, mode, payload)` |
+| v1，单 mode，subgraphs=False | `payload` |
+| v1，单 mode，subgraphs=True | `(ns, payload)` |
+
+[UML]
+None
+
+[Detail]
+`print_mode` 在 `_defaults()` 中并入内部 `stream_modes`，确保 Loop 生产这些事件；但 `_output()` 只打印 `mode in print_mode`，只有 `mode in stream_mode` 才向调用方 yield。因此打印模式不会改变返回结果（`main.py:2586-2593`、`4214-4258`）。
+
+v2 对 values 做两项额外处理：把 `__interrupt__` 从 payload 移入 typed `interrupts` 字段，并可用 `_output_mapper` 转换状态；checkpoint/debug 中的 values 则通过 `_state_mapper` 就地转换（`main.py:4235-4250`）。
+
+本地最小并行图的实际输出：
+
+```text
+v1:
+('values', {'events': []})
+('updates', {'a': {'events': ['a']}})
+('updates', {'b': {'events': ['b']}})
+('values', {'events': ['a', 'b']})
+
+v2:
+{'type': 'values', 'ns': (), 'data': {'events': []}, 'interrupts': ()}
+{'type': 'updates', 'ns': (), 'data': {'a': {'events': ['a']}}}
+{'type': 'updates', 'ns': (), 'data': {'b': {'events': ['b']}}}
+{'type': 'values', 'ns': (), 'data': {'events': ['a', 'b']}, 'interrupts': ()}
+```
+
+初始 `values` 来自输入被 `_first()` 写入后的状态；两个 updates 来自 task commit；最后 values 来自 `after_tick()` 屏障后的合并状态。
+
+------------------------------------------------------------
