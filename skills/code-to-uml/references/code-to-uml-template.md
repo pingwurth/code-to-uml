@@ -23,7 +23,7 @@ This file owns only the HTML, `.ctu`, and runtime loading contract. For content 
 
 ## Quick Checklist
 
-- Resolve `$CTU_HOME`; all paths below are relative to it.
+- Resolve `$CTU_HOME` with the bootstrap algorithm in `SKILL.md`; all paths below are relative to the resolved absolute root.
 - Normalize relative HTML and data paths against the resolved `$CTU_HOME`, not the analyzed repository cwd, skill directory, or shell cwd.
 - Put HTML in `cache/<report-slug>.html` and content in `data/<report-slug>/{category}--{n}_{lang}.ctu`.
 - Save HTML and `.ctu` files as valid UTF-8. On Windows, avoid shell-default ANSI/GBK writes; use explicit UTF-8 encoding.
@@ -37,14 +37,19 @@ This file owns only the HTML, `.ctu`, and runtime loading contract. For content 
 
 ## Root Resolution
 
-Resolve the Code-To-UML project root as:
+Resolve the Code-To-UML project root before any artifact path. `$CTU_HOME` means the resolved absolute root, not necessarily a pre-existing environment variable.
 
-1. `CTU_HOME` environment variable.
-2. A user-provided Code-To-UML project root path, when the request gives one.
-3. Current working directory, only if it contains `cache/_TEMPLATE.html` and `data/_TEMPLATE.ctu`.
-4. Otherwise stop and tell the user to run `node install.js` from the Code-To-UML project.
+A valid project root must contain `cache/_TEMPLATE.html`, `data/_TEMPLATE.ctu`, `demo.html`, and `serve.js`. Use the first valid absolute candidate:
 
-After resolution, convert the CTU root and every artifact path to absolute paths before writing. A relative path such as `cache/report.html` means `<CTU_HOME>/cache/report.html`, even when the analyzed source lives in another repository. Do not write outside the CTU root unless the user explicitly provides an absolute external path.
+1. An explicit user-provided Code-To-UML root.
+2. The repository that bundles this skill: if `CTU_SKILL_ROOT` ends with `skills/code-to-uml`, use `dirname(dirname(CTU_SKILL_ROOT))`.
+3. The `CTU_HOME` environment variable, if set.
+4. The current working directory and each ancestor.
+5. The nearest ancestor of any explicit report HTML, data, template, or output path.
+
+After resolution, convert the CTU root and every artifact path to absolute paths before writing. A relative path such as `cache/report.html` means `<CTU_HOME>/cache/report.html`, even when the analyzed source lives in another repository. Always pass the resolved root to validation with `--root <CTU_HOME>`. Do not write outside the CTU root unless the user explicitly provides an absolute external path.
+
+Only ask the user to run `node install.js` or provide a root after all candidates fail; include the candidates checked and the missing sentinel files.
 
 ## Artifact and Naming Contract
 
@@ -217,6 +222,7 @@ Parser behavior to respect:
 - UML syntax validation applies only to non-empty `[UML]` content after `None` normalization.
 - For generated report cards, every non-`None` `[Description]` and `[Detail]` must use Markdown text with content-driven line breaks. Short content may stay on one line. Do not hard-wrap prose by character count or visual line length; in prose, start a new line only after sentence-ending punctuation (`。`, `；`, `.`, or `;`). Lists, numbered steps, caveats, and tables may use one line per item or row.
 - Organize `[Description]` and `[Detail]` with Markdown structures that match the content: paragraphs, bullet lists, numbered steps, indentation, and Markdown tables. Use lists for parallel points, numbered steps for ordered procedures, indentation for nested context, and tables for comparison or dense reference data.
+- Break lines when content contains sentence-ending punctuation such as periods and semicolons; do not hard-wrap prose by visual length.
 - Generated files should still include separators between cards, even though the parser can split on a later `[Example]`.
 
 If a card includes a diagram, `[Detail]` must explain the important nodes, arrows, relationships, and why the diagram matters.

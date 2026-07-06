@@ -13,9 +13,25 @@ Analyzed source is read-only unless the user asks for code changes. Keep report 
 ## Absolute Path Rule
 
 - Resolve `CTU_SKILL_ROOT` to the absolute directory containing this `SKILL.md` before reading skill resources or running skill scripts.
-- Resolve `CTU_HOME` to the absolute Code-To-UML root before reading templates, writing artifacts, validating reports, or starting the server.
+- Resolve `CTU_HOME` to the absolute Code-To-UML root before reading templates, writing artifacts, validating reports, or starting the server. Treat `$CTU_HOME` in this skill as a resolved logical variable; it does not have to exist as a pre-set environment variable.
 - Treat every `$CTU_SKILL_ROOT/...` and `$CTU_HOME/...` path in this document as absolute because both root variables must contain absolute paths.
 - Do not use bare relative paths, `.` paths, `..` paths, or commands whose meaning depends on the shell working directory.
+
+## CTU_HOME Bootstrap
+
+Resolve `CTU_HOME` before choosing output paths or running any command. Never fail only because the environment variable is unset.
+
+A valid Code-To-UML root must contain all project sentinels: `$CTU_HOME/cache/_TEMPLATE.html`, `$CTU_HOME/data/_TEMPLATE.ctu`, `$CTU_HOME/demo.html`, and `$CTU_HOME/serve.js`. Use the first valid absolute candidate from this ordered list:
+
+1. An explicit user-provided Code-To-UML root path.
+2. The repository that bundles this skill: when `CTU_SKILL_ROOT` ends with `skills/code-to-uml`, test `dirname(dirname(CTU_SKILL_ROOT))`.
+3. The `CTU_HOME` environment variable, if set.
+4. The current shell working directory, then each ancestor of it.
+5. The nearest ancestor of any explicit report HTML, data, template, or output path in the request.
+
+After selecting the root, store it as an absolute local variable for every command and pass it explicitly as `--root "$CTU_HOME"` to validators. Do not rely on environment variables persisting between tool calls. If multiple valid candidates conflict, use the explicit user-provided root first; otherwise prefer the `CTU_SKILL_ROOT`-derived repository root and mention the mismatch.
+
+Only ask the user to run `node install.js` or provide a root after all candidates fail. When that happens, report the candidates checked and which sentinel files were missing.
 
 ## Mode Picker
 
@@ -36,7 +52,7 @@ Choose the mode before reading references or changing files.
 - Report language: use the user's language; use `zh` for Chinese-dominant requests and `en` for English-dominant requests.
 - Report mode: explicit user mode wins; otherwise use compact for small functions/classes/low-complexity files, full for project/module/file or comprehensive requests.
 - Output path: if omitted for generated HTML, use `$CTU_HOME/cache/<target-slug>_analysis.html`.
-- CTU root: resolve as an absolute `CTU_HOME`, then an absolute user-provided Code-To-UML root, then the absolute shell working directory only if that directory passes the Code-To-UML template existence checks.
+- CTU root: always use the `CTU_HOME Bootstrap` algorithm above and keep the result absolute.
 - Relative output paths requested by the user are always relative to the resolved CTU root and must immediately become absolute `$CTU_HOME/...` paths, never the analyzed repository cwd, skill directory, or shell cwd.
 - An output path outside the resolved CTU root is allowed only when the user explicitly provides an absolute path and clearly requests external placement.
 - Ask only when the target/action cannot be inferred safely, multiple targets match, or an existing report cannot be mapped to source/data.
@@ -58,7 +74,11 @@ Before generating artifacts, state the resolved absolute CTU root and absolute H
 - Preserve template structure, data conventions, CSS/JS dependencies, script order, `[FIXED]` selectors, and allowed `[EDIT]` / `[CONFIG]` boundaries.
 - Before writing, verify that normalized HTML and data paths are under the resolved CTU root unless the user explicitly requested an absolute external path.
 - Write generated HTML and `.ctu` files as valid UTF-8; do not rely on Windows shell-default encoding.
+- The report language must match the user's question language unless the user explicitly requests another language.
 - Use real target-specific content for every required `Section-ID: Sxx_...`; never use section markers as placeholders.
+- `S13_MAINTAINER_REFERENCE` must be a Markdown table, not prose or bullets.
+- `[Description]` and `[Detail]` must use Markdown structures that fit the content: paragraphs, bullet lists, numbered steps, indentation, and Markdown tables.
+- Break lines when content contains sentence-ending punctuation such as periods and semicolons; do not hard-wrap prose by visual length.
 - Full reports must pass coverage and depth. Large or multi-subsystem targets use `--complexity high` and cover all major subsystems.
 - Compact reports may merge sections, but each merged ID must include concrete evidence or a clear reason no separate content exists.
 - The intro `<p data-markdown>` is a concise whole-report Markdown overview, not a category overview.
