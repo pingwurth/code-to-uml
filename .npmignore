@@ -72,6 +72,9 @@ test/
 *.test.js
 *.spec.js
 
+# Skill install pointer (machine-specific absolute path; must never be published)
+skills/code-to-uml/ctu-home.json
+
 # Development tools
 .eslintcache
 .stylelintcache

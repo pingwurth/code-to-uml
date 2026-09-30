@@ -1,4 +1,4 @@
 interface:
   display_name: "Code UML Report"
   short_description: "Work on Code-To-UML .ctu/HTML source-analysis reports."
-  default_prompt: "Use $code-to-uml to analyze the specified project, module, file, class, or function, choose compact or full report mode, generate or update a Code-To-UML .ctu/HTML report, and validate the matching artifact/content/runtime scope."
+  default_prompt: "Use $code-to-uml to analyze the specified project, module, file, class, or function, choose compact or full report mode, then generate or update a Code-To-UML .ctu/HTML report: resolve the CTU root, plan with plan-report.js, compile the HTML shell with scaffold-report.js, author only the .ctu content, and validate with validate-report.js and check-runtime.js."

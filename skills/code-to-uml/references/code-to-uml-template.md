@@ -23,33 +23,38 @@ This file owns only the HTML, `.ctu`, and runtime loading contract. For content 
 
 ## Quick Checklist
 
-- Resolve `$CTU_HOME` with the bootstrap algorithm in `SKILL.md`; all paths below are relative to the resolved absolute root.
+- Resolve `$CTU_HOME` with the resolver script in `SKILL.md` (`$CTU_SKILL_ROOT/scripts/resolve-ctu-home.js`, optional `--hint`); all paths below are relative to the resolved absolute root.
 - Normalize relative HTML and data paths against the resolved `$CTU_HOME`, not the analyzed repository cwd, skill directory, or shell cwd.
-- Put HTML in `cache/<report-slug>.html` and content in `data/<report-slug>/{category}--{n}_{lang}.ctu`.
+- Take the required section list, card floors, and coverage diff from `scripts/plan-report.js` before writing content.
+- Put HTML in `cache/<report-slug>.html` and content in `data/<report-slug>/{category}--{n}_{lang}.ctu`. Compile or refresh the HTML shell with `scripts/scaffold-report.js`: it derives tabs, tab labels (`Title:`), section overviews (`Describe:`), `h2#demo-title`, and `body[data-dir]` from the data. Do not hand-copy or hand-rewrite the template.
 - Save HTML and `.ctu` files as valid UTF-8. On Windows, avoid shell-default ANSI/GBK writes; use explicit UTF-8 encoding.
 - Use ASCII `report-slug` and `category` values: `a-z`, `0-9`, `_`, `-`.
-- Set `<body class="demo-page" data-dir="<report-slug>">` for custom report data.
+- Set `<body class="demo-page" data-dir="<report-slug>">` for custom report data (the scaffold script does this).
 - Keep required selectors, script order, tabs, overviews, `.ctu` prefixes, and API keys aligned.
 - Use `None` only to mean "empty/hidden"; `[UML]` may be `None` for text-only cards. Handle `official-demo-link` deliberately.
 - Put `Section-ID: Sxx_...` markers in generated `.ctu` card Markdown so content validation can verify required report coverage.
 - Choose `--mode <compact|full>` and `--complexity <low|medium|high>` from `report-contract.md`, then run `scripts/validate-report.js --strict --mode <mode> --complexity <level>`.
-- Verify page route, API payload, card counts, topbar behavior, and UML rendering.
+- Verify the page route, API payload, static assets, and UML rendering with `scripts/check-runtime.js` (add `--start` when no server runs, `--render` when Java and `plantuml.jar` exist).
 
 ## Root Resolution
 
 Resolve the Code-To-UML project root before any artifact path. `$CTU_HOME` means the resolved absolute root, not necessarily a pre-existing environment variable.
 
-A valid project root must contain `cache/_TEMPLATE.html`, `data/_TEMPLATE.ctu`, `demo.html`, and `serve.js`. Use the first valid absolute candidate:
+Preferred: run the bundled resolver and read its output instead of reasoning about candidate paths by hand:
 
-1. An explicit user-provided Code-To-UML root.
-2. The repository that bundles this skill: if `CTU_SKILL_ROOT` ends with `skills/code-to-uml`, use `dirname(dirname(CTU_SKILL_ROOT))`.
-3. The `CTU_HOME` environment variable, if set.
-4. The current working directory and each ancestor.
-5. The nearest ancestor of any explicit report HTML, data, template, or output path.
+```text
+node <absolute-skill-dir>/scripts/resolve-ctu-home.js [--hint <path>]
+```
 
-After resolution, convert the CTU root and every artifact path to absolute paths before writing. A relative path such as `cache/report.html` means `<CTU_HOME>/cache/report.html`, even when the analyzed source lives in another repository. Always pass the resolved root to validation with `--root <CTU_HOME>`. Do not write outside the CTU root unless the user explicitly provides an absolute external path.
+The script prints `CTU_HOME=<absolute path>` plus the winning source, or exits 1 with every candidate checked and every missing sentinel. It tries, in order: the `--hint` path and its ancestors, the `ctu-home.json` install pointer written next to the skill by `node install.js`, the `CTU_HOME` environment variable, the repository that bundles this skill, the working directory and its ancestors, and shell profile markers.
 
-Only ask the user to run `node install.js` or provide a root after all candidates fail; include the candidates checked and the missing sentinel files.
+A valid project root must contain `cache/_TEMPLATE.html`, `data/_TEMPLATE.ctu`, `demo.html`, and `serve.js`. Do not trust the `skills/code-to-uml` path suffix alone: an installed skill under `~/.claude/skills/code-to-uml` shares the suffix, but its grandparent is a tool config directory, not this repository. Only sentinel-verified roots count.
+
+After resolution, convert the CTU root and every artifact path to absolute paths before writing. A relative path such as `cache/report.html` means `<CTU_HOME>/cache/report.html`, even when the analyzed source lives in another repository. Always pass the resolved root to validation with `--root <CTU_HOME>`. Do not write outside the CTU root unless the user explicitly provides an absolute external path. When the user does request an external location, add `--allow-external-assets` to the validator command so the expected missing relative template assets are reported as non-blocking info instead of warnings that fail `--strict`.
+
+Only ask the user to run `node install.js` or provide a root after the resolver reports every candidate failed; include the candidates checked and the missing sentinel files.
+
+If the resolver script itself is unavailable, apply the same candidate order manually and verify all four sentinels before accepting any root.
 
 ## Artifact and Naming Contract
 
@@ -263,9 +268,19 @@ First run the bundled artifact validator from the skill directory. Set `--lang` 
 node <skill-dir>/scripts/validate-report.js --root <CTU_HOME> --html cache/<report-slug>.html --lang <zh|en> --scope <project|module|file|class|function> --complexity <low|medium|high> --mode <compact|full> --strict
 ```
 
+When `--root` is omitted, the validator tries `CTU_HOME`, the working directory, and then the skill-installed `ctu-home.json` pointer, so a missing `--root` can still self-heal; keep passing it explicitly in skill workflows.
+
 Add `--render` when `plantuml.jar` exists in `<CTU_HOME>` and Java is available on `PATH`.
 
-Start the server from `$CTU_HOME` and leave it running:
+Then run the bundled runtime checker, which reuses a running server or starts and stops its own with `--start`:
+
+```text
+node <skill-dir>/scripts/check-runtime.js --root <CTU_HOME> --html cache/<report-slug>.html --lang <zh|en> [--start] [--render]
+```
+
+It verifies the page route returns 200 with its runtime anchors, `/api/cache-html` lists the report, `/api/demo-examples` returns every category present in the data directory, and every referenced static asset responds 200; with `--render` it also POSTs a small diagram to `/api/plantuml-svg`.
+
+To inspect the server manually, start it from `$CTU_HOME` and leave it running:
 
 - macOS/Linux: `"$CTU_HOME/serve.sh" "$PORT"`
 - Windows PowerShell: `Set-Location $env:CTU_HOME`, then `.\serve.bat 5401`
@@ -274,7 +289,9 @@ Start the server from `$CTU_HOME` and leave it running:
 Before claiming completion, verify:
 
 - `scripts/validate-report.js --strict` returns zero errors and zero warnings.
+- `scripts/check-runtime.js` returns exit code 0 (skips allowed), or every manual check below passes.
 - `http://localhost:<PORT>/cache/<report-slug>.html` returns HTTP 200.
+- The validator reports no missing referenced assets: every relative `../main.css`, `../demo.js`, `../js/...`, or `../component/...` reference in the HTML resolves to an existing file, so the page loads its styles and scripts.
 - `http://localhost:<PORT>/api/demo-examples?lang=<zh|en>&dir=<report-slug>` returns all expected category keys for the report language.
 - API category keys, `button[data-diagram]`, `p[data-diagram-overview]`, card counts, and `.ctu` blocks match.
 - Every `.ctu` filename matches `{category}--{n}_{lang}.ctu` and uses UTF-8 marker syntax.

@@ -5,6 +5,41 @@ English version: [README.en.md](README.en.md)
 这个 skill 用于在任意代码仓库中生成、更新、修复、验证或评审 Code-To-UML `.ctu` / HTML 源码分析报告。
 调用时建议显式写出目标、范围、报告模式、语言和输出位置，避免模型误判为全量报告或普通 UML 解释。
 
+## CTU_HOME 解析机制
+
+skill 不要求预先设置 `CTU_HOME` 环境变量。执行的第一步是运行解析脚本：
+
+```bash
+node "$CTU_SKILL_ROOT/scripts/resolve-ctu-home.js"
+```
+
+脚本会依次尝试：`--hint` 显式路径及其祖先、安装指针 `ctu-home.json`（由 `node install.js` 复制 skill 时写入）、`CTU_HOME` 环境变量、打包本 skill 的仓库、当前目录及其祖先、shell profile 标记。
+每个候选都必须通过哨兵文件检查（`cache/_TEMPLATE.html`、`data/_TEMPLATE.ctu`、`demo.html`、`serve.js`）。
+解析失败时脚本会列出全部候选与缺失的哨兵文件；此时在 Code-To-UML 仓库重新运行 `node install.js`，或用 `--hint` 显式指定根路径后重试。
+
+## 脚本化流程
+
+智能体只负责脚本无法完成的内容创作（`.ctu` 卡片内容、整份报告概述、图的选择与内容）；其余机械步骤全部由脚本完成：
+
+| 脚本 | 作用 | 典型命令 |
+| --- | --- | --- |
+| `resolve-ctu-home.js` | 确定性解析 `CTU_HOME` | `node "$CTU_SKILL_ROOT/scripts/resolve-ctu-home.js" [--hint <root>]` |
+| `scan-target.js` | 目标行数/符号数统计、六维复杂度评分建议 | `node "$CTU_SKILL_ROOT/scripts/scan-target.js" --target <path> [--json]` |
+| `plan-report.js` | 必需 section、卡片下限、覆盖差异、下一步精确命令 | `node "$CTU_SKILL_ROOT/scripts/plan-report.js" --root "$CTU_HOME" --slug <slug> --scope <scope> --complexity <level> --mode <mode>` |
+| `scaffold-report.js` | 从 `$CTU_HOME/cache/_TEMPLATE.html` 编译或刷新 HTML 外壳（tabs / 标签 / 概述 / `demo-title` / `data-dir` 全部由 `.ctu` 头派生） | `node "$CTU_SKILL_ROOT/scripts/scaffold-report.js" --root "$CTU_HOME" --slug <slug> --lang <zh\|en> --title "<title>" [--intro-file <path>] [--categories a,b]` |
+| `validate-report.js` | 产物/内容契约验证与深度门禁 | 见下方 fixture 示例 |
+| `check-runtime.js` | HTTP 运行时验证（页面锚点、首页发现、API 类别、静态资源、可选 PlantUML 渲染） | `node "$CTU_SKILL_ROOT/scripts/check-runtime.js" --root "$CTU_HOME" --html "$CTU_HOME/cache/<file>.html" [--start] [--render]` |
+| `validate-fixtures.js` | validator 自检 | `node "$CTU_SKILL_ROOT/scripts/validate-fixtures.js"` |
+
+典型生成流程：`scan-target.js`（可选评分）→ `plan-report.js`（取计划与命令）→ `scaffold-report.js`（可用 `--categories` 先行建壳）→ 写 `.ctu` 数据 → 再次 `scaffold-report.js` 刷新标签与概述 → `validate-report.js --strict` → `check-runtime.js --start`。
+所有脚本都支持 `--json` 机读输出，失败时退出码非 0 并给出可操作的错误信息。
+
+## 故障排查：报告无样式
+
+如果生成的报告页面没有样式或脚本，几乎总是 HTML 被放到了 CTU 根目录之外，导致 `../main.css`、`../demo.js`、`../js/...` 等相对引用失效。
+先运行上面的解析脚本确认 `CTU_HOME`，再把 HTML 移回 `$CTU_HOME/cache/`、数据移回 `$CTU_HOME/data/<report-slug>/`，并重新运行 validator（它会检查引用资源是否存在）。
+如果用户明确要求把报告放在根目录之外，运行 validator 时加 `--allow-external-assets`，让这些预期内的缺失资源降级为非阻断 info，而不是让 `--strict` 失败。
+
 ## 快速模板
 
 ```text

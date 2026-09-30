@@ -5,6 +5,12 @@ const fs = require("fs");
 const path = require("path");
 const { spawnSync } = require("child_process");
 const { TextDecoder } = require("util");
+const { resolveCtuHome } = require("./resolve-ctu-home.js");
+const {
+	regexMatchAllOutsideComments,
+	regexMatchOutsideComments,
+	normalizeAssetRef
+} = require("./lib/report-html.js");
 
 const DEFAULT_LANG = "zh";
 const VALID_NAME_RE = /^[A-Za-z0-9_-]+$/;
@@ -71,7 +77,14 @@ Options:
   --content-strict    Deprecated alias for --mode full when --mode is omitted.
   --render            Render non-empty UML blocks with plantuml.jar when available.
   --strict            Treat warnings as failures.
+  --allow-external-assets  Reports placed outside the CTU root on purpose: missing
+                      relative template assets are reported as non-blocking info
+                      instead of warnings, so --strict can still converge.
+  --json              Print a machine-readable result.
   --help              Show this help.
+
+Root resolution without --root tries CTU_HOME, the working directory, then the
+skill-installed ctu-home.json pointer, so a missing --root can still self-heal.
 
 Examples:
   # Artifact shape only
@@ -105,6 +118,14 @@ function parseArgs(argv) {
 		}
 		if (arg === "--strict") {
 			args.strict = true;
+			continue;
+		}
+		if (arg === "--allow-external-assets") {
+			args.allowExternalAssets = true;
+			continue;
+		}
+		if (arg === "--json") {
+			args.json = true;
 			continue;
 		}
 		if (arg === "--content-strict") {
@@ -143,7 +164,12 @@ function resolveRoot(inputRoot) {
 	if (isCtuRoot(process.cwd())) {
 		return process.cwd();
 	}
-	throw new Error("Cannot resolve Code-To-UML root. Pass --root or set CTU_HOME.");
+	const resolved = resolveCtuHome({});
+	if (resolved.ok) {
+		return resolved.ctuHome;
+	}
+	const checked = resolved.attempts.map((attempt) => `${attempt.source}: ${attempt.dir || "(no path)"}${attempt.ok ? " (ok)" : ""}`).join("; ");
+	throw new Error(`Cannot resolve Code-To-UML root. Pass --root, set CTU_HOME, or reinstall the skill with node install.js. Tried: ${checked}`);
 }
 
 function resolveUnderRoot(root, inputPath) {
@@ -151,6 +177,53 @@ function resolveUnderRoot(root, inputPath) {
 		return "";
 	}
 	return path.isAbsolute(inputPath) ? inputPath : path.join(root, inputPath);
+}
+
+function isUnderRoot(root, filePath) {
+	const relative = path.relative(path.resolve(root), path.resolve(filePath));
+	return relative === "" || (!relative.startsWith("..") && !path.isAbsolute(relative));
+}
+
+function collectRelativeAssetRefs(html) {
+	const refs = new Set();
+	const patterns = [
+		/<link\b[^>]*?\bhref\s*=\s*(?:"([^"]+)"|'([^']+)')/gi,
+		/<script\b[^>]*?\bsrc\s*=\s*(?:"([^"]+)"|'([^']+)')/gi,
+		/<img\b[^>]*?\bsrc\s*=\s*(?:"([^"]+)"|'([^']+)')/gi
+	];
+	for (const pattern of patterns) {
+		let match;
+		while ((match = pattern.exec(html)) !== null) {
+			const ref = normalizeAssetRef(match[1] || match[2]);
+			if (!ref || path.isAbsolute(ref)) {
+				continue;
+			}
+			refs.add(ref);
+		}
+	}
+	return [...refs];
+}
+
+function validateReferencedAssets(html, htmlPath, root, issues, allowExternalAssets) {
+	const refs = collectRelativeAssetRefs(html);
+	if (!refs.length) {
+		return;
+	}
+	const htmlDir = path.dirname(htmlPath);
+	const inRoot = isUnderRoot(root, htmlPath);
+	for (const ref of refs) {
+		const absolute = path.resolve(htmlDir, ref);
+		if (fs.existsSync(absolute)) {
+			continue;
+		}
+		if (inRoot) {
+			addIssue(issues, "error", htmlPath, `Referenced runtime asset is missing: ${ref} (resolved to ${absolute}). Restore the asset or keep the report inside the CTU root.`);
+		} else if (allowExternalAssets) {
+			addIssue(issues, "info", htmlPath, `Referenced runtime asset is missing: ${ref} (resolved to ${absolute}). Allowed by --allow-external-assets: the HTML is outside the CTU root and renders without styles or scripts.`);
+		} else {
+			addIssue(issues, "warning", htmlPath, `Referenced runtime asset is missing: ${ref} (resolved to ${absolute}). The HTML is outside the CTU root, so relative template assets cannot load and the page renders without styles or scripts.`);
+		}
+	}
 }
 
 function readText(filePath, issues) {
@@ -209,22 +282,20 @@ function hasClass(attrs, className) {
 
 function extractTags(html, tagName) {
 	const re = new RegExp(`<${tagName}\\b[^>]*>`, "gi");
-	const tags = [];
-	let match;
-	while ((match = re.exec(html)) !== null) {
-		const tag = match[0];
-		tags.push({ tag, attrs: parseAttrs(tag), index: match.index });
-	}
-	return tags;
+	return regexMatchAllOutsideComments(html, re).map((match) => ({
+		tag: match[0],
+		attrs: parseAttrs(match[0]),
+		index: match.index
+	}));
 }
 
 function extractBodyAttrs(html) {
-	const match = /<body\b[^>]*>/i.exec(html);
+	const match = regexMatchOutsideComments(html, /<body\b[^>]*>/i);
 	return match ? parseAttrs(match[0]) : null;
 }
 
 function extractIntroMarkdown(html) {
-	const match = /<section\b[^>]*class=["'][^"']*\bintro\b[^"']*["'][^>]*>[\s\S]*?<p\b[^>]*\bdata-markdown\b[^>]*>([\s\S]*?)<\/p>/i.exec(html);
+	const match = regexMatchOutsideComments(html, /<section\b[^>]*class=["'][^"']*\bintro\b[^"']*["'][^>]*>[\s\S]*?<p\b[^>]*\bdata-markdown\b[^>]*>([\s\S]*?)<\/p>/i);
 	return match ? decodeHtmlEntities(match[1].trim()) : "";
 }
 
@@ -256,7 +327,7 @@ function validateIntro(html, htmlPath, lang, issues) {
 	}
 }
 
-function validateHtml(root, htmlPath, lang, contentStrict, issues) {
+function validateHtml(root, htmlPath, lang, contentStrict, allowExternalAssets, issues) {
 	if (!exists(htmlPath)) {
 		addIssue(issues, "error", htmlPath, "HTML file does not exist.");
 		return null;
@@ -288,7 +359,7 @@ function validateHtml(root, htmlPath, lang, contentStrict, issues) {
 		[/\bdata-demo-toc\b/i, "Missing [data-demo-toc] runtime container."]
 	];
 	for (const [re, message] of selectorChecks) {
-		if (!re.test(html)) {
+		if (!regexMatchOutsideComments(html, re)) {
 			addIssue(issues, "error", htmlPath, message);
 		}
 	}
@@ -338,6 +409,8 @@ function validateHtml(root, htmlPath, lang, contentStrict, issues) {
 			addIssue(issues, "error", htmlPath, "official-demo-link exists but does not have a truthful href.");
 		}
 	}
+
+	validateReferencedAssets(html, htmlPath, root, issues, allowExternalAssets);
 
 	if (contentStrict) {
 		validateIntro(html, htmlPath, lang, issues);
@@ -669,14 +742,21 @@ function validateData(root, dataDir, tabs, lang, render, mode, scope, complexity
 	return { categories: [...categories], cardCount, umlCount };
 }
 
-function printIssues(issues) {
-	const sorted = issues.slice().sort((a, b) => {
-		if (a.kind !== b.kind) {
-			return a.kind === "error" ? -1 : 1;
+const ISSUE_KIND_ORDER = { error: 0, warning: 1, info: 2 };
+
+function sortIssues(issues) {
+	return issues.slice().sort((a, b) => {
+		const rankA = ISSUE_KIND_ORDER[a.kind] !== undefined ? ISSUE_KIND_ORDER[a.kind] : 3;
+		const rankB = ISSUE_KIND_ORDER[b.kind] !== undefined ? ISSUE_KIND_ORDER[b.kind] : 3;
+		if (rankA !== rankB) {
+			return rankA - rankB;
 		}
 		return `${a.file}${a.message}`.localeCompare(`${b.file}${b.message}`);
 	});
-	for (const issue of sorted) {
+}
+
+function printIssues(issues) {
+	for (const issue of sortIssues(issues)) {
 		console.log(`[${issue.kind.toUpperCase()}] ${issue.file}: ${issue.message}`);
 	}
 }
@@ -714,7 +794,7 @@ function main() {
 	const root = resolveRoot(args.root);
 	const htmlPath = resolveUnderRoot(root, args.html);
 	const issues = [];
-	const htmlInfo = validateHtml(root, htmlPath, args.lang, mode !== "artifact", issues);
+	const htmlInfo = validateHtml(root, htmlPath, args.lang, mode !== "artifact", args.allowExternalAssets, issues);
 
 	let dataDir = "";
 	if (args.dataDir) {
@@ -732,25 +812,71 @@ function main() {
 
 	const errors = issues.filter((issue) => issue.kind === "error");
 	const warnings = issues.filter((issue) => issue.kind === "warning");
-	printIssues(issues);
+	const infos = issues.filter((issue) => issue.kind === "info");
+	const ok = errors.length === 0 && !(args.strict && warnings.length);
 
-	console.log(`Validated report: ${path.relative(root, htmlPath) || htmlPath}`);
-	console.log(`Mode: ${mode}`);
-	console.log(`Data directory: ${dataDir ? path.relative(root, dataDir) : "(unresolved)"}`);
-	console.log(`Categories: ${dataSummary.categories.length ? dataSummary.categories.join(", ") : "(none)"}`);
-	console.log(`Cards: ${dataSummary.cardCount}`);
-	console.log(`Non-empty UML blocks: ${dataSummary.umlCount}`);
-	console.log(`Errors: ${errors.length}`);
-	console.log(`Warnings: ${warnings.length}`);
+	if (args.json) {
+		console.log(JSON.stringify({
+			ok,
+			html: htmlPath,
+			lang: args.lang,
+			mode,
+			scope: args.scope || null,
+			complexity: args.complexity,
+			dataDir: dataDir || null,
+			categories: dataSummary.categories,
+			cards: dataSummary.cardCount,
+			umlBlocks: dataSummary.umlCount,
+			errors: errors.length,
+			warnings: warnings.length,
+			infos: infos.length,
+			issues: sortIssues(issues)
+		}, null, 2));
+	} else {
+		printIssues(issues);
+		console.log(`Validated report: ${path.relative(root, htmlPath) || htmlPath}`);
+		console.log(`Mode: ${mode}`);
+		console.log(`Data directory: ${dataDir ? path.relative(root, dataDir) : "(unresolved)"}`);
+		console.log(`Categories: ${dataSummary.categories.length ? dataSummary.categories.join(", ") : "(none)"}`);
+		console.log(`Cards: ${dataSummary.cardCount}`);
+		console.log(`Non-empty UML blocks: ${dataSummary.umlCount}`);
+		console.log(`Errors: ${errors.length}`);
+		console.log(`Warnings: ${warnings.length}`);
+		if (infos.length) {
+			console.log(`Infos: ${infos.length}`);
+		}
+	}
 
-	if (errors.length || (args.strict && warnings.length)) {
+	if (!ok) {
 		process.exitCode = 1;
 	}
 }
 
-try {
-	main();
-} catch (error) {
-	console.error(`[ERROR] ${error.message}`);
-	process.exitCode = 1;
+module.exports = {
+	SECTION_IDS,
+	SCOPE_REQUIRED_SECTIONS,
+	COMPLEXITY_CARD_FLOORS,
+	COMPLEXITY_MULTI_CATEGORY_FLOORS,
+	COMPACT_CARD_FLOORS,
+	VALID_LANGS,
+	VALID_MODES,
+	VALID_SCOPES,
+	VALID_COMPLEXITIES,
+	VALID_NAME_RE,
+	CTU_FILE_RE,
+	parseCtuFile,
+	extractSectionIds,
+	hasMarkdownTable,
+	categoryFromFileName,
+	readText,
+	addIssue
+};
+
+if (require.main === module) {
+	try {
+		main();
+	} catch (error) {
+		console.error(`[ERROR] ${error.message}`);
+		process.exitCode = 1;
+	}
 }

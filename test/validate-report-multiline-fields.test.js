@@ -16,6 +16,10 @@ function writeReport(root, ctuText) {
 	fs.writeFileSync(path.join(root, "cache", "sample-report.html"), `<!doctype html>
 <body class="demo-page" data-dir="sample-report">
 	<main class="content">
+		<section class="intro">
+			<h1>Sample</h1>
+			<p data-markdown>Sample report overview used for field validation.</p>
+		</section>
 		<nav class="demo-tabs">
 			<button class="demo-tab is-active" data-diagram="overview">Overview</button>
 		</nav>

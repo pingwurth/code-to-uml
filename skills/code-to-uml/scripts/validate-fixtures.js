@@ -1,12 +1,17 @@
 #!/usr/bin/env node
 "use strict";
 
+// Validator self-check: run the bundled fixtures through validate-report.js and
+// assert each case passes or fails as expected. --json prints a machine-readable
+// summary instead of the per-case [PASS]/[FAIL] lines.
+
 const { spawnSync } = require("child_process");
 const path = require("path");
 
 const skillDir = path.resolve(__dirname, "..");
 const validator = path.join(skillDir, "scripts", "validate-report.js");
 const root = process.cwd();
+const json = process.argv.slice(2).includes("--json");
 
 const cases = [
 	{
@@ -54,6 +59,7 @@ const cases = [
 ];
 
 let failed = false;
+const results = [];
 
 for (const testCase of cases) {
 	const result = spawnSync(process.execPath, testCase.args, {
@@ -61,8 +67,15 @@ for (const testCase of cases) {
 		encoding: "utf8"
 	});
 	const passed = result.status === 0;
-	if (passed !== testCase.expectPass) {
+	const ok = passed === testCase.expectPass;
+	if (!ok) {
 		failed = true;
+	}
+	results.push({ name: testCase.name, expectPass: testCase.expectPass, passed, ok });
+	if (json) {
+		continue;
+	}
+	if (!ok) {
 		console.error(`[FAIL] ${testCase.name}: expected ${testCase.expectPass ? "pass" : "fail"}, got ${passed ? "pass" : "fail"}`);
 		if (result.stdout) {
 			console.error(result.stdout.trim());
@@ -73,6 +86,10 @@ for (const testCase of cases) {
 	} else {
 		console.log(`[PASS] ${testCase.name}`);
 	}
+}
+
+if (json) {
+	console.log(JSON.stringify({ ok: !failed, results }, null, 2));
 }
 
 if (failed) {

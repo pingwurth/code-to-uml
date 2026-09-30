@@ -39,6 +39,13 @@ try {
 	assert.equal(result.status, 0, result.stderr || result.stdout);
 	assert.match(result.stdout, /Installed code-to-uml skill for codex/);
 	assert.ok(fs.existsSync(path.join(home, ".codex", "skills", "code-to-uml", "SKILL.md")));
+	const pointerPath = path.join(home, ".codex", "skills", "code-to-uml", "ctu-home.json");
+	assert.ok(fs.existsSync(pointerPath), "installed skill should carry a CTU_HOME pointer");
+	assert.equal(
+		JSON.parse(fs.readFileSync(pointerPath, "utf8")).ctuHome,
+		repoRoot,
+		"installed skill pointer should reference the bundling repository root"
+	);
 	assert.ok(!fs.existsSync(path.join(home, ".claude", "skills", "code-to-uml")), "named install should not install other tools");
 	if (process.platform !== "win32") {
 		assert.match(fs.readFileSync(profile, "utf8"), /CTU_HOME/);
@@ -85,6 +92,11 @@ try {
 		fs.readFileSync(path.join(home, ".codex", "skills", "code-to-uml", "SKILL.md"), "utf8"),
 		existing,
 		"existing skill should be overwritten when confirmed"
+	);
+	assert.equal(
+		JSON.parse(fs.readFileSync(path.join(home, ".codex", "skills", "code-to-uml", "ctu-home.json"), "utf8")).ctuHome,
+		repoRoot,
+		"overwrite should refresh the CTU_HOME pointer"
 	);
 
 	const allTools = spawnSync(process.execPath, [

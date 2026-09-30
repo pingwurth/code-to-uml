@@ -150,3 +150,4 @@ vite.config.ts.timestamp-*
 
 # skills
 skills/*_zh/
+skills/code-to-uml/ctu-home.json

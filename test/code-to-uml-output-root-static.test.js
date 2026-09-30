@@ -10,31 +10,31 @@ const readmeEn = fs.readFileSync("skills/code-to-uml/README.en.md", "utf8");
 
 assert.match(
 	skill,
-	/Relative output paths[^\n]*are always relative to the resolved CTU root/,
+	/相对输出路径[^\n]*始终相对于解析后的 CTU 根目录/,
 	"SKILL.md should anchor relative artifact paths to CTU_HOME."
 );
 
 assert.match(
 	skill,
-	/never the analyzed repository cwd, skill directory, or shell cwd/,
+	/绝不能相对于被分析的仓库 cwd、skill 目录或 shell cwd/,
 	"SKILL.md should forbid using incidental working directories as the output base."
 );
 
 assert.match(
 	skill,
-	/state the resolved absolute CTU root and absolute HTML\/data output paths/,
+	/生成产物之前，先声明解析得到的绝对 CTU 根目录以及 HTML\/数据文件的绝对输出路径/,
 	"SKILL.md should require visible absolute path resolution before generation."
 );
 
 assert.match(
 	skill,
-	/Resolve `CTU_SKILL_ROOT` to the absolute directory containing this `SKILL\.md`/,
+	/将 `CTU_SKILL_ROOT` 解析为包含本 `SKILL\.md` 的绝对目录/,
 	"SKILL.md should define an absolute root for its own resources."
 );
 
 assert.match(
 	skill,
-	/Do not use bare relative paths, `\.` paths, `\.\.` paths/,
+	/不要使用裸相对路径、`\.` 路径、`\.\.` 路径/,
 	"SKILL.md should explicitly reject working-directory-dependent paths."
 );
 

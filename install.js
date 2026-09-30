@@ -12,6 +12,7 @@ const MARKER_START = "# >>> code-to-uml CTU_HOME >>>";
 const MARKER_END = "# <<< code-to-uml CTU_HOME <<<";
 const SKILL_NAME = "code-to-uml";
 const SKILL_SOURCE_DIR = path.join(PROJECT_ROOT, "skills", SKILL_NAME);
+const SKILL_POINTER_FILE = "ctu-home.json";
 const TOOL_SKILL_DIRS = {
 	codex: [".codex", "skills"],
 	claude: [".claude", "skills"],
@@ -34,6 +35,8 @@ Sets ${VAR_NAME} to this project root:
   ${PROJECT_ROOT}
 
 Installs the bundled ${SKILL_NAME} skill. If no tool is specified, installs for all supported tools.
+Each installed skill copy also receives a ${SKILL_POINTER_FILE} pointer back to this project root,
+so the skill can re-discover CTU_HOME without environment variables.
 
 Supported tools:
   ${Object.keys(TOOL_SKILL_DIRS).join(", ")}
@@ -45,6 +48,8 @@ Options:
 
 Notes:
   - This script does not add anything to PATH.
+  - The skill resolves CTU_HOME through ${SKILL_POINTER_FILE} first; the profile
+    variable is a convenience for interactive shells, not a requirement.
   - Open a new terminal after installation, or use --print for the current shell.`);
 }
 
@@ -136,6 +141,11 @@ function skillBaseDir(tool) {
 	return path.join(userDir(), ...TOOL_SKILL_DIRS[tool]);
 }
 
+function writeSkillPointer(skillTargetDir) {
+	const file = path.join(skillTargetDir, SKILL_POINTER_FILE);
+	fs.writeFileSync(file, `${JSON.stringify({ ctuHome: PROJECT_ROOT }, null, 2)}\n`);
+}
+
 function installSkill(tool, overwriteAll) {
 	if (!fs.existsSync(path.join(SKILL_SOURCE_DIR, "SKILL.md"))) {
 		throw new Error(`Bundled skill not found: ${SKILL_SOURCE_DIR}`);
@@ -157,11 +167,13 @@ function installSkill(tool, overwriteAll) {
 		}
 		fs.rmSync(target, { recursive: true, force: true });
 		copyDirectory(SKILL_SOURCE_DIR, target);
-		console.log(`Overwritten ${SKILL_NAME} skill for ${tool}: ${target}`);
+		writeSkillPointer(target);
+		console.log(`Overwritten ${SKILL_NAME} skill for ${tool}: ${target} (CTU_HOME pointer: ${PROJECT_ROOT})`);
 		return { overwritten: true, all: overwriteAll };
 	}
 	copyDirectory(SKILL_SOURCE_DIR, target);
-	console.log(`Installed ${SKILL_NAME} skill for ${tool}: ${target}`);
+	writeSkillPointer(target);
+	console.log(`Installed ${SKILL_NAME} skill for ${tool}: ${target} (CTU_HOME pointer: ${PROJECT_ROOT})`);
 	return { overwritten: true, all: overwriteAll };
 }
 

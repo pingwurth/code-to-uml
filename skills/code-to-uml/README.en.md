@@ -5,6 +5,41 @@
 Use this skill to generate, update, repair, validate, or review Code-To-UML `.ctu` / HTML source-analysis reports for any code repository.
 When invoking it, state the target, scope, report mode, language, and output path explicitly so the model does not confuse a compact report with a full report or a general UML explanation.
 
+## CTU_HOME Resolution
+
+The skill does not require a pre-set `CTU_HOME` environment variable. The first execution step is the resolver script:
+
+```bash
+node "$CTU_SKILL_ROOT/scripts/resolve-ctu-home.js"
+```
+
+It tries, in order: an explicit `--hint` path and its ancestors, the `ctu-home.json` install pointer (written by `node install.js` when the skill is copied), the `CTU_HOME` environment variable, the repository that bundles this skill, the working directory and its ancestors, and shell profile markers.
+Every candidate must pass the sentinel check (`cache/_TEMPLATE.html`, `data/_TEMPLATE.ctu`, `demo.html`, `serve.js`).
+On failure the script lists every candidate and the missing sentinels; rerun `node install.js` inside the Code-To-UML repository, or retry with `--hint <root>`.
+
+## Scripted Pipeline
+
+The agent authors only what scripts cannot write (`.ctu` card content, the whole-report overview, diagram selection and content); every mechanical step runs through a script:
+
+| Script | Responsibility | Typical command |
+| --- | --- | --- |
+| `resolve-ctu-home.js` | Deterministic `CTU_HOME` resolution | `node "$CTU_SKILL_ROOT/scripts/resolve-ctu-home.js" [--hint <root>]` |
+| `scan-target.js` | File/line/symbol counts and six-dimension complexity scoring hints | `node "$CTU_SKILL_ROOT/scripts/scan-target.js" --target <path> [--json]` |
+| `plan-report.js` | Required sections, card floors, coverage diff, exact next commands | `node "$CTU_SKILL_ROOT/scripts/plan-report.js" --root "$CTU_HOME" --slug <slug> --scope <scope> --complexity <level> --mode <mode>` |
+| `scaffold-report.js` | Compile or refresh the HTML shell from `$CTU_HOME/cache/_TEMPLATE.html` (tabs / labels / overviews / `demo-title` / `data-dir` all derive from `.ctu` headers) | `node "$CTU_SKILL_ROOT/scripts/scaffold-report.js" --root "$CTU_HOME" --slug <slug> --lang <zh\|en> --title "<title>" [--intro-file <path>] [--categories a,b]` |
+| `validate-report.js` | Artifact/content contract validation and depth gates | see the fixture example below |
+| `check-runtime.js` | HTTP runtime verification (page anchors, home-page discovery, API categories, static assets, optional PlantUML rendering) | `node "$CTU_SKILL_ROOT/scripts/check-runtime.js" --root "$CTU_HOME" --html "$CTU_HOME/cache/<file>.html" [--start] [--render]` |
+| `validate-fixtures.js` | Validator self-check | `node "$CTU_SKILL_ROOT/scripts/validate-fixtures.js"` |
+
+Typical generation flow: `scan-target.js` (optional scoring) -> `plan-report.js` (plan and commands) -> `scaffold-report.js` (optionally pre-scaffold with `--categories`) -> write `.ctu` data -> `scaffold-report.js` again to sync labels and overviews -> `validate-report.js --strict` -> `check-runtime.js --start`.
+Every script supports `--json` machine-readable output and exits non-zero with actionable errors on failure.
+
+## Troubleshooting: Report Renders Without Styles
+
+When a generated page has no styles or scripts, the HTML was almost certainly placed outside the CTU root, so `../main.css`, `../demo.js`, and `../js/...` references break.
+Run the resolver above to confirm `CTU_HOME`, move the HTML back to `$CTU_HOME/cache/` and the data back to `$CTU_HOME/data/<report-slug>/`, then rerun the validator (it checks that referenced assets exist).
+If the user explicitly asked for a location outside the root, add `--allow-external-assets` to the validator so these expected missing assets become non-blocking info instead of failing `--strict`.
+
 ## Quick Template
 
 ```text

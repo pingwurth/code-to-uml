@@ -9,7 +9,7 @@ const template = fs.readFileSync("skills/code-to-uml/references/code-to-uml-temp
 
 assert.match(
 	skill,
-	/S13_MAINTAINER_REFERENCE[^\n]*Markdown table/,
+	/S13_MAINTAINER_REFERENCE[^\n]*Markdown 表格/,
 	"SKILL.md should explicitly require S13_MAINTAINER_REFERENCE to use a Markdown table."
 );
 
@@ -33,7 +33,7 @@ assert.match(
 
 assert.match(
 	skill,
-	/\[Description\][^\n]*\[Detail\][^\n]*paragraphs, bullet lists, numbered steps, indentation, and Markdown tables/,
+	/\[Description\][^\n]*\[Detail\][^\n]*段落、无序列表、编号步骤、缩进和 Markdown 表格/,
 	"SKILL.md should require Description and Detail to use appropriate Markdown layout structures."
 );
 
@@ -57,7 +57,7 @@ assert.doesNotMatch(
 
 assert.match(
 	skill,
-	/Break lines when content contains sentence-ending punctuation such as periods and semicolons/,
+	/当内容包含句号、分号等句末标点时应当断行/,
 	"SKILL.md should require line breaks at sentence punctuation such as periods and semicolons."
 );
 
@@ -69,7 +69,7 @@ assert.match(
 
 assert.match(
 	skill,
-	/report language must match the user's question language/,
+	/报告语言必须与用户提问语言一致/,
 	"SKILL.md should require the report language to match the user's question language."
 );
 
