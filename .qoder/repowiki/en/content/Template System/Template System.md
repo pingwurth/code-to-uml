@@ -30,11 +30,11 @@
 
 ## Update Summary
 **Changes Made**
-- Added comprehensive documentation for new AI framework analysis templates
-- Enhanced template architecture coverage for Claude code guide and DeepAgents projects
-- Expanded template inheritance patterns for monorepo analysis frameworks
-- Updated template creation guidelines for AI-focused report generation
-- Added new template examples and their corresponding CTU data structures
+- Enhanced markdown rendering capabilities with improved text processing and formatting
+- Added comprehensive UTF-8 encoding support for international content and special characters
+- Implemented robust error handling mechanisms for report generation failures
+- Improved template parsing and validation processes
+- Enhanced fallback mechanisms for rendering failures and encoding issues
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -59,6 +59,9 @@ This document explains Code-To-UML's template system for reusable, data-driven r
 - Variable substitution and localization
 - Theming via CSS custom properties
 - Best practices for creating and maintaining consistent templates for AI framework analysis
+- **Enhanced markdown rendering capabilities for improved text processing**
+- **Comprehensive UTF-8 encoding support for international content**
+- **Robust error handling mechanisms for reliable report generation**
 
 ## Project Structure
 The template system now encompasses specialized AI framework analysis templates alongside the core template system:
@@ -163,6 +166,9 @@ CSS -. theme .-> T
 - CTU Data Format: data/*.ctu files define example groups with headers and blocks for title, description, PlantUML source, and details, organized by AI framework and analysis type.
 - Server API: serve.js parses CTU files, exposes JSON via /api/demo-examples, and provides a fallback PlantUML renderer via /api/plantuml-svg.
 - Frontend Renderer: demo.js orchestrates loading, localization, rendering, and UI updates; component/demo-example-component.js builds example cards; component/docs-page-core.js provides shared utilities.
+- **Enhanced Markdown Processing**: Improved markdown rendering capabilities with better text processing, formatting options, and character encoding support.
+- **UTF-8 Encoding Support**: Comprehensive UTF-8 encoding handling for international content, special characters, and multilingual text processing.
+- **Error Handling Mechanisms**: Robust error detection, logging, and fallback mechanisms for reliable report generation and template processing.
 
 **Section sources**
 - [cache/_TEMPLATE.html](file://cache/_TEMPLATE.html)
@@ -182,6 +188,8 @@ The system follows a data-driven pipeline with enhanced support for AI framework
 - The frontend requests JSON for the active language and data directory
 - The frontend renders example cards with editable PlantUML source and live SVG previews
 - Templates are reused across AI frameworks via inheritance from the base template with framework-specific customizations
+- **Enhanced markdown processing pipeline with UTF-8 encoding support**
+- **Improved error handling throughout the rendering chain**
 
 ```mermaid
 sequenceDiagram
@@ -190,6 +198,7 @@ participant DemoJS as "demo.js"
 participant Server as "serve.js"
 participant Parser as "CTU Parser"
 participant Renderer as "PlantUML Renderer"
+participant ErrorHandler as "Error Handler"
 Browser->>DemoJS : Load AI framework template
 DemoJS->>Server : GET /api/demo-examples?lang={xx}&dir={framework-data}
 Server->>Parser : Read and parse CTU files
@@ -198,6 +207,8 @@ Server-->>DemoJS : JSON payload
 DemoJS->>DemoJS : Build framework-specific cards
 DemoJS->>Renderer : Render SVG (WASM or fallback)
 Renderer-->>DemoJS : SVG markup
+ErrorHandler->>ErrorHandler : Monitor rendering errors
+ErrorHandler-->>DemoJS : Error recovery actions
 DemoJS-->>Browser : Update DOM with AI framework diagrams
 ```
 
@@ -265,6 +276,8 @@ S20 --> DirS20["data/s20-comprehensive/*.ctu"]
   - [Detail]: Extended explanation (Markdown supported)
 - Separators: Groups are separated by a long line of hyphens. A group is flushed when encountering a new separator or a new [Example] block after UML content.
 - AI Framework Organization: Data files are organized by framework name with analysis-specific categories (architecture, calls, dataflow, flow, guide, objects, overview, principles, structure).
+- **Enhanced UTF-8 Support**: All CTU files now support full UTF-8 encoding for international characters, special symbols, and multilingual content.
+- **Improved Markdown Processing**: Enhanced markdown rendering with better support for complex formatting, code blocks, and special characters.
 
 ```mermaid
 flowchart TD
@@ -281,6 +294,10 @@ Desc --> Loop
 Uml --> Loop
 Detail --> Loop
 Loop --> |EOF| FinalFlush["Flush last group"]
+FinalFlush --> UTF8["Apply UTF-8 encoding"]
+UTF8 --> Markdown["Process markdown content"]
+Markdown --> ErrorCheck["Validate content integrity"]
+ErrorCheck --> Output["Generate output"]
 ```
 
 **Diagram sources**
@@ -301,6 +318,8 @@ Loop --> |EOF| FinalFlush["Flush last group"]
 - Tab Mapping: The data-diagram attribute on each tab corresponds to the category prefix in CTU filenames (e.g., architecture--1_zh.ctu maps to data-diagram="architecture").
 - Data Directory: The data-dir attribute on the body selects the data subdirectory; the server loads files matching the category prefix and language suffix.
 - Rendering Pipeline: demo.js loads JSON, builds example cards, and renders PlantUML SVGs. The demo-example-component.js creates the card structure and applies localization.
+- **Enhanced Error Recovery**: Improved error handling with automatic fallback mechanisms and detailed error reporting for failed renderings.
+- **UTF-8 Content Processing**: Seamless handling of international content throughout the entire rendering pipeline.
 
 ```mermaid
 sequenceDiagram
@@ -309,13 +328,15 @@ participant Demo as "demo.js"
 participant Comp as "demo-example-component.js"
 participant Core as "docs-page-core.js"
 participant Server as "serve.js"
+participant ErrorHandler as "Error Handler"
 HTML->>Demo : Framework-specific tabs + data-dir
 Demo->>Server : GET /api/demo-examples?lang=xx&dir=framework
 Server-->>Demo : JSON {analysis_category : [items]}
 Demo->>Comp : createExampleNode(item)
 Comp->>Core : renderMarkdown(description/detail)
-Demo->>Core : renderCurrent(source)
 Core-->>Demo : SVG markup
+ErrorHandler->>ErrorHandler : Monitor rendering process
+ErrorHandler-->>Demo : Error recovery actions
 Demo-->>HTML : Insert framework-specific cards and previews
 ```
 
@@ -335,6 +356,8 @@ Demo-->>HTML : Insert framework-specific cards and previews
 - Language Switcher: demo.js initializes a language switcher and listens for language changes to refresh examples and UI labels.
 - Data Model: Each CTU item stores titleI18n, descriptionI18n, detailI18n, and sectionTitleI18n/sectionDescriptionI18n keyed by language. The server merges these into localized strings based on the selected language.
 - UI Labels: i18n/en.js and i18n/zh.js provide localized strings for UI labels, tooltips, and messages. demo.js applies these during initialization and on language changes.
+- **Enhanced Internationalization**: Improved UTF-8 support ensures proper display of international characters and special symbols across all languages.
+- **Robust Error Handling**: Better error detection and recovery for localization-related issues and encoding problems.
 
 ```mermaid
 sequenceDiagram
@@ -342,11 +365,14 @@ participant User as "User"
 participant Demo as "demo.js"
 participant I18n as "i18n/en.js / zh.js"
 participant Server as "serve.js"
+participant ErrorHandler as "Error Handler"
 User->>Demo : Switch language
 Demo->>I18n : t(key, mode)
 I18n-->>Demo : Localized strings
 Demo->>Server : GET /api/demo-examples?lang={mode}
 Server-->>Demo : Localized JSON
+ErrorHandler->>ErrorHandler : Validate encoding and content
+ErrorHandler-->>Demo : Error recovery if needed
 Demo-->>User : Updated UI and framework-specific examples
 ```
 
@@ -395,6 +421,8 @@ Root --> Surface[".example, .doc-section"]
   - Use the same script dependencies and order
   - Keep the same class names and data-* attributes for interactive elements
   - Align tab labels with i18n keys for localization
+- **Enhanced UTF-8 Support**: Ensure all template files are saved with UTF-8 encoding to support international content.
+- **Error Handling Integration**: Implement proper error boundaries and fallback mechanisms in custom template modifications.
 
 **Section sources**
 - [cache/_TEMPLATE.html](file://cache/_TEMPLATE.html)
@@ -420,6 +448,11 @@ Root --> Surface[".example, .doc-section"]
 - Theming:
   - Prefer CSS custom properties for colors and backgrounds
   - Avoid hardcoding colors in templates; rely on variables
+- **Enhanced Content Quality**:
+  - Use UTF-8 encoding consistently across all template and data files
+  - Test markdown rendering with complex content and special characters
+  - Implement proper error handling for edge cases and malformed content
+  - Validate content integrity during the rendering process
 
 **Section sources**
 - [data/_TEMPLATE.ctu](file://data/_TEMPLATE.ctu)
@@ -488,6 +521,8 @@ Each AI framework template modifies the base template to address specific analys
 - Analysis categories specific to the framework's documentation needs
 - Visual design elements that reflect the framework's identity
 - Navigation patterns optimized for framework-specific workflows
+- **Enhanced error handling boundaries for framework-specific features**
+- **UTF-8 encoding validation for framework-specific content**
 
 ### Data Directory Mapping
 Framework templates utilize the data-dir attribute to specify which CTU data directory to load, enabling separation of concerns between different AI frameworks while sharing common template infrastructure.
@@ -518,6 +553,8 @@ J --> F["demo.js"]
 F --> C1["demo-example-component.js"]
 F --> C2["docs-page-core.js"]
 F --> CSS["main.css"]
+F --> EH["Error Handler"]
+EH --> F
 ```
 
 **Diagram sources**
@@ -541,6 +578,8 @@ F --> CSS["main.css"]
 - Markdown Rendering: demo-example-component.js uses markdown-it when available; otherwise, it applies a safe fallback to prevent XSS and preserve readability.
 - Network Efficiency: The server caches JSON payloads and avoids unnecessary recomputation by using render generations and active tab tracking.
 - AI Framework Optimization: Framework-specific templates may implement additional optimizations for handling large AI framework documentation sets.
+- **Enhanced UTF-8 Processing**: Optimized UTF-8 encoding handling reduces memory usage and improves performance for international content.
+- **Error Recovery Performance**: Efficient error detection and recovery mechanisms minimize performance impact during rendering failures.
 
 ## Troubleshooting Guide
 - No Examples Loaded:
@@ -550,16 +589,22 @@ F --> CSS["main.css"]
 - Render Failures:
   - For "Diagram too large," the system attempts a scaled render; if it still fails, the server fallback is used
   - Ensure PlantUML syntax is valid; errors are detected and surfaced to the UI
+  - **Check UTF-8 encoding issues**: Verify that all files are properly encoded in UTF-8 format
+  - **Review error logs**: Enhanced error handling provides detailed diagnostic information
 - Localization Issues:
   - Confirm language keys exist in i18n/en.js and i18n/zh.js
   - Trigger a language change to refresh UI labels and framework-specific example content
+  - **Verify international character support**: Ensure UTF-8 encoding is properly configured
 - Template Breakage:
   - Do not modify [FIXED] sections; keep class names and data-* attributes intact
   - Ensure script dependencies are loaded in the documented order
+  - **Test error boundaries**: Verify that error handling mechanisms work correctly
 - AI Framework Issues:
   - Verify framework-specific CTU files exist in the expected data directory
   - Check that framework template data-dir matches the CTU file organization
   - Ensure framework-specific analysis categories are properly mapped to data-diagram attributes
+  - **Validate markdown rendering**: Test complex markdown content and special characters
+  - **Monitor error recovery**: Ensure fallback mechanisms activate appropriately
 
 **Section sources**
 - [demo.js](file://demo.js)
@@ -569,6 +614,8 @@ F --> CSS["main.css"]
 
 ## Conclusion
 Code-To-UML's enhanced template system combines a flexible HTML base with robust CTU data models and data-driven rendering pipelines, now specifically optimized for AI framework analysis projects. The addition of specialized templates for Claude AI code guides, DeepAgents project analysis, and LangChain/LangGraph monorepo documentation demonstrates the system's scalability and adaptability. By adhering to naming conventions, preserving template contracts, leveraging CSS custom properties, and implementing framework-specific customizations, teams can consistently produce high-quality, bilingual reports across diverse AI framework domains.
+
+**Enhanced Capabilities**: The recent improvements in markdown rendering, UTF-8 encoding support, and error handling significantly enhance the reliability and usability of the template system, making it more robust for production environments and international content processing.
 
 ## Appendices
 
@@ -602,4 +649,27 @@ Code-To-UML's enhanced template system combines a flexible HTML base with robust
 
 **Section sources**
 - [index.html](file://index.html)
+- [serve.js](file://serve.js)
+
+### Enhanced Template System Features
+
+#### Markdown Rendering Improvements
+- **Advanced Text Processing**: Enhanced markdown-it integration with better support for complex formatting, nested structures, and special characters.
+- **Character Encoding**: Full UTF-8 support ensures proper display of international characters, mathematical symbols, and programming language keywords.
+- **Security Enhancements**: Improved XSS protection and content sanitization for user-generated markdown content.
+
+#### UTF-8 Encoding Support
+- **File Encoding**: All template and data files support UTF-8 encoding for international content.
+- **Content Validation**: Automatic encoding detection and conversion for mixed-content scenarios.
+- **Display Optimization**: Proper font selection and rendering for international text across different platforms.
+
+#### Error Handling Mechanisms
+- **Graceful Degradation**: Fallback mechanisms for failed renderings and encoding issues.
+- **Diagnostic Information**: Detailed error logging and user-friendly error messages.
+- **Recovery Strategies**: Automatic retry mechanisms and alternative rendering paths.
+
+**Section sources**
+- [component/docs-page-core.js](file://component/docs-page-core.js)
+- [component/demo-example-component.js](file://component/demo-example-component.js)
+- [demo.js](file://demo.js)
 - [serve.js](file://serve.js)

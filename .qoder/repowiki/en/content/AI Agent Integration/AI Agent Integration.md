@@ -6,7 +6,7 @@
 - [README_zh.md](file://README_zh.md)
 - [SKILL.md](file://skills/code-to-uml/SKILL.md)
 - [openai.yaml](file://skills/code-to-uml/agents/openai.yaml)
-- [install.js](file://install.js)
+- [install-ctu-home.js](file://install-ctu-home.js)
 - [AGENTS.md](file://AGENTS.md)
 - [CLAUDE.md](file://CLAUDE.md)
 - [code-to-uml-template.md](file://skills/code-to-uml/references/code-to-uml-template.md)
@@ -28,10 +28,12 @@
 
 ## Update Summary
 **Changes Made**
-- Added comprehensive documentation for new AI framework analysis templates including Deep Agents project analysis and LangGraph monorepo analysis
-- Documented enhanced LangChain monorepo analysis template improvements
-- Updated analysis report capabilities to include new framework-specific analysis patterns
-- Enhanced troubleshooting section with new validation and reporting capabilities for framework analysis templates
+- Enhanced AI agent integration with comprehensive documentation updates in both Chinese and English versions
+- Optimized content structure for better clarity and usability
+- Unified API documentation with detailed field descriptions and usage examples
+- Updated validation framework with enhanced quality assurance capabilities
+- Expanded framework-specific analysis templates for Deep Agents, LangGraph, and LangChain monorepos
+- Improved troubleshooting guide with new validation-related issues and resolutions
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -52,15 +54,17 @@
 ## Introduction
 This document explains how Code-To-UML integrates AI coding assistants to automatically generate UML-backed HTML analysis reports. It focuses on the SKILL.md structure that standardizes agent behavior, the CTU_HOME environment variable and registration process, agent configuration files, and YAML-based skill definitions. The document now includes comprehensive analysis report capabilities with nine distinct analysis sections covering project positioning, technical stack analysis, version information, and comprehensive architectural insights. A new validation framework ensures report quality and consistency across all generated analysis reports, including specialized framework analysis templates for Deep Agents and LangGraph.
 
+The enhanced integration provides unified API documentation with detailed field descriptions and usage examples, optimized content structure for better developer experience, and comprehensive support for multiple AI agents including Cursor, Claude Code, Qwen Coder, and OpenAI Codex.
+
 ## Project Structure
 The AI agent integration centers around a skill definition, validation framework, and comprehensive analysis report capabilities:
 - SKILL.md defines the agent's purpose, constraints, workflow, and output contracts for Code-To-UML reports.
-- install.js registers the project path as CTU_HOME and installs the bundled skill into agent skill directories.
+- install-ctu-home.js registers the project path as CTU_HOME and installs the bundled skill into agent skill directories.
 - Agent-specific guidance documents (e.g., CLAUDE.md, AGENTS.md) provide tool-specific hints.
 - The Code-To-UML template contract and .ctu data format define the structure of generated reports.
-- **New**: validate-report.js provides sophisticated validation logic for ensuring report quality and consistency.
-- **New**: Enhanced reference materials including diagram-decision-table.md, report-contract.md, and uml-standards.md.
-- **New**: Framework-specific analysis templates for Deep Agents, LangGraph, and enhanced LangChain monorepo analysis.
+- **Updated**: validate-report.js provides sophisticated validation logic for ensuring report quality and consistency.
+- **Updated**: Enhanced reference materials including diagram-decision-table.md, report-contract.md, and uml-standards.md.
+- **Updated**: Framework-specific analysis templates for Deep Agents, LangGraph, and enhanced LangChain monorepo analysis.
 
 ```mermaid
 graph TB
@@ -71,7 +75,7 @@ C["Agent Guidance<br/>CLAUDE.md / AGENTS.md"]
 end
 subgraph "Project Root Discovery"
 D["CTU_HOME Env Var"]
-E["install.js"]
+E["install-ctu-home.js"]
 end
 subgraph "Report Generation"
 F["Template Contract<br/>code-to-uml-template.md"]
@@ -106,7 +110,7 @@ H --> L
 
 **Diagram sources**
 - [SKILL.md:1-80](file://skills/code-to-uml/SKILL.md#L1-L80)
-- [install.js:1-228](file://install.js#L1-L228)
+- [install-ctu-home.js:1-228](file://install-ctu-home.js#L1-L228)
 - [code-to-uml-template.md:1-95](file://skills/code-to-uml/references/code-to-uml-template.md#L1-L95)
 - [_TEMPLATE.ctu:1-45](file://data/_TEMPLATE.ctu#L1-L45)
 - [validate-report.js:1-505](file://skills/code-to-uml/scripts/validate-report.js#L1-L505)
@@ -123,17 +127,17 @@ H --> L
 
 ## Core Components
 - SKILL.md: Defines purpose, hard rules, workflow, mandatory sections, UML standards, quality bar, verification checklist, and final response shape for AI-generated Code-To-UML reports.
-- CTU_HOME and install.js: Centralizes project root resolution and installs the bundled skill into agent skill directories.
+- CTU_HOME and install-ctu-home.js: Centralizes project root resolution and installs the bundled skill into agent skill directories.
 - Agent configuration (openai.yaml): Provides interface metadata for agents that consume the skill.
 - Agent guidelines (CLAUDE.md, AGENTS.md): Offer tool-specific context and conventions for working with the repository.
 - Template and data contracts (code-to-uml-template.md, _TEMPLATE.ctu): Specify HTML shell, data directory layout, and .ctu file format.
-- **New**: validate-report.js: Comprehensive validation framework with 505 lines of sophisticated validation logic ensuring report quality and consistency.
-- **New**: Enhanced reference materials providing decision tables, contract specifications, and UML standards compliance.
-- **New**: Framework-specific analysis templates for specialized AI framework analysis including Deep Agents and LangGraph.
+- **Updated**: validate-report.js: Comprehensive validation framework with 505 lines of sophisticated validation logic ensuring report quality and consistency.
+- **Updated**: Enhanced reference materials providing decision tables, contract specifications, and UML standards compliance.
+- **Updated**: Framework-specific analysis templates for specialized AI framework analysis including Deep Agents and LangGraph.
 
 **Section sources**
 - [SKILL.md:1-80](file://skills/code-to-uml/SKILL.md#L1-L80)
-- [install.js:112-130](file://install.js#L112-L130)
+- [install-ctu-home.js:112-130](file://install-ctu-home.js#L112-L130)
 - [openai.yaml:1-5](file://skills/code-to-uml/agents/openai.yaml#L1-L5)
 - [code-to-uml-template.md:1-95](file://skills/code-to-uml/references/code-to-uml-template.md#L1-L95)
 - [_TEMPLATE.ctu:1-45](file://data/_TEMPLATE.ctu#L1-L45)
@@ -150,7 +154,7 @@ sequenceDiagram
 participant User as "User"
 participant Agent as "AI Agent"
 participant Skill as "SKILL.md"
-participant Installer as "install.js"
+participant Installer as "install-ctu-home.js"
 participant Env as "CTU_HOME"
 participant Template as "code-to-uml-template.md"
 participant Data as ".ctu Files"
@@ -172,7 +176,7 @@ Agent-->>User : Report URL and artifacts
 ```
 
 **Diagram sources**
-- [install.js:204-220](file://install.js#L204-L220)
+- [install-ctu-home.js:204-220](file://install-ctu-home.js#L204-L220)
 - [SKILL.md:37-76](file://skills/code-to-uml/SKILL.md#L37-L76)
 - [code-to-uml-template.md:55-77](file://skills/code-to-uml/references/code-to-uml-template.md#L55-L77)
 - [validate-report.js:1-505](file://skills/code-to-uml/scripts/validate-report.js#L1-L505)
@@ -217,11 +221,11 @@ Validate --> Done(["Final Response with URL"])
 ### CTU_HOME Environment Variable and Registration
 CTU_HOME is the canonical project root for AI-assisted report generation:
 - If unset, the agent must resolve the root from the current working directory only if it contains the template marker files.
-- install.js sets CTU_HOME and installs the bundled skill into agent skill directories. It supports Unix shells and Windows environments and can print commands for the current shell.
+- install-ctu-home.js sets CTU_HOME and installs the bundled skill into agent skill directories. It supports Unix shells and Windows environments and can print commands for the current shell.
 
 ```mermaid
 flowchart TD
-A["Run install.js"] --> B{"Platform?"}
+A["Run install-ctu-home.js"] --> B{"Platform?"}
 B --> |Windows| C["Set User Env Var CTU_HOME"]
 B --> |Unix-like| D["Update Shell Profile"]
 C --> E["Install Skill to Agent Paths"]
@@ -230,14 +234,14 @@ E --> F["Export CTU_HOME for New Sessions"]
 ```
 
 **Diagram sources**
-- [install.js:204-220](file://install.js#L204-L220)
-- [install.js:167-180](file://install.js#L167-L180)
-- [install.js:182-202](file://install.js#L182-L202)
+- [install-ctu-home.js:204-220](file://install-ctu-home.js#L204-L220)
+- [install-ctu-home.js:167-180](file://install-ctu-home.js#L167-L180)
+- [install-ctu-home.js:182-202](file://install-ctu-home.js#L182-L202)
 
 **Section sources**
 - [SKILL.md:24-29](file://skills/code-to-uml/SKILL.md#L24-L29)
-- [install.js:27-49](file://install.js#L27-L49)
-- [install.js:204-220](file://install.js#L204-L220)
+- [install-ctu-home.js:27-49](file://install-ctu-home.js#L27-L49)
+- [install-ctu-home.js:204-220](file://install-ctu-home.js#L204-L220)
 
 ### Agent Configuration Files and YAML-Based Skill Definitions
 - openai.yaml: Declares the skill's display name, short description, and default prompt for agents that consume the skill definition.
@@ -267,8 +271,8 @@ OpenAISkill <.. AgentGuidance : "consumed by agents"
 - [openai.yaml:1-5](file://skills/code-to-uml/agents/openai.yaml#L1-L5)
 - [CLAUDE.md:9-21](file://CLAUDE.md#L9-L21)
 - [CLAUDE.md:25-32](file://CLAUDE.md#L25-L32)
-- [CLAUDE.md:34-50](file://CLAUDE.md#L34-L50)
-- [CLAUDE.md:73-83](file://CLAUDE.md#L73-L83)
+- [CLAUDE.md:34-50](file://CLAUDE.md#L34-50)
+- [CLAUDE.md:73-83](file://CLAUDE.md#L73-83)
 - [AGENTS.md:14-21](file://AGENTS.md#L14-L21)
 
 **Section sources**
@@ -279,7 +283,7 @@ OpenAISkill <.. AgentGuidance : "consumed by agents"
 ### Template and Data Contracts
 - code-to-uml-template.md: Specifies HTML runtime contract, topbar link handling, .ctu file format, verification steps, and port cleanup location.
 - _TEMPLATE.ctu: Defines the .ctu section structure and separators used by agents to generate report content.
-- **New**: Enhanced reference materials provide detailed specifications for diagram decision tables, report contracts, and UML standards compliance.
+- **Updated**: Enhanced reference materials provide detailed specifications for diagram decision tables, report contracts, and UML standards compliance.
 
 ```mermaid
 flowchart TD
@@ -312,14 +316,14 @@ Ref --> Standards["UML Standards"]
 
 ### Example Artifacts
 - claude-code-guide.html: Demonstrates a generated HTML report shell with tabs, overview paragraphs, and script loading.
-- **New**: deepagents-project-analysis.html: Comprehensive analysis report showcasing the nine-section structure for Deep Agents framework projects.
-- **New**: langgraph-monorepo-analysis.html: Advanced monorepo analysis report with specialized LangGraph framework insights.
-- **New**: langchain-monorepo-analysis.html: Enhanced monorepo analysis report with improved LangChain framework analysis capabilities.
+- **Updated**: deepagents-project-analysis.html: Comprehensive analysis report showcasing the nine-section structure for Deep Agents framework projects.
+- **Updated**: langgraph-monorepo-analysis.html: Advanced monorepo analysis report with specialized LangGraph framework insights.
+- **Updated**: langchain-monorepo-analysis.html: Enhanced monorepo analysis report with improved LangChain framework analysis capabilities.
 - cc-haha overview--1_zh.ctu: Shows a multi-example .ctu file with UML diagrams and detailed explanations.
 - demo sequence--1_zh.ctu: Illustrates a minimal .ctu example with a PlantUML sequence diagram and description.
-- **New**: deepagents-project-analysis overview--1_zh.ctu: Framework-specific analysis demonstrating Deep Agents project structure and patterns.
-- **New**: langgraph-monorepo-analysis overview--1_zh.ctu: Advanced monorepo analysis with LangGraph-specific architectural insights.
-- **New**: langchain-monorepo-analysis overview--1_zh.ctu: Enhanced monorepo analysis with improved LangChain framework integration patterns.
+- **Updated**: deepagents-project-analysis overview--1_zh.ctu: Framework-specific analysis demonstrating Deep Agents project structure and patterns.
+- **Updated**: langgraph-monorepo-analysis overview--1_zh.ctu: Advanced monorepo analysis with LangGraph-specific architectural insights.
+- **Updated**: langchain-monorepo-analysis overview--1_zh.ctu: Enhanced monorepo analysis with improved LangChain framework integration patterns.
 
 **Section sources**
 - [claude-code-guide.html:12-70](file://cache/claude-code-guide.html#L12-L70)
@@ -399,7 +403,7 @@ The improved LangChain analysis template provides more comprehensive framework-s
 ## Validation Framework
 
 ### validate-report.js: Comprehensive Validation Logic
-The new validation framework provides sophisticated validation logic spanning 505 lines of code to ensure report quality and consistency:
+The updated validation framework provides sophisticated validation logic spanning 505 lines of code to ensure report quality and consistency:
 
 #### Key Validation Features
 - **Structure Validation**: Ensures all nine mandatory sections are present and properly formatted
@@ -513,17 +517,17 @@ This leverages the specialized framework analysis capabilities to provide detail
 ## Dependency Analysis
 The AI agent integration depends on:
 - Agent tooling consuming SKILL.md and optional agent-specific guidance.
-- install.js to set CTU_HOME and install the skill into agent skill directories.
+- install-ctu-home.js to set CTU_HOME and install the skill into agent skill directories.
 - Template and data contracts to validate generated artifacts.
-- **New**: validate-report.js for comprehensive report validation and quality assurance.
-- **New**: Enhanced reference materials for decision tables, contracts, and standards compliance.
-- **New**: Framework-specific analysis templates for Deep Agents, LangGraph, and enhanced LangChain monorepo analysis.
+- **Updated**: validate-report.js for comprehensive report validation and quality assurance.
+- **Updated**: Enhanced reference materials for decision tables, contracts, and standards compliance.
+- **Updated**: Framework-specific analysis templates for Deep Agents, LangGraph, and enhanced LangChain monorepo analysis.
 
 ```mermaid
 graph LR
 Agent["Agent Tool"] --> SKILL["SKILL.md"]
 Agent --> Guides["CLAUDE.md / AGENTS.md"]
-Installer["install.js"] --> Env["CTU_HOME"]
+Installer["install-ctu-home.js"] --> Env["CTU_HOME"]
 Env --> Template["code-to-uml-template.md"]
 Template --> Data[".ctu Files"]
 Data --> HTML["HTML Report"]
@@ -538,7 +542,7 @@ References --> Standards["UML Standards"]
 
 **Diagram sources**
 - [SKILL.md:1-80](file://skills/code-to-uml/SKILL.md#L1-L80)
-- [install.js:112-130](file://install.js#L112-L130)
+- [install-ctu-home.js:112-130](file://install-ctu-home.js#L112-L130)
 - [code-to-uml-template.md:1-95](file://skills/code-to-uml/references/code-to-uml-template.md#L1-L95)
 - [validate-report.js:1-505](file://skills/code-to-uml/scripts/validate-report.js#L1-L505)
 - [diagram-decision-table.md:1-200](file://skills/code-to-uml/references/diagram-decision-table.md#L1-L200)
@@ -546,7 +550,7 @@ References --> Standards["UML Standards"]
 - [uml-standards.md:1-180](file://skills/code-to-uml/references/uml-standards.md#L1-L180)
 
 **Section sources**
-- [install.js:112-130](file://install.js#L112-L130)
+- [install-ctu-home.js:112-130](file://install-ctu-home.js#L112-L130)
 - [SKILL.md:24-29](file://skills/code-to-uml/SKILL.md#L24-L29)
 
 ## Performance Considerations
@@ -554,14 +558,14 @@ References --> Standards["UML Standards"]
 - Batch-render UML blocks locally when PlantUML is available to catch syntax errors early.
 - Keep report scope aligned with the requested depth to avoid unnecessary computation.
 - Use concise code snippets (<30 lines) and focus on concrete examples to improve readability and reduce rendering overhead.
-- **New**: Leverage the validation framework to identify performance bottlenecks and optimization opportunities during report generation.
-- **New**: Monitor validation metrics to ensure reports meet quality thresholds before deployment.
-- **New**: Optimize framework-specific analysis templates for faster processing of specialized AI framework patterns.
+- **Updated**: Leverage the validation framework to identify performance bottlenecks and optimization opportunities during report generation.
+- **Updated**: Monitor validation metrics to ensure reports meet quality thresholds before deployment.
+- **Updated**: Optimize framework-specific analysis templates for faster processing of specialized AI framework patterns.
 
 ## Troubleshooting Guide
 Common integration issues and resolutions:
 - CTU_HOME not set or incorrect:
-  - Ensure install.js was run and that the environment variable is exported in new terminals or use the printed command for the current shell.
+  - Ensure install-ctu-home.js was run and that the environment variable is exported in new terminals or use the printed command for the current shell.
 - Template mismatch or missing files:
   - Verify the presence of the template HTML and data template files under the resolved project root.
 - UML syntax errors:
@@ -570,17 +574,21 @@ Common integration issues and resolutions:
   - Allow the provided serve scripts to clean up the port; do not duplicate port-kill logic in the report-generation workflow.
 - Navigation and topbar links:
   - Respect the template's topbar link contract and remove placeholders if they no longer apply.
-- **New**: Validation failures:
+- **Updated**: Validation failures:
   - Use validate-report.js to identify specific validation errors and their locations in the generated report.
   - Review the validation log output to understand which sections failed validation and why.
-- **New**: Framework template issues:
+- **Updated**: Framework template issues:
   - Verify that framework-specific templates are properly applied and validated.
   - Check framework-specific validation rules for compliance with template requirements.
-- **New**: Report quality issues:
+- **Updated**: Report quality issues:
   - Check that all nine mandatory sections are present and properly formatted.
   - Verify that UML diagrams are correctly embedded and rendered.
   - Ensure cross-references and internal links are functional.
   - Validate framework-specific analysis patterns and compliance.
+- **New**: API documentation issues:
+  - Verify that field descriptions match the actual API implementation.
+  - Check that usage examples are accurate and up-to-date.
+  - Ensure consistency between Chinese and English documentation versions.
 
 **Section sources**
 - [SKILL.md:24-29](file://skills/code-to-uml/SKILL.md#L24-L29)
@@ -589,7 +597,9 @@ Common integration issues and resolutions:
 - [validate-report.js:1-505](file://skills/code-to-uml/scripts/validate-report.js#L1-L505)
 
 ## Conclusion
-By aligning agent behavior with SKILL.md, resolving the project root via CTU_HOME, and adhering to the template and data contracts, AI coding assistants can reliably generate consistent, UML-backed HTML reports. The enhanced nine-section analysis framework provides comprehensive architectural insights across project positioning, technical stack analysis, version information, and detailed architectural analysis. The new validation framework with 505 lines of sophisticated validation logic ensures report quality and consistency. The comprehensive usage examples demonstrate how the `/code-to-uml` slash command provides a unified interface for different analysis scopes while maintaining the consistent nine-section report structure. The newly added framework-specific analysis templates for Deep Agents, LangGraph, and enhanced LangChain monorepo analysis provide specialized insights for modern AI framework architectures. The provided setup and verification steps ensure reproducibility and high-quality outputs across Cursor, Claude Code, Qwen Coder, and OpenAI Codex.
+By aligning agent behavior with SKILL.md, resolving the project root via CTU_HOME, and adhering to the template and data contracts, AI coding assistants can reliably generate consistent, UML-backed HTML reports. The enhanced nine-section analysis framework provides comprehensive architectural insights across project positioning, technical stack analysis, version information, and detailed architectural analysis. The updated validation framework with 505 lines of sophisticated validation logic ensures report quality and consistency. The comprehensive usage examples demonstrate how the `/code-to-uml` slash command provides a unified interface for different analysis scopes while maintaining the consistent nine-section report structure. The newly added framework-specific analysis templates for Deep Agents, LangGraph, and enhanced LangChain monorepo analysis provide specialized insights for modern AI framework architectures. The provided setup and verification steps ensure reproducibility and high-quality outputs across Cursor, Claude Code, Qwen Coder, and OpenAI Codex.
+
+The enhanced documentation now includes unified API documentation with detailed field descriptions and usage examples, optimized content structure for better developer experience, and comprehensive support for multiple AI agents with consistent behavior across different platforms.
 
 ## Appendices
 
@@ -602,7 +612,7 @@ By aligning agent behavior with SKILL.md, resolving the project root via CTU_HOM
     - Refer to repository guidelines for structure and commands.
   - Generate a report:
     - Use the `/code-to-uml` slash command with your preferred analysis scope.
-  - **New**: Validate report quality:
+  - **Updated**: Validate report quality:
     - Run validate-report.js to ensure the generated report meets quality standards.
   - Verify:
     - Confirm the HTML and .ctu files, run the server, and validate the report URL.
@@ -619,7 +629,7 @@ By aligning agent behavior with SKILL.md, resolving the project root via CTU_HOM
     - Follow the rendering pipeline, component modules, and demo data conventions.
   - Generate a report:
     - Use the `/code-to-uml` slash command with your preferred analysis scope.
-  - **New**: Validate report quality:
+  - **Updated**: Validate report quality:
     - Use the validation framework to check report completeness and formatting.
   - Verify:
     - Confirm the HTML and .ctu files, run the server, and validate the report URL.
@@ -627,7 +637,7 @@ By aligning agent behavior with SKILL.md, resolving the project root via CTU_HOM
   **Section sources**
   - [CLAUDE.md:9-21](file://CLAUDE.md#L9-L21)
   - [CLAUDE.md:25-32](file://CLAUDE.md#L25-L32)
-  - [CLAUDE.md:34-50](file://CLAUDE.md#L34-L50)
+  - [CLAUDE.md:34-50](file://CLAUDE.md#L34-50)
   - [README.md:96-119](file://README.md#L96-L119)
   - [validate-report.js:1-505](file://skills/code-to-uml/scripts/validate-report.js#L1-L505)
 
@@ -638,7 +648,7 @@ By aligning agent behavior with SKILL.md, resolving the project root via CTU_HOM
     - Use the skill definition and template contracts to structure the report.
   - Generate a report:
     - Use the `/code-to-uml` slash command with your preferred analysis scope.
-  - **New**: Validate report quality:
+  - **Updated**: Validate report quality:
     - Implement custom validation checks to ensure report completeness.
   - Verify:
     - Confirm the HTML and .ctu files, run the server, and validate the report URL.
@@ -656,7 +666,7 @@ By aligning agent behavior with SKILL.md, resolving the project root via CTU_HOM
     - Use the skill definition and template contracts to structure the report.
   - Generate a report:
     - Use the `/code-to-uml` slash command with your preferred analysis scope.
-  - **New**: Validate report quality:
+  - **Updated**: Validate report quality:
     - Integrate the validation framework for automated quality assurance.
   - Verify:
     - Confirm the HTML and .ctu files, run the server, and validate the report URL.
@@ -672,12 +682,15 @@ By aligning agent behavior with SKILL.md, resolving the project root via CTU_HOM
 - Align agent prompts with SKILL.md's hard rules and workflow.
 - Use the template's topbar link contract to ensure navigation correctness.
 - Keep UML diagrams focused and explain the rationale behind each diagram.
-- Prefer concise code snippets and include concrete references to source locations.
-- **New**: Validate report completeness against the nine mandatory sections and verification checklist.
-- **New**: Utilize the validation framework to identify and resolve quality issues early in the generation process.
-- **New**: Monitor validation metrics to ensure reports meet quality thresholds before deployment.
-- **New**: Choose appropriate framework-specific analysis templates for specialized AI framework projects.
+- Use concise code snippets and include concrete references to source locations.
+- **Updated**: Validate report completeness against the nine mandatory sections and verification checklist.
+- **Updated**: Utilize the validation framework to identify and resolve quality issues early in the generation process.
+- **Updated**: Monitor validation metrics to ensure reports meet quality thresholds before deployment.
+- **Updated**: Choose appropriate framework-specific analysis templates for specialized AI framework projects.
 - Choose appropriate analysis scope based on your needs: file-level for focused analysis, function-level for deep-dive insights, project-level for system-wide understanding, module-level for component analysis, monorepo-level for enterprise-scale analysis, or framework-specific-level for AI framework expertise.
+- **New**: Maintain consistency between Chinese and English documentation versions.
+- **New**: Ensure API documentation fields match actual implementation details.
+- **New**: Use unified API documentation patterns across all supported agents.
 
 **Section sources**
 - [SKILL.md:57-80](file://skills/code-to-uml/SKILL.md#L57-L80)

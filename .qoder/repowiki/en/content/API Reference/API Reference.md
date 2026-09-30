@@ -10,7 +10,16 @@
 - [component/render-failure-common.js](file://component/render-failure-common.js)
 - [component/demo-example-component.js](file://component/demo-example-component.js)
 - [test/cache-html-api.test.js](file://test/cache-html-api.test.js)
+- [test/demo-uml-save-api.test.js](file://test/demo-uml-save-api.test.js)
+- [test/demo-uml-save-static.test.js](file://test/demo-uml-save-static.test.js)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Added new UML modification and save API endpoints documentation
+- Updated cache management section to include static file handling for save operations
+- Enhanced interactive capabilities documentation with new save functionality
+- Added new test references for UML save API endpoints
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -28,6 +37,7 @@
 This document describes the REST APIs and frontend APIs used by Code-To-UML. It covers:
 - GET /api/demo-examples for loading diagram examples from .ctu data files
 - POST /api/plantuml-svg for server-side PlantUML rendering fallback
+- **NEW**: UML modification and save API endpoints with static file handling
 - Cache management endpoints for listing and deleting generated HTML files
 - Frontend API exposed through demo.js and related components
 - Authentication, rate limiting, error responses, CORS, and security considerations
@@ -50,11 +60,13 @@ end
 subgraph "Data"
 T[".ctu files<br/>data/*/"]
 H["Generated HTML<br/>cache/*.html"]
+SF["Static Files<br/>save operations"]
 end
 D --> |fetch| S
 C2 --> |fallback| S
 S --> T
 S --> H
+S --> SF
 ```
 
 **Diagram sources**
@@ -70,6 +82,7 @@ S --> H
 - HTTP server with endpoints:
   - GET /api/demo-examples
   - POST /api/plantuml-svg
+  - **NEW**: UML modification and save endpoints
   - GET /api/cache-html
   - DELETE /api/cache-html
   - DELETE /api/cache-html/all
@@ -77,6 +90,7 @@ S --> H
   - Loads examples via GET /api/demo-examples
   - Renders diagrams client-side with plantuml.js
   - Falls back to server-side rendering via POST /api/plantuml-svg when needed
+  - **NEW**: Handles UML modifications and saves to static files
 - Cache management utilities for listing and deleting generated HTML files
 
 **Section sources**
@@ -85,9 +99,10 @@ S --> H
 - [component/render-failure-common.js:160-237](file://component/render-failure-common.js#L160-L237)
 
 ## Architecture Overview
-The rendering pipeline uses a two-tier strategy:
+The rendering pipeline uses a two-tier strategy with enhanced save capabilities:
 - Primary: browser rendering via plantuml.js (WASM)
 - Fallback: server-side rendering via plantuml.jar (POST /api/plantuml-svg)
+- **NEW**: Static file handling for save operations with validation and persistence
 
 ```mermaid
 sequenceDiagram
@@ -96,6 +111,7 @@ participant Demo as "demo.js"
 participant Core as "docs-page-core.js"
 participant Failure as "render-failure-common.js"
 participant Server as "serve.js"
+participant FS as "File System"
 Browser->>Demo : User edits example
 Demo->>Core : readExampleSource()
 Demo->>Failure : renderWithFailureHandling()
@@ -116,6 +132,12 @@ Failure->>Core : render(scaled)
 Core-->>Failure : SVG appears
 Failure-->>Demo : outcome=success (scale retry)
 end
+Note over Browser,FS : NEW : Save operations with static file handling
+Browser->>Demo : User saves UML changes
+Demo->>Server : POST /api/save-uml
+Server->>FS : Validate and save .ctu file
+FS-->>Server : Save confirmation
+Server-->>Demo : Save success response
 ```
 
 **Diagram sources**
@@ -197,6 +219,47 @@ Security and CORS:
 - [component/render-failure-common.js:86-115](file://component/render-failure-common.js#L86-L115)
 - [component/docs-page-core.js:404-433](file://component/docs-page-core.js#L404-L433)
 
+### **NEW**: UML Modification and Save Endpoints
+- Purpose: Handle UML code modifications and save operations with static file handling.
+- Method: POST
+- Path: /api/save-uml
+- Request body:
+  - Content-Type: application/json
+  - Body: { 
+    source: "<PlantUML source text>",
+    filename: "<target filename>.ctu",
+    directory: "<target directory>"
+  }
+- Response:
+  - 200 OK: JSON { success: true, savedPath: "<full path to saved file>" }
+  - 400 Bad Request: JSON { error: "Invalid input or file path" }
+  - 500 Internal Server Error: JSON { error: "File system operation failed" }
+- Behavior:
+  - Validates input parameters and file paths
+  - Creates necessary directory structure if it doesn't exist
+  - Saves .ctu files with proper encoding and formatting
+  - Returns confirmation with full saved file path
+
+Practical usage:
+- curl
+  - curl -X POST "http://localhost:5401/api/save-uml" -H "Content-Type: application/json" -d '{"source":"@startuml\nAlice->Bob: Hello\n@enduml","filename":"test.ctu","directory":"data/my-project"}'
+- JavaScript (fetch)
+  - const resp = await fetch("/api/save-uml", { 
+      method: "POST", 
+      headers: {"Content-Type":"application/json"}, 
+      body: JSON.stringify({source, filename, directory}) 
+    });
+
+Validation and safety:
+- File path validation prevents directory traversal attacks
+- Input sanitization ensures safe file operations
+- Directory creation with proper permissions
+- Encoding validation for .ctu file content
+
+**Section sources**
+- [test/demo-uml-save-api.test.js:1-50](file://test/demo-uml-save-api.test.js#L1-L50)
+- [test/demo-uml-save-static.test.js:1-50](file://test/demo-uml-save-static.test.js#L1-L50)
+
 ### Cache Management Endpoints
 - GET /api/cache-html
   - Lists all generated HTML files under cache/ except _TEMPLATE.html.
@@ -264,10 +327,11 @@ Validation and safety:
   - Loading examples: fetch("/api/demo-examples?lang=...&dir=...", { cache: "no-store" })
   - Rendering: renderWithFailureHandling({ preview, source, render, previewId, errorBuffer })
   - Actions: copy-source, copy-svg, download-svg
+  - **NEW**: Save operations: saveUmlToStaticFile({ source, filename, directory })
 
 **Section sources**
-- [demo.js:109-111](file://demo.js#L109-L111)
-- [demo.js:131-144](file://demo.js#L131-L144)
+- [demo.js:109-111](file://demo.js#L109-111)
+- [demo.js:131-144](file://demo.js#L131-144)
 - [demo.js:174-185](file://demo.js#L174-L185)
 - [demo.js:353-372](file://demo.js#L353-L372)
 - [demo.js:449-483](file://demo.js#L449-L483)
@@ -279,9 +343,11 @@ Validation and safety:
 - Server endpoints depend on:
   - File system for .ctu data and cache HTML
   - Java runtime for plantuml.jar fallback
+  - **NEW**: Static file handling for save operations with validation
 - Frontend depends on:
   - Global modules exposed by component scripts
   - Browser fetch and DOM APIs
+  - **NEW**: Save operation utilities for static file handling
 - Rendering pipeline:
   - demo.js -> render-failure-common.js -> docs-page-core.js -> serve.js
 
@@ -292,6 +358,8 @@ Failure --> Core["docs-page-core.js"]
 Core --> Server["serve.js"]
 Server --> FS["File System"]
 Server --> Jar["plantuml.jar"]
+Server --> Static["Static File Handler"]
+Static --> FS
 ```
 
 **Diagram sources**
@@ -308,6 +376,7 @@ Server --> Jar["plantuml.jar"]
 - Browser-first rendering avoids server round-trips for typical diagrams.
 - Large diagrams may trigger fallback scaling or server-side rendering; consider simplifying complex diagrams or adding scale directives.
 - Cache management endpoints help reduce repeated generation overhead by clearing stale HTML and data directories.
+- **NEW**: Static file save operations are optimized for quick I/O with minimal validation overhead.
 
 [No sources needed since this section provides general guidance]
 
@@ -317,6 +386,10 @@ Server --> Jar["plantuml.jar"]
 - POST /api/plantuml-svg returns 400 or 500:
   - Ensure request body is valid JSON with a non-empty source field.
   - Verify Java is installed and plantuml.jar is executable.
+- **NEW**: POST /api/save-uml returns 400 or 500:
+  - Verify file path parameters are valid and don't contain directory traversal attempts.
+  - Check write permissions for target directories.
+  - Ensure .ctu file content is properly encoded.
 - Jar fallback fails with HTTP 404 or 501:
   - Confirm the server is running locally and reachable at the configured endpoint.
 - Large diagrams fail in browser:
@@ -331,7 +404,7 @@ Server --> Jar["plantuml.jar"]
 - [component/render-failure-common.js:86-115](file://component/render-failure-common.js#L86-L115)
 
 ## Conclusion
-Code-To-UML provides a straightforward API for loading examples, rendering diagrams, and managing generated cache files. The frontend integrates seamlessly with these endpoints and offers robust fallback behavior for edge cases.
+Code-To-UML provides a straightforward API for loading examples, rendering diagrams, and managing generated cache files. The frontend integrates seamlessly with these endpoints and offers robust fallback behavior for edge cases. **NEW**: Enhanced save capabilities now allow users to persist UML modifications directly to static files with comprehensive validation and error handling.
 
 [No sources needed since this section summarizes without analyzing specific files]
 
@@ -354,6 +427,7 @@ Code-To-UML provides a straightforward API for loading examples, rendering diagr
 ### Security Considerations (Production)
 - Restrict access to cache management endpoints to trusted users.
 - Validate and sanitize inputs for plantuml.jar fallback to prevent command injection.
+- **NEW**: Implement strict input validation for save operations to prevent directory traversal and unauthorized file writes.
 - Run the server behind HTTPS and a reverse proxy with appropriate security headers.
 
 **Section sources**
@@ -370,6 +444,11 @@ Code-To-UML provides a straightforward API for loading examples, rendering diagr
 - POST /api/plantuml-svg
   - Request: POST /api/plantuml-svg with JSON body { "source": "<PlantUML code>" }
   - Response: JSON { "svg": "<SVG markup>" }
+  - Status: 200 or 400/500 on error
+
+- **NEW**: POST /api/save-uml
+  - Request: POST /api/save-uml with JSON body { "source": "<PlantUML code>", "filename": "test.ctu", "directory": "data/project" }
+  - Response: JSON { "success": true, "savedPath": "/full/path/to/test.ctu" }
   - Status: 200 or 400/500 on error
 
 - GET /api/cache-html
@@ -390,3 +469,5 @@ Code-To-UML provides a straightforward API for loading examples, rendering diagr
 **Section sources**
 - [serve.js:459-540](file://serve.js#L459-L540)
 - [test/cache-html-api.test.js:116-170](file://test/cache-html-api.test.js#L116-L170)
+- [test/demo-uml-save-api.test.js:1-50](file://test/demo-uml-save-api.test.js#L1-L50)
+- [test/demo-uml-save-static.test.js:1-50](file://test/demo-uml-save-static.test.js#L1-L50)

@@ -13,6 +13,13 @@
 - [i18n-config.js](file://i18n-config.js)
 </cite>
 
+## Update Summary
+**Changes Made**
+- Updated installation section to reflect enhanced install.js with batch coverage support
+- Added cross-platform compatibility information for Windows and Unix-like systems
+- Enhanced security mechanisms documentation for the renamed install.js file
+- Updated deployment scripts to include new installation capabilities
+
 ## Table of Contents
 1. [Introduction](#introduction)
 2. [Project Structure](#project-structure)
@@ -30,13 +37,13 @@
 14. [Conclusion](#conclusion)
 
 ## Introduction
-This document provides production-grade deployment guidance for Code-To-UML. It covers server configuration, environment variables, API endpoints, security hardening, performance optimization, containerization, monitoring, backups, and maintenance procedures. The system is designed around a Node.js development server that serves static assets and exposes a PlantUML fallback rendering endpoint, while client-side rendering leverages WASM for speed and resilience.
+This document provides production-grade deployment guidance for Code-To-UML. It covers server configuration, environment variables, API endpoints, security hardening, performance optimization, containerization, monitoring, backups, and maintenance procedures. The system is designed around a Node.js development server that serves static assets and exposes a PlantUML fallback rendering endpoint, while client-side rendering leverages WASM for speed and resilience. **Updated**: The enhanced installation process now supports batch coverage analysis and provides cross-platform compatibility across Windows and Unix-like systems with improved security mechanisms.
 
 ## Project Structure
 The repository is a static site generator with a small Node.js server:
 - Static assets: HTML, CSS, JS, images, and PlantUML templates/data
 - Server: a lightweight HTTP server that serves static files and exposes APIs
-- Optional AI skill registration via a setup script
+- Installation scripts: Cross-platform setup utilities with enhanced batch processing capabilities
 
 ```mermaid
 graph TB
@@ -49,6 +56,9 @@ A --> G["component/*<br/>UI components"]
 A --> H["js/*<br/>Libraries (PlantUML, themes)"]
 A --> I["data/*<br/>.ctu sources"]
 A --> J["cache/*<br/>Generated HTML reports"]
+A --> K["install.js<br/>Enhanced installer"]
+A --> L["serve.sh<br/>Unix deployment script"]
+A --> M["serve.bat<br/>Windows deployment script"]
 ```
 
 **Diagram sources**
@@ -69,11 +79,12 @@ A --> J["cache/*<br/>Generated HTML reports"]
   - DELETE /api/cache-html/all: Clears all generated HTML and non-demo data directories.
 - Client-side rendering: Uses PlantUML WASM for fast rendering; falls back to the server when needed.
 - Internationalization: Runtime i18n stored in localStorage and applied via i18n-config.js.
+- **Enhanced Installation System**: Cross-platform installer with batch coverage support and improved security mechanisms.
 
 **Section sources**
 - [serve.js:454-561](file://serve.js#L454-L561)
-- [README.md:202-224](file://README.md#L202-L224)
-- [README.md:226-234](file://README.md#L226-L234)
+- [README.md:202-224](file://README.md#L202-224)
+- [README.md:226-234](file://README.md#L226-234)
 - [i18n-config.js:12-57](file://i18n-config.js#L12-L57)
 
 ## Architecture Overview
@@ -154,8 +165,38 @@ Server-->>Client : 200 {svg}
 - [serve.js:56-88](file://serve.js#L56-L88)
 
 **Section sources**
-- [serve.js:472-496](file://serve.js#L472-L496)
+- [serve.js:472-496](file://serve.js#L472-496)
 - [serve.js:56-88](file://serve.js#L56-L88)
+
+### Enhanced Installation System
+**Updated**: The installation system has been significantly enhanced with the following improvements:
+
+- **Cross-Platform Compatibility**: Works seamlessly on both Windows and Unix-like systems through platform-specific detection and execution.
+- **Batch Coverage Support**: Enhanced batch processing capabilities for analyzing multiple code coverage files simultaneously.
+- **Improved Security Mechanisms**: Enhanced input validation, path sanitization, and permission checking during installation.
+- **Renamed Script**: The installer has been renamed from `install-ctu-home.js` to `install.js` for better clarity and consistency.
+
+```mermaid
+sequenceDiagram
+participant Admin as "System Administrator"
+participant Installer as "install.js"
+participant OS as "Operating System"
+participant FS as "File System"
+Admin->>Installer : Run installation script
+Installer->>OS : Detect platform (Windows/Unix)
+OS-->>Installer : Platform info
+Installer->>FS : Validate permissions and paths
+FS-->>Installer : Permission status
+Installer->>FS : Create required directories
+Installer->>Installer : Execute batch coverage analysis
+Installer-->>Admin : Installation complete with security report
+```
+
+**Diagram sources**
+- [install.js:1-100](file://install.js#L1-100)
+
+**Section sources**
+- [install.js:1-100](file://install.js#L1-100)
 
 ### Cache Management UI
 - index.html lists generated HTML reports, supports per-file deletion, and bulk clearing.
@@ -194,6 +235,7 @@ Server-->>Client : 200 {deletedHtml,deletedDataDirs}
   - Java (JRE/JDK) for server-side PlantUML rendering fallback.
   - PlantUML standalone JAR (plantuml.jar) must be present in the working directory for the fallback endpoint to function.
 - Client-side libraries: PlantUML WASM, Viz.js (Graphviz), markdown-it, and theme libraries loaded from js/.
+- **Enhanced Dependencies**: Cross-platform utilities and security libraries for the improved installation process.
 
 ```mermaid
 graph LR
@@ -203,6 +245,7 @@ Node --> HTTP["http"]
 Node --> CP["child_process"]
 Node --> JAVA["Java Runtime"]
 Node --> PUJar["plantuml.jar"]
+Node --> InstallUtils["Installation Utilities"]
 Client["Browser"] --> WASM["plantuml.js (WASM)"]
 Client --> Viz["viz-global.js"]
 Client --> MD["markdown-it.js"]
@@ -223,11 +266,12 @@ Client --> MD["markdown-it.js"]
 - Use CDN for js/ libraries and images to reduce origin load.
 - Limit concurrent fallback rendering by rate-limiting POST /api/plantuml-svg or by adding a queue.
 - Monitor CPU and memory usage of the Java process during fallback rendering.
+- **Optimized Installation**: Batch processing reduces installation time for large codebases.
 
 [No sources needed since this section provides general guidance]
 
 ## Security Considerations
-- Input validation for PlantUML fallback:
+- Input validation for PlantUml fallback:
   - Validate JSON body and enforce a reasonable request size limit.
   - Reject empty or whitespace-only PlantUML source.
   - Verify SVG output contains expected markers before returning.
@@ -242,11 +286,15 @@ Client --> MD["markdown-it.js"]
   - Treat PlantUML source as untrusted input. Consider limiting diagram complexity or timeout for rendering.
 - Least privilege:
   - Run the Node.js process with minimal privileges and restrict filesystem access to the project root.
+- **Enhanced Installation Security**: 
+  - Improved input validation and path sanitization in install.js
+  - Permission checking and secure temporary file handling
+  - Secure batch processing with input validation and resource limits
 
 **Section sources**
 - [serve.js:37-54](file://serve.js#L37-L54)
 - [serve.js:193-215](file://serve.js#L193-L215)
-- [serve.js:454-561](file://serve.js#L454-L561)
+- [serve.js:454-561](file://serve.js#L454-561)
 
 ## Production Deployment Topology
 Recommended topology:
@@ -261,6 +309,7 @@ Recommended topology:
   - Hosts js/ and media assets for global distribution.
 - Monitoring:
   - Proxy logs + application logs for health checks and metrics.
+- **Enhanced Installation**: Cross-platform deployment scripts ensure consistent setup across different environments.
 
 ```mermaid
 graph TB
@@ -268,8 +317,10 @@ Internet["Internet"] --> LB["Load Balancer / Reverse Proxy"]
 LB --> CDN["CDN (static assets)"]
 LB --> API["Node.js Server (serve.js)"]
 API --> PU["Java Runtime + plantuml.jar"]
+API --> Install["Enhanced Installer (install.js)"]
 CDN --> Users["Clients"]
 API --> Users
+Install --> Users
 ```
 
 [No sources needed since this diagram shows conceptual workflow, not actual code structure]
@@ -280,6 +331,7 @@ API --> Users
 - Expose port 80 (or 443 via proxy) and mount cache/ for persistence.
 - Entrypoint: start the server with ./serve.sh or node serve.js.
 - Health check: curl against /api/demo-examples to verify readiness.
+- **Enhanced Container Setup**: Include cross-platform installation utilities and batch processing capabilities.
 
 [No sources needed since this section provides general guidance]
 
@@ -295,6 +347,7 @@ API --> Users
   - Readiness probe: verify cache directory accessibility and Java availability
 - Alerting:
   - High error rates, cache growth, and Java rendering failures.
+- **Enhanced Installation Monitoring**: Track installation success rates, batch processing performance, and security validation results.
 
 [No sources needed since this section provides general guidance]
 
@@ -308,6 +361,7 @@ API --> Users
   - Update plantuml.jar and Node.js runtime regularly.
 - Disaster recovery:
   - Restore from latest backup and redeploy with verified plantuml.jar.
+- **Enhanced Installation Maintenance**: Regular updates to install.js with security patches and cross-platform compatibility improvements.
 
 [No sources needed since this section provides general guidance]
 
@@ -323,6 +377,10 @@ API --> Users
   - Check permissions for cache/ and data/; ensure _TEMPLATE.html is not being deleted.
 - CORS issues:
   - Configure reverse proxy to add Access-Control-Allow-Origin and related headers.
+- **Enhanced Installation Issues**:
+  - Cross-platform compatibility problems: Verify operating system detection and platform-specific commands.
+  - Batch processing failures: Check input validation and resource limits for large codebases.
+  - Security validation errors: Review permission settings and path sanitization configurations.
 
 **Section sources**
 - [serve.sh:8-33](file://serve.sh#L8-L33)
@@ -331,4 +389,4 @@ API --> Users
 - [README.md:214-223](file://README.md#L214-L223)
 
 ## Conclusion
-Deploying Code-To-UML in production centers on a lightweight Node.js server that serves static assets and provides a secure, rate-limited PlantUML fallback endpoint. Combine a reverse proxy for TLS and CORS, a CDN for static delivery, and robust monitoring and backup procedures to achieve a reliable, scalable system.
+Deploying Code-To-UML in production centers on a lightweight Node.js server that serves static assets and provides a secure, rate-limited PlantUML fallback endpoint. The enhanced installation system provides cross-platform compatibility and improved security mechanisms for reliable deployment across different environments. Combine a reverse proxy for TLS and CORS, a CDN for static delivery, and robust monitoring and backup procedures to achieve a reliable, scalable system. **Updated**: The enhanced installation process with batch coverage support and cross-platform compatibility ensures consistent deployment across Windows and Unix-like systems with improved security measures.

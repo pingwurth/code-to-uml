@@ -19,14 +19,18 @@
 - [plantuml-official-demo/zh/sequence-diagram_zh.html](file://plantuml-official-demo/zh/sequence-diagram_zh.html)
 - [main.css](file://main.css)
 - [js/c4.min.js](file://js/c4.min.js)
+- [data/agent-analysis/architecture--1_zh.ctu](file://data/agent-analysis/architecture--1_zh.ctu)
+- [data/claude-code-demo-analysis/architecture--1_zh.ctu](file://data/claude-code-demo-analysis/architecture--1_zh.ctu)
+- [data/kode-cli/architecture--1_zh.ctu](file://data/kode-cli/architecture--1_zh.ctu)
+- [data/langgraph-pregel-stream-analysis/architecture--1_zh.ctu](file://data/langgraph-pregel-stream-analysis/architecture--1_zh.ctu)
 </cite>
 
 ## Update Summary
 **Changes Made**
-- Added new section on Visual Presentation Guidelines and Styling Recommendations
-- Updated Theme Improvements section with enhanced styling standards
-- Added content refinement standards documentation
-- Enhanced example quality guidelines and best practices
+- Added comprehensive new analysis examples including agent-analysis, claude-code-demo-analysis, kode-cli, and langgraph-pregel-stream-analysis directories
+- Updated example organization to include code analysis capabilities demonstration
+- Enhanced documentation to reflect the expanded scope of analysis examples
+- Maintained consistency with existing bilingual structure and naming conventions
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -34,20 +38,21 @@
 3. [Core Components](#core-components)
 4. [Architecture Overview](#architecture-overview)
 5. [Detailed Component Analysis](#detailed-component-analysis)
-6. [Visual Presentation Guidelines and Styling Recommendations](#visual-presentation-guidelines-and-styling-recommendations)
-7. [Theme Improvements](#theme-improvements)
-8. [Content Refinement Standards](#content-refinement-standards)
-9. [Dependency Analysis](#dependency-analysis)
-10. [Performance Considerations](#performance-considerations)
-11. [Troubleshooting Guide](#troubleshooting-guide)
-12. [Conclusion](#conclusion)
-13. [Appendices](#appendices)
+6. [Code Analysis Examples](#code-analysis-examples)
+7. [Visual Presentation Guidelines and Styling Recommendations](#visual-presentation-guidelines-and-styling-recommendations)
+8. [Theme Improvements](#theme-improvements)
+9. [Content Refinement Standards](#content-refinement-standards)
+10. [Dependency Analysis](#dependency-analysis)
+11. [Performance Considerations](#performance-considerations)
+12. [Troubleshooting Guide](#troubleshooting-guide)
+13. [Conclusion](#conclusion)
+14. [Appendices](#appendices)
 
 ## Introduction
-This document describes Code-To-UML's extensive diagram example library. It explains how examples are categorized by UML and Non-UML types, how CTU files are named and organized, how bilingual examples work, and how the official PlantUML demo integrates with the built-in examples. It also provides practical guidance for adding and maintaining examples, documents enhanced visual presentation guidelines and styling recommendations, and discusses how example complexity relates to rendering performance.
+This document describes Code-To-UML's extensive diagram example library. It explains how examples are categorized by UML and Non-UML types, how CTU files are named and organized, how bilingual examples work, and how the official PlantUML demo integrates with the built-in examples. The library now includes comprehensive code analysis examples demonstrating advanced analysis capabilities across multiple domains including agent systems, Claude Code demos, CLI tools, and LangGraph Pregel stream processing. It also provides practical guidance for adding and maintaining examples, documents enhanced visual presentation guidelines and styling recommendations, and discusses how example complexity relates to rendering performance.
 
 ## Project Structure
-The example library lives under the data/demo/ directory and is consumed by the interactive demo page. The demo page loads examples via an API endpoint, renders them using PlantUML (client or server), and supports bilingual display with enhanced visual styling.
+The example library lives under the data/ directory and is consumed by the interactive demo page. The structure has been expanded to include specialized analysis directories alongside the traditional demo examples:
 
 ```mermaid
 graph TB
@@ -59,21 +64,22 @@ end
 subgraph "Core Runtime"
 D["component/docs-page-core.js"]
 end
-subgraph "Data"
+subgraph "Example Data"
 E["data/demo/*.ctu"]
 F["data/_TEMPLATE.ctu"]
+G["data/agent-analysis/*.ctu"]
+H["data/claude-code-demo-analysis/*.ctu"]
+I["data/kode-cli/*.ctu"]
+J["data/langgraph-pregel-stream-analysis/*.ctu"]
+K["data/*-analysis/*.ctu"]
 end
 subgraph "Internationalization"
-G["i18n/en.js"]
-H["i18n/zh.js"]
+L["i18n/en.js"]
+M["i18n/zh.js"]
 end
 subgraph "Official PlantUML Docs"
-I["plantuml-official-demo/en/*.html"]
-J["plantuml-official-demo/zh/*.html"]
-end
-subgraph "Theme System"
-K["js/c4.min.js"]
-L["Enhanced CSS Variables"]
+N["plantuml-official-demo/en/*.html"]
+O["plantuml-official-demo/zh/*.html"]
 end
 A --> B
 B --> C
@@ -81,18 +87,19 @@ B --> D
 B --> E
 B --> G
 B --> H
-D --> K
-E --> F
-I -. "Reference syntax & features" .-> A
-J -. "Reference syntax & features" .-> A
+B --> I
+B --> J
+B --> K
+B --> L
+B --> M
+D --> N
+D --> O
 ```
 
 **Diagram sources**
 - [demo.js:146-185](file://demo.js#L146-L185)
 - [README.md:166-198](file://README.md#L166-L198)
 - [README_zh.md:166-198](file://README_zh.md#L166-L198)
-- [main.css:1-16](file://main.css#L1-L16)
-- [js/c4.min.js:121-144](file://js/c4.min.js#L121-L144)
 
 **Section sources**
 - [README.md:166-198](file://README.md#L166-L198)
@@ -101,21 +108,20 @@ J -. "Reference syntax & features" .-> A
 ## Core Components
 - Example data format: CTU files define one or more examples with metadata and PlantUML source blocks.
 - Naming convention: {diagram-type}--{number}_{language}.ctu (e.g., sequence--1_en.ctu).
-- Organization: data/demo/ holds all built-in examples grouped by diagram type and language.
+- Organization: data/ directory contains both demo examples and specialized analysis directories.
 - Bilingual support: Each diagram type typically includes both _en.ctu and _zh.ctu variants.
 - API consumption: demo.js fetches examples from /api/demo-examples?lang=en|zh and renders them dynamically.
 - Enhanced styling: Built-in theme system with CSS variables and C4 framework integration.
+- Analysis capabilities: Specialized directories demonstrate code analysis across different domains and technologies.
 
 **Section sources**
 - [README.md:135-163](file://README.md#L135-L163)
 - [README_zh.md:135-163](file://README_zh.md#L135-L163)
 - [demo.js:174-185](file://demo.js#L174-L185)
 - [data/_TEMPLATE.ctu:1-46](file://data/_TEMPLATE.ctu#L1-L46)
-- [main.css:1-16](file://main.css#L1-L16)
-- [js/c4.min.js:121-144](file://js/c4.min.js#L121-L144)
 
 ## Architecture Overview
-The demo page orchestrates loading, internationalization, and rendering of examples with enhanced visual styling. It normalizes diagram keys, applies i18n labels, renders PlantUML sources with robust error handling, and implements theme-aware styling through CSS variables and C4 framework integration.
+The demo page orchestrates loading, internationalization, and rendering of examples with enhanced visual styling. It normalizes diagram keys, applies i18n labels, renders PlantUML sources with robust error handling, and implements theme-aware styling through CSS variables and C4 framework integration. The architecture now supports multiple analysis domains while maintaining consistent presentation.
 
 ```mermaid
 sequenceDiagram
@@ -129,7 +135,7 @@ U->>P : Open demo.html
 P->>J : Initialize page
 J->>J : Load active tab & language
 J->>S : GET /api/demo-examples?lang={en|zh}
-S-->>J : JSON examples
+S-->>J : JSON examples (demo + analysis)
 J->>J : Normalize diagram keys<br/>Apply i18n labels
 J->>T : Apply theme styling<br/>CSS variables & C4 themes
 loop For each example
@@ -147,8 +153,6 @@ J->>P : Render preview + actions<br/>with enhanced styling
 - [demo.js:146-185](file://demo.js#L146-L185)
 - [demo.js:374-439](file://demo.js#L374-L439)
 - [component/docs-page-core.js:12-23](file://component/docs-page-core.js#L12-L23)
-- [main.css:1-16](file://main.css#L1-L16)
-- [js/c4.min.js:121-144](file://js/c4.min.js#L121-L144)
 
 **Section sources**
 - [demo.js:146-185](file://demo.js#L146-L185)
@@ -241,11 +245,11 @@ D --> E["Render with localized titles/descriptions"]
 - [README.md:192-192](file://README.md#L192-L192)
 - [README_zh.md:192-192](file://README_zh.md#L192-L192)
 - [plantuml-official-demo/en/sequence-diagram_en.html:775-795](file://plantuml-official-demo/en/sequence-diagram_en.html#L775-L795)
-- [plantuml-official-demo/zh/sequence-diagram_zh.html:761-783](file://plantuml-official-demo/zh/sequence-diagram_zh.html#L761-L783)
+- [plantuml-official-demo/zh/sequence-diagram_zh.html:761-783](file://plantuml-official-demo/zh/sequence-diagram_zh.html#L761-783)
 
 ### Adding New Examples
 - Choose the appropriate diagram type and number; follow the naming convention.
-- Place the .ctu file in data/demo/.
+- Place the .ctu file in data/ directory (either data/demo/ for general examples or specialized analysis directories).
 - Ensure both _en.ctu and _zh.ctu variants exist for bilingual coverage.
 - Use the template to structure content consistently.
 - Apply enhanced visual styling guidelines for improved presentation.
@@ -256,7 +260,7 @@ D --> E["Render with localized titles/descriptions"]
 - [data/_TEMPLATE.ctu:1-46](file://data/_TEMPLATE.ctu#L1-L46)
 
 ### Modifying Existing Examples
-- Update the relevant .ctu file in data/demo/.
+- Update the relevant .ctu file in data/ directory.
 - Keep the filename unchanged to preserve tab and link stability.
 - When changing diagram keys, update i18n labels accordingly.
 - Apply content refinement standards for consistency.
@@ -276,6 +280,71 @@ D --> E["Render with localized titles/descriptions"]
 - [README.md:57-63](file://README.md#L57-L63)
 - [README_zh.md:57-63](file://README_zh.md#L57-L63)
 - [data/_TEMPLATE.ctu:1-46](file://data/_TEMPLATE.ctu#L1-L46)
+
+## Code Analysis Examples
+
+**Updated** Added comprehensive new analysis examples demonstrating advanced code analysis capabilities across multiple domains and technologies.
+
+### Agent Analysis Examples
+The agent-analysis directory contains complete sets of .ctu files demonstrating agent system architecture and behavior patterns:
+- Architecture diagrams showing agent system components and relationships
+- Call flow diagrams illustrating agent interactions
+- Code structure analysis with class and method relationships
+- Data flow diagrams for information processing
+- Process flow diagrams for agent workflows
+- Guide and overview documentation
+- Object relationship diagrams
+- Principle demonstrations
+
+### Claude Code Demo Analysis Examples  
+The claude-code-demo-analysis directory provides comprehensive analysis of Claude Code implementation:
+- Multi-level architecture diagrams (architecture--1, architecture--2)
+- Complex call sequences (calls--1, calls--2)
+- Detailed code analysis (code--1, code--2, code--3)
+- Data flow visualization (dataflow--1, dataflow--2)
+- Process flows (flow--1, flow--2, flow--3)
+- Extended guide documentation (guide--1, guide--3)
+- Object relationships (objects--1, objects--2, objects--3)
+- Additional overview and principles documentation
+
+### Kode CLI Analysis Examples
+The kode-cli directory demonstrates CLI tool analysis capabilities:
+- Complete architecture overview with system components
+- Call flow analysis for command processing
+- Code structure analysis with dependency mapping
+- Data flow visualization for input/output processing
+- Workflow diagrams for CLI operations
+- Comprehensive guide and overview documentation
+- Principle demonstrations for CLI design patterns
+
+### LangGraph Pregel Stream Analysis Examples
+The langgraph-pregel-stream-analysis directory showcases complex stream processing analysis:
+- Architecture diagrams for distributed stream processing
+- Code analysis for Pregel algorithm implementation
+- Flow diagrams for message passing patterns
+- Guide documentation for stream processing concepts
+- Overview and principle demonstrations
+
+### Analysis Example Structure
+Each analysis directory follows a consistent structure:
+- **Architecture**: System-level component relationships
+- **Calls**: Interaction sequences and method calls
+- **Code**: Detailed code structure and relationships
+- **Dataflow**: Information flow and processing pipelines
+- **Flow**: Process and workflow diagrams
+- **Guide**: Comprehensive documentation and usage instructions
+- **Overview**: High-level system understanding
+- **Principles**: Design patterns and architectural principles
+- **Structure**: Component organization and dependencies
+- **Objects**: Object-oriented relationships and instances
+
+All analysis examples maintain bilingual support with _zh.ctu variants and follow the established naming conventions for consistency across the library.
+
+**Section sources**
+- [data/agent-analysis/architecture--1_zh.ctu:1-50](file://data/agent-analysis/architecture--1_zh.ctu#L1-L50)
+- [data/claude-code-demo-analysis/architecture--1_zh.ctu:1-50](file://data/claude-code-demo-analysis/architecture--1_zh.ctu#L1-L50)
+- [data/kode-cli/architecture--1_zh.ctu:1-50](file://data/kode-cli/architecture--1_zh.ctu#L1-L50)
+- [data/langgraph-pregel-stream-analysis/architecture--1_zh.ctu:1-50](file://data/langgraph-pregel-stream-analysis/architecture--1_zh.ctu#L1-L50)
 
 ## Visual Presentation Guidelines and Styling Recommendations
 
@@ -413,7 +482,7 @@ The example library maintains high standards for content quality and presentatio
 The demo page depends on:
 - docs-page-core for reading sources, splitting lines, scaling large diagrams, and error detection.
 - i18n modules for labels and UI strings.
-- data/demo files for example content.
+- data/ directory files for example content (both demo and analysis examples).
 - Official PlantUML docs for reference.
 - Enhanced theme system for visual styling.
 - CSS custom properties for dynamic theming.
@@ -423,6 +492,10 @@ graph LR
 J["demo.js"] --> C["docs-page-core.js"]
 J --> E["_TEMPLATE.ctu"]
 J --> D["data/demo/*.ctu"]
+J --> A["data/agent-analysis/*.ctu"]
+J --> CDA["data/claude-code-demo-analysis/*.ctu"]
+J --> KC["data/kode-cli/*.ctu"]
+J --> LPS["data/langgraph-pregel-stream-analysis/*.ctu"]
 J --> EN["i18n/en.js"]
 J --> ZH["i18n/zh.js"]
 J --> OFF_EN["plantuml-official-demo/en/*.html"]
@@ -450,6 +523,7 @@ CSS_VARS --> MAIN_CSS["main.css"]
 - Rendering is queued and generation-aware to avoid stale updates when switching tabs or languages.
 - Enhanced theme system uses CSS custom properties for efficient styling updates.
 - Responsive design minimizes layout thrashing during theme switching.
+- Analysis examples with complex diagrams benefit from optimized rendering strategies.
 
 ```mermaid
 flowchart TD
@@ -468,23 +542,24 @@ K --> L["Re-render with new theme"]
 ```
 
 **Diagram sources**
-- [demo.js:413-429](file://demo.js#L413-L429)
+- [demo.js:413-429](file://demo.js#L413-429)
 - [demo.js:395-403](file://demo.js#L395-L403)
 - [README.md:237-274](file://README.md#L237-L274)
 - [main.css:1-16](file://main.css#L1-L16)
 
 **Section sources**
-- [demo.js:413-429](file://demo.js#L413-L429)
+- [demo.js:413-429](file://demo.js#L413-429)
 - [demo.js:395-403](file://demo.js#L395-L403)
 - [README.md:237-274](file://README.md#L237-L274)
 
 ## Troubleshooting Guide
-- If examples fail to load, verify the API response and the presence of .ctu files in data/demo/.
+- If examples fail to load, verify the API response and the presence of .ctu files in data/ directory.
 - If rendering fails, check for syntax errors or unsupported constructs; the demo detects common error markers in the rendered SVG.
 - For large diagrams, confirm auto-scaling is applied and consider simplifying the diagram.
 - If client rendering crashes persistently, ensure server-side fallback is functioning.
 - For theme-related issues, verify CSS variable definitions and C4 framework integration.
 - Check color contrast ratios for accessibility compliance.
+- For analysis examples, ensure proper bilingual file pairs exist (_en.ctu and _zh.ctu).
 
 **Section sources**
 - [demo.js:124-130](file://demo.js#L124-L130)
@@ -492,7 +567,7 @@ K --> L["Re-render with new theme"]
 - [component/docs-page-core.js:77-130](file://component/docs-page-core.js#L77-L130)
 
 ## Conclusion
-Code-To-UML's example library offers a comprehensive, bilingual, and maintainable collection of diagrams spanning UML and Non-UML categories. The enhanced visual presentation guidelines and styling recommendations ensure consistent, professional appearance across all examples. The advanced theme system provides flexibility while maintaining design coherence. The demo page's architecture ensures reliable rendering with graceful fallbacks, while the official PlantUML docs provide authoritative reference material. Following the naming convention, using the template, applying visual guidelines, and keeping bilingual parity will help sustain a high-quality example library with excellent visual presentation.
+Code-To-UML's example library offers a comprehensive, bilingual, and maintainable collection of diagrams spanning UML and Non-UML categories, now enhanced with sophisticated code analysis examples across multiple domains. The addition of agent-analysis, claude-code-demo-analysis, kode-cli, and langgraph-pregel-stream-analysis directories demonstrates advanced analysis capabilities while maintaining consistency with existing examples. The enhanced visual presentation guidelines and styling recommendations ensure consistent, professional appearance across all examples. The advanced theme system provides flexibility while maintaining design coherence. The demo page's architecture ensures reliable rendering with graceful fallbacks, while the official PlantUML docs provide authoritative reference material. Following the naming convention, using the template, applying visual guidelines, and keeping bilingual parity will help sustain a high-quality example library with excellent visual presentation and comprehensive analysis capabilities.
 
 ## Appendices
 
@@ -506,8 +581,9 @@ Code-To-UML's example library offers a comprehensive, bilingual, and maintainabl
 
 ### Appendix B: Example File Naming and Organization
 - Pattern: {diagram-type}--{number}_{language}.ctu
-- Location: data/demo/
+- Location: data/ directory (data/demo/ for general examples, specialized directories for analysis)
 - Variants: Both _en.ctu and _zh.ctu for each example number
+- Analysis directories: agent-analysis, claude-code-demo-analysis, kode-cli, langgraph-pregel-stream-analysis
 
 **Section sources**
 - [README.md:160-163](file://README.md#L160-L163)
@@ -528,3 +604,15 @@ Code-To-UML's example library offers a comprehensive, bilingual, and maintainabl
 **Section sources**
 - [main.css:1-804](file://main.css#L1-L804)
 - [js/c4.min.js:121-144](file://js/c4.min.js#L121-L144)
+
+### Appendix D: Analysis Example Categories
+- **Agent Analysis**: Agent system architecture and behavior patterns
+- **Claude Code Demo**: Comprehensive Claude Code implementation analysis
+- **Kode CLI**: CLI tool analysis and command processing
+- **LangGraph Pregel Stream**: Distributed stream processing analysis
+
+**Section sources**
+- [data/agent-analysis/architecture--1_zh.ctu:1-50](file://data/agent-analysis/architecture--1_zh.ctu#L1-L50)
+- [data/claude-code-demo-analysis/architecture--1_zh.ctu:1-50](file://data/claude-code-demo-analysis/architecture--1_zh.ctu#L1-L50)
+- [data/kode-cli/architecture--1_zh.ctu:1-50](file://data/kode-cli/architecture--1_zh.ctu#L1-L50)
+- [data/langgraph-pregel-stream-analysis/architecture--1_zh.ctu:1-50](file://data/langgraph-pregel-stream-analysis/architecture--1_zh.ctu#L1-L50)

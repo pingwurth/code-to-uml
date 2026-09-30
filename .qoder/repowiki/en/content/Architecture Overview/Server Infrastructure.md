@@ -11,9 +11,16 @@
 - [demo.js](file://demo.js)
 - [docs-page-core.js](file://component/docs-page-core.js)
 - [cache-html-api.test.js](file://test/cache-html-api.test.js)
-- [install.js](file://install.js)
+- [install-ctu-home.js](file://install-ctu-home.js)
 - [i18n-config.js](file://i18n-config.js)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Updated path resolution system documentation to reflect enhanced absolute path handling relative to $CTU_HOME
+- Enhanced file management system section with improved path security and resolution mechanisms
+- Updated environment configuration section to document CTU_HOME-based path resolution
+- Revised troubleshooting guide with new path-related error scenarios
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -28,10 +35,10 @@
 10. [Appendices](#appendices)
 
 ## Introduction
-This document describes the Node.js development server that powers the in-browser UML diagram showcase and report generation. It covers the API endpoints for loading diagram examples, server-side PlantUML rendering, and cache management. It also documents the file management system for CTU data files and generated HTML reports, cross-platform server setup scripts, development server configuration, static file serving, client-server rendering relationship, deployment considerations, environment configuration, and maintenance procedures.
+This document describes the Node.js development server that powers the in-browser UML diagram showcase and report generation. It covers the API endpoints for loading diagram examples, server-side PlantUML rendering, and cache management. It also documents the enhanced file management system for CTU data files and generated HTML reports using absolute paths relative to $CTU_HOME, cross-platform server setup scripts, development server configuration, static file serving, client-server rendering relationship, deployment considerations, environment configuration, and maintenance procedures.
 
 ## Project Structure
-The server is implemented as a single-file Node.js HTTP server with companion shell scripts for cross-platform startup. Static assets and generated reports live under cache/ and data/ directories. The client-side pages (demo.html and index.html) integrate with the server via JSON APIs.
+The server is implemented as a single-file Node.js HTTP server with companion shell scripts for cross-platform startup. Static assets and generated reports live under cache/ and data/ directories. The client-side pages (demo.html and index.html) integrate with the server via JSON APIs. The enhanced path resolution system now uses absolute paths relative to $CTU_HOME for improved security and reliability.
 
 ```mermaid
 graph TB
@@ -47,11 +54,13 @@ end
 subgraph "Data & Reports"
 DATA["data/<project>/ *.ctu<br/>Structured examples"]
 CACHE["cache/*.html<br/>Generated reports"]
+HOME["$CTU_HOME<br/>Absolute path base"]
 end
 SH --> S
 BAT --> S
 D --> |fetches| S
 I --> |manages| S
+S --> HOME
 S --> DATA
 S --> CACHE
 ```
@@ -68,15 +77,17 @@ S --> CACHE
 - [serve.js:8-24](file://serve.js#L8-L24)
 
 ## Core Components
-- Development server: A minimal HTTP server that serves static files and exposes JSON APIs for diagram examples, PlantUML rendering, and cache management.
+- Development server: A minimal HTTP server that serves static files and exposes JSON APIs for diagram examples, PlantUML rendering, and cache management with enhanced path resolution.
 - Cross-platform launchers: Shell scripts for Linux/macOS and Windows batch files to start the server in foreground or background modes, with port detection and PID management.
 - Client integration: Two SPAs that call server APIs to populate content and manage cached HTML reports.
+- Enhanced path resolution: Absolute path system relative to $CTU_HOME for secure file operations.
 
 Key responsibilities:
-- Static file serving with path safety checks.
+- Static file serving with path safety checks and absolute path validation.
 - Parsing CTU files into diagram examples for the demo viewer.
 - Server-side PlantUML rendering via Java-based plantuml.jar with automatic fallback.
 - Listing, deleting, and clearing generated HTML reports and associated data directories.
+- Secure path resolution using $CTU_HOME as the base directory.
 
 **Section sources**
 - [serve.js:454-561](file://serve.js#L454-L561)
@@ -85,7 +96,7 @@ Key responsibilities:
 - [README.md:202-224](file://README.md#L202-L224)
 
 ## Architecture Overview
-The rendering pipeline prioritizes client-side WASM rendering for speed and responsiveness, with automatic fallback to server-side rendering when needed.
+The rendering pipeline prioritizes client-side WASM rendering for speed and responsiveness, with automatic fallback to server-side rendering when needed. The enhanced path resolution system ensures all file operations are performed within the $CTU_HOME boundary.
 
 ```mermaid
 sequenceDiagram
@@ -93,8 +104,11 @@ participant Browser as "Browser"
 participant Demo as "demo.html"
 participant Core as "docs-page-core.js"
 participant Server as "serve.js"
+participant PathResolver as "$CTU_HOME Resolver"
 Browser->>Demo : Load page
 Demo->>Server : GET /api/demo-examples?lang=xx&dir=xxx
+Server->>PathResolver : Resolve absolute path from $CTU_HOME
+PathResolver-->>Server : Validated absolute path
 Server-->>Demo : JSON examples
 Demo->>Core : Render with plantuml.js (WASM)
 Core-->>Demo : SVG or error
@@ -115,9 +129,9 @@ end
 ## Detailed Component Analysis
 
 ### Development Server (serve.js)
-The server is a single HTTP module with:
+The server is a single HTTP module with enhanced path resolution capabilities:
 - Port/host configuration from CLI or environment.
-- Static file serving with path traversal protection.
+- Static file serving with path traversal protection and absolute path validation.
 - API endpoints:
   - GET /api/demo-examples: Loads CTU files and returns parsed examples.
   - POST /api/plantuml-svg: Renders PlantUML source via plantuml.jar and returns SVG.
@@ -125,15 +139,18 @@ The server is a single HTTP module with:
   - DELETE /api/cache-html: Deletes a specific HTML report and its matching data directory.
   - DELETE /api/cache-html/all: Clears generated HTML and non-demo data directories.
 
-Security and safety:
-- Path traversal checks for static and cache operations.
+Security and safety enhancements:
+- Enhanced path traversal checks for static and cache operations using absolute paths.
 - Request body size limits.
 - Strict MIME type mapping for static assets.
 - Controlled error responses with HTTP status codes.
+- $CTU_HOME-based path resolution prevents directory escape attacks.
 
 Rendering logic:
 - CTU parsing supports multilingual examples and separates metadata blocks.
 - PlantUML rendering spawns java -jar plantuml.jar with --svg -pipe and validates SVG output.
+
+**Updated** Enhanced path resolution system now uses absolute paths relative to $CTU_HOME for improved security and reliability.
 
 **Section sources**
 - [serve.js:8-24](file://serve.js#L8-L24)
@@ -210,9 +227,10 @@ Usage:
   - Response: { deletedHtml, deletedDataDirs }
 
 Security notes:
-- Path traversal is prevented for cache operations.
+- Enhanced path traversal prevention for cache operations using absolute path validation.
 - Template files cannot be deleted.
 - Non-HTML cache entries are ignored by clear operations.
+- All file operations are constrained within $CTU_HOME boundary.
 
 **Section sources**
 - [README.md:202-224](file://README.md#L202-L224)
@@ -230,10 +248,14 @@ Security notes:
 - CTU data files:
   - Stored under data/<project>/ with naming convention {type}--{id}_{lang}.ctu.
   - Parsed into diagram examples with metadata and multilingual support.
+  - Accessed via absolute paths resolved from $CTU_HOME.
 - Generated HTML reports:
   - Stored under cache/<name>.html.
   - Optionally paired with a data/<name>/ directory containing related artifacts.
   - Managed via cache index UI and API endpoints.
+  - All file operations validated against $CTU_HOME boundary.
+
+**Updated** Enhanced path resolution system now uses absolute paths relative to $CTU_HOME for all file operations, providing improved security and reliability.
 
 **Section sources**
 - [README.md:135-163](file://README.md#L135-L163)
@@ -244,7 +266,10 @@ Security notes:
 ### Static File Serving
 - Root path resolves to index.html; directories are served as demo.html if present.
 - MIME types are mapped per extension.
-- Path traversal protection ensures requests stay within project root.
+- Path traversal protection ensures requests stay within project root using absolute path validation.
+- Enhanced security with $CTU_HOME-based path resolution.
+
+**Updated** Static file serving now includes enhanced path validation using absolute paths relative to $CTU_HOME.
 
 **Section sources**
 - [serve.js:397-452](file://serve.js#L397-L452)
@@ -253,14 +278,17 @@ Security notes:
 - Port management:
   - PORT environment variable or CLI argument; defaults to 5401.
 - Project root:
-  - CTU_HOME can be set via install.js to register the project path for AI agent integration.
+  - CTU_HOME can be set via install-ctu-home.js to register the project path for AI agent integration.
+  - All file operations now use absolute paths relative to $CTU_HOME for enhanced security.
 - Maintenance:
   - Use cache index UI or /api/cache-html/all to clear generated content.
   - Use serve.sh/serve.bat to start/stop the server across platforms.
 
+**Updated** Enhanced path resolution system now requires proper $CTU_HOME configuration for secure file operations.
+
 **Section sources**
 - [README.md:226-234](file://README.md#L226-L234)
-- [install.js:1-228](file://install.js#L1-L228)
+- [install-ctu-home.js:1-228](file://install-ctu-home.js#L1-L228)
 
 ## Dependency Analysis
 The server depends on Node.js built-ins and external tools:
@@ -273,6 +301,7 @@ graph LR
 Client["Client Pages<br/>demo.html, index.html"] --> API["Server APIs<br/>serve.js"]
 API --> FS["Node fs/path"]
 API --> JVM["Java Runtime<br/>plantuml.jar"]
+API --> PATHRES["$CTU_HOME Path Resolver"]
 Client --> Libs["Client Libraries<br/>plantuml.js, Viz.js, Markdown"]
 ```
 
@@ -290,6 +319,7 @@ Client --> Libs["Client Libraries<br/>plantuml.js, Viz.js, Markdown"]
 - Large diagrams may trigger fallback scaling; consider simplifying complex diagrams or using server rendering intentionally.
 - Cache index operations are synchronous filesystem scans; keep cache directories lean for faster listing.
 - Static file serving streams content; ensure adequate disk I/O for concurrent clients.
+- Enhanced path resolution adds minimal overhead while significantly improving security.
 
 ## Troubleshooting Guide
 Common issues and resolutions:
@@ -300,8 +330,14 @@ Common issues and resolutions:
   - Confirm server is reachable at /api/plantuml-svg when using fallback.
 - Path traversal errors:
   - Ensure cache paths are within cache/ and refer to .html files.
+  - Verify $CTU_HOME is properly configured for absolute path resolution.
 - CORS/file:// restrictions:
   - Jar fallback requires HTTP access; open via http://localhost:PORT, not file://.
+- $CTU_HOME configuration issues:
+  - Check that CTU_HOME points to a valid directory.
+  - Ensure proper permissions for file operations within $CTU_HOME.
+
+**Updated** Added troubleshooting guidance for $CTU_HOME configuration and absolute path resolution issues.
 
 **Section sources**
 - [serve.sh:8-33](file://serve.sh#L8-L33)
@@ -310,7 +346,7 @@ Common issues and resolutions:
 - [serve.js:193-215](file://serve.js#L193-L215)
 
 ## Conclusion
-The server infrastructure provides a lightweight, cross-platform development environment for browsing diagram examples, generating reports from CTU data, and managing cached HTML outputs. Its design emphasizes fast client-side rendering with reliable server-side fallback and robust file management.
+The server infrastructure provides a lightweight, cross-platform development environment for browsing diagram examples, generating reports from CTU data, and managing cached HTML outputs. Its design emphasizes fast client-side rendering with reliable server-side fallback and robust file management. The enhanced path resolution system using absolute paths relative to $CTU_HOME significantly improves security and reliability while maintaining backward compatibility.
 
 ## Appendices
 
@@ -332,9 +368,12 @@ The server infrastructure provides a lightweight, cross-platform development env
 
 ### Integration Patterns
 - CI/CD: Use serve.sh to start the server on ephemeral ports for preview deployments.
-- AI agent integration: Configure CTU_HOME via install.js to enable agent skills.
+- AI agent integration: Configure CTU_HOME via install-ctu-home.js to enable agent skills.
 - Local development: Use serve.sh/serve.bat to quickly spin up the server and open demo.html or index.html.
+- Security best practices: Always configure CTU_HOME for production deployments to ensure secure file operations.
+
+**Updated** Added security best practices for CTU_HOME configuration in production environments.
 
 **Section sources**
 - [README.md:81-120](file://README.md#L81-L120)
-- [install.js:204-228](file://install.js#L204-L228)
+- [install-ctu-home.js:204-228](file://install-ctu-home.js#L204-L228)

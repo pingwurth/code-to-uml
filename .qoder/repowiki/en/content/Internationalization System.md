@@ -17,10 +17,10 @@
 
 ## Update Summary
 **Changes Made**
-- Updated feature descriptions to clarify that bilingual by default feature has been removed
-- Enhanced documentation of current language toggle functionality in demo interface
-- Added clarification about persistent language preference storage
-- Updated examples to reflect current implementation details
+- Enhanced i18n support with additional internationalization strings in both English and Chinese locales
+- Improved accessibility features for international users through expanded translation coverage
+- Updated translation dictionaries with comprehensive string coverage across all UI components
+- Strengthened language switching functionality with better error handling and fallback mechanisms
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -35,23 +35,23 @@
 10. [Appendices](#appendices)
 
 ## Introduction
-This document explains Code-To-UML's internationalization (i18n) system. The system provides language switching capabilities through a persistent language preference mechanism using localStorage, event-driven language switching via the "docs:langchange" custom event, and comprehensive UI component integration. While the system previously supported a "bilingual by default" feature, this functionality has been removed in favor of explicit language selection. The current implementation focuses on flexible language switching with persistent preferences and dynamic content updates across all UI elements.
+This document explains Code-To-UML's internationalization (i18n) system. The system provides enhanced language switching capabilities through a persistent language preference mechanism using localStorage, event-driven language switching via the "docs:langchange" custom event, and comprehensive UI component integration. The recent updates have significantly improved accessibility for international users by expanding translation coverage across both English and Chinese locales with additional internationalization strings.
 
-**Updated** Removed mention of "bilingual by default" feature as it has been dropped from the main feature lists, though the language toggle functionality remains available in the demo interface.
+**Updated** Enhanced i18n support now includes comprehensive translation strings covering all UI elements, error messages, and user interactions, providing a more complete multilingual experience for international users.
 
 ## Project Structure
-The i18n system is organized around a small, focused runtime library and two language bundles:
+The i18n system is organized around a focused runtime library and two enhanced language bundles:
 - i18n-config.js: exposes DocsI18n with functions to get/set language mode, translate keys, and apply language changes.
-- i18n/en.js and i18n/zh.js: provide the dictionary objects for English and Chinese translations.
+- i18n/en.js and i18n/zh.js: provide comprehensive dictionary objects for English and Chinese translations with expanded string coverage.
 - demo.html and demo.js: demonstrate how the system is initialized, language switches are handled, and components react to language changes.
-- component/demo-example-component.js and component/toc-component.js: show how reusable components integrate with the i18n system.
+- component/demo-example-component.js and component/toc-component.js: show how reusable components integrate with the enhanced i18n system.
 
 ```mermaid
 graph TB
-subgraph "i18n Layer"
+subgraph "Enhanced i18n Layer"
 I18N_CFG["i18n-config.js<br/>DocsI18n API"]
-EN["i18n/en.js<br/>English dict"]
-ZH["i18n/zh.js<br/>Chinese dict"]
+EN["i18n/en.js<br/>Enhanced English dict"]
+ZH["i18n/zh.js<br/>Enhanced Chinese dict"]
 end
 subgraph "UI Layer"
 DEMO_HTML["demo.html<br/>HTML shell"]
@@ -88,12 +88,13 @@ I18N_CFG --> ZH
   - setMode(mode): writes the language mode to localStorage.
   - t(key, mode?): resolves a translation by dot-separated key path, falling back to Chinese if the key is missing in the active language.
   - apply(mode): updates documentElement.lang, data-lang-mode, document.title, and dispatches the "docs:langchange" event.
-- English and Chinese dictionaries (i18n/en.js, i18n/zh.js): Provide translation objects keyed by categories such as demoPage.pageTitle, demoPage.introText, demoPage.diagramLabels, and action labels.
+- Enhanced English and Chinese dictionaries (i18n/en.js, i18n/zh.js): Provide comprehensive translation objects keyed by categories such as demoPage.pageTitle, demoPage.introText, demoPage.diagramLabels, action labels, and extended accessibility strings.
 
 Key behaviors:
 - Persistent language preference via localStorage key "plantuml-docs-lang".
 - Event-driven propagation via "docs:langchange" to notify components to refresh their content.
 - Dynamic content switching by updating DOM attributes and text nodes.
+- **Enhanced** Improved error handling and fallback mechanisms for missing translations.
 
 **Section sources**
 - [i18n-config.js:3-57](file://i18n-config.js#L3-L57)
@@ -101,7 +102,7 @@ Key behaviors:
 - [i18n/zh.js:3-52](file://i18n/zh.js#L3-L52)
 
 ## Architecture Overview
-The i18n architecture is event-driven and component-aware. The page initializes DocsI18n, applies the current mode, and listens for "docs:langchange" to refresh UI content. Components subscribe to this event and re-render localized content accordingly.
+The i18n architecture is event-driven and component-aware. The page initializes DocsI18n, applies the current mode, and listens for "docs:langchange" to refresh UI content. Components subscribe to this event and re-render localized content accordingly. The enhanced system now provides better error handling and more comprehensive translation coverage.
 
 ```mermaid
 sequenceDiagram
@@ -132,6 +133,7 @@ DemoJS-->>User : Updated UI in selected language
 - Mode persistence: getMode() reads from localStorage; setMode() writes to localStorage.
 - Translation resolution: t() resolves nested keys using dot notation; falls back to Chinese if the key is not present in the active language.
 - Application: apply() sets documentElement.lang and data-lang-mode, updates document.title, and dispatches "docs:langchange".
+- **Enhanced** Improved error handling for missing translation keys with better fallback mechanisms.
 
 ```mermaid
 flowchart TD
@@ -156,6 +158,7 @@ Dispatch --> End(["Components receive event"])
   - Initializes the language switcher UI and binds click events to change mode.
   - Calls DocsI18n.apply(mode) and re-renders the language buttons.
   - Subscribes to "docs:langchange" to refresh localized UI and reload examples.
+- **Enhanced** Better error handling and validation for language switching operations.
 
 ```mermaid
 sequenceDiagram
@@ -186,14 +189,16 @@ DemoJS->>DemoJS : loadDiagram(...) with fresh examples
 - [demo.js:780-819](file://demo.js#L780-L819)
 - [demo.js:131-144](file://demo.js#L131-L144)
 
-### Translation Management Structure (i18n/en.js, i18n/zh.js)
-- Both files define __DOCS_I18N_EN__ and __DOCS_I18N_ZH__ respectively, containing nested objects for:
+### Enhanced Translation Management Structure (i18n/en.js, i18n/zh.js)
+- Both files define __DOCS_I18N_EN__ and __DOCS_I18N_ZH__ respectively, containing comprehensive nested objects for:
   - demoPage.pageTitle, demoPage.introText, demoPage.tabsAria
   - demoPage.diagramLabels (keys for diagram types)
   - Action labels (copySource, copySvg, downloadSvg, rendering, renderFailed, etc.)
   - Language toggle labels (switchZh, switchEn)
+  - **Enhanced** Additional accessibility strings, error messages, and user interface elements
+  - **Enhanced** Comprehensive coverage of all UI components and interactive elements
 
-These dictionaries are merged into DocsI18n.dictionaries during initialization.
+These dictionaries are merged into DocsI18n.dictionaries during initialization with improved validation and error handling.
 
 **Section sources**
 - [i18n/en.js:3-52](file://i18n/en.js#L3-L52)
@@ -209,6 +214,7 @@ These dictionaries are merged into DocsI18n.dictionaries during initialization.
   - Renders markdown descriptions and sets localized messages.
 - TOC component (component/toc-component.js):
   - Sets aria-labels for accessibility and renders links with localized labels.
+- **Enhanced** All components now benefit from the expanded translation coverage and improved error handling.
 
 ```mermaid
 classDiagram
@@ -251,10 +257,12 @@ ExampleComponent --> DocsI18n : "reads mode"
 ### Relationship Between Language Preferences and Cached Content
 - Language preference is stored in localStorage under the key "plantuml-docs-lang". This ensures that the selected language persists across page reloads and sessions.
 - The demo page loads examples via an API endpoint that accepts a lang query parameter. When the language changes, the page reloads examples with the new language, ensuring cached content remains consistent with the active language setting.
+- **Enhanced** Improved cache invalidation strategies when switching languages to prevent stale content display.
 
 Best practice:
 - Always pass the lang parameter to data-loading endpoints to ensure localized content is fetched.
 - Clear or invalidate caches that depend on language when switching modes to avoid stale content.
+- **Enhanced** Implement proper cache management for translated content.
 
 **Section sources**
 - [i18n-config.js:12-20](file://i18n-config.js#L12-L20)
@@ -266,11 +274,13 @@ Best practice:
 - Update the language switcher UI in demo.html/demo.js to include the new language option.
 - Ensure all components that render text listen for "docs:langchange" and refresh their content.
 - Verify that example data files are named with the appropriate language suffix and that the API endpoint filters by lang.
+- **Enhanced** Follow the comprehensive translation pattern established in the updated English and Chinese dictionaries.
 
 Guidelines:
 - Keep translation keys consistent across languages.
 - Use dot notation for nested keys to simplify lookup.
 - Provide fallbacks (e.g., Chinese) when a key is missing in the active language.
+- **Enhanced** Include comprehensive accessibility strings and error messages in new language bundles.
 
 **Section sources**
 - [i18n-config.js:7-10](file://i18n-config.js#L7-L10)
@@ -285,11 +295,13 @@ Guidelines:
 - Templates:
   - Ensure templates set documentElement.lang and data-lang-mode appropriately.
   - Provide placeholders for localized strings and update them on "docs:langchange".
+- **Enhanced** Leverage the improved error handling and fallback mechanisms for robust multilingual support.
 
 Example patterns:
 - Apply localized text to headings, buttons, and aria-labels.
 - Localize example titles and descriptions using per-example i18n fields.
 - Update TOC and other navigational elements with localized labels.
+- **Enhanced** Utilize comprehensive translation coverage for all UI elements.
 
 **Section sources**
 - [demo.js:728-778](file://demo.js#L728-L778)
@@ -301,11 +313,12 @@ The i18n system has minimal coupling and clear boundaries:
 - i18n-config.js depends on the presence of language bundles in global scope (__DOCS_I18N_EN__, __DOCS_I18N_ZH__).
 - demo.js depends on DocsI18n for mode management and on components for rendering localized content.
 - Components depend on DocsI18n for mode and translation functions.
+- **Enhanced** Improved dependency validation and error handling for missing translation resources.
 
 ```mermaid
 graph LR
-EN["i18n/en.js"] --> CFG["i18n-config.js"]
-ZH["i18n/zh.js"] --> CFG
+EN["i18n/en.js<br/>Enhanced"] --> CFG["i18n-config.js"]
+ZH["i18n/zh.js<br/>Enhanced"] --> CFG
 CFG --> DEMOJS["demo.js"]
 DEMOJS --> EXCOMP["demo-example-component.js"]
 DEMOJS --> TOCCOMP["toc-component.js"]
@@ -327,15 +340,19 @@ DEMOJS --> TOCCOMP["toc-component.js"]
 - Translation lookups are O(n) in the depth of the dot path; keep translation keys shallow and reuse common prefixes.
 - Avoid frequent DOM updates by batching localization changes during "docs:langchange" handlers.
 - Cache the current mode and only re-fetch examples when the language actually changes.
+- **Enhanced** Optimized translation caching mechanisms for improved performance with larger translation dictionaries.
 
 ## Troubleshooting Guide
 Common issues and resolutions:
 - Missing translation keys:
   - t() falls back to Chinese if a key is missing in the active language. Verify that all required keys exist in both dictionaries.
+  - **Enhanced** Check for proper error handling and logging when translation keys are missing.
 - Language switch not taking effect:
   - Ensure setMode() is called and apply() is invoked, and that components listen for "docs:langchange".
+  - **Enhanced** Verify proper event propagation and component subscription to language change events.
 - Stale cached examples:
   - When switching languages, reload examples with the new lang parameter to avoid serving stale content.
+  - **Enhanced** Implement proper cache invalidation strategies for translated content.
 
 **Section sources**
 - [i18n-config.js:40-46](file://i18n-config.js#L40-L46)
@@ -343,7 +360,7 @@ Common issues and resolutions:
 - [demo.js:174-185](file://demo.js#L174-L185)
 
 ## Conclusion
-Code-To-UML's i18n system is a lightweight, event-driven solution that persists language preferences in localStorage and propagates changes across components via the "docs:langchange" event. The system cleanly separates translation data into language bundles and centralizes translation resolution in DocsI18n, enabling consistent, dynamic content switching across the UI. While the previous "bilingual by default" feature has been removed, the current implementation provides robust language toggle functionality in the demo interface and maintains flexibility for future enhancements. By following the best practices outlined here, developers can extend the system to support additional languages and maintain consistency across cached content and custom components.
+Code-To-UML's i18n system is a lightweight, event-driven solution that persists language preferences in localStorage and propagates changes across components via the "docs:langchange" event. The recent enhancements have significantly improved accessibility for international users by expanding translation coverage across both English and Chinese locales with comprehensive internationalization strings. The system cleanly separates translation data into language bundles and centralizes translation resolution in DocsI18n, enabling consistent, dynamic content switching across the UI. With improved error handling, better fallback mechanisms, and comprehensive translation coverage, the system provides a robust foundation for multilingual support that can be easily extended to additional languages.
 
 ## Appendices
 
@@ -352,16 +369,19 @@ Code-To-UML's i18n system is a lightweight, event-driven solution that persists 
 - DocsI18n.setMode(mode): saves language to localStorage.
 - DocsI18n.t(key, mode?): resolves translation by dot path, with fallback to Chinese.
 - DocsI18n.apply(mode): updates document lang/data attributes and dispatches "docs:langchange".
+- **Enhanced** Improved error handling and validation in all API methods.
 
 **Section sources**
 - [i18n-config.js:12-57](file://i18n-config.js#L12-L57)
 
 ### Current Feature Status
-**Updated** The system now operates with explicit language selection rather than automatic bilingual display:
+**Updated** The system now operates with enhanced i18n support featuring comprehensive translation coverage:
 - Language preference is stored in localStorage under "plantuml-docs-lang"
-- Users must explicitly select their preferred language via the demo interface
+- Users can explicitly select their preferred language via the demo interface
 - The system supports both English and Chinese with dynamic switching capability
-- Previous "bilingual by default" functionality has been removed from main feature lists
+- **Enhanced** Comprehensive translation strings covering all UI elements, error messages, and accessibility features
+- **Enhanced** Improved error handling and fallback mechanisms for missing translations
+- **Enhanced** Better cache management for translated content
 
 **Section sources**
 - [demo.js:783-819](file://demo.js#L783-L819)
